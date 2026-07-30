@@ -1,0 +1,188 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "back": "Back",
+    "readMore": "Read more",
+    "viewAll": "View all",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "notFound": "Not found"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "products": "Products",
+    "services": "Services",
+    "projects": "Projects",
+    "contact": "Contact",
+    "rfq": "Request a Quote"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "about": "About Us",
+    "products": "Products",
+    "services": "Services",
+    "projects": "Projects",
+    "rfq": "RFQ Requests",
+    "contacts": "Contact Messages",
+    "homepage": "Homepage",
+    "seo": "SEO Settings",
+    "settings": "Settings",
+    "login": "Login"
+  },
+  "aboutAdmin": {
+    "title": "About Us Management",
+    "subtitle": "Manage company information, mission & vision, core values, history timeline, team leaders, and certificates.",
+    "tabs": {
+      "companyInfo": "Company Info",
+      "missionVision": "Mission & Vision",
+      "coreValues": "Core Values",
+      "timeline": "Timeline",
+      "team": "Management Team",
+      "certificates": "Certificates"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome back! Here's an overview of your business.",
+    "stats": {
+      "totalProducts": "Total Products",
+      "totalServices": "Total Services",
+      "totalProjects": "Total Projects",
+      "totalRfqs": "Total RFQs",
+      "unreadRfqs": "Unread RFQs",
+      "totalContacts": "Total Contacts",
+      "unreadContacts": "Unread Contacts",
+      "featuredProducts": "Featured Products",
+      "featuredProjects": "Featured Projects",
+      "certificates": "Certificates",
+      "errorTitle": "Failed to load statistics"
+    },
+    "charts": {
+      "monthlyRfqs": "Monthly RFQ Requests",
+      "monthlyContacts": "Monthly Contact Requests",
+      "monthlyServices": "Monthly Services Added",
+      "monthlyProjects": "Monthly Projects Added",
+      "errorTitle": "Failed to load charts"
+    },
+    "rfqTable": {
+      "title": "Latest RFQ Requests",
+      "customer": "Customer",
+      "company": "Company",
+      "email": "Email",
+      "phone": "Phone",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions",
+      "view": "View details",
+      "viewAll": "View All",
+      "emptyTitle": "No RFQ requests yet",
+      "emptyDescription": "RFQ requests from your website will appear here.",
+      "errorTitle": "Failed to load RFQ requests"
+    },
+    "contactTable": {
+      "title": "Latest Contact Messages",
+      "name": "Name",
+      "email": "Email",
+      "subject": "Subject",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions",
+      "view": "View details",
+      "viewAll": "View All",
+      "emptyTitle": "No contact messages yet",
+      "emptyDescription": "Contact form submissions will appear here.",
+      "errorTitle": "Failed to load contacts"
+    },
+    "activity": {
+      "title": "Recent Activity",
+      "emptyTitle": "No activity yet",
+      "emptyDescription": "Admin actions will be tracked here.",
+      "errorTitle": "Failed to load activity"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "addProduct": "Add Product",
+      "addService": "Add Service",
+      "addProject": "Add Project",
+      "viewRfqs": "View RFQs",
+      "websiteSettings": "Settings",
+      "seoSettings": "SEO",
+      "homepage": "Homepage"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Premium Hydraulic Services",
+      "subtitle": "Industry-leading hydraulic solutions for your most demanding applications.",
+      "cta": "Explore Products",
+      "ctaSecondary": "Request a Quote"
+    }
+  },
+  "products": {
+    "title": "Our Products",
+    "subtitle": "Explore our comprehensive range of hydraulic products.",
+    "empty": "No products found",
+    "emptyDescription": "Try adjusting your search or filter criteria.",
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "archived": "Archived"
+    }
+  },
+  "rfq": {
+    "title": "Request a Quote",
+    "subtitle": "Fill in the form and our team will get back to you within 24 hours.",
+    "companyName": "Company Name",
+    "contactName": "Contact Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "country": "Country",
+    "productName": "Product / Part Name",
+    "quantity": "Quantity",
+    "requirements": "Technical Requirements",
+    "attachment": "Attach Technical Drawing (optional)",
+    "submit": "Submit RFQ",
+    "success": "Your request has been submitted. We will contact you shortly.",
+    "error": "Failed to submit request. Please try again."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "name": "Full Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "subject": "Subject",
+    "message": "Message",
+    "submit": "Send Message",
+    "success": "Your message has been sent. We will respond shortly.",
+    "error": "Failed to send message. Please try again."
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
+  "homepageAdmin": {
+    "title": "Homepage Management",
+    "subtitle": "Configure and customize every section of your public website homepage.",
+    "tabs": {
+      "hero": "Hero Section",
+      "about": "About Preview",
+      "stats": "Company Stats",
+      "services": "Featured Services",
+      "products": "Featured Products",
+      "projects": "Featured Projects",
+      "clients": "Clients & Partners",
+      "certificates": "Certificates",
+      "contactCta": "Contact CTA"
+    }
+  }
+}
