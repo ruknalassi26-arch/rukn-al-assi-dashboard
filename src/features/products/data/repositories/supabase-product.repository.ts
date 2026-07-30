@@ -1,148 +1,284 @@
 // ==============================================================================
 // features/products/data/repositories/supabase-product.repository.ts
-// Concrete Supabase implementation of IProductRepository
+// Supabase Data Repository Implementation for Products Management
 // ==============================================================================
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-import type { Database } from "@core/types/database.types";
-import type { ListParams, PaginatedResponse } from "@core/types/api.types";
-import type { ProductEntity, ProductSummary } from "../../domain/entities/product.entity";
-import type { IProductRepository, ProductFilters } from "../../domain/repositories/i-product.repository";
-import { toProductEntity, toProductSummary, toProductInsert, toProductUpdate } from "./product.mapper";
-import type { ProductSummaryDTO } from "../models/product.dto";
+import { createClient } from "@core/lib/supabase/client";
+import type { UpdateTables } from "@core/types/database.types";
+import type {
+  IProductRepository,
+  ProductFilterParams,
+  PaginatedProducts,
+  CreateProductInput,
+  UpdateProductInput,
+} from "../../domain/repositories/i-product.repository";
+import { ProductEntity, ProductCategoryEntity } from "../../domain/entities/product.entity";
+import type { ProductStatus } from "../../domain/entities/product.entity";
+import { toProductEntity, toProductCategoryEntity } from "../mapper/product.mapper";
+import type { ProductWithCategoryDTO, ProductCategoryDTO } from "../dto/product.dto";
 
 export class SupabaseProductRepository implements IProductRepository {
-  constructor(private readonly supabase: SupabaseClient<Database>) {}
+  private get supabase() {
+    return createClient();
+  }
 
-  async findAll(
-    params: ListParams & ProductFilters
-  ): Promise<PaginatedResponse<ProductSummary>> {
-    const {
-      page = 1,
-      pageSize = 10,
-      search,
-      sortBy = "sort_order",
-      sortOrder = "asc",
-      status,
-      categoryId,
-      isFeatured,
-    } = params;
+  private async logActivity(
+    action: "created" | "updated" | "deleted",
+    entityId: string | null,
+    entityTitle: string | null,
+    metadata?: Record<string, unknown>
+  ) {
+    try {
+      const { data: userData } = await this.supabase.auth.getUser();
+      await this.supabase.from("activity_logs").insert({
+        action,
+        entity_type: "product",
+        entity_id: entityId,
+        entity_title: entityTitle,
+        user_id: userData.user?.id ?? null,
+        user_email: userData.user?.email ?? null,
+        metadata: metadata ?? null,
+      });
+    } catch {
+      // Activity logging is non-blocking
+    }
+  }
 
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
+  async getProducts(params?: ProductFilterParams): Promise<PaginatedProducts> {
+    const page = params?.page ?? 1;
+    const limit = params?.limit ?? 10;
+    const offset = (page - 1) * limit;
+    const sortBy = params?.sortBy ?? "created_at";
+    const sortOrder = params?.sortOrder ?? "desc";
 
     let query = this.supabase
       .from("products")
-      .select(
-        "id, slug, name_en, name_ar, images, status, is_featured, sort_order",
-        { count: "exact" }
-      );
+      .select("*, product_categories(*)", { count: "exact" });
 
-    if (status) query = query.eq("status", status);
-    if (categoryId) query = query.eq("category_id", categoryId);
-    if (isFeatured !== undefined) query = query.eq("is_featured", isFeatured);
-    if (search) {
-      query = query.or(`name_en.ilike.%${search}%,name_ar.ilike.%${search}%`);
+    // Search filter
+    if (params?.search && params.search.trim() !== "") {
+      const searchStr = params.search.trim();
+      query = query.or(`name_en.ilike.%${searchStr}%,name_ar.ilike.%${searchStr}%,slug.ilike.%${searchStr}%`);
     }
 
-    const { data, error, count } = await query
-      .order(sortBy, { ascending: sortOrder === "asc" })
-      .range(from, to);
+    // Category filter
+    if (params?.categoryId && params.categoryId !== "all") {
+      query = query.eq("category_id", params.categoryId);
+    }
 
-    if (error) throw new Error(error.message);
+    // Status filter
+    if (params?.status && params.status !== "all") {
+      query = query.eq("status", params.status);
+    }
 
+    // Featured filter
+    if (params?.isFeatured !== undefined) {
+      query = query.eq("is_featured", params.isFeatured);
+    }
+
+    // Sorting & Pagination
+    query = query.order(sortBy, { ascending: sortOrder === "asc" }).range(offset, offset + limit - 1);
+
+    const { data, count, error } = await query;
+
+    if (error || !data) {
+      return { items: [], total: 0, page, limit, totalPages: 0 };
+    }
+
+    const items = (data as ProductWithCategoryDTO[]).map(toProductEntity);
     const total = count ?? 0;
-    const totalPages = Math.ceil(total / pageSize);
+    const totalPages = Math.ceil(total / limit);
 
-    return {
-      data: (data as ProductSummaryDTO[]).map(toProductSummary),
-      meta: {
-        page,
-        pageSize,
-        total,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
-      error: null,
-    };
+    return { items, total, page, limit, totalPages };
   }
 
-  async findBySlug(slug: string): Promise<ProductEntity | null> {
+  async getProductById(id: string): Promise<ProductEntity | null> {
     const { data, error } = await this.supabase
       .from("products")
-      .select("*")
+      .select("*, product_categories(*)")
+      .eq("id", id)
+      .single();
+
+    if (error || !data) return null;
+    return toProductEntity(data as ProductWithCategoryDTO);
+  }
+
+  async getProductBySlug(slug: string): Promise<ProductEntity | null> {
+    const { data, error } = await this.supabase
+      .from("products")
+      .select("*, product_categories(*)")
       .eq("slug", slug)
       .single();
 
     if (error || !data) return null;
-    return toProductEntity(data);
+    return toProductEntity(data as ProductWithCategoryDTO);
   }
 
-  async findById(id: string): Promise<ProductEntity | null> {
+  async createProduct(input: CreateProductInput): Promise<ProductEntity> {
+    const payload = {
+      slug: input.slug,
+      name_en: input.nameEn,
+      name_ar: input.nameAr,
+      short_description_en: input.shortDescriptionEn ?? null,
+      short_description_ar: input.shortDescriptionAr ?? null,
+      description_en: input.descriptionEn ?? null,
+      description_ar: input.descriptionAr ?? null,
+      seo_title_en: input.seoTitleEn ?? null,
+      seo_title_ar: input.seoTitleAr ?? null,
+      seo_description_en: input.seoDescriptionEn ?? null,
+      seo_description_ar: input.seoDescriptionAr ?? null,
+      category_id: input.categoryId ?? null,
+      images: input.images ?? [],
+      thumbnail: input.thumbnail ?? (input.images && input.images.length > 0 ? input.images[0] : null),
+      datasheet_url: input.datasheetUrl ?? null,
+      seo_image: input.seoImage ?? null,
+      status: input.status ?? "active",
+      is_featured: input.isFeatured ?? false,
+      sort_order: input.sortOrder ?? 0,
+    };
+
     const { data, error } = await this.supabase
       .from("products")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error || !data) return null;
-    return toProductEntity(data);
-  }
-
-  async findFeatured(limit: number = 6): Promise<ProductSummary[]> {
-    const { data, error } = await this.supabase
-      .from("products")
-      .select("id, slug, name_en, name_ar, images, status, is_featured, sort_order")
-      .eq("is_featured", true)
-      .eq("status", "active")
-      .order("sort_order", { ascending: true })
-      .limit(limit);
-
-    if (error || !data) return [];
-    return (data as ProductSummaryDTO[]).map(toProductSummary);
-  }
-
-  async create(
-    data: Omit<ProductEntity, "id" | "createdAt" | "updatedAt">
-  ): Promise<ProductEntity> {
-    const payload = toProductInsert(data);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: created, error } = await (this.supabase.from("products") as any)
       .insert(payload)
-      .select()
+      .select("*, product_categories(*)")
       .single();
 
-    if (error || !created) throw new Error(error?.message ?? "Failed to create product");
-    return toProductEntity(created);
+    if (error || !data) throw new Error(error?.message ?? "Failed to create product");
+
+    const created = toProductEntity(data as ProductWithCategoryDTO);
+    await this.logActivity("created", created.id, created.nameEn);
+    return created;
   }
 
-  async update(id: string, data: Partial<ProductEntity>): Promise<ProductEntity> {
-    const payload = toProductUpdate(data);
-    payload.updated_at = new Date().toISOString();
+  async updateProduct(input: UpdateProductInput): Promise<ProductEntity> {
+    const payload: UpdateTables<"products"> = {
+      updated_at: new Date().toISOString(),
+    };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: updated, error } = await (this.supabase.from("products") as any)
+    if (input.slug !== undefined) payload.slug = input.slug;
+    if (input.nameEn !== undefined) payload.name_en = input.nameEn;
+    if (input.nameAr !== undefined) payload.name_ar = input.nameAr;
+    if (input.shortDescriptionEn !== undefined) payload.short_description_en = input.shortDescriptionEn;
+    if (input.shortDescriptionAr !== undefined) payload.short_description_ar = input.shortDescriptionAr;
+    if (input.descriptionEn !== undefined) payload.description_en = input.descriptionEn;
+    if (input.descriptionAr !== undefined) payload.description_ar = input.descriptionAr;
+    if (input.seoTitleEn !== undefined) payload.seo_title_en = input.seoTitleEn;
+    if (input.seoTitleAr !== undefined) payload.seo_title_ar = input.seoTitleAr;
+    if (input.seoDescriptionEn !== undefined) payload.seo_description_en = input.seoDescriptionEn;
+    if (input.seoDescriptionAr !== undefined) payload.seo_description_ar = input.seoDescriptionAr;
+    if (input.categoryId !== undefined) payload.category_id = input.categoryId;
+    if (input.images !== undefined) payload.images = input.images;
+    if (input.thumbnail !== undefined) payload.thumbnail = input.thumbnail;
+    if (input.datasheetUrl !== undefined) payload.datasheet_url = input.datasheetUrl;
+    if (input.seoImage !== undefined) payload.seo_image = input.seoImage;
+    if (input.status !== undefined) payload.status = input.status;
+    if (input.isFeatured !== undefined) payload.is_featured = input.isFeatured;
+    if (input.sortOrder !== undefined) payload.sort_order = input.sortOrder;
+
+    const { data, error } = await this.supabase
+      .from("products")
       .update(payload)
-      .eq("id", id)
-      .select()
+      .eq("id", input.id)
+      .select("*, product_categories(*)")
       .single();
 
-    if (error || !updated) throw new Error(error?.message ?? "Failed to update product");
-    return toProductEntity(updated);
+    if (error || !data) throw new Error(error?.message ?? "Failed to update product");
+
+    const updated = toProductEntity(data as ProductWithCategoryDTO);
+    await this.logActivity("updated", updated.id, updated.nameEn);
+    return updated;
   }
 
-  async archive(id: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (this.supabase.from("products") as any)
-      .update({ status: "archived", updated_at: new Date().toISOString() })
+  async deleteProduct(id: string): Promise<void> {
+    const existing = await this.getProductById(id);
+
+    const { error } = await this.supabase
+      .from("products")
+      .delete()
       .eq("id", id);
 
     if (error) throw new Error(error.message);
+
+    await this.logActivity("deleted", id, existing?.nameEn ?? "Product");
   }
 
-  async delete(id: string): Promise<void> {
-    const { error } = await this.supabase.from("products").delete().eq("id", id);
+  async duplicateProduct(id: string): Promise<ProductEntity> {
+    const original = await this.getProductById(id);
+    if (!original) throw new Error("Original product not found");
+
+    const newSlug = `${original.slug}-copy-${Date.now()}`;
+    const newNameEn = `${original.nameEn} (Copy)`;
+    const newNameAr = `${original.nameAr} (نسخة)`;
+
+    return this.createProduct({
+      slug: newSlug,
+      nameEn: newNameEn,
+      nameAr: newNameAr,
+      shortDescriptionEn: original.shortDescriptionEn,
+      shortDescriptionAr: original.shortDescriptionAr,
+      descriptionEn: original.descriptionEn,
+      descriptionAr: original.descriptionAr,
+      seoTitleEn: original.seoTitleEn,
+      seoTitleAr: original.seoTitleAr,
+      seoDescriptionEn: original.seoDescriptionEn,
+      seoDescriptionAr: original.seoDescriptionAr,
+      categoryId: original.categoryId,
+      images: original.images,
+      thumbnail: original.thumbnail,
+      datasheetUrl: original.datasheetUrl,
+      seoImage: original.seoImage,
+      status: "draft",
+      isFeatured: false,
+      sortOrder: original.sortOrder + 1,
+    });
+  }
+
+  async toggleFeatureProduct(id: string, isFeatured: boolean): Promise<ProductEntity> {
+    return this.updateProduct({ id, isFeatured });
+  }
+
+  async bulkDeleteProducts(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    const { error } = await this.supabase
+      .from("products")
+      .delete()
+      .in("id", ids);
+
     if (error) throw new Error(error.message);
+    await this.logActivity("deleted", null, `${ids.length} products`, { count: ids.length });
+  }
+
+  async bulkUpdateProductStatus(ids: string[], status: ProductStatus): Promise<void> {
+    if (ids.length === 0) return;
+    const { error } = await this.supabase
+      .from("products")
+      .update({ status, updated_at: new Date().toISOString() })
+      .in("id", ids);
+
+    if (error) throw new Error(error.message);
+    await this.logActivity("updated", null, `Bulk updated status to ${status}`, { ids, status });
+  }
+
+  async getCategories(): Promise<ProductCategoryEntity[]> {
+    const { data, error } = await this.supabase
+      .from("product_categories")
+      .select("*")
+      .order("sort_order", { ascending: true });
+
+    if (error || !data) return [];
+    return (data as ProductCategoryDTO[]).map(toProductCategoryEntity);
+  }
+
+  async checkSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
+    let query = this.supabase
+      .from("products")
+      .select("id")
+      .eq("slug", slug);
+
+    if (excludeId) {
+      query = query.neq("id", excludeId);
+    }
+
+    const { data } = await query;
+    return !data || data.length === 0;
   }
 }
