@@ -1,0 +1,436 @@
+"use client";
+// ==============================================================================
+// features/certificates/presentation/components/certificate-table.tsx
+// Modern Enterprise Data Table for Certificates Management
+// ==============================================================================
+import React, { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  Shield,
+  Search,
+  Plus,
+  RefreshCw,
+  Trash2,
+  Edit,
+  Eye,
+  MoreVertical,
+  ArrowUpDown,
+  Calendar,
+  Building2,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Badge,
+  Checkbox,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Skeleton,
+} from "@shared/ui";
+import { EmptyState } from "@shared/components/empty-state";
+import { ErrorState } from "@shared/components/error-state";
+import { ConfirmDialog } from "@shared/dialogs/confirm-dialog";
+import { useCertificateStore } from "../stores/certificate.store";
+import {
+  useCertificates,
+  useDeleteCertificate,
+  useBulkDeleteCertificates,
+  useBulkUpdateCertificateStatus,
+} from "@shared/hooks/certificates/use-certificate-hooks";
+import type { CertificateEntity, CertificateStatus } from "../../domain/entities/certificate.entity";
+
+export function CertificateTable() {
+  const {
+    search,
+    status,
+    page,
+    limit,
+    sortBy,
+    sortOrder,
+    selectedIds,
+    setSearch,
+    setStatus,
+    setPage,
+    setSorting,
+    toggleSelectId,
+    setSelectedIds,
+    clearSelection,
+    openDrawer,
+  } = useCertificateStore();
+
+  const { data, isLoading, error, refetch, isFetching } = useCertificates({
+    search,
+    status,
+    page,
+    limit,
+    sortBy,
+    sortOrder,
+  });
+
+  const deleteCertificateMutation = useDeleteCertificate();
+  const bulkDeleteMutation = useBulkDeleteCertificates();
+  const bulkUpdateStatusMutation = useBulkUpdateCertificateStatus();
+
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+
+  const certificates = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
+
+  const isAllSelected = certificates.length > 0 && certificates.every((c) => selectedIds.includes(c.id));
+
+  const handleSelectAllToggle = () => {
+    if (isAllSelected) {
+      clearSelection();
+    } else {
+      setSelectedIds(certificates.map((c) => c.id));
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteId) return;
+    await deleteCertificateMutation.mutateAsync(deleteId);
+    setDeleteId(null);
+  };
+
+  const handleBulkDeleteConfirm = async () => {
+    if (selectedIds.length === 0) return;
+    await bulkDeleteMutation.mutateAsync(selectedIds);
+    clearSelection();
+    setIsBulkDeleteOpen(false);
+  };
+
+  const handleBulkStatusChange = async (newStatus: CertificateStatus) => {
+    if (selectedIds.length === 0) return;
+    await bulkUpdateStatusMutation.mutateAsync({ ids: selectedIds, status: newStatus });
+    clearSelection();
+  };
+
+  const handleSortToggle = (column: "title_en" | "sort_order" | "created_at" | "issue_date") => {
+    if (sortBy === column) {
+      setSorting(column, sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSorting(column, "asc");
+    }
+  };
+
+  return (
+    <Card className="border shadow-xs">
+      {/* Header */}
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b bg-muted/20 pb-4">
+        <div>
+          <CardTitle className="text-xl font-bold flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            Certificates Management
+          </CardTitle>
+          <CardDescription>
+            Manage ISO, quality compliance certificates, issuing organizations, and validity dates.
+          </CardDescription>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="gap-1.5">
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+          </Button>
+          <Link href="/admin/certificates/create">
+            <Button size="sm" className="gap-1.5">
+              <Plus className="h-4 w-4" /> Add Certificate
+            </Button>
+          </Link>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-4 pt-4">
+        {/* Bulk Action Bar */}
+        {selectedIds.length > 0 && (
+          <div className="flex items-center justify-between rounded-lg border bg-primary/5 p-3 text-sm">
+            <span className="font-semibold text-primary">
+              {selectedIds.length} certificate{selectedIds.length > 1 ? "s" : ""} selected
+            </span>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("active")}>
+                Publish Selected
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("draft")}>
+                Draft Selected
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => setIsBulkDeleteOpen(true)} className="gap-1.5">
+                <Trash2 className="h-4 w-4" /> Delete Selected
+              </Button>
+              <Button size="sm" variant="ghost" onClick={clearSelection}>
+                Clear
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Filters Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by title or organization..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-9"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            {/* Status Filter */}
+            <Select value={status} onValueChange={(val) => setStatus(val as any)}>
+              <SelectTrigger className="w-[140px] h-9">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Error State */}
+        {error ? (
+          <ErrorState
+            title="Failed to load certificates"
+            error={error}
+            onRetry={() => refetch()}
+          />
+        ) : (
+          /* Table Section */
+          <div className="rounded-md border overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted/40">
+                <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={isAllSelected}
+                      onCheckedChange={handleSelectAllToggle}
+                    />
+                  </TableHead>
+                  <TableHead className="w-16">Preview</TableHead>
+                  <TableHead className="cursor-pointer" onClick={() => handleSortToggle("title_en")}>
+                    <div className="flex items-center gap-1">
+                      <span>Title</span>
+                      <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </TableHead>
+                  <TableHead>Organization</TableHead>
+                  <TableHead className="cursor-pointer" onClick={() => handleSortToggle("issue_date")}>
+                    <div className="flex items-center gap-1">
+                      <span>Issue Date</span>
+                      <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer" onClick={() => handleSortToggle("sort_order")}>
+                    <div className="flex items-center gap-1">
+                      <span>Order</span>
+                      <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                      <TableCell><Skeleton className="h-10 w-10 rounded-md" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : certificates.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="h-64 text-center">
+                      <EmptyState
+                        icon={Shield}
+                        title="No certificates found"
+                        description="Try adjusting your search criteria or add your first certificate."
+                        action={
+                          <Link href="/admin/certificates/create">
+                            <Button size="sm"><Plus className="mr-2 h-4 w-4" />Add Certificate</Button>
+                          </Link>
+                        }
+                      />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  certificates.map((cert: CertificateEntity) => {
+                    const isSelected = selectedIds.includes(cert.id);
+                    return (
+                      <TableRow key={cert.id} className={isSelected ? "bg-primary/5" : "hover:bg-muted/30"}>
+                        <TableCell>
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => toggleSelectId(cert.id)}
+                          />
+                        </TableCell>
+
+                        {/* Image Preview */}
+                        <TableCell>
+                          {cert.image ? (
+                            <div className="relative h-10 w-10 overflow-hidden rounded-md border bg-muted">
+                              <Image src={cert.image} alt={cert.titleEn} fill className="object-cover" />
+                            </div>
+                          ) : (
+                            <div className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted text-muted-foreground">
+                              <Shield className="h-5 w-5" />
+                            </div>
+                          )}
+                        </TableCell>
+
+                        {/* Title */}
+                        <TableCell className="font-semibold text-foreground">
+                          <div>
+                            <div>{cert.titleEn}</div>
+                            <div className="text-xs font-normal text-muted-foreground" dir="rtl">{cert.titleAr}</div>
+                          </div>
+                        </TableCell>
+
+                        {/* Organization */}
+                        <TableCell className="text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <Building2 className="h-3.5 w-3.5" />
+                            <span>{cert.organization ?? "N/A"}</span>
+                          </div>
+                        </TableCell>
+
+                        {/* Issue Date */}
+                        <TableCell className="text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span>{cert.issueDate ?? "N/A"}</span>
+                          </div>
+                        </TableCell>
+
+                        {/* Sort Order */}
+                        <TableCell className="text-sm font-mono">{cert.sortOrder}</TableCell>
+
+                        {/* Status */}
+                        <TableCell>
+                          <Badge variant={cert.isActive ? "default" : "secondary"}>
+                            {cert.status}
+                          </Badge>
+                        </TableCell>
+
+                        {/* Actions */}
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openDrawer(cert.id)}>
+                                <Eye className="mr-2 h-4 w-4 text-blue-500" /> View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link href={`/admin/certificates/edit/${cert.id}`}>
+                                  <Edit className="mr-2 h-4 w-4 text-emerald-500" /> Edit
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => setDeleteId(cert.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {/* Pagination Footer */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-xs text-muted-foreground">
+              Showing page <span className="font-semibold">{page}</span> of{" "}
+              <span className="font-semibold">{totalPages}</span> ({total} total certificates)
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page - 1)}
+                disabled={page <= 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page + 1)}
+                disabled={page >= totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        title="Delete Certificate?"
+        description="Are you sure you want to delete this certificate? This action cannot be undone."
+        confirmText="Delete Certificate"
+        variant="destructive"
+        isLoading={deleteCertificateMutation.isPending}
+        onConfirm={handleDeleteConfirm}
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isBulkDeleteOpen}
+        onClose={() => setIsBulkDeleteOpen(false)}
+        title={`Delete ${selectedIds.length} Selected Certificates?`}
+        description="Are you sure you want to delete all selected certificates? This action cannot be undone."
+        confirmText="Delete Certificates"
+        variant="destructive"
+        isLoading={bulkDeleteMutation.isPending}
+        onConfirm={handleBulkDeleteConfirm}
+      />
+    </Card>
+  );
+}

@@ -36,7 +36,10 @@ export const queryKeys = {
   services: {
     all: ["services"] as const,
     lists: () => [...queryKeys.services.all, "list"] as const,
-    detail: (slug: string) => [...queryKeys.services.all, "detail", slug] as const,
+    list: (filters: Record<string, unknown>) =>
+      [...queryKeys.services.lists(), filters] as const,
+    details: () => [...queryKeys.services.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.services.details(), id] as const,
   },
 
   // ---------- Projects ----------
@@ -94,6 +97,26 @@ export const queryKeys = {
     timeline: () => [...queryKeys.about.all, "timeline"] as const,
     team: () => [...queryKeys.about.all, "team"] as const,
     certificates: () => [...queryKeys.about.all, "certificates"] as const,
+  },
+
+  // ---------- Certificates ----------
+  certificates: {
+    all: ["certificates"] as const,
+    lists: () => [...queryKeys.certificates.all, "list"] as const,
+    list: (filters: Record<string, unknown>) =>
+      [...queryKeys.certificates.lists(), filters] as const,
+    details: () => [...queryKeys.certificates.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.certificates.details(), id] as const,
+  },
+
+  // ---------- Team Members ----------
+  team: {
+    all: ["team"] as const,
+    lists: () => [...queryKeys.team.all, "list"] as const,
+    list: (filters: Record<string, unknown>) =>
+      [...queryKeys.team.lists(), filters] as const,
+    details: () => [...queryKeys.team.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.team.details(), id] as const,
   },
 
   // ---------- Auth ----------

@@ -21,6 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  Users,
 } from "lucide-react";
 import { cn } from "@core/utils/cn";
 import { useRTL } from "@core/hooks/use-rtl";
@@ -46,6 +47,8 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/products", labelKey: "products", icon: Package },
   { href: "/admin/categories", labelKey: "categories", icon: FolderKanban },
   { href: "/admin/services", labelKey: "services", icon: Wrench },
+  { href: "/admin/certificates", labelKey: "certificates", icon: Shield },
+  { href: "/admin/team", labelKey: "team", icon: Users },
   { href: "/admin/projects", labelKey: "projects", icon: FolderKanban },
   { href: "/admin/rfq", labelKey: "rfq", icon: FileText },
   { href: "/admin/contacts", labelKey: "contacts", icon: Mail },

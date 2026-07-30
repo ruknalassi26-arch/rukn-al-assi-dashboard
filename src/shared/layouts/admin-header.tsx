@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // shared/layouts/admin-header.tsx
-// Top header bar for the admin layout
+// Top header bar for the admin layout with 3-language switcher (en | ar | ckb)
 // ==============================================================================
 import Link from "next/link";
 import { useLocale } from "next-intl";
@@ -14,6 +14,7 @@ import {
   Menu,
   Sun,
   Moon,
+  Check,
 } from "lucide-react";
 import { cn } from "@core/utils/cn";
 import { useAuth } from "@core/providers";
@@ -38,6 +39,12 @@ interface AdminHeaderProps {
   className?: string;
 }
 
+const LANGUAGES = [
+  { code: "en", label: "English", flag: "🇺🇸" },
+  { code: "ar", label: "العربية", flag: "🇸🇦" },
+  { code: "ckb", label: "کوردی", flag: "☀️" },
+];
+
 export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
   const { user, signOut } = useAuth();
   const locale = useLocale();
@@ -45,13 +52,13 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
   const isRtl = useRTL();
   const { theme, setTheme } = useTheme();
 
-  const otherLocale = locale === "en" ? "ar" : "en";
-  const otherLocaleLabel = locale === "en" ? "العربية" : "English";
+  const currentLanguage = LANGUAGES.find((l) => l.code === locale) ?? LANGUAGES[0];
 
-  const handleLocaleSwitch = () => {
+  const handleLocaleSwitch = (newLocale: string) => {
+    if (newLocale === locale) return;
     const currentPath = window.location.pathname;
-    const pathWithoutLocale = currentPath.replace(/^\/(en|ar)/, "");
-    router.push(`/${otherLocale}${pathWithoutLocale}`);
+    const pathWithoutLocale = currentPath.replace(/^\/(en|ar|ckb|ku)/, "");
+    router.push(`/${newLocale}${pathWithoutLocale}`);
   };
 
   const handleSignOut = async () => {
@@ -102,17 +109,40 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
           <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </Button>
 
-        {/* Locale toggle */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLocaleSwitch}
-          className="gap-2 text-muted-foreground hover:text-foreground"
-          aria-label={`Switch to ${otherLocaleLabel}`}
-        >
-          <Globe className="h-4 w-4" />
-          <span className="hidden sm:inline text-xs font-medium">{otherLocaleLabel}</span>
-        </Button>
+        {/* 3-Locale Language Dropdown Switcher */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-muted-foreground hover:text-foreground"
+              aria-label="Select Language"
+            >
+              <Globe className="h-4 w-4" />
+              <span className="text-xs font-medium gap-1 flex items-center">
+                <span>{currentLanguage.flag}</span>
+                <span className="hidden sm:inline">{currentLanguage.label}</span>
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Select Language</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {LANGUAGES.map((lang) => (
+              <DropdownMenuItem
+                key={lang.code}
+                onClick={() => handleLocaleSwitch(lang.code)}
+                className="flex items-center justify-between text-xs cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span>{lang.flag}</span>
+                  <span className={lang.code === locale ? "font-bold" : ""}>{lang.label}</span>
+                </div>
+                {lang.code === locale && <Check className="h-3.5 w-3.5 text-primary" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Separator orientation="vertical" className="h-6" />
 

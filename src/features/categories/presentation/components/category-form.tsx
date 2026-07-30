@@ -254,31 +254,31 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                 kurdishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="nameKu">Navê Kategoriyê (bi Kurdî)</Label>
+                      <Label htmlFor="nameKu">ناوی هاوپۆل (بە کوردی)</Label>
                       <Input
                         id="nameKu"
-                        placeholder="mînak: Pompên Hîdrolîk"
+                        placeholder="نموونە: پەمپە هایدرۆلیکییەکان"
                         {...register("nameKu")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="descriptionKu">Pênase (bi Kurdî)</Label>
+                      <Label htmlFor="descriptionKu">وەسفی هاوپۆل (بە کوردی)</Label>
                       <Textarea
                         id="descriptionKu"
-                        placeholder="Pênaseya hûrgulî ya vê kategoriyê binivîse..."
+                        placeholder="زانیاری و ووردەکاری دەربارەی ئەم هاوپۆلە..."
                         className="min-h-[120px]"
                         {...register("descriptionKu")}
                       />
                     </div>
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Mîhengên SEO (bi Kurdî)</h4>
+                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">ڕێکخستنەکانی SEO (بە کوردی)</h4>
                       <div className="space-y-2">
-                        <Label htmlFor="seoTitleKu">Sernavê SEO (bi Kurdî)</Label>
-                        <Input id="seoTitleKu" placeholder="Sernavê SEO ji bo motora gerê" {...register("seoTitleKu")} />
+                        <Label htmlFor="seoTitleKu">نیشانی SEO (بە کوردی)</Label>
+                        <Input id="seoTitleKu" placeholder="نیشانی پەڕە بۆ بزوێنەرەکانی گەڕان" {...register("seoTitleKu")} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionKu">Pênaseya SEO (bi Kurdî)</Label>
-                        <Textarea id="seoDescriptionKu" placeholder="Agahdariya SEO" className="min-h-[70px]" {...register("seoDescriptionKu")} />
+                        <Label htmlFor="seoDescriptionKu">وەسفی SEO (بە کوردی)</Label>
+                        <Textarea id="seoDescriptionKu" placeholder="پوختەی ناوەڕۆک بۆ بزوێنەرەکانی گەڕان" className="min-h-[70px]" {...register("seoDescriptionKu")} />
                       </div>
                     </div>
                   </div>
