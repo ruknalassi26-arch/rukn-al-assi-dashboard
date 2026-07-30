@@ -21,10 +21,19 @@ export interface Database {
           slug: string;
           name_en: string;
           name_ar: string;
+          short_description_en: string | null;
+          short_description_ar: string | null;
           description_en: string | null;
           description_ar: string | null;
+          seo_title_en: string | null;
+          seo_title_ar: string | null;
+          seo_description_en: string | null;
+          seo_description_ar: string | null;
           category_id: string | null;
           images: string[];
+          thumbnail: string | null;
+          datasheet_url: string | null;
+          seo_image: string | null;
           status: "active" | "draft" | "archived";
           is_featured: boolean;
           sort_order: number;
@@ -36,10 +45,19 @@ export interface Database {
           slug: string;
           name_en: string;
           name_ar: string;
+          short_description_en?: string | null;
+          short_description_ar?: string | null;
           description_en?: string | null;
           description_ar?: string | null;
+          seo_title_en?: string | null;
+          seo_title_ar?: string | null;
+          seo_description_en?: string | null;
+          seo_description_ar?: string | null;
           category_id?: string | null;
           images?: string[];
+          thumbnail?: string | null;
+          datasheet_url?: string | null;
+          seo_image?: string | null;
           status?: "active" | "draft" | "archived";
           is_featured?: boolean;
           sort_order?: number;
@@ -47,6 +65,46 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["products"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "product_categories";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      product_categories: {
+        Row: {
+          id: string;
+          slug: string;
+          name_en: string;
+          name_ar: string;
+          description_en: string | null;
+          description_ar: string | null;
+          name_ku?: string | null;
+          description_ku?: string | null;
+          icon: string | null;
+          image?: string | null;
+          seo_title_en?: string | null;
+          seo_title_ar?: string | null;
+          seo_title_ku?: string | null;
+          seo_description_en?: string | null;
+          seo_description_ar?: string | null;
+          seo_description_ku?: string | null;
+          sort_order: number;
+          status: "active" | "draft";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["product_categories"]["Row"], "id" | "created_at" | "updated_at"> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["product_categories"]["Insert"]>;
+        Relationships: [];
       };
       services: {
         Row: {
@@ -70,6 +128,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["services"]["Insert"]>;
+        Relationships: [];
       };
       projects: {
         Row: {
@@ -95,6 +154,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["projects"]["Insert"]>;
+        Relationships: [];
       };
       rfq_requests: {
         Row: {
@@ -123,6 +183,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["rfq_requests"]["Insert"]>;
+        Relationships: [];
       };
       contact_submissions: {
         Row: {
@@ -140,6 +201,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["contact_submissions"]["Insert"]>;
+        Relationships: [];
       };
       activity_logs: {
         Row: {
@@ -158,6 +220,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["activity_logs"]["Insert"]>;
+        Relationships: [];
       };
       certificates: {
         Row: {
@@ -181,6 +244,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["certificates"]["Insert"]>;
+        Relationships: [];
       };
       company_info: {
         Row: {
@@ -204,6 +268,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_info"]["Insert"]>;
+        Relationships: [];
       };
       company_mission: {
         Row: {
@@ -221,6 +286,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_mission"]["Insert"]>;
+        Relationships: [];
       };
       company_vision: {
         Row: {
@@ -238,6 +304,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_vision"]["Insert"]>;
+        Relationships: [];
       };
       core_values: {
         Row: {
@@ -258,6 +325,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["core_values"]["Insert"]>;
+        Relationships: [];
       };
       company_timeline: {
         Row: {
@@ -279,6 +347,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_timeline"]["Insert"]>;
+        Relationships: [];
       };
       management_team: {
         Row: {
@@ -304,6 +373,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["management_team"]["Insert"]>;
+        Relationships: [];
       };
       homepage_hero: {
         Row: {
@@ -331,6 +401,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["homepage_hero"]["Insert"]>;
+        Relationships: [];
       };
       homepage_about: {
         Row: {
@@ -353,6 +424,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["homepage_about"]["Insert"]>;
+        Relationships: [];
       };
       company_statistics: {
         Row: {
@@ -372,6 +444,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_statistics"]["Insert"]>;
+        Relationships: [];
       };
       clients: {
         Row: {
@@ -391,6 +464,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["clients"]["Insert"]>;
+        Relationships: [];
       };
       homepage_contact_cta: {
         Row: {
@@ -410,6 +484,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["homepage_contact_cta"]["Insert"]>;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

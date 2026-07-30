@@ -44,6 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin", labelKey: "dashboard", icon: LayoutDashboard },
   { href: "/admin/about", labelKey: "about", icon: Info },
   { href: "/admin/products", labelKey: "products", icon: Package },
+  { href: "/admin/categories", labelKey: "categories", icon: FolderKanban },
   { href: "/admin/services", labelKey: "services", icon: Wrench },
   { href: "/admin/projects", labelKey: "projects", icon: FolderKanban },
   { href: "/admin/rfq", labelKey: "rfq", icon: FileText },
