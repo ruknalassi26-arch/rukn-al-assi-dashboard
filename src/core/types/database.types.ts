@@ -514,6 +514,12 @@ export interface Database {
           company_name_en: string;
           company_name_ar: string;
           company_name_ku?: string | null;
+          tagline_en?: string | null;
+          tagline_ar?: string | null;
+          tagline_ku?: string | null;
+          logo_url?: string | null;
+          logo_dark_url?: string | null;
+          favicon_url?: string | null;
           email: string | null;
           phone: string | null;
           phone_secondary?: string | null;

@@ -7,7 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { StorageFile } from "@core/types/api.types";
 import type { Database } from "@core/types/database.types";
 
-export type UploadBucket = "products" | "services" | "projects" | "rfq" | "general";
+export type UploadBucket = "products" | "services" | "projects" | "rfq" | "certificates" | "team" | "branding" | "general";
 
 export interface UploadOptions {
   bucket: UploadBucket;

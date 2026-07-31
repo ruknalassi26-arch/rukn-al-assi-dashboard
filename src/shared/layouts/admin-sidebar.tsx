@@ -51,7 +51,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/team", labelKey: "team", icon: Users },
   { href: "/admin/projects", labelKey: "projects", icon: FolderKanban },
   { href: "/admin/rfq", labelKey: "rfq", icon: FileText },
-  { href: "/admin/contacts", labelKey: "contacts", icon: Mail },
+  { href: "/admin/contact", labelKey: "contacts", icon: Mail },
   { href: "/admin/homepage", labelKey: "homepage", icon: Home },
   { href: "/admin/seo", labelKey: "seo", icon: Search },
   { href: "/admin/settings", labelKey: "settings", icon: Settings },
