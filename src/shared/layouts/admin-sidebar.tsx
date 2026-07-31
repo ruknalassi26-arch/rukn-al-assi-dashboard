@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // shared/layouts/admin-sidebar.tsx
-// Collapsible admin sidebar with navigation links
+// Collapsible admin sidebar with navigation links & top collapse arrow button
 // ==============================================================================
 import { useState } from "react";
 import Link from "next/link";
@@ -22,7 +22,6 @@ import {
   ChevronRight,
   Shield,
   Users,
-  Phone,
   Building2,
 } from "lucide-react";
 import { cn } from "@core/utils/cn";
@@ -92,15 +91,18 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
           className
         )}
       >
-        {/* Logo area */}
-        <div className="flex h-16 items-center border-b px-4">
+        {/* Top Logo & Collapse Toggle Header */}
+        <div className="flex h-16 items-center justify-between border-b px-3">
           <Link
             href={`/${locale}/admin`}
-            className="flex items-center gap-3 overflow-hidden"
+            className="flex items-center gap-2.5 overflow-hidden"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Shield className="h-5 w-5" />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.jpg"
+              alt="Rukn Al Assi Logo"
+              className="h-9 w-9 shrink-0 rounded-md object-contain border bg-white p-0.5"
+            />
             {!collapsed && (
               <div className="flex flex-col overflow-hidden">
                 <span className="truncate text-sm font-bold text-foreground">
@@ -112,9 +114,19 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
               </div>
             )}
           </Link>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCollapsed(!collapsed)}
+            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent"
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            <CollapseIcon className="h-4 w-4" />
+          </Button>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation items */}
         <ScrollArea className="flex-1 px-3 py-4">
           <nav className="flex flex-col gap-1" role="navigation" aria-label="Admin navigation">
             {NAV_ITEMS.map((item) => {
@@ -168,19 +180,6 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             })}
           </nav>
         </ScrollArea>
-
-        {/* Collapse toggle */}
-        <div className="border-t p-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-full justify-center"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            <CollapseIcon className="h-4 w-4" />
-          </Button>
-        </div>
       </aside>
     </TooltipProvider>
   );
