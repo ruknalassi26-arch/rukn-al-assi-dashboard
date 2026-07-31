@@ -206,6 +206,8 @@ export interface Database {
           subject: string | null;
           message: string;
           status: "new" | "read" | "replied";
+          attachment_url?: string | null;
+          notes?: string | null;
           created_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["contact_submissions"]["Row"], "id" | "created_at"> & {

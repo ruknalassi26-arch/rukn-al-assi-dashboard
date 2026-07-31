@@ -56,16 +56,24 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.rfq.all, "detail", id] as const,
   },
 
-  // ---------- Contact ----------
+  // ---------- Contact Info ----------
   contact: {
     all: ["contact"] as const,
-    lists: () => [...queryKeys.contact.all, "list"] as const,
-    detail: (id: string) => [...queryKeys.contact.all, "detail", id] as const,
     info: () => [...queryKeys.contact.all, "info"] as const,
     branches: () => [...queryKeys.contact.all, "branches"] as const,
     branchList: (filters: Record<string, unknown>) =>
       [...queryKeys.contact.branches(), filters] as const,
     branchDetail: (id: string) => [...queryKeys.contact.branches(), id] as const,
+  },
+
+  // ---------- Contact Messages (Inbox) ----------
+  contactMessages: {
+    all: ["contact-messages"] as const,
+    lists: () => [...queryKeys.contactMessages.all, "list"] as const,
+    list: (filters: Record<string, unknown>) =>
+      [...queryKeys.contactMessages.lists(), filters] as const,
+    details: () => [...queryKeys.contactMessages.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.contactMessages.details(), id] as const,
   },
 
   // ---------- Dashboard ----------
