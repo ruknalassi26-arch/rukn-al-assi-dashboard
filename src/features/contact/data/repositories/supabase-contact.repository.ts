@@ -81,12 +81,6 @@ export class SupabaseContactRepository implements IContactRepository {
       instagram_url: input.instagramUrl ?? null,
       youtube_url: input.youtubeUrl ?? null,
       whatsapp_number: input.whatsappNumber ?? null,
-      seo_title_en: input.seoTitleEn ?? null,
-      seo_title_ar: input.seoTitleAr ?? null,
-      seo_title_ku: input.seoTitleKu ?? null,
-      seo_description_en: input.seoDescriptionEn ?? null,
-      seo_description_ar: input.seoDescriptionAr ?? null,
-      seo_description_ku: input.seoDescriptionKu ?? null,
       updated_at: new Date().toISOString(),
     };
 
@@ -114,7 +108,7 @@ export class SupabaseContactRepository implements IContactRepository {
     }
 
     const updated = toContactInfoEntity(resultData);
-    await this.logActivity("updated", updated.id, "Contact Information & Settings");
+    await this.logActivity("updated", updated.id, "Contact Information & Business Details");
     return updated;
   }
 

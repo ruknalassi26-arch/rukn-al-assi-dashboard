@@ -30,12 +30,6 @@ export function toContactInfoEntity(dto: ContactInfoDTO): ContactInfoEntity {
     instagramUrl: dto.instagram_url ?? null,
     youtubeUrl: dto.youtube_url ?? null,
     whatsappNumber: dto.whatsapp_number ?? null,
-    seoTitleEn: dto.seo_title_en ?? null,
-    seoTitleAr: dto.seo_title_ar ?? null,
-    seoTitleKu: dto.seo_title_ku ?? null,
-    seoDescriptionEn: dto.seo_description_en ?? null,
-    seoDescriptionAr: dto.seo_description_ar ?? null,
-    seoDescriptionKu: dto.seo_description_ku ?? null,
     updatedAt: new Date(dto.updated_at),
   });
 }

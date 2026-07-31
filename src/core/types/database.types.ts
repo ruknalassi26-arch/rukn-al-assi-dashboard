@@ -587,6 +587,32 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["company_branches"]["Insert"]>;
         Relationships: [];
       };
+      seo_settings: {
+        Row: {
+          id: string;
+          page_key: "home" | "about" | "products" | "categories" | "services" | "projects" | "certificates" | "contact";
+          meta_title_en: string | null;
+          meta_title_ar: string | null;
+          meta_title_ku?: string | null;
+          meta_description_en: string | null;
+          meta_description_ar: string | null;
+          meta_description_ku?: string | null;
+          keywords_en: string | null;
+          keywords_ar: string | null;
+          keywords_ku?: string | null;
+          og_image_url: string | null;
+          is_indexed: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["seo_settings"]["Row"], "id" | "created_at" | "updated_at"> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["seo_settings"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

@@ -1,6 +1,6 @@
 // ==============================================================================
 // features/contact/domain/entities/contact-info.entity.ts
-// Contact Information Domain Entity Class
+// Contact Information Domain Entity Class (No SEO fields)
 // ==============================================================================
 
 export interface ContactInfoProps {
@@ -26,12 +26,6 @@ export interface ContactInfoProps {
   instagramUrl?: string | null;
   youtubeUrl?: string | null;
   whatsappNumber?: string | null;
-  seoTitleEn?: string | null;
-  seoTitleAr?: string | null;
-  seoTitleKu?: string | null;
-  seoDescriptionEn?: string | null;
-  seoDescriptionAr?: string | null;
-  seoDescriptionKu?: string | null;
   updatedAt: Date;
 }
 
@@ -58,12 +52,6 @@ export class ContactInfoEntity {
   public readonly instagramUrl: string | null;
   public readonly youtubeUrl: string | null;
   public readonly whatsappNumber: string | null;
-  public readonly seoTitleEn: string | null;
-  public readonly seoTitleAr: string | null;
-  public readonly seoTitleKu: string | null;
-  public readonly seoDescriptionEn: string | null;
-  public readonly seoDescriptionAr: string | null;
-  public readonly seoDescriptionKu: string | null;
   public readonly updatedAt: Date;
 
   constructor(props: ContactInfoProps) {
@@ -89,12 +77,6 @@ export class ContactInfoEntity {
     this.instagramUrl = props.instagramUrl ?? null;
     this.youtubeUrl = props.youtubeUrl ?? null;
     this.whatsappNumber = props.whatsappNumber ?? null;
-    this.seoTitleEn = props.seoTitleEn ?? null;
-    this.seoTitleAr = props.seoTitleAr ?? null;
-    this.seoTitleKu = props.seoTitleKu ?? null;
-    this.seoDescriptionEn = props.seoDescriptionEn ?? null;
-    this.seoDescriptionAr = props.seoDescriptionAr ?? null;
-    this.seoDescriptionKu = props.seoDescriptionKu ?? null;
     this.updatedAt = props.updatedAt;
   }
 }

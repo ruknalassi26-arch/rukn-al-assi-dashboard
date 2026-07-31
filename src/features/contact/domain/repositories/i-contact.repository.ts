@@ -1,6 +1,6 @@
 // ==============================================================================
 // features/contact/domain/repositories/i-contact.repository.ts
-// IContactRepository Contract Interface
+// IContactRepository Contract Interface (Refactored: No SEO fields)
 // ==============================================================================
 import type { ContactInfoEntity } from "../entities/contact-info.entity";
 import type { BranchEntity, BranchStatus } from "../entities/branch.entity";
@@ -44,12 +44,6 @@ export interface UpdateContactInfoInput {
   instagramUrl?: string | null;
   youtubeUrl?: string | null;
   whatsappNumber?: string | null;
-  seoTitleEn?: string | null;
-  seoTitleAr?: string | null;
-  seoTitleKu?: string | null;
-  seoDescriptionEn?: string | null;
-  seoDescriptionAr?: string | null;
-  seoDescriptionKu?: string | null;
 }
 
 export interface CreateBranchInput {

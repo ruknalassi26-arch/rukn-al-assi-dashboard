@@ -124,6 +124,13 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.team.details(), id] as const,
   },
 
+  // ---------- SEO ----------
+  seo: {
+    all: ["seo"] as const,
+    pages: () => [...queryKeys.seo.all, "pages"] as const,
+    byPage: (pageKey: string) => [...queryKeys.seo.pages(), pageKey] as const,
+  },
+
   // ---------- Website Settings ----------
   settings: {
     all: ["settings"] as const,

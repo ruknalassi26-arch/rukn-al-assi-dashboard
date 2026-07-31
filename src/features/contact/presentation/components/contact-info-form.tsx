@@ -1,13 +1,13 @@
 "use client";
 // ==============================================================================
 // features/contact/presentation/components/contact-info-form.tsx
-// Main Contact Information & Settings Form (RHF + Zod + MultilingualTabs)
+// Business Contact Information Form (RHF + Zod + MultilingualTabs - NO SEO)
 // ==============================================================================
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Save, MapPin, Phone, Mail, Clock, Share2, Search } from "lucide-react";
+import { Loader2, Save, MapPin, Phone, Mail, Share2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -46,12 +46,6 @@ const contactInfoSchema = z.object({
   instagramUrl: z.string().optional().nullable(),
   youtubeUrl: z.string().optional().nullable(),
   whatsappNumber: z.string().optional().nullable(),
-  seoTitleEn: z.string().optional().nullable(),
-  seoTitleAr: z.string().optional().nullable(),
-  seoTitleKu: z.string().optional().nullable(),
-  seoDescriptionEn: z.string().optional().nullable(),
-  seoDescriptionAr: z.string().optional().nullable(),
-  seoDescriptionKu: z.string().optional().nullable(),
 });
 
 export type ContactInfoFormValues = z.infer<typeof contactInfoSchema>;
@@ -84,12 +78,6 @@ export function ContactInfoForm() {
       instagramUrl: contactInfo?.instagramUrl ?? "",
       youtubeUrl: contactInfo?.youtubeUrl ?? "",
       whatsappNumber: contactInfo?.whatsappNumber ?? "",
-      seoTitleEn: contactInfo?.seoTitleEn ?? "Contact Us | Rukn Al Assi",
-      seoTitleAr: contactInfo?.seoTitleAr ?? "تواصل معنا | ركن العاصي",
-      seoTitleKu: contactInfo?.seoTitleKu ?? "",
-      seoDescriptionEn: contactInfo?.seoDescriptionEn ?? "Get in touch with Rukn Al Assi for hydraulic products, maintenance, and technical inquiries.",
-      seoDescriptionAr: contactInfo?.seoDescriptionAr ?? "تواصل مع شركة ركن العاصي للمنتجات والخدمات الهيدروليكية وعروض الأسعار.",
-      seoDescriptionKu: contactInfo?.seoDescriptionKu ?? "",
     },
   });
 
@@ -122,9 +110,9 @@ export function ContactInfoForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-5xl mx-auto pb-16">
       <div className="flex items-center justify-between gap-4 border-b pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Main Contact Information</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Main Business Contact Information</h1>
           <p className="text-sm text-muted-foreground">
-            Manage main headquarters contact details, phone numbers, addresses, working hours, and social channels.
+            Manage headquarters contact details, phone numbers, working hours, and social media channels.
           </p>
         </div>
 
@@ -215,12 +203,12 @@ export function ContactInfoForm() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Share2 className="h-5 w-5 text-primary" />
-                Social Links & Google Maps
+                Social Profiles & Google Maps Link
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="googleMapsUrl">Google Maps URL / Embed Link</Label>
+                <Label htmlFor="googleMapsUrl">Google Maps URL</Label>
                 <Input id="googleMapsUrl" placeholder="https://maps.google.com/..." {...register("googleMapsUrl")} />
               </div>
 
@@ -237,7 +225,7 @@ export function ContactInfoForm() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t">
                 <div className="space-y-2">
-                  <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
+                  <Label htmlFor="whatsappNumber">WhatsApp Business Number</Label>
                   <Input id="whatsappNumber" placeholder="+964 7XX XXX XXXX" {...register("whatsappNumber")} />
                 </div>
                 <div className="space-y-2">
@@ -252,58 +240,11 @@ export function ContactInfoForm() {
                   <Label htmlFor="instagramUrl">Instagram Profile URL</Label>
                   <Input id="instagramUrl" placeholder="https://instagram.com/..." {...register("instagramUrl")} />
                 </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="youtubeUrl">YouTube Channel URL</Label>
+                  <Input id="youtubeUrl" placeholder="https://youtube.com/..." {...register("youtubeUrl")} />
+                </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Basic Contact Page SEO */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="h-5 w-5 text-primary" />
-                Contact Page SEO (Basic)
-              </CardTitle>
-              <CardDescription>Configure meta title and meta description for the Contact Us page.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <MultilingualTabs
-                englishFields={
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="seoTitleEn">SEO Meta Title (English)</Label>
-                      <Input id="seoTitleEn" {...register("seoTitleEn")} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="seoDescriptionEn">SEO Meta Description (English)</Label>
-                      <Textarea id="seoDescriptionEn" className="min-h-[80px]" {...register("seoDescriptionEn")} />
-                    </div>
-                  </div>
-                }
-                arabicFields={
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="seoTitleAr">عنوان SEO (بالعربية)</Label>
-                      <Input id="seoTitleAr" {...register("seoTitleAr")} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="seoDescriptionAr">وصف SEO (بالعربية)</Label>
-                      <Textarea id="seoDescriptionAr" className="min-h-[80px]" {...register("seoDescriptionAr")} />
-                    </div>
-                  </div>
-                }
-                kurdishFields={
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="seoTitleKu">نیشانی SEO (بە کوردی)</Label>
-                      <Input id="seoTitleKu" {...register("seoTitleKu")} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="seoDescriptionKu">وەسفی SEO (بە کوردی)</Label>
-                      <Textarea id="seoDescriptionKu" className="min-h-[80px]" {...register("seoDescriptionKu")} />
-                    </div>
-                  </div>
-                }
-              />
             </CardContent>
           </Card>
         </div>
