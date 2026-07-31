@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // shared/layouts/admin-header.tsx
-// Top header bar for the admin layout with 3-language switcher (en | ar | ckb)
+// Top header bar for the admin layout with 3-language switcher (en | ar | ckb) & auth menu
 // ==============================================================================
 import Link from "next/link";
 import { useLocale } from "next-intl";
@@ -15,9 +15,9 @@ import {
   Sun,
   Moon,
   Check,
+  KeyRound,
 } from "lucide-react";
 import { cn } from "@core/utils/cn";
-import { useAuth } from "@core/providers";
 import { useRTL } from "@core/hooks/use-rtl";
 import {
   Button,
@@ -33,6 +33,9 @@ import {
   Separator,
 } from "@shared/ui";
 import { AdminBreadcrumb } from "./admin-breadcrumb";
+import { useSignOut } from "@shared/hooks/auth/use-auth-hooks";
+import { useAuthStore } from "@features/authentication/presentation/stores/auth.store";
+import { ChangePasswordModal } from "@features/authentication/presentation/components/change-password-modal";
 
 interface AdminHeaderProps {
   onMenuToggle?: () => void;
@@ -46,7 +49,8 @@ const LANGUAGES = [
 ];
 
 export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
-  const { user, signOut } = useAuth();
+  const { user, openChangePasswordModal } = useAuthStore();
+  const signOutMutation = useSignOut();
   const locale = useLocale();
   const router = useRouter();
   const isRtl = useRTL();
@@ -62,15 +66,16 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    router.push(`/${locale}/admin/login`);
+    await signOutMutation.mutateAsync();
   };
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const userInitials = user?.email
+  const userInitials = user?.fullName
+    ? user.initials
+    : user?.email
     ? user.email.substring(0, 2).toUpperCase()
     : "AD";
 
@@ -156,14 +161,14 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
                 </AvatarFallback>
               </Avatar>
               <span className="hidden md:inline text-xs font-medium text-muted-foreground max-w-[140px] truncate">
-                {user?.email ?? "Admin"}
+                {user?.fullName ?? user?.email ?? "Admin Portal"}
               </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align={isRtl ? "start" : "end"} className="w-56">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Administrator</p>
+                <p className="text-sm font-medium leading-none">{user?.fullName ?? "Administrator"}</p>
                 <p className="text-xs leading-none text-muted-foreground truncate">
                   {user?.email ?? "admin@ruknalassi.com"}
                 </p>
@@ -174,13 +179,18 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
               <DropdownMenuItem asChild>
                 <Link href={`/${locale}/admin/settings`} className="cursor-pointer">
                   <User className="me-2 h-4 w-4" />
-                  Profile Settings
+                  Website Settings
                 </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={openChangePasswordModal} className="cursor-pointer">
+                <KeyRound className="me-2 h-4 w-4" />
+                Change Password
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleSignOut}
+              disabled={signOutMutation.isPending}
               className="text-destructive focus:text-destructive cursor-pointer"
             >
               <LogOut className="me-2 h-4 w-4" />
@@ -189,6 +199,8 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <ChangePasswordModal />
     </header>
   );
 }

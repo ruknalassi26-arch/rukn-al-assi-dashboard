@@ -10,18 +10,18 @@
     "semantic_hash": ""
   },
   "messages/ar.json": {
-    "mtime": 1785481111.9670548,
-    "ast_hash": "e54c04bde18b1ee0c723a990e76d902d",
+    "mtime": 1785493591.1716857,
+    "ast_hash": "3c38e6bf9bf5165ade09f949be5b6669",
     "semantic_hash": ""
   },
   "messages/ckb.json": {
-    "mtime": 1785481120.5960586,
-    "ast_hash": "9788861a258f828a44c3222f2cdabca0",
+    "mtime": 1785493614.0847063,
+    "ast_hash": "48781ba766d589759b447dab06031ef1",
     "semantic_hash": ""
   },
   "messages/en.json": {
-    "mtime": 1785481098.2947068,
-    "ast_hash": "60fb090b99ee04c6b9de5407a763f101",
+    "mtime": 1785493564.0852618,
+    "ast_hash": "688ec8812590fb5952f172f1257583a4",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -2340,8 +2340,8 @@
     "semantic_hash": ""
   },
   "src/shared/layouts/admin-sidebar.tsx": {
-    "mtime": 1785481161.0648167,
-    "ast_hash": "1bdf08cb40d29cb54777c342c77a2551",
+    "mtime": 1785493671.5162556,
+    "ast_hash": "b96f70cd731acbef52ce68930e17d856",
     "semantic_hash": ""
   },
   "src/shared/ui/avatar.tsx": {
@@ -2487,6 +2487,11 @@
   "public/window.svg": {
     "mtime": 1785225245.9444096,
     "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  },
+  "src/app/[locale]/(admin)/admin/branches/page.tsx": {
+    "mtime": 1785493691.7157075,
+    "ast_hash": "d13f25e6217bcf0591740f9f62891fcb",
     "semantic_hash": ""
   }
 }

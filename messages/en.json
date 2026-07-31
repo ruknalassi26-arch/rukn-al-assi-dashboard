@@ -43,6 +43,46 @@
     "settings": "Settings",
     "login": "Login"
   },
+  "auth": {
+    "login": {
+      "title": "Sign in to Admin",
+      "subtitle": "Enter your credentials to access the Rukn Al Assi portal",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "admin@ruknalassi.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "rememberMe": "Remember me for 30 days",
+      "forgotPassword": "Forgot Password?",
+      "submit": "Sign In",
+      "signingIn": "Signing in..."
+    },
+    "forgotPassword": {
+      "title": "Reset Your Password",
+      "subtitle": "Enter your admin email address and we'll send you instructions to reset your password.",
+      "emailLabel": "Admin Email",
+      "submit": "Send Reset Link",
+      "sending": "Sending link...",
+      "backToLogin": "Back to Sign In",
+      "successTitle": "Check Your Inbox",
+      "successMessage": "We've sent a password reset link to your email address."
+    },
+    "resetPassword": {
+      "title": "Set New Password",
+      "subtitle": "Enter your new password below.",
+      "newPasswordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "submit": "Update Password",
+      "updating": "Updating password..."
+    },
+    "changePassword": {
+      "title": "Change Account Password",
+      "subtitle": "Update your account password for security.",
+      "newPasswordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "submit": "Change Password",
+      "changing": "Changing..."
+    }
+  },
   "aboutAdmin": {
     "title": "About Us Management",
     "subtitle": "Manage company information, mission & vision, core values, history timeline, team leaders, and certificates.",

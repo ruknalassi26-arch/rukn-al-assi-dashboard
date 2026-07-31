@@ -2340,8 +2340,8 @@
     "semantic_hash": ""
   },
   "src/shared/layouts/admin-sidebar.tsx": {
-    "mtime": 1785493671.5162556,
-    "ast_hash": "b96f70cd731acbef52ce68930e17d856",
+    "mtime": 1785494220.5242522,
+    "ast_hash": "a872d71e55ee94dd446c294abed00f90",
     "semantic_hash": ""
   },
   "src/shared/ui/avatar.tsx": {
@@ -2492,6 +2492,16 @@
   "src/app/[locale]/(admin)/admin/branches/page.tsx": {
     "mtime": 1785493691.7157075,
     "ast_hash": "d13f25e6217bcf0591740f9f62891fcb",
+    "semantic_hash": ""
+  },
+  "src/features/authentication/domain/entities/user-profile.entity.ts": {
+    "mtime": 1785494428.7943757,
+    "ast_hash": "2f9975c5786d919c71722033374a2ce0",
+    "semantic_hash": ""
+  },
+  "public/logo.jpg": {
+    "mtime": 1784793478.213522,
+    "ast_hash": "1a3cd1910ba2c4f5f8ce5dc71754d427",
     "semantic_hash": ""
   }
 }
