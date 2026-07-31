@@ -8,5 +8,7 @@
   "6": "ContactMessageFilterParams",
   "7": "page.tsx",
   "8": "i-contact-messages.repository.ts",
-  "9": "admin-sidebar.tsx"
+  "9": "admin-sidebar.tsx",
+  "10": "DeleteContactMessageUseCase",
+  "11": "SendMessageReplyUseCase"
 }
