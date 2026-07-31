@@ -23,6 +23,7 @@ import {
   Shield,
   Users,
   Phone,
+  Building2,
 } from "lucide-react";
 import { cn } from "@core/utils/cn";
 import { useRTL } from "@core/hooks/use-rtl";
@@ -52,7 +53,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/team", labelKey: "team", icon: Users },
   { href: "/admin/projects", labelKey: "projects", icon: FolderKanban },
   { href: "/admin/rfq", labelKey: "rfq", icon: FileText },
-  { href: "/admin/contact", labelKey: "contact", icon: Phone },
+  { href: "/admin/branches", labelKey: "branches", icon: Building2 },
   { href: "/admin/contact-messages", labelKey: "contactMessages", icon: Mail },
   { href: "/admin/homepage", labelKey: "homepage", icon: Home },
   { href: "/admin/seo", labelKey: "seo", icon: Search },
