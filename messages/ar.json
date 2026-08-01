@@ -232,5 +232,11 @@
       "certificates": "الشهادات والاعتمادات",
       "contactCta": "دعوة التواصل (CTA)"
     }
+  },
+  "projects": {
+    "title": "معرض المشاريع",
+    "createTitle": "إضافة مشروع جديد",
+    "editTitle": "تعديل المشروع",
+    "deleteTitle": "حذف المشروع"
   }
 }

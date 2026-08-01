@@ -46,7 +46,10 @@ export const queryKeys = {
   projects: {
     all: ["projects"] as const,
     lists: () => [...queryKeys.projects.all, "list"] as const,
-    detail: (slug: string) => [...queryKeys.projects.all, "detail", slug] as const,
+    list: (filters: Record<string, unknown>) =>
+      [...queryKeys.projects.lists(), filters] as const,
+    details: () => [...queryKeys.projects.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.projects.details(), id] as const,
   },
 
   // ---------- RFQ ----------

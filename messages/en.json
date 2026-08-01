@@ -232,5 +232,11 @@
       "certificates": "Certificates",
       "contactCta": "Contact CTA"
     }
+  },
+  "projects": {
+    "title": "Projects Portfolio",
+    "createTitle": "Create New Project",
+    "editTitle": "Edit Project",
+    "deleteTitle": "Delete Project"
   }
 }

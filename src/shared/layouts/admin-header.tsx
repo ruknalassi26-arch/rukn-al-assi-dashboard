@@ -66,7 +66,7 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
     if (newLocale === locale) return;
     const currentPath = window.location.pathname;
     const pathWithoutLocale = currentPath.replace(/^\/(en|ar|ckb|ku)/, "");
-    router.push(`/${newLocale}${pathWithoutLocale}`);
+    window.location.href = `/${newLocale}${pathWithoutLocale}`;
   };
 
   const handleSignOut = async () => {
