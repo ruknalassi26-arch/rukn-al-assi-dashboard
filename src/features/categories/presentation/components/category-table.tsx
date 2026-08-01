@@ -55,7 +55,11 @@ import {
 } from "@shared/hooks/categories/use-category-hooks";
 import type { CategoryEntity } from "../../domain/entities/category.entity";
 
+import { useTranslations } from "next-intl";
+
 export function CategoryTable() {
+  const t = useTranslations("categories");
+  const tCommon = useTranslations("common");
   const {
     search,
     status,
@@ -107,10 +111,10 @@ export function CategoryTable() {
         <div>
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <FolderKanban className="h-5 w-5 text-primary" />
-            Product Categories
+            {t("title")}
           </CardTitle>
           <CardDescription>
-            Organize and manage your product catalog categories, sorting orders, and translations.
+            {t("subtitle")}
           </CardDescription>
         </div>
 
@@ -122,11 +126,11 @@ export function CategoryTable() {
             disabled={isFetching}
             className="gap-1.5"
           >
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> {tCommon("retry")}
           </Button>
           <Link href="/admin/categories/create">
             <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" /> Add Category
+              <Plus className="h-4 w-4" /> {t("addNew")}
             </Button>
           </Link>
         </div>

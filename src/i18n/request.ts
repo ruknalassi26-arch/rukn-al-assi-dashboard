@@ -6,6 +6,7 @@ import { getRequestConfig } from "next-intl/server";
 import { routing } from "@core/config/i18n";
 
 import arMessages from "../../messages/ar.json";
+import ckbMessages from "../../messages/ckb.json";
 import enMessages from "../../messages/en.json";
 
 export default getRequestConfig(async ({ requestLocale }) => {
@@ -15,7 +16,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale = routing.defaultLocale;
   }
 
-  const messages = locale === "ar" ? arMessages : enMessages;
+  let messages = enMessages;
+  if (locale === "ar") {
+    messages = arMessages;
+  } else if (locale === "ckb" || locale === "ku") {
+    messages = ckbMessages as typeof enMessages;
+  }
 
   return {
     locale,

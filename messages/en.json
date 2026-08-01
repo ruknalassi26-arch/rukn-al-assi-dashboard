@@ -217,6 +217,45 @@
       "homepage": "Homepage"
     }
   },
+  "categories": {
+    "title": "Product Categories",
+    "subtitle": "Organize and manage your product catalog categories, sorting orders, and translations.",
+    "addNew": "Add Category",
+    "createTitle": "Create Category",
+    "editTitle": "Edit Category",
+    "deleteTitle": "Delete Category",
+    "table": {
+      "name": "Category Name",
+      "slug": "Slug",
+      "sortOrder": "Sort Order",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "services": {
+    "title": "Services Portfolio",
+    "subtitle": "Manage hydraulic repair, maintenance, engineering, and field service offerings.",
+    "addNew": "Add Service",
+    "createTitle": "Create Service",
+    "editTitle": "Edit Service",
+    "deleteTitle": "Delete Service"
+  },
+  "certificates": {
+    "title": "Certificates & Quality Standard Management",
+    "subtitle": "Upload and showcase company ISO certifications, accreditation documents, and compliance standards.",
+    "addNew": "Add Certificate",
+    "createTitle": "Create Certificate",
+    "editTitle": "Edit Certificate",
+    "deleteTitle": "Delete Certificate"
+  },
+  "team": {
+    "title": "Management & Engineering Team Members",
+    "subtitle": "Manage executive profiles, engineers, technicians, contact details, and social links.",
+    "addNew": "Add Team Member",
+    "createTitle": "Create Team Member",
+    "editTitle": "Edit Team Member",
+    "deleteTitle": "Delete Team Member"
+  },
   "activityLog": {
     "title": "Activity Audit Stream",
     "subtitle": "Track all administrative actions, data mutations, logins, and system changes in real-time.",
@@ -277,6 +316,10 @@
   "products": {
     "title": "Our Products",
     "subtitle": "Explore our comprehensive range of hydraulic products.",
+    "addNew": "Add Product",
+    "createTitle": "Create Product",
+    "editTitle": "Edit Product",
+    "deleteTitle": "Delete Product",
     "empty": "No products found",
     "emptyDescription": "Try adjusting your search or filter criteria.",
     "status": {
@@ -378,5 +421,20 @@
       "featuredProject": "Featured Project",
       "featuredDesc": "Highlight on website homepage"
     }
+  },
+  "seo": {
+    "title": "SEO & Meta Management",
+    "subtitle": "Configure search engine titles, meta descriptions, OpenGraph social sharing tags, and keywords for all pages.",
+    "save": "Save SEO Settings"
+  },
+  "settings": {
+    "title": "Website Settings",
+    "subtitle": "Manage company branding, contact details, social links, and maintenance mode.",
+    "save": "Save Settings"
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your administrative profile, display name, avatar, and security credentials.",
+    "save": "Save Profile"
   }
 }
