@@ -226,6 +226,9 @@ export interface Database {
           entity_title: string | null;
           user_id: string | null;
           user_email: string | null;
+          ip_address?: string | null;
+          old_value?: unknown;
+          new_value?: unknown;
           metadata: Record<string, unknown> | null;
           created_at: string;
         };
@@ -234,6 +237,25 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["activity_logs"]["Insert"]>;
+        Relationships: [];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          type: "rfq_new" | "contact_new" | "system" | "email_failure" | "admin_login";
+          title: string;
+          message: string;
+          link: string | null;
+          is_read: boolean;
+          user_id: string | null;
+          metadata: Record<string, unknown> | null;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["notifications"]["Row"], "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
         Relationships: [];
       };
       certificates: {

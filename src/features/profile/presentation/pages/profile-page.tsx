@@ -3,7 +3,7 @@
 // features/profile/presentation/pages/profile-page.tsx
 // Main My Profile Admin Page
 // ==============================================================================
-import { User, KeyRound, Globe, Edit3, Loader2, AlertCircle } from "lucide-react";
+import { User, KeyRound, Edit3, AlertCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger, Skeleton, Card, CardContent } from "@shared/ui";
 import { useProfileQuery } from "@shared/hooks/profile/use-profile-hooks";
 import { useProfileStore } from "../stores/profile.store";
@@ -11,7 +11,6 @@ import { AvatarUploader } from "../components/avatar-uploader";
 import { ProfileDetailsCard } from "../components/profile-details-card";
 import { EditProfileForm } from "../components/edit-profile-form";
 import { ChangePasswordForm } from "../components/change-password-form";
-import { PreferencesCard } from "../components/preferences-card";
 
 export function ProfilePage() {
   const { data: user, isLoading, isError, error } = useProfileQuery();
@@ -58,7 +57,7 @@ export function ProfilePage() {
             My Profile
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            Manage your admin profile details, security credentials, avatar image, and system preferences.
+            Manage your admin profile details, security credentials, and avatar image.
           </p>
         </div>
       </div>
@@ -68,7 +67,7 @@ export function ProfilePage() {
 
       {/* Main Feature Tabs */}
       <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="space-y-6">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full h-auto p-1 bg-muted/60 rounded-xl">
+        <TabsList className="grid grid-cols-3 w-full max-w-md h-auto p-1 bg-muted/60 rounded-xl">
           <TabsTrigger value="details" className="gap-2 text-xs py-2.5 rounded-lg">
             <User className="h-4 w-4" />
             Profile Details
@@ -80,10 +79,6 @@ export function ProfilePage() {
           <TabsTrigger value="password" className="gap-2 text-xs py-2.5 rounded-lg">
             <KeyRound className="h-4 w-4" />
             Change Password
-          </TabsTrigger>
-          <TabsTrigger value="preferences" className="gap-2 text-xs py-2.5 rounded-lg">
-            <Globe className="h-4 w-4" />
-            Preferences
           </TabsTrigger>
         </TabsList>
 
@@ -100,11 +95,6 @@ export function ProfilePage() {
         {/* Tab 3: Change Password */}
         <TabsContent value="password">
           <ChangePasswordForm />
-        </TabsContent>
-
-        {/* Tab 4: Preferences */}
-        <TabsContent value="preferences">
-          <PreferencesCard />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,39 +1,41 @@
 "use client";
 // ==============================================================================
 // features/dashboard/presentation/components/dashboard-stats.tsx
-// Grid of KPI Stat Cards for Dashboard
+// 8 KPI Stat Widgets Card Grid
 // ==============================================================================
+import Link from "next/link";
+import { useLocale } from "next-intl";
 import {
   Package,
-  Wrench,
   FolderKanban,
+  Wrench,
+  FolderOpen,
+  ShieldCheck,
+  Users,
   FileText,
   Mail,
-  Award,
-  Users,
-  Building,
-  TrendingUp,
-  Clock,
+  ArrowUpRight,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@shared/ui";
+import { Card, CardContent, Skeleton, Badge, Button } from "@shared/ui";
 import { useDashboardStats } from "@shared/hooks/dashboard/use-dashboard-hooks";
 import { ErrorState } from "@shared/components/error-state";
 
 export function DashboardStats() {
+  const locale = useLocale();
   const { data: stats, isLoading, error, refetch } = useDashboardStats();
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <Card key={i}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-4 rounded-full" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-7 w-16 mb-1" />
-              <Skeleton className="h-3 w-28" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Card key={i} className="border shadow-sm">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 w-8 rounded-lg" />
+              </div>
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="h-3 w-32" />
             </CardContent>
           </Card>
         ))}
@@ -41,44 +43,124 @@ export function DashboardStats() {
     );
   }
 
-  if (error) {
+  if (error || !stats) {
     return (
       <ErrorState
         title="Failed to load dashboard statistics"
-        error={error}
+        error={error ?? new Error("No stats data")}
         onRetry={() => refetch()}
       />
     );
   }
 
   const statCards = [
-    { title: "Total Products", value: stats?.totalProducts ?? 0, icon: Package, color: "text-blue-600", desc: `${stats?.activeProducts ?? 0} Active` },
-    { title: "Total Services", value: stats?.totalServices ?? 0, icon: Wrench, color: "text-emerald-600", desc: `${stats?.activeServices ?? 0} Active` },
-    { title: "Total Projects", value: stats?.totalProjects ?? 0, icon: FolderKanban, color: "text-violet-600", desc: `${stats?.completedProjects ?? 0} Completed` },
-    { title: "RFQ Requests", value: stats?.totalRfqs ?? 0, icon: FileText, color: "text-amber-600", desc: `${stats?.pendingRfqs ?? 0} Pending` },
-    { title: "Contact Messages", value: stats?.totalContacts ?? 0, icon: Mail, color: "text-rose-600", desc: `${stats?.unreadContacts ?? 0} Unread` },
-    { title: "Certificates", value: stats?.totalCertificates ?? 0, icon: Award, color: "text-teal-600", desc: "Active ISO & Badges" },
-    { title: "Client Partners", value: stats?.totalClients ?? 0, icon: Users, color: "text-indigo-600", desc: "Active Clients" },
-    { title: "Company Stats", value: stats?.totalCompanyStats ?? 0, icon: Building, color: "text-cyan-600", desc: "KPI Counter Badges" },
-    { title: "Growth Rate", value: "+18%", icon: TrendingUp, color: "text-green-600", desc: "Vs previous month" },
-    { title: "Avg Response", value: "< 24h", icon: Clock, color: "text-orange-600", desc: "For RFQs & inquiries" },
+    {
+      title: "Total Products",
+      value: stats.totalProducts,
+      subtext: `${stats.activeProducts} active products`,
+      icon: Package,
+      color: "text-blue-500 bg-blue-500/10",
+      href: `/${locale}/admin/products`,
+    },
+    {
+      title: "Total Categories",
+      value: stats.totalCategories,
+      subtext: "Product catalog categories",
+      icon: FolderKanban,
+      color: "text-indigo-500 bg-indigo-500/10",
+      href: `/${locale}/admin/categories`,
+    },
+    {
+      title: "Total Services",
+      value: stats.totalServices,
+      subtext: `${stats.activeServices} active services`,
+      icon: Wrench,
+      color: "text-cyan-500 bg-cyan-500/10",
+      href: `/${locale}/admin/services`,
+    },
+    {
+      title: "Total Projects",
+      value: stats.totalProjects,
+      subtext: `${stats.completedProjects} completed projects`,
+      icon: FolderOpen,
+      color: "text-emerald-500 bg-emerald-500/10",
+      href: `/${locale}/admin/projects`,
+    },
+    {
+      title: "Total Certificates",
+      value: stats.totalCertificates,
+      subtext: "Quality & ISO certifications",
+      icon: ShieldCheck,
+      color: "text-amber-500 bg-amber-500/10",
+      href: `/${locale}/admin/certificates`,
+    },
+    {
+      title: "Team Members",
+      value: stats.totalTeamMembers,
+      subtext: "Company staff & personnel",
+      icon: Users,
+      color: "text-purple-500 bg-purple-500/10",
+      href: `/${locale}/admin/team`,
+    },
+    {
+      title: "Total RFQs",
+      value: stats.totalRfqs,
+      badge: stats.pendingRfqs > 0 ? `${stats.pendingRfqs} Pending` : null,
+      badgeVariant: "warning" as const,
+      subtext: "Quotation inquiries received",
+      icon: FileText,
+      color: "text-orange-500 bg-orange-500/10",
+      href: `/${locale}/admin/rfq`,
+    },
+    {
+      title: "Contact Messages",
+      value: stats.totalContacts,
+      badge: stats.unreadContacts > 0 ? `${stats.unreadContacts} New` : null,
+      badgeVariant: "default" as const,
+      subtext: "Direct customer submissions",
+      icon: Mail,
+      color: "text-rose-500 bg-rose-500/10",
+      href: `/${locale}/admin/contact-messages`,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-      {statCards.map((stat, i) => {
-        const Icon = stat.icon;
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {statCards.map((card, index) => {
+        const Icon = card.icon;
         return (
-          <Card key={i} className="hover:border-primary/50 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground">
-                {stat.title}
-              </CardTitle>
-              <Icon className={`h-4 w-4 ${stat.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{stat.desc}</p>
+          <Card key={index} className="border shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
+                  {card.title}
+                </span>
+                <div className={`p-2 rounded-lg ${card.color}`}>
+                  <Icon className="h-4 w-4" />
+                </div>
+              </div>
+
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-2xl font-bold tracking-tight text-foreground">
+                  {card.value.toLocaleString()}
+                </span>
+                {card.badge && (
+                  <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0.5 bg-primary/10 text-primary border-primary/20">
+                    {card.badge}
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t">
+                <span className="truncate">{card.subtext}</span>
+                <Link
+                  href={card.href}
+                  className="text-primary hover:underline flex items-center gap-0.5 font-medium shrink-0"
+                >
+                  <span>View</span>
+                  <ArrowUpRight className="h-3 w-3" />
+                </Link>
+              </div>
             </CardContent>
           </Card>
         );

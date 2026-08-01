@@ -100,33 +100,35 @@ export class SupabaseProfileRepository implements IProfileRepository {
 
     const fileExt = file.name.split(".").pop() || "jpg";
     const fileName = `avatar-${userData.user.id}-${Date.now()}.${fileExt}`;
-    const filePath = `${userData.user.id}/${fileName}`;
 
-    // Upload file to Supabase Storage bucket 'avatars'
-    const { error: uploadError } = await this.supabase.storage
-      .from("avatars")
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: true,
-      });
+    // Candidate buckets in priority order (using existing public buckets in Supabase Storage)
+    const candidateBuckets = ["team-photos", "branding", "product-images", "avatars"];
 
-    if (uploadError) {
-      // Fallback: try uploading to 'public' or 'uploads' bucket
-      const { error: fallbackError } = await this.supabase.storage
-        .from("uploads")
-        .upload(filePath, file, {
+    let successfulBucket: string | null = null;
+    let lastErrorMessage = "";
+
+    for (const bucket of candidateBuckets) {
+      const { error: uploadError } = await this.supabase.storage
+        .from(bucket)
+        .upload(fileName, file, {
           cacheControl: "3600",
           upsert: true,
+          contentType: file.type,
         });
 
-      if (fallbackError) {
-        throw new Error(`Failed to upload avatar image: ${uploadError.message}`);
+      if (!uploadError) {
+        successfulBucket = bucket;
+        break;
       }
 
-      return getStoragePublicUrl("uploads", filePath);
+      lastErrorMessage = uploadError.message;
     }
 
-    return getStoragePublicUrl("avatars", filePath);
+    if (!successfulBucket) {
+      throw new Error(`Failed to upload avatar image: ${lastErrorMessage}`);
+    }
+
+    return getStoragePublicUrl(successfulBucket, fileName);
   }
 
   async changePassword(input: ChangePasswordInput): Promise<void> {

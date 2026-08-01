@@ -1,6 +1,6 @@
 // ==============================================================================
 // src/middleware.ts
-// Combines next-intl locale routing with Supabase session refresh & Protected Routes
+// Combines next-intl locale routing with Supabase session refresh, Auth & RBAC Middleware Protection
 // ==============================================================================
 import createMiddleware from "next-intl/middleware";
 import { type NextRequest, NextResponse } from "next/server";
@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = PUBLIC_AUTH_ROUTES.some((route) => pathWithoutLocale.startsWith(route));
   const isAdminRoute = pathWithoutLocale.startsWith("/admin");
 
-  // Protected route check
+  // 1. Unauthenticated User attempting to access Protected Admin Routes
   if (isAdminRoute && !isAuthRoute && !user) {
     const localeMatch = pathname.match(/^\/(en|ar|ckb|ku)/);
     const locale = localeMatch ? localeMatch[1] : "en";
@@ -52,7 +52,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // If already authenticated and trying to access login, redirect to admin dashboard
+  // 2. Authenticated User attempting to access Auth Routes (/admin/login)
   if (isAuthRoute && user && pathWithoutLocale === "/admin/login") {
     const localeMatch = pathname.match(/^\/(en|ar|ckb|ku)/);
     const locale = localeMatch ? localeMatch[1] : "en";

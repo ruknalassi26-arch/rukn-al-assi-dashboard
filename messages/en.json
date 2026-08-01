@@ -41,6 +41,8 @@
     "homepage": "Homepage",
     "seo": "SEO Settings",
     "profile": "My Profile",
+    "activityLog": "Activity Log",
+    "notifications": "Notification Center",
     "settings": "Website Settings",
     "login": "Login"
   },

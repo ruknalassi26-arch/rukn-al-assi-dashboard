@@ -24,6 +24,8 @@ import {
   Users,
   Building2,
   User,
+  Activity,
+  Bell,
 } from "lucide-react";
 import { cn } from "@core/utils/cn";
 import { useRTL } from "@core/hooks/use-rtl";
@@ -58,6 +60,8 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/homepage", labelKey: "homepage", icon: Home },
   { href: "/admin/seo", labelKey: "seo", icon: Search },
   { href: "/admin/profile", labelKey: "profile", icon: User },
+  { href: "/admin/activity-log", labelKey: "activityLog", icon: Activity },
+  { href: "/admin/notifications", labelKey: "notifications", icon: Bell },
   { href: "/admin/settings", labelKey: "settings", icon: Settings },
 ];
 
@@ -93,8 +97,26 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
           className
         )}
       >
-        {/* Top Logo & Collapse Toggle Header */}
-        <div className="flex h-16 items-center justify-between border-b px-3">
+        {/* Floating Collapse/Expand Button beside sidebar */}
+        <button
+          type="button"
+          onClick={() => setCollapsed(!collapsed)}
+          className={cn(
+            "absolute top-5 z-40 flex h-6 w-6 items-center justify-center rounded-full border bg-card text-muted-foreground shadow-md transition-all hover:bg-accent hover:text-foreground hover:scale-110 active:scale-95",
+            isRtl ? "-left-3" : "-right-3"
+          )}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <CollapseIcon className="h-3.5 w-3.5" />
+        </button>
+
+        {/* Top Logo Header */}
+        <div
+          className={cn(
+            "flex h-16 items-center border-b px-3 transition-all",
+            collapsed ? "justify-center" : "justify-start"
+          )}
+        >
           <Link
             href={`/${locale}/admin`}
             className="flex items-center gap-2.5 overflow-hidden"
@@ -103,7 +125,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             <img
               src="/logo.jpg"
               alt="Rukn Al Assi Logo"
-              className="h-9 w-9 shrink-0 rounded-md object-contain border bg-white p-0.5"
+              className="h-9 w-9 shrink-0 rounded-md object-contain border bg-white p-0.5 shadow-sm"
             />
             {!collapsed && (
               <div className="flex flex-col overflow-hidden">
@@ -116,16 +138,6 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
               </div>
             )}
           </Link>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCollapsed(!collapsed)}
-            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            <CollapseIcon className="h-4 w-4" />
-          </Button>
         </div>
 
         {/* Navigation items */}

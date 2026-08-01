@@ -4,7 +4,7 @@
 // ==============================================================================
 import { create } from "zustand";
 
-export type ProfileTab = "details" | "edit" | "password" | "preferences";
+export type ProfileTab = "details" | "edit" | "password";
 
 interface ProfileState {
   activeTab: ProfileTab;

@@ -38,6 +38,8 @@ import { AdminBreadcrumb } from "./admin-breadcrumb";
 import { useSignOut } from "@shared/hooks/auth/use-auth-hooks";
 import { useAuthStore } from "@features/authentication/presentation/stores/auth.store";
 import { ChangePasswordModal } from "@features/authentication/presentation/components/change-password-modal";
+import { NotificationBell } from "@features/notifications/presentation/components/notification-bell";
+import { GlobalSearchTrigger, GlobalSearchModal } from "@features/global-search/presentation/components";
 
 interface AdminHeaderProps {
   onMenuToggle?: () => void;
@@ -104,6 +106,9 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Global Search Trigger (Ctrl+K) */}
+        <GlobalSearchTrigger />
+
         {/* Theme mode toggle */}
         <Button
           variant="ghost"
@@ -150,6 +155,9 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Notification Bell */}
+        <NotificationBell />
 
         <Separator orientation="vertical" className="h-6" />
 
@@ -210,6 +218,7 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
       </div>
 
       <ChangePasswordModal />
+      <GlobalSearchModal />
     </header>
   );
 }

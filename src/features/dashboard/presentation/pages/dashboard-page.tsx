@@ -3,36 +3,29 @@
 // features/dashboard/presentation/pages/dashboard-page.tsx
 // Main Dashboard Page Component
 // ==============================================================================
-import { useTranslations } from "next-intl";
 import { ErrorBoundary } from "@shared/components/error-boundary";
+import { DashboardHeader } from "../components/dashboard-header";
+import { QuickActions } from "../components/quick-actions";
 import { DashboardStats } from "../components/dashboard-stats";
 import { DashboardCharts } from "../components/dashboard-charts";
 import { DashboardTables } from "../components/dashboard-tables";
 import { RecentActivity } from "../components/recent-activity";
-import { QuickActions } from "../components/quick-actions";
 
 export function DashboardPage() {
-  const t = useTranslations("dashboard");
-
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-          {t("title")}
-        </h1>
-        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
-      </div>
+    <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
+      {/* Dashboard Header controls */}
+      <DashboardHeader />
 
       {/* Quick Actions Bar */}
       <QuickActions />
 
-      {/* KPI Stats Cards */}
+      {/* 8 KPI Stats Widgets Grid */}
       <ErrorBoundary>
         <DashboardStats />
       </ErrorBoundary>
 
-      {/* Charts Grid */}
+      {/* RFQ & Contact Trend Charts */}
       <ErrorBoundary>
         <DashboardCharts />
       </ErrorBoundary>

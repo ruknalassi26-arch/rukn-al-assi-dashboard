@@ -6,6 +6,7 @@
 export interface DashboardStatsProps {
   totalProducts: number;
   activeProducts: number;
+  totalCategories: number;
   totalServices: number;
   activeServices: number;
   totalProjects: number;
@@ -15,6 +16,7 @@ export interface DashboardStatsProps {
   totalContacts: number;
   unreadContacts: number;
   totalCertificates: number;
+  totalTeamMembers: number;
   totalClients: number;
   totalCompanyStats: number;
 }
@@ -22,6 +24,7 @@ export interface DashboardStatsProps {
 export class DashboardStatsEntity {
   public readonly totalProducts: number;
   public readonly activeProducts: number;
+  public readonly totalCategories: number;
   public readonly totalServices: number;
   public readonly activeServices: number;
   public readonly totalProjects: number;
@@ -31,12 +34,14 @@ export class DashboardStatsEntity {
   public readonly totalContacts: number;
   public readonly unreadContacts: number;
   public readonly totalCertificates: number;
+  public readonly totalTeamMembers: number;
   public readonly totalClients: number;
   public readonly totalCompanyStats: number;
 
   constructor(props: DashboardStatsProps) {
     this.totalProducts = props.totalProducts;
     this.activeProducts = props.activeProducts;
+    this.totalCategories = props.totalCategories;
     this.totalServices = props.totalServices;
     this.activeServices = props.activeServices;
     this.totalProjects = props.totalProjects;
@@ -46,6 +51,7 @@ export class DashboardStatsEntity {
     this.totalContacts = props.totalContacts;
     this.unreadContacts = props.unreadContacts;
     this.totalCertificates = props.totalCertificates;
+    this.totalTeamMembers = props.totalTeamMembers;
     this.totalClients = props.totalClients;
     this.totalCompanyStats = props.totalCompanyStats;
   }

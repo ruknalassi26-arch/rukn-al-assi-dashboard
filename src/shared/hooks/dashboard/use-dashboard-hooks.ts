@@ -3,7 +3,7 @@
 // shared/hooks/dashboard/use-dashboard-hooks.ts
 // Centralized React Query hooks for Dashboard feature
 // ==============================================================================
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@core/constants/query-keys";
 import { createClient } from "@core/lib/supabase/client";
 import { SupabaseDashboardRepository } from "@features/dashboard/data/repository/supabase-dashboard.repository";
@@ -58,4 +58,13 @@ export function useRecentActivity(limit = 10) {
     queryFn: () => new GetRecentActivityUseCase(getRepo()).execute(limit),
     staleTime: 15 * 1000,
   });
+}
+
+export function useRefetchDashboard() {
+  const queryClient = useQueryClient();
+  return () => {
+    return queryClient.invalidateQueries({
+      queryKey: queryKeys.dashboard.all,
+    });
+  };
 }

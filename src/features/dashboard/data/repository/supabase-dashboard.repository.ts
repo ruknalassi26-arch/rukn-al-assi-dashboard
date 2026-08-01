@@ -26,6 +26,7 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
     const [
       productsResult,
       activeProductsResult,
+      categoriesResult,
       servicesResult,
       activeServicesResult,
       projectsResult,
@@ -35,11 +36,13 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
       contactsResult,
       unreadContactsResult,
       certificatesResult,
+      teamMembersResult,
       clientsResult,
       statsResult,
     ] = await Promise.all([
       this.supabase.from("products").select("*", { count: "exact", head: true }),
       this.supabase.from("products").select("*", { count: "exact", head: true }).eq("status", "active"),
+      this.supabase.from("categories").select("*", { count: "exact", head: true }),
       this.supabase.from("services").select("*", { count: "exact", head: true }),
       this.supabase.from("services").select("*", { count: "exact", head: true }).eq("status", "active"),
       this.supabase.from("projects").select("*", { count: "exact", head: true }),
@@ -49,6 +52,7 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
       this.supabase.from("contact_submissions").select("*", { count: "exact", head: true }),
       this.supabase.from("contact_submissions").select("*", { count: "exact", head: true }).eq("status", "new"),
       this.supabase.from("certificates").select("*", { count: "exact", head: true }),
+      (this.supabase as any).from("team_members").select("*", { count: "exact", head: true }),
       this.supabase.from("clients").select("*", { count: "exact", head: true }),
       this.supabase.from("company_statistics").select("*", { count: "exact", head: true }),
     ]);
@@ -56,6 +60,7 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
     return new DashboardStatsEntity({
       totalProducts: productsResult.count ?? 0,
       activeProducts: activeProductsResult.count ?? 0,
+      totalCategories: categoriesResult.count ?? 0,
       totalServices: servicesResult.count ?? 0,
       activeServices: activeServicesResult.count ?? 0,
       totalProjects: projectsResult.count ?? 0,
@@ -65,6 +70,7 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
       totalContacts: contactsResult.count ?? 0,
       unreadContacts: unreadContactsResult.count ?? 0,
       totalCertificates: certificatesResult.count ?? 0,
+      totalTeamMembers: teamMembersResult.count ?? 0,
       totalClients: clientsResult.count ?? 0,
       totalCompanyStats: statsResult.count ?? 0,
     });

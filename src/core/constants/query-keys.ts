@@ -143,11 +143,37 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.team.details(), id] as const,
   },
 
+  // ---------- Activity Logs ----------
+  activityLog: {
+    all: ["activity-logs"] as const,
+    lists: () => [...queryKeys.activityLog.all, "list"] as const,
+    list: (filters: Record<string, unknown>) =>
+      [...queryKeys.activityLog.lists(), filters] as const,
+    details: () => [...queryKeys.activityLog.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.activityLog.details(), id] as const,
+  },
+
   // ---------- SEO ----------
   seo: {
     all: ["seo"] as const,
     pages: () => [...queryKeys.seo.all, "pages"] as const,
     byPage: (pageKey: string) => [...queryKeys.seo.pages(), pageKey] as const,
+  },
+
+  // ---------- Notifications ----------
+  notifications: {
+    all: ["notifications"] as const,
+    lists: () => [...queryKeys.notifications.all, "list"] as const,
+    list: (filters: Record<string, unknown>) =>
+      [...queryKeys.notifications.lists(), filters] as const,
+    unreadCount: () => [...queryKeys.notifications.all, "unread-count"] as const,
+  },
+
+  // ---------- Global Search ----------
+  globalSearch: {
+    all: ["global-search"] as const,
+    query: (q: string, moduleFilter?: string, page?: number) =>
+      [...queryKeys.globalSearch.all, q, moduleFilter ?? "all", page ?? 1] as const,
   },
 
   // ---------- Website Settings ----------
