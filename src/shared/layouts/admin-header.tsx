@@ -4,7 +4,7 @@
 // Top header bar for the admin layout with 3-language switcher (en | ar | ckb) & auth menu
 // ==============================================================================
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
@@ -53,6 +53,7 @@ const LANGUAGES = [
 ];
 
 export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
+  const t = useTranslations();
   const { user, openChangePasswordModal } = useAuthStore();
   const signOutMutation = useSignOut();
   const locale = useLocale();
@@ -190,18 +191,18 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
               <DropdownMenuItem asChild>
                 <Link href={`/${locale}/admin/profile`} className="cursor-pointer">
                   <User className="me-2 h-4 w-4" />
-                  My Profile
+                  {t("header.myProfile")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/${locale}/admin/settings`} className="cursor-pointer">
                   <Settings className="me-2 h-4 w-4" />
-                  Website Settings
+                  {t("header.websiteSettings")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={openChangePasswordModal} className="cursor-pointer">
                 <KeyRound className="me-2 h-4 w-4" />
-                Change Password
+                {t("header.changePassword")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -211,7 +212,7 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
               className="text-destructive focus:text-destructive cursor-pointer"
             >
               <LogOut className="me-2 h-4 w-4" />
-              Sign Out
+              {t("header.signOut")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

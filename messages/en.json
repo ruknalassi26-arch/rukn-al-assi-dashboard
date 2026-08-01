@@ -14,7 +14,22 @@
     "search": "Search",
     "filter": "Filter",
     "clear": "Clear",
-    "notFound": "Not found"
+    "notFound": "Not found",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "active": "Active",
+    "inactive": "Inactive",
+    "completed": "Completed",
+    "ongoing": "Ongoing",
+    "upcoming": "Upcoming",
+    "draft": "Draft",
+    "all": "All",
+    "resetFilters": "Reset Filters",
+    "showing": "Showing",
+    "of": "of",
+    "page": "Page",
+    "items": "items"
   },
   "nav": {
     "home": "Home",
@@ -45,6 +60,41 @@
     "notifications": "Notification Center",
     "settings": "Website Settings",
     "login": "Login"
+  },
+  "header": {
+    "searchPlaceholder": "Search system...",
+    "myProfile": "My Profile",
+    "websiteSettings": "Website Settings",
+    "changePassword": "Change Password",
+    "signOut": "Sign Out"
+  },
+  "globalSearch": {
+    "title": "Global System Search",
+    "placeholder": "Type to search products, RFQs, services, categories...",
+    "recentSearches": "Recent Searches",
+    "clearAll": "Clear All",
+    "emptySearchTitle": "Global System Search",
+    "emptySearchDesc": "Search across products, quotation requests, services, projects, team members & messages.",
+    "noResultsTitle": "No Results Found for",
+    "noResultsDesc": "Try refining your search keyword or selecting a different category tab.",
+    "foundResults": "Found {total} results",
+    "tabs": {
+      "all": "All Results",
+      "products": "Products",
+      "categories": "Categories",
+      "services": "Services",
+      "projects": "Projects",
+      "certificates": "Certificates",
+      "team": "Team",
+      "rfq": "RFQs",
+      "contact": "Messages"
+    }
+  },
+  "rolesPermissions": {
+    "accessRestricted": "Access Restricted",
+    "accessRestrictedDesc": "You do not have permission to access or view this module. Please contact your system administrator.",
+    "roleRestricted": "Role Restrict Access",
+    "roleRestrictedDesc": "Your user account role does not have sufficient privileges to access this area."
   },
   "auth": {
     "login": {
@@ -167,6 +217,55 @@
       "homepage": "Homepage"
     }
   },
+  "activityLog": {
+    "title": "Activity Audit Stream",
+    "subtitle": "Track all administrative actions, data mutations, logins, and system changes in real-time.",
+    "allActions": "All Actions",
+    "allEntities": "All Entities",
+    "searchPlaceholder": "Search by email, title, action...",
+    "table": {
+      "user": "User",
+      "action": "Action",
+      "entity": "Entity",
+      "ipAddress": "IP Address",
+      "timestamp": "Timestamp",
+      "details": "Inspect",
+      "emptyTitle": "No Activity Logs Found",
+      "emptyDesc": "Admin activity and system changes will be automatically recorded here."
+    },
+    "drawer": {
+      "title": "Activity Details",
+      "subtitle": "Audit log metadata and state changes",
+      "actionType": "Action Type",
+      "targetEntity": "Target Entity",
+      "userAccount": "User Account",
+      "ipAddress": "IP Address",
+      "timestamp": "Timestamp",
+      "diffTitle": "Old Value vs New Value (JSON Diff)",
+      "oldValue": "Old State (Before)",
+      "newValue": "New State (After)"
+    }
+  },
+  "notifications": {
+    "title": "Notification Center",
+    "subtitle": "Stay updated on quotation requests, customer inquiries, and system notifications in real-time.",
+    "bellTitle": "Notifications",
+    "markAllRead": "Mark all as read",
+    "viewAll": "View all notifications",
+    "unreadOnly": "Unread Only",
+    "markSelectedRead": "Mark Selected Read",
+    "deleteSelected": "Delete Selected",
+    "emptyTitle": "No Notifications Yet",
+    "emptyDesc": "New quotation requests and customer submissions will trigger live notifications here.",
+    "types": {
+      "all": "All Notifications",
+      "rfq": "RFQ Requests",
+      "contact": "Contact Messages",
+      "system": "System Notifications",
+      "email_failure": "Email Alerts",
+      "admin_login": "Login Audit"
+    }
+  },
   "home": {
     "hero": {
       "title": "Premium Hydraulic Services",
@@ -235,8 +334,49 @@
   },
   "projects": {
     "title": "Projects Portfolio",
+    "subtitle": "Manage showcase projects, client portfolios, gallery images, and homepage featured items.",
     "createTitle": "Create New Project",
+    "createDesc": "Add a new showcase project to your portfolio",
     "editTitle": "Edit Project",
-    "deleteTitle": "Delete Project"
+    "editDesc": "Update project details, images, and localized content",
+    "deleteTitle": "Delete Project",
+    "deleteDesc": "Are you sure you want to delete this project? This action cannot be undone and will remove project images.",
+    "addNew": "Add New Project",
+    "bulkActivate": "Bulk Activate",
+    "bulkDeactivate": "Bulk Deactivate",
+    "bulkDelete": "Bulk Delete",
+    "table": {
+      "cover": "Cover",
+      "projectName": "Project Name",
+      "location": "Location",
+      "client": "Client",
+      "status": "Status",
+      "featured": "Featured",
+      "order": "Order",
+      "actions": "Actions",
+      "noProjectsTitle": "No Projects Found",
+      "noProjectsDesc": "Try adjusting your search or category filters."
+    },
+    "form": {
+      "multilingualContent": "Multilingual Content",
+      "multilingualDesc": "Fill project title, short description, and full content for each supported language.",
+      "mediaCardTitle": "Project Images & Gallery",
+      "mediaCardDesc": "Upload single cover image and multiple project gallery showcase photos to Supabase Storage.",
+      "coverLabel": "Cover Image (Featured Banner)",
+      "coverHint": "JPG, PNG, WebP up to 5MB",
+      "galleryLabel": "Gallery Images (Multiple Photos)",
+      "galleryHint": "Add Photos",
+      "projectInfo": "Project Information",
+      "category": "Category",
+      "noCategory": "No Category",
+      "projectStatus": "Project Status",
+      "clientName": "Client Name",
+      "projectLocation": "Project Location",
+      "completionDate": "Completion Date / Year",
+      "urlSlug": "URL Slug",
+      "displayOrder": "Display Order (Integer)",
+      "featuredProject": "Featured Project",
+      "featuredDesc": "Highlight on website homepage"
+    }
   }
 }

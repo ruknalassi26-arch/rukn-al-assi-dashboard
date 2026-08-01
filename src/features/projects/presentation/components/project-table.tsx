@@ -4,7 +4,7 @@
 // Responsive Data Table for Projects with Bulk Operations & Pagination
 // ==============================================================================
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Table,
   TableBody,
@@ -16,14 +16,12 @@ import {
   Button,
   Checkbox,
   Skeleton,
-  Switch,
   Card,
 } from "@shared/ui";
 import {
   Pencil,
   Trash2,
   Star,
-  ExternalLink,
   ChevronLeft,
   ChevronRight,
   FolderOpen,
@@ -38,10 +36,12 @@ import {
   useToggleProjectFeaturedMutation,
   useBulkDeleteProjectsMutation,
 } from "@shared/hooks/projects/use-projects-hooks";
-import type { ProjectEntity, ProjectStatus } from "../../domain/entities/project.entity";
+import type { ProjectStatus } from "../../domain/entities/project.entity";
 
 export function ProjectTable() {
   const locale = useLocale();
+  const t = useTranslations("projects");
+  const tCommon = useTranslations("common");
 
   const {
     search,
@@ -114,12 +114,12 @@ export function ProjectTable() {
     return (
       <Card className="border border-destructive/20 bg-destructive/5 p-8 text-center space-y-3">
         <XCircle className="h-10 w-10 mx-auto text-destructive" />
-        <h3 className="text-base font-bold text-foreground">Failed to Load Projects</h3>
+        <h3 className="text-base font-bold text-foreground">{tCommon("error")}</h3>
         <p className="text-xs text-muted-foreground max-w-sm mx-auto">
           An error occurred while fetching project data from Supabase.
         </p>
         <Button size="sm" onClick={() => refetch()} className="text-xs">
-          Retry Request
+          {tCommon("retry")}
         </Button>
       </Card>
     );
@@ -131,7 +131,7 @@ export function ProjectTable() {
       {selectedIds.length > 0 && (
         <div className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-xl">
           <span className="text-xs font-semibold text-primary">
-            {selectedIds.length} project(s) selected
+            {selectedIds.length} {tCommon("items")} selected
           </span>
 
           <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export function ProjectTable() {
                 onClick={() => handleBulkStatusChange("active")}
                 className="h-8 text-xs gap-1"
               >
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Bulk Activate
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> {t("bulkActivate")}
               </Button>
               <Button
                 variant="outline"
@@ -150,7 +150,7 @@ export function ProjectTable() {
                 onClick={() => handleBulkStatusChange("draft")}
                 className="h-8 text-xs gap-1"
               >
-                <XCircle className="h-3.5 w-3.5 text-amber-500" /> Bulk Deactivate
+                <XCircle className="h-3.5 w-3.5 text-amber-500" /> {t("bulkDeactivate")}
               </Button>
             </Can>
 
@@ -161,7 +161,7 @@ export function ProjectTable() {
                 onClick={handleBulkDelete}
                 className="h-8 text-xs gap-1"
               >
-                <Trash2 className="h-3.5 w-3.5" /> Bulk Delete
+                <Trash2 className="h-3.5 w-3.5" /> {t("bulkDelete")}
               </Button>
             </Can>
 
@@ -171,7 +171,7 @@ export function ProjectTable() {
               onClick={clearSelection}
               className="h-8 text-xs text-muted-foreground"
             >
-              Clear
+              {tCommon("clear")}
             </Button>
           </div>
         </div>
@@ -185,14 +185,14 @@ export function ProjectTable() {
               <TableHead className="w-10">
                 <Checkbox checked={isAllSelected} onCheckedChange={handleToggleAll} />
               </TableHead>
-              <TableHead className="text-xs font-bold">Cover</TableHead>
-              <TableHead className="text-xs font-bold">Project Name</TableHead>
-              <TableHead className="text-xs font-bold">Location</TableHead>
-              <TableHead className="text-xs font-bold">Client</TableHead>
-              <TableHead className="text-xs font-bold">Status</TableHead>
-              <TableHead className="text-xs font-bold">Featured</TableHead>
-              <TableHead className="text-xs font-bold text-center">Order</TableHead>
-              <TableHead className="text-xs font-bold text-end">Actions</TableHead>
+              <TableHead className="text-xs font-bold">{t("table.cover")}</TableHead>
+              <TableHead className="text-xs font-bold">{t("table.projectName")}</TableHead>
+              <TableHead className="text-xs font-bold">{t("table.location")}</TableHead>
+              <TableHead className="text-xs font-bold">{t("table.client")}</TableHead>
+              <TableHead className="text-xs font-bold">{t("table.status")}</TableHead>
+              <TableHead className="text-xs font-bold">{t("table.featured")}</TableHead>
+              <TableHead className="text-xs font-bold text-center">{t("table.order")}</TableHead>
+              <TableHead className="text-xs font-bold text-end">{t("table.actions")}</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -202,9 +202,9 @@ export function ProjectTable() {
                 <TableCell colSpan={9} className="h-48 text-center">
                   <div className="flex flex-col items-center justify-center space-y-2">
                     <FolderOpen className="h-8 w-8 text-muted-foreground/40" />
-                    <p className="text-xs font-bold text-muted-foreground">No Projects Found</p>
+                    <p className="text-xs font-bold text-muted-foreground">{t("table.noProjectsTitle")}</p>
                     <p className="text-[11px] text-muted-foreground/80">
-                      Try adjusting your search or category filters.
+                      {t("table.noProjectsDesc")}
                     </p>
                   </div>
                 </TableCell>
@@ -331,8 +331,8 @@ export function ProjectTable() {
         {total > 0 && (
           <div className="p-3 border-t bg-card flex items-center justify-between gap-2 text-xs text-muted-foreground">
             <span>
-              Showing <strong className="text-foreground">{projects.length}</strong> of{" "}
-              <strong className="text-foreground">{total}</strong> projects
+              {tCommon("showing")} <strong className="text-foreground">{projects.length}</strong> {tCommon("of")}{" "}
+              <strong className="text-foreground">{total}</strong> {tCommon("items")}
             </span>
 
             <div className="flex items-center gap-1">
@@ -346,7 +346,7 @@ export function ProjectTable() {
                 <ChevronLeft className="h-3.5 w-3.5" />
               </Button>
               <span className="text-[11px] font-semibold px-2">
-                Page {page} of {totalPages}
+                {tCommon("page")} {page} {tCommon("of")} {totalPages}
               </span>
               <Button
                 variant="outline"

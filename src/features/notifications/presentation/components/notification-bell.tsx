@@ -4,7 +4,7 @@
 // Header Notification Bell with Live Unread Counter & Quick Popover Menu
 // ==============================================================================
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Bell, CheckCheck, FileText, Mail, ShieldAlert, AlertTriangle, UserCheck, ArrowRight, ExternalLink } from "lucide-react";
 import {
   Button,
@@ -25,6 +25,8 @@ import type { NotificationType } from "../../domain/entities/notification.entity
 
 export function NotificationBell() {
   const locale = useLocale();
+  const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
 
   // Active Realtime Listener
   useNotificationsRealtime();
@@ -55,10 +57,10 @@ export function NotificationBell() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative h-9 w-9" title="Notifications">
+        <Button variant="ghost" size="icon" className="relative h-9 w-9" title={t("bellTitle")}>
           <Bell className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground shadow-xs animate-pulse">
+            <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground animate-pulse">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -70,10 +72,10 @@ export function NotificationBell() {
         <div className="flex items-center justify-between p-3.5 border-b bg-card">
           <div className="flex items-center gap-2">
             <Bell className="h-4 w-4 text-primary" />
-            <h4 className="text-sm font-bold text-foreground">Notifications</h4>
+            <h4 className="text-sm font-bold text-foreground">{t("bellTitle")}</h4>
             {unreadCount > 0 && (
               <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
-                {unreadCount} Unread
+                {unreadCount}
               </Badge>
             )}
           </div>
@@ -87,7 +89,7 @@ export function NotificationBell() {
               className="h-7 text-[11px] gap-1 text-muted-foreground hover:text-foreground"
             >
               <CheckCheck className="h-3 w-3" />
-              <span>Mark all read</span>
+              <span>{t("markAllRead")}</span>
             </Button>
           )}
         </div>
@@ -95,12 +97,12 @@ export function NotificationBell() {
         {/* Notification Stream Items */}
         <ScrollArea className="h-80">
           {isLoading ? (
-            <div className="p-8 text-center text-xs text-muted-foreground">Loading notifications...</div>
+            <div className="p-8 text-center text-xs text-muted-foreground">{tCommon("loading")}</div>
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center space-y-1">
               <Bell className="h-6 w-6 mx-auto text-muted-foreground/40" />
-              <p className="text-xs font-semibold text-muted-foreground">No Notifications</p>
-              <p className="text-[11px] text-muted-foreground/80">You are all caught up!</p>
+              <p className="text-xs font-semibold text-muted-foreground">{t("emptyTitle")}</p>
+              <p className="text-[11px] text-muted-foreground/80">{t("emptyDesc")}</p>
             </div>
           ) : (
             <div className="divide-y">
@@ -131,7 +133,7 @@ export function NotificationBell() {
                         href={`/${locale}${item.link}`}
                         className="text-[11px] text-primary font-medium hover:underline inline-flex items-center gap-1 pt-1"
                       >
-                        <span>View</span>
+                        <span>{tCommon("viewAll")}</span>
                         <ExternalLink className="h-3 w-3" />
                       </Link>
                     )}
@@ -152,7 +154,7 @@ export function NotificationBell() {
             href={`/${locale}/admin/notifications`}
             className="text-xs font-semibold text-primary hover:underline flex items-center justify-center gap-1.5"
           >
-            <span>Notification Center Page</span>
+            <span>{t("viewAll")}</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>

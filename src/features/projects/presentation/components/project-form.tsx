@@ -73,6 +73,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
   const locale = useLocale();
   const router = useRouter();
   const t = useTranslations("projects");
+  const tCommon = useTranslations("common");
 
   const [activeTab, setActiveTab] = useState<"en" | "ar" | "ckb">("en");
   const [coverImage, setCoverImage] = useState<string | null>(initialData?.coverImage ?? null);
@@ -139,7 +140,6 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const path = `${timestamp}-${sanitizedName}`;
 
-    // Try project-images, product-images, team-photos buckets
     let bucket = "project-images";
     let { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
 
@@ -240,7 +240,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
               {isEdit ? t("editTitle") : t("createTitle")}
             </h1>
             <p className="text-xs text-muted-foreground">
-              {isEdit ? "Update project details, images, and localized content" : "Add a new showcase project to your portfolio"}
+              {isEdit ? t("editDesc") : t("createDesc")}
             </p>
           </div>
         </div>
@@ -254,11 +254,11 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
             disabled={isSubmitting}
             className="text-xs"
           >
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button type="submit" size="sm" disabled={isSubmitting} className="text-xs gap-1.5">
             {isSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            <span>{isEdit ? "Update Project" : "Create Project"}</span>
+            <span>{isEdit ? t("editTitle") : t("createTitle")}</span>
           </Button>
         </div>
       </div>
@@ -270,7 +270,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
           <Card className="border shadow-sm">
             <CardHeader className="pb-3 border-b">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-bold">Multilingual Content</CardTitle>
+                <CardTitle className="text-base font-bold">{t("form.multilingualContent")}</CardTitle>
                 <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="w-auto">
                   <TabsList className="h-8">
                     <TabsTrigger value="en" className="text-xs px-3">English 🇺🇸</TabsTrigger>
@@ -280,7 +280,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                 </Tabs>
               </div>
               <CardDescription className="text-xs">
-                Fill project title, short description, and full content for each supported language.
+                {t("form.multilingualDesc")}
               </CardDescription>
             </CardHeader>
 
@@ -356,7 +356,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
 
               {/* Tab 3: Kurdish Sorani */}
               {activeTab === "ckb" && (
-                <div className="space-y-4">
+                <div className="space-y-4" dir="rtl">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold">ناونیشانی پڕۆژە (کوردی)</Label>
                     <Input
@@ -394,17 +394,17 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
             <CardHeader className="pb-3 border-b">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <ImageIcon className="h-4 w-4 text-primary" />
-                Project Images & Gallery
+                {t("form.mediaCardTitle")}
               </CardTitle>
               <CardDescription className="text-xs">
-                Upload single cover image and multiple project gallery showcase photos to Supabase Storage.
+                {t("form.mediaCardDesc")}
               </CardDescription>
             </CardHeader>
 
             <CardContent className="pt-4 space-y-6">
               {/* Cover Image Upload */}
               <div className="space-y-2">
-                <Label className="text-xs font-semibold">Cover Image (Featured Banner)</Label>
+                <Label className="text-xs font-semibold">{t("form.coverLabel")}</Label>
                 {coverImage ? (
                   <div className="relative group w-full h-48 rounded-xl overflow-hidden border bg-muted">
                     <img src={coverImage} alt="Cover preview" className="w-full h-full object-cover" />
@@ -421,7 +421,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                         onClick={() => setCoverImage(null)}
                         className="text-xs h-8 px-3"
                       >
-                        <X className="h-3.5 w-3.5 me-1" /> Remove
+                        <X className="h-3.5 w-3.5 me-1" /> {tCommon("delete")}
                       </Button>
                     </div>
                   </div>
@@ -433,13 +433,13 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                     {isUploadingCover ? (
                       <div className="flex flex-col items-center gap-2">
                         <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        <span className="text-xs text-muted-foreground">Uploading cover image...</span>
+                        <span className="text-xs text-muted-foreground">{tCommon("loading")}</span>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2 text-center">
                         <Upload className="h-8 w-8 text-muted-foreground/60" />
-                        <span className="text-xs font-semibold text-foreground">Click to upload cover image</span>
-                        <span className="text-[11px] text-muted-foreground">JPG, PNG, WebP up to 5MB</span>
+                        <span className="text-xs font-semibold text-foreground">{t("form.coverLabel")}</span>
+                        <span className="text-[11px] text-muted-foreground">{t("form.coverHint")}</span>
                       </div>
                     )}
                   </Label>
@@ -457,7 +457,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
               {/* Gallery Images (Multiple) */}
               <div className="space-y-2 pt-2 border-t">
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs font-semibold">Gallery Images (Multiple Photos)</Label>
+                  <Label className="text-xs font-semibold">{t("form.galleryLabel")}</Label>
                   <span className="text-[11px] text-muted-foreground">{galleryImages.length} uploaded</span>
                 </div>
 
@@ -485,7 +485,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                     ) : (
                       <div className="flex flex-col items-center gap-1">
                         <Plus className="h-5 w-5 text-muted-foreground" />
-                        <span className="text-[10px] font-semibold text-muted-foreground">Add Photos</span>
+                        <span className="text-[10px] font-semibold text-muted-foreground">{t("form.galleryHint")}</span>
                       </div>
                     )}
                   </Label>
@@ -508,22 +508,22 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
         <div className="space-y-6">
           <Card className="border shadow-sm">
             <CardHeader className="pb-3 border-b">
-              <CardTitle className="text-base font-bold">Project Information</CardTitle>
+              <CardTitle className="text-base font-bold">{t("form.projectInfo")}</CardTitle>
             </CardHeader>
 
             <CardContent className="pt-4 space-y-4">
               {/* Category */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Category</Label>
+                <Label className="text-xs font-semibold">{t("form.category")}</Label>
                 <Select
                   value={watch("categoryId") || "none"}
                   onValueChange={(val) => setValue("categoryId", val === "none" ? undefined : val)}
                 >
                   <SelectTrigger className="text-xs h-9">
-                    <SelectValue placeholder="Select Category" />
+                    <SelectValue placeholder={t("form.category")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none" className="text-xs">No Category</SelectItem>
+                    <SelectItem value="none" className="text-xs">{t("form.noCategory")}</SelectItem>
                     {categories.map((cat: any) => (
                       <SelectItem key={cat.id} value={cat.id} className="text-xs">
                         {cat.getLocalizedName ? cat.getLocalizedName(locale) : cat.nameEn || cat.name_en || cat.id}
@@ -535,27 +535,27 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
 
               {/* Status */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Project Status *</Label>
+                <Label className="text-xs font-semibold">{t("form.projectStatus")} *</Label>
                 <Select
                   value={watch("status")}
                   onValueChange={(val) => setValue("status", val as ProjectStatus)}
                 >
                   <SelectTrigger className="text-xs h-9">
-                    <SelectValue placeholder="Select Status" />
+                    <SelectValue placeholder={t("form.projectStatus")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active" className="text-xs">Active</SelectItem>
-                    <SelectItem value="completed" className="text-xs">Completed</SelectItem>
-                    <SelectItem value="ongoing" className="text-xs">Ongoing</SelectItem>
-                    <SelectItem value="upcoming" className="text-xs">Upcoming</SelectItem>
-                    <SelectItem value="draft" className="text-xs">Draft</SelectItem>
+                    <SelectItem value="active" className="text-xs">{tCommon("active")}</SelectItem>
+                    <SelectItem value="completed" className="text-xs">{tCommon("completed")}</SelectItem>
+                    <SelectItem value="ongoing" className="text-xs">{tCommon("ongoing")}</SelectItem>
+                    <SelectItem value="upcoming" className="text-xs">{tCommon("upcoming")}</SelectItem>
+                    <SelectItem value="draft" className="text-xs">{tCommon("draft")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Client Name */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Client Name</Label>
+                <Label className="text-xs font-semibold">{t("form.clientName")}</Label>
                 <Input
                   placeholder="e.g. Ministry of Oil & Energy"
                   {...register("client")}
@@ -565,7 +565,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
 
               {/* Location */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Project Location</Label>
+                <Label className="text-xs font-semibold">{t("form.projectLocation")}</Label>
                 <Input
                   placeholder="e.g. Erbil / Basra, Iraq"
                   {...register("location")}
@@ -575,7 +575,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
 
               {/* Completion Date */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Completion Date / Year</Label>
+                <Label className="text-xs font-semibold">{t("form.completionDate")}</Label>
                 <Input
                   type="date"
                   {...register("completionDate")}
@@ -585,7 +585,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
 
               {/* Slug */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">URL Slug *</Label>
+                <Label className="text-xs font-semibold">{t("form.urlSlug")} *</Label>
                 <Input
                   placeholder="al-assi-pipeline-expansion"
                   {...register("slug")}
@@ -596,7 +596,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
 
               {/* Display Order */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Display Order (Integer)</Label>
+                <Label className="text-xs font-semibold">{t("form.displayOrder")}</Label>
                 <Input
                   type="number"
                   {...register("sortOrder", { valueAsNumber: true })}
@@ -607,8 +607,8 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
               {/* Featured Toggle */}
               <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/20 pt-2">
                 <div className="space-y-0.5">
-                  <Label className="text-xs font-bold cursor-pointer">Featured Project</Label>
-                  <p className="text-[11px] text-muted-foreground">Highlight on website homepage</p>
+                  <Label className="text-xs font-bold cursor-pointer">{t("form.featuredProject")}</Label>
+                  <p className="text-[11px] text-muted-foreground">{t("form.featuredDesc")}</p>
                 </div>
                 <Switch
                   checked={watch("isFeatured")}

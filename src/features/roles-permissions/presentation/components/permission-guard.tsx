@@ -4,6 +4,7 @@
 // Permission Guard Component with Fallback View
 // ==============================================================================
 import React from "react";
+import { useTranslations } from "next-intl";
 import { usePermission } from "../hooks/use-permission";
 import type { PermissionCode } from "../../domain/entities/role.enums";
 import { ShieldAlert } from "lucide-react";
@@ -16,6 +17,7 @@ interface PermissionGuardProps {
 }
 
 export function PermissionGuard({ permission, children, fallback }: PermissionGuardProps) {
+  const t = useTranslations("rolesPermissions");
   const { hasPermission } = usePermission();
 
   const perms = Array.isArray(permission) ? permission : [permission];
@@ -28,9 +30,9 @@ export function PermissionGuard({ permission, children, fallback }: PermissionGu
       <Card className="border border-destructive/20 bg-destructive/5 my-6">
         <CardContent className="p-8 text-center space-y-3">
           <ShieldAlert className="h-10 w-10 mx-auto text-destructive" />
-          <h3 className="text-lg font-bold text-foreground">Access Restricted</h3>
+          <h3 className="text-lg font-bold text-foreground">{t("accessRestricted")}</h3>
           <p className="text-xs text-muted-foreground max-w-md mx-auto">
-            You do not have permission to access or view this module. Please contact your system administrator.
+            {t("accessRestrictedDesc")}
           </p>
         </CardContent>
       </Card>

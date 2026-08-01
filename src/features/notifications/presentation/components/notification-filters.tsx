@@ -3,27 +3,30 @@
 // features/notifications/presentation/components/notification-filters.tsx
 // Search, Type & Read Status Filters for Notification Center Page
 // ==============================================================================
+import { useTranslations } from "next-intl";
 import { Search, RotateCcw, Filter } from "lucide-react";
 import { Input, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/ui";
 import { useNotificationStore } from "../stores/notification.store";
 
-const NOTIFICATION_TYPES = [
-  { value: "all", label: "All Types" },
-  { value: "rfq_new", label: "New RFQs" },
-  { value: "contact_new", label: "Contact Messages" },
-  { value: "system", label: "System Alerts" },
-  { value: "email_failure", label: "Email Failures" },
-  { value: "admin_login", label: "Admin Logins" },
-];
-
-const READ_STATUSES = [
-  { value: "all", label: "All Statuses" },
-  { value: "unread", label: "Unread Only" },
-  { value: "read", label: "Read Only" },
-];
-
 export function NotificationFilters() {
+  const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
   const { search, type, readStatus, setSearch, setType, setReadStatus, resetFilters } = useNotificationStore();
+
+  const NOTIFICATION_TYPES = [
+    { value: "all", label: t("types.all") },
+    { value: "rfq_new", label: t("types.rfq") },
+    { value: "contact_new", label: t("types.contact") },
+    { value: "system", label: t("types.system") },
+    { value: "email_failure", label: t("types.email_failure") },
+    { value: "admin_login", label: t("types.admin_login") },
+  ];
+
+  const READ_STATUSES = [
+    { value: "all", label: tCommon("all") },
+    { value: "unread", label: t("unreadOnly") },
+    { value: "read", label: tCommon("active") },
+  ];
 
   const hasActiveFilters = search !== "" || type !== "all" || readStatus !== "all";
 
@@ -31,7 +34,7 @@ export function NotificationFilters() {
     <div className="space-y-3 p-4 bg-card border rounded-xl shadow-xs">
       <div className="flex items-center gap-2 pb-1 border-b">
         <Filter className="h-4 w-4 text-primary" />
-        <span className="text-xs font-semibold text-foreground">Filter Notifications</span>
+        <span className="text-xs font-semibold text-foreground">{tCommon("filter")}</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -39,7 +42,7 @@ export function NotificationFilters() {
         <div className="relative">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search notifications..."
+            placeholder={tCommon("search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="ps-9 text-xs h-9"
@@ -49,7 +52,7 @@ export function NotificationFilters() {
         {/* Type Select */}
         <Select value={type} onValueChange={setType}>
           <SelectTrigger className="text-xs h-9">
-            <SelectValue placeholder="Select Notification Type" />
+            <SelectValue placeholder={tCommon("filter")} />
           </SelectTrigger>
           <SelectContent>
             {NOTIFICATION_TYPES.map((item) => (
@@ -61,9 +64,9 @@ export function NotificationFilters() {
         </Select>
 
         {/* Read Status Select */}
-        <Select value={readStatus} onValueChange={(val) => setReadStatus(val as "all" | "unread" | "read")}>
+        <Select value={readStatus} onValueChange={setReadStatus}>
           <SelectTrigger className="text-xs h-9">
-            <SelectValue placeholder="Select Read Status" />
+            <SelectValue placeholder={tCommon("status")} />
           </SelectTrigger>
           <SelectContent>
             {READ_STATUSES.map((item) => (
@@ -76,15 +79,15 @@ export function NotificationFilters() {
       </div>
 
       {hasActiveFilters && (
-        <div className="flex justify-end pt-1">
+        <div className="pt-2 flex justify-end">
           <Button
             variant="ghost"
             size="sm"
             onClick={resetFilters}
-            className="gap-1.5 text-xs text-muted-foreground hover:text-foreground h-8"
+            className="h-8 text-xs text-muted-foreground hover:text-foreground gap-1.5"
           >
-            <RotateCcw className="h-3 w-3" />
-            Reset Filters
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>{tCommon("resetFilters")}</span>
           </Button>
         </div>
       )}

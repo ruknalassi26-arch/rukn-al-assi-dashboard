@@ -164,4 +164,8 @@ export class ActivityLogEntity {
     }
     return null;
   }
+
+  public get formattedDate(): string {
+    return new Date(this.createdAt).toLocaleString();
+  }
 }

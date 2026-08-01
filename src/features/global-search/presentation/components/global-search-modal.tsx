@@ -5,7 +5,7 @@
 // ==============================================================================
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -39,21 +39,10 @@ import { useGlobalSearchQuery } from "@shared/hooks/global-search/use-global-sea
 import { TextHighlighter } from "./text-highlighter";
 import type { SearchModuleType } from "../../domain/entities/global-search.entity";
 
-const MODULE_TABS = [
-  { value: "all", label: "All Results" },
-  { value: "products", label: "Products" },
-  { value: "categories", label: "Categories" },
-  { value: "services", label: "Services" },
-  { value: "projects", label: "Projects" },
-  { value: "certificates", label: "Certificates" },
-  { value: "team", label: "Team" },
-  { value: "rfq", label: "RFQs" },
-  { value: "contact", label: "Messages" },
-];
-
 export function GlobalSearchModal() {
   const locale = useLocale();
   const router = useRouter();
+  const t = useTranslations("globalSearch");
 
   const {
     isOpen,
@@ -70,6 +59,18 @@ export function GlobalSearchModal() {
     removeRecentSearch,
     clearRecentSearches,
   } = useGlobalSearchStore();
+
+  const MODULE_TABS = [
+    { value: "all", label: t("tabs.all") },
+    { value: "products", label: t("tabs.products") },
+    { value: "categories", label: t("tabs.categories") },
+    { value: "services", label: t("tabs.services") },
+    { value: "projects", label: t("tabs.projects") },
+    { value: "certificates", label: t("tabs.certificates") },
+    { value: "team", label: t("tabs.team") },
+    { value: "rfq", label: t("tabs.rfq") },
+    { value: "contact", label: t("tabs.contact") },
+  ];
 
   // Global Ctrl+K / Cmd+K Hotkey Listener
   useEffect(() => {
@@ -128,7 +129,7 @@ export function GlobalSearchModal() {
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
       <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-0 overflow-hidden gap-0">
         <DialogHeader className="sr-only">
-          <DialogTitle>Global System Search</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
 
         {/* Input Bar */}
@@ -136,7 +137,7 @@ export function GlobalSearchModal() {
           <Search className="h-4 w-4 text-muted-foreground me-3 shrink-0" />
           <Input
             autoFocus
-            placeholder="Type to search products, RFQs, services, categories..."
+            placeholder={t("placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="border-0 focus-visible:ring-0 text-sm shadow-none p-0 h-8"
@@ -159,7 +160,7 @@ export function GlobalSearchModal() {
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span className="font-semibold flex items-center gap-1.5">
                 <History className="h-3.5 w-3.5 text-primary" />
-                Recent Searches
+                {t("recentSearches")}
               </span>
               <button
                 type="button"
@@ -167,7 +168,7 @@ export function GlobalSearchModal() {
                 className="hover:text-destructive text-[11px] flex items-center gap-1"
               >
                 <Trash2 className="h-3 w-3" />
-                <span>Clear All</span>
+                <span>{t("clearAll")}</span>
               </button>
             </div>
 
@@ -227,9 +228,9 @@ export function GlobalSearchModal() {
           {query.trim().length === 0 ? (
             <div className="text-center py-12 space-y-2">
               <Search className="h-8 w-8 mx-auto text-muted-foreground/40" />
-              <p className="text-xs font-semibold text-muted-foreground">Global System Search</p>
+              <p className="text-xs font-semibold text-muted-foreground">{t("emptySearchTitle")}</p>
               <p className="text-[11px] text-muted-foreground/80">
-                Search across products, quotation requests, services, projects, team members & messages.
+                {t("emptySearchDesc")}
               </p>
             </div>
           ) : isLoading ? (
@@ -247,9 +248,9 @@ export function GlobalSearchModal() {
           ) : results.length === 0 ? (
             <div className="text-center py-12 space-y-2 border border-dashed rounded-lg bg-muted/20">
               <Search className="h-8 w-8 mx-auto text-muted-foreground/40" />
-              <p className="text-xs font-semibold text-muted-foreground">No Results Found for "{query}"</p>
+              <p className="text-xs font-semibold text-muted-foreground">{t("noResultsTitle")} "{query}"</p>
               <p className="text-[11px] text-muted-foreground/80">
-                Try refining your search keyword or selecting a different category tab.
+                {t("noResultsDesc")}
               </p>
             </div>
           ) : (
@@ -298,7 +299,7 @@ export function GlobalSearchModal() {
         {query.trim().length > 0 && total > 0 && (
           <div className="p-3 border-t bg-card flex items-center justify-between gap-2 text-xs text-muted-foreground">
             <span>
-              Found <strong className="text-foreground">{total}</strong> results
+              {t("foundResults", { total })}
             </span>
 
             <div className="flex items-center gap-1">

@@ -3,6 +3,7 @@
 // features/projects/presentation/components/project-filters.tsx
 // Search & Filter Toolbar for Projects List
 // ==============================================================================
+import { useTranslations } from "next-intl";
 import { Search, RotateCcw } from "lucide-react";
 import { useLocale } from "next-intl";
 import { Input, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/ui";
@@ -11,6 +12,9 @@ import { useCategories } from "@shared/hooks/categories/use-category-hooks";
 
 export function ProjectFilters() {
   const locale = useLocale();
+  const tCommon = useTranslations("common");
+  const tProjects = useTranslations("projects");
+
   const {
     search,
     categoryId,
@@ -37,22 +41,22 @@ export function ProjectFilters() {
       <div className="flex flex-1 flex-wrap items-center gap-3">
         {/* Search */}
         <div className="relative min-w-[200px] flex-1 sm:flex-initial sm:w-64">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search projects by name, client..."
+            placeholder={tCommon("search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9 text-xs"
+            className="ps-9 h-9 text-xs"
           />
         </div>
 
         {/* Category Filter */}
         <Select value={categoryId} onValueChange={setCategoryId}>
           <SelectTrigger className="h-9 w-40 text-xs">
-            <SelectValue placeholder="All Categories" />
+            <SelectValue placeholder={tProjects("form.category")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all" className="text-xs">All Categories</SelectItem>
+            <SelectItem value="all" className="text-xs">{tCommon("all")}</SelectItem>
             {categories.map((cat: any) => (
               <SelectItem key={cat.id} value={cat.id} className="text-xs">
                 {cat.getLocalizedName ? cat.getLocalizedName(locale) : cat.nameEn || cat.name_en || cat.id}
@@ -64,15 +68,15 @@ export function ProjectFilters() {
         {/* Status Filter */}
         <Select value={status} onValueChange={setStatus}>
           <SelectTrigger className="h-9 w-36 text-xs">
-            <SelectValue placeholder="All Statuses" />
+            <SelectValue placeholder={tCommon("status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all" className="text-xs">All Statuses</SelectItem>
-            <SelectItem value="active" className="text-xs">Active</SelectItem>
-            <SelectItem value="completed" className="text-xs">Completed</SelectItem>
-            <SelectItem value="ongoing" className="text-xs">Ongoing</SelectItem>
-            <SelectItem value="upcoming" className="text-xs">Upcoming</SelectItem>
-            <SelectItem value="draft" className="text-xs">Draft</SelectItem>
+            <SelectItem value="all" className="text-xs">{tCommon("all")}</SelectItem>
+            <SelectItem value="active" className="text-xs">{tCommon("active")}</SelectItem>
+            <SelectItem value="completed" className="text-xs">{tCommon("completed")}</SelectItem>
+            <SelectItem value="ongoing" className="text-xs">{tCommon("ongoing")}</SelectItem>
+            <SelectItem value="upcoming" className="text-xs">{tCommon("upcoming")}</SelectItem>
+            <SelectItem value="draft" className="text-xs">{tCommon("draft")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -86,12 +90,12 @@ export function ProjectFilters() {
           }}
         >
           <SelectTrigger className="h-9 w-36 text-xs">
-            <SelectValue placeholder="All Featured" />
+            <SelectValue placeholder={tProjects("table.featured")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all" className="text-xs">All Projects</SelectItem>
-            <SelectItem value="featured" className="text-xs">Featured Only</SelectItem>
-            <SelectItem value="standard" className="text-xs">Standard Only</SelectItem>
+            <SelectItem value="all" className="text-xs">{tCommon("all")}</SelectItem>
+            <SelectItem value="featured" className="text-xs">{tProjects("table.featured")}</SelectItem>
+            <SelectItem value="standard" className="text-xs">Standard</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -104,7 +108,7 @@ export function ProjectFilters() {
           className="h-9 text-xs text-muted-foreground hover:text-foreground shrink-0 gap-1.5"
         >
           <RotateCcw className="h-3.5 w-3.5" />
-          <span>Reset Filters</span>
+          <span>{tCommon("resetFilters")}</span>
         </Button>
       )}
     </div>
