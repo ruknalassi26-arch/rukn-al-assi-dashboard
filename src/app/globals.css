@@ -2,48 +2,63 @@
 
 @layer base {
   :root {
+    /* Rukn Al Assi Industrial Brand Colors (Blue #1A4D9B & Gold #F2B31A) */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 217 33% 17%; /* #1F2937 */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 217 33% 17%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
+    --popover-foreground: 217 33% 17%;
+    
+    /* Primary Blue #1A4D9B */
+    --primary: 216 71% 36%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary Gold #F2B31A */
+    --secondary: 42 89% 53%;
+    --secondary-foreground: 217 33% 17%;
+    
+    /* Surface & Muted #F8FAFC & #6B7280 */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 42 89% 96%;
+    --accent-foreground: 216 71% 36%;
+    
+    /* Status Colors */
+    --destructive: 0 84% 60%; /* #EF4444 */
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 220 13% 91%; /* #E5E7EB */
+    --input: 220 13% 91%;
+    --ring: 216 71% 36%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --background: 217 33% 10%;
+    --foreground: 210 40% 98%;
+    --card: 217 33% 12%;
+    --card-foreground: 210 40% 98%;
+    --popover: 217 33% 12%;
+    --popover-foreground: 210 40% 98%;
+    
+    /* Dark Mode Primary Blue & Gold */
+    --primary: 216 71% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 42 89% 53%;
+    --secondary-foreground: 217 33% 10%;
+    
+    --muted: 217 25% 18%;
+    --muted-foreground: 215 16% 65%;
+    --accent: 217 25% 18%;
+    --accent-foreground: 210 40% 98%;
+    
+    --destructive: 0 63% 40%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 217 25% 20%;
+    --input: 217 25% 20%;
+    --ring: 216 71% 45%;
   }
 }
 
@@ -67,6 +82,14 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+  
+  /* Rukn Al Assi Custom Brand Color Utility Palette */
+  --color-brand-blue: #1A4D9B;
+  --color-brand-blue-dark: #143E82;
+  --color-brand-gold: #F2B31A;
+  --color-brand-gold-dark: #D99A0A;
+  --color-brand-surface: #F8FAFC;
+  
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
