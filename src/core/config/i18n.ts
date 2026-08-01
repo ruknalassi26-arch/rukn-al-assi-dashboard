@@ -15,9 +15,9 @@ export type Locale = (typeof routing.locales)[number];
 export const locales = routing.locales;
 export const defaultLocale = routing.defaultLocale;
 
-// Arabic and Kurdish Sorani (ckb) use RTL layout (Arabic/Sorani script)
-export const RTL_LOCALES: Locale[] = ["ar", "ckb"];
+// Arabic and Kurdish Sorani (ckb / ku) use RTL layout (Arabic/Sorani script)
+export const RTL_LOCALES = ["ar", "ckb", "ku"];
 
-export function isRTL(locale: Locale): boolean {
+export function isRTL(locale: string): boolean {
   return RTL_LOCALES.includes(locale);
 }
