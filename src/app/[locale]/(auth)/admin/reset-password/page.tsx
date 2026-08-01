@@ -1,6 +1,6 @@
 // ==============================================================================
-// src/app/[locale]/(admin)/admin/reset-password/page.tsx
-// Admin Portal Reset Password Route
+// src/app/[locale]/(auth)/admin/reset-password/page.tsx
+// Admin Standalone Reset Password Route
 // ==============================================================================
 import type { Metadata } from "next";
 import { ResetPasswordPage } from "@features/authentication/presentation/pages";

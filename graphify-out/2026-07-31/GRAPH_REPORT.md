@@ -1,16 +1,16 @@
 # Graph Report - rukn-al-assi-dashboard  (2026-07-31)
 
 ## Corpus Check
-- 494 files · ~109,802 words
+- 495 files · ~110,225 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 117 nodes · 260 edges · 10 communities (5 shown, 5 thin omitted)
+- 124 nodes · 266 edges · 11 communities (6 shown, 5 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8432e709`
+- Built from commit: `a0faa581`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,6 +25,7 @@
 - page.tsx
 - i-contact-messages.repository.ts
 - admin-sidebar.tsx
+- UserProfileEntity
 
 ## God Nodes (most connected - your core abstractions)
 1. `IContactMessagesRepository` - 23 edges
@@ -36,7 +37,7 @@
 7. `useContactMessagesStore` - 7 edges
 8. `PaginatedContactMessages` - 6 edges
 9. `SendMessageReplyInput` - 6 edges
-10. `toContactMessageEntity()` - 5 edges
+10. `UserProfileEntity` - 5 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `SupabaseContactMessagesRepository` --implements--> `IContactMessagesRepository`  [EXTRACTED]
@@ -53,30 +54,34 @@
 ## Import Cycles
 - None detected.
 
-## Communities (10 total, 5 thin omitted)
+## Communities (11 total, 5 thin omitted)
 
 ### Community 0 - "contact-messages-table.tsx"
 Cohesion: 0.19
 Nodes (16): CONTACT_MESSAGE_STATUS_LABELS, CONTACT_MESSAGE_STATUS_VARIANTS, ContactMessageStatusEnum, ContactMessagesTable(), MessageDetailsDrawer(), MessageEmailReplyModal(), MessageReplyFormValues, messageReplySchema (+8 more)
 
 ### Community 2 - "supabase-contact-messages.repository.ts"
-Cohesion: 0.16
-Nodes (11): Database, Enums, InsertTables, Json, Tables, UpdateTables, ContactMessageDTO, toContactMessageEntity() (+3 more)
+Cohesion: 0.21
+Nodes (9): Database, Enums, InsertTables, Json, Tables, UpdateTables, ContactMessageDTO, toContactMessageEntity() (+1 more)
 
 ### Community 3 - "use-contact-messages-hooks.ts"
 Cohesion: 0.14
 Nodes (10): QueryKeys, BulkDeleteMessagesUseCase, bulkDeleteMessagesUseCase, bulkUpdateMessageStatusUseCase, deleteContactMessageUseCase, getContactMessageByIdUseCase, getContactMessagesUseCase, repository (+2 more)
 
+### Community 4 - "IContactMessagesRepository"
+Cohesion: 0.38
+Nodes (3): ContactMessageStatus, BulkUpdateMessageStatusUseCase, ContactMessagesState
+
 ### Community 8 - "i-contact-messages.repository.ts"
-Cohesion: 0.16
-Nodes (7): IContactMessagesRepository, SendMessageReplyInput, BulkUpdateMessageStatusUseCase, DeleteContactMessageUseCase, GetContactMessagesUseCase, SendMessageReplyUseCase, UpdateMessageStatusUseCase
+Cohesion: 0.15
+Nodes (8): ContactMessageFilterParams, IContactMessagesRepository, PaginatedContactMessages, SendMessageReplyInput, DeleteContactMessageUseCase, GetContactMessagesUseCase, SendMessageReplyUseCase, UpdateMessageStatusUseCase
 
 ### Community 9 - "admin-sidebar.tsx"
 Cohesion: 0.40
 Nodes (3): AdminSidebarProps, NAV_ITEMS, NavItem
 
 ## Knowledge Gaps
-- **22 isolated node(s):** `metadata`, `NavItem`, `NAV_ITEMS`, `AdminSidebarProps`, `metadata` (+17 more)
+- **23 isolated node(s):** `UserProfileProps`, `NavItem`, `NAV_ITEMS`, `AdminSidebarProps`, `metadata` (+18 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -84,12 +89,12 @@ Nodes (3): AdminSidebarProps, NAV_ITEMS, NavItem
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `IContactMessagesRepository` connect `i-contact-messages.repository.ts` to `ContactMessageStatus`, `supabase-contact-messages.repository.ts`, `use-contact-messages-hooks.ts`, `IContactMessagesRepository`, `SupabaseContactMessagesRepository`?**
-  _High betweenness centrality (0.145) - this node is a cross-community bridge._
-- **Why does `ContactMessageEntity` connect `ContactMessageStatus` to `contact-messages-table.tsx`, `supabase-contact-messages.repository.ts`, `IContactMessagesRepository`, `SupabaseContactMessagesRepository`, `i-contact-messages.repository.ts`?**
-  _High betweenness centrality (0.093) - this node is a cross-community bridge._
-- **Why does `ContactMessageStatus` connect `IContactMessagesRepository` to `contact-messages-table.tsx`, `supabase-contact-messages.repository.ts`, `use-contact-messages-hooks.ts`, `SupabaseContactMessagesRepository`, `i-contact-messages.repository.ts`?**
-  _High betweenness centrality (0.092) - this node is a cross-community bridge._
-- **What connects `metadata`, `NavItem`, `NAV_ITEMS` to the rest of the system?**
-  _22 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.129) - this node is a cross-community bridge._
+- **Why does `ContactMessageEntity` connect `ContactMessageStatus` to `i-contact-messages.repository.ts`, `contact-messages-table.tsx`, `supabase-contact-messages.repository.ts`, `SupabaseContactMessagesRepository`?**
+  _High betweenness centrality (0.082) - this node is a cross-community bridge._
+- **Why does `ContactMessageStatus` connect `IContactMessagesRepository` to `contact-messages-table.tsx`, `ContactMessageStatus`, `supabase-contact-messages.repository.ts`, `use-contact-messages-hooks.ts`, `SupabaseContactMessagesRepository`, `i-contact-messages.repository.ts`?**
+  _High betweenness centrality (0.082) - this node is a cross-community bridge._
+- **What connects `UserProfileProps`, `NavItem`, `NAV_ITEMS` to the rest of the system?**
+  _23 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `use-contact-messages-hooks.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._

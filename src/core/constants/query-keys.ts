@@ -122,6 +122,17 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.certificates.details(), id] as const,
   },
 
+  // ---------- Auth & User Profile ----------
+  auth: {
+    all: ["auth"] as const,
+    session: () => [...queryKeys.auth.all, "session"] as const,
+    user: () => [...queryKeys.auth.all, "user"] as const,
+  },
+  profile: {
+    all: ["profile"] as const,
+    user: () => [...queryKeys.profile.all, "user"] as const,
+  },
+
   // ---------- Team Members ----------
   team: {
     all: ["team"] as const,
@@ -144,12 +155,6 @@ export const queryKeys = {
     all: ["settings"] as const,
     website: () => [...queryKeys.settings.all, "website"] as const,
     branding: () => [...queryKeys.settings.all, "branding"] as const,
-  },
-
-  // ---------- Auth ----------
-  auth: {
-    session: ["auth", "session"] as const,
-    user: ["auth", "user"] as const,
   },
 } as const;
 

@@ -16,6 +16,7 @@ import {
   Moon,
   Check,
   KeyRound,
+  Settings,
 } from "lucide-react";
 import { cn } from "@core/utils/cn";
 import { useRTL } from "@core/hooks/use-rtl";
@@ -23,6 +24,7 @@ import {
   Button,
   Avatar,
   AvatarFallback,
+  AvatarImage,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -156,6 +158,7 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-2 px-2">
               <Avatar className="h-7 w-7">
+                <AvatarImage src={user?.avatarUrl ?? undefined} alt={user?.fullName ?? "Avatar"} className="object-cover" />
                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                   {userInitials}
                 </AvatarFallback>
@@ -177,8 +180,14 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href={`/${locale}/admin/settings`} className="cursor-pointer">
+                <Link href={`/${locale}/admin/profile`} className="cursor-pointer">
                   <User className="me-2 h-4 w-4" />
+                  My Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/${locale}/admin/settings`} className="cursor-pointer">
+                  <Settings className="me-2 h-4 w-4" />
                   Website Settings
                 </Link>
               </DropdownMenuItem>

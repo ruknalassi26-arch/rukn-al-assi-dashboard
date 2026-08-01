@@ -50,16 +50,25 @@ export class SupabaseAuthRepository implements IAuthRepository {
       throw new Error(error?.message || "Invalid email or password");
     }
 
-    // Fetch user profile from admin_profiles
-    const { data: profile } = await this.supabase
-      .from("admin_profiles")
-      .select("*")
-      .eq("id", data.user.id)
-      .maybeSingle();
+    // Fetch user profile from admin_profiles if table exists
+    let profile: AdminProfileDTO | null = null;
+    try {
+      const { data: profileData } = await (this.supabase as any)
+        .from("admin_profiles")
+        .select("*")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      if (profileData) {
+        profile = profileData as AdminProfileDTO;
+      }
+    } catch {
+      // Fallback
+    }
 
     // Update last_login_at
     try {
-      await this.supabase
+      await (this.supabase as any)
         .from("admin_profiles")
         .update({ last_login_at: new Date().toISOString() })
         .eq("id", data.user.id);
@@ -69,7 +78,7 @@ export class SupabaseAuthRepository implements IAuthRepository {
 
     const userEntity = toUserProfileEntity({
       user: data.user,
-      profile: profile as AdminProfileDTO | null,
+      profile,
     });
 
     await this.logActivity("login", data.user.id, data.user.email ?? input.email, {
@@ -94,15 +103,24 @@ export class SupabaseAuthRepository implements IAuthRepository {
     const { data: userData, error } = await this.supabase.auth.getUser();
     if (error || !userData.user) return null;
 
-    const { data: profile } = await this.supabase
-      .from("admin_profiles")
-      .select("*")
-      .eq("id", userData.user.id)
-      .maybeSingle();
+    let profile: AdminProfileDTO | null = null;
+    try {
+      const { data: profileData } = await (this.supabase as any)
+        .from("admin_profiles")
+        .select("*")
+        .eq("id", userData.user.id)
+        .maybeSingle();
+
+      if (profileData) {
+        profile = profileData as AdminProfileDTO;
+      }
+    } catch {
+      // Fallback
+    }
 
     return toUserProfileEntity({
       user: userData.user,
-      profile: profile as AdminProfileDTO | null,
+      profile,
     });
   }
 

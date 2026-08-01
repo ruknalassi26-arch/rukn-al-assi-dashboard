@@ -1,6 +1,6 @@
 // ==============================================================================
-// src/app/[locale]/(admin)/admin/forgot-password/page.tsx
-// Admin Portal Forgot Password Route
+// src/app/[locale]/(auth)/admin/forgot-password/page.tsx
+// Admin Standalone Forgot Password Route
 // ==============================================================================
 import type { Metadata } from "next";
 import { ForgotPasswordPage } from "@features/authentication/presentation/pages";

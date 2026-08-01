@@ -14,6 +14,7 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+  fallback: ["system-ui", "arial", "sans-serif"],
 });
 
 const notoSansArabic = Noto_Sans_Arabic({
@@ -21,6 +22,7 @@ const notoSansArabic = Noto_Sans_Arabic({
   variable: "--font-noto-arabic",
   display: "swap",
   weight: ["300", "400", "500", "600", "700", "800"],
+  fallback: ["system-ui", "tahoma", "sans-serif"],
 });
 
 export const metadata: Metadata = {

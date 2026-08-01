@@ -6,6 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { StorageFile } from "@core/types/api.types";
 import type { Database } from "@core/types/database.types";
+import { getStoragePublicUrl } from "@core/utils/storage";
 
 export type UploadBucket = "products" | "services" | "projects" | "rfq" | "certificates" | "team" | "branding" | "seo" | "general";
 
@@ -51,7 +52,7 @@ export class UploadService {
       return { success: false, error: error.message };
     }
 
-    const { data: urlData } = this.supabase.storage.from(bucket).getPublicUrl(data.path);
+    const publicUrl = getStoragePublicUrl(bucket, data.path);
 
     return {
       success: true,
@@ -59,7 +60,7 @@ export class UploadService {
         id: data.id ?? data.path,
         name: file.name,
         bucket,
-        publicUrl: urlData.publicUrl,
+        publicUrl,
         size: file.size,
         contentType: file.type,
         createdAt: new Date().toISOString(),
@@ -78,7 +79,6 @@ export class UploadService {
   }
 
   getPublicUrl(bucket: UploadBucket, path: string): string {
-    const { data } = this.supabase.storage.from(bucket).getPublicUrl(path);
-    return data.publicUrl;
+    return getStoragePublicUrl(bucket, path);
   }
 }

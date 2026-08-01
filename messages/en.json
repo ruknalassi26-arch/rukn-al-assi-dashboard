@@ -40,7 +40,8 @@
     "contacts": "Contact Messages",
     "homepage": "Homepage",
     "seo": "SEO Settings",
-    "settings": "Settings",
+    "profile": "My Profile",
+    "settings": "Website Settings",
     "login": "Login"
   },
   "auth": {

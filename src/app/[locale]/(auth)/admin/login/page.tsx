@@ -1,6 +1,6 @@
 // ==============================================================================
-// src/app/[locale]/(admin)/admin/login/page.tsx
-// Admin Portal Login Route
+// src/app/[locale]/(auth)/admin/login/page.tsx
+// Admin Standalone Login Route
 // ==============================================================================
 import type { Metadata } from "next";
 import { LoginPage } from "@features/authentication/presentation/pages";

@@ -7,6 +7,7 @@ export interface UserProfileProps {
   id: string;
   email: string;
   fullName: string;
+  phone?: string | null;
   avatarUrl?: string | null;
   role: string;
   permissions: string[];
@@ -19,6 +20,7 @@ export class UserProfileEntity {
   public readonly id: string;
   public readonly email: string;
   public readonly fullName: string;
+  public readonly phone: string | null;
   public readonly avatarUrl: string | null;
   public readonly role: string;
   public readonly permissions: string[];
@@ -30,6 +32,7 @@ export class UserProfileEntity {
     this.id = props.id;
     this.email = props.email;
     this.fullName = props.fullName;
+    this.phone = props.phone ?? null;
     this.avatarUrl = props.avatarUrl ?? null;
     this.role = props.role;
     this.permissions = props.permissions;
