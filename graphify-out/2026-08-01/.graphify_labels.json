@@ -9,11 +9,5 @@
   "7": "page.tsx",
   "8": "i-contact-messages.repository.ts",
   "9": "admin-sidebar.tsx",
-  "10": "UserProfileEntity",
-  "11": "i-auth.repository.ts",
-  "12": "SupabaseAuthRepository",
-  "13": "SendPasswordResetInput",
-  "14": "sign-in.usecase.ts",
-  "15": "i18n.ts",
-  "16": "get-current-user.usecase.ts"
+  "10": "UserProfileEntity"
 }

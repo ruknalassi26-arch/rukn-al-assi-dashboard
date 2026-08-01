@@ -4,59 +4,103 @@
   "graph": {},
   "nodes": [
     {
-      "label": "i18n.ts",
+      "label": "forgot-password/page.tsx",
       "file_type": "code",
-      "source_file": "src/core/config/i18n.ts",
+      "source_file": "src/app/[locale]/(admin)/admin/forgot-password/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "src_core_config_i18n",
-      "community": 15,
-      "community_name": "i18n.ts",
-      "norm_label": "i18n.ts"
+      "id": "src_app_locale_admin_admin_forgot_password_page",
+      "community": 1,
+      "community_name": "ContactMessageStatus",
+      "norm_label": "forgot-password/page.tsx"
     },
     {
-      "label": "routing",
+      "label": "metadata",
       "file_type": "code",
-      "source_file": "src/core/config/i18n.ts",
-      "source_location": "L7",
+      "source_file": "src/app/[locale]/(admin)/admin/forgot-password/page.tsx",
+      "source_location": "L8",
       "_origin": "ast",
-      "id": "src_core_config_i18n_routing",
-      "community": 15,
-      "community_name": "i18n.ts",
-      "norm_label": "routing"
+      "id": "src_app_locale_admin_admin_forgot_password_page_metadata",
+      "community": 1,
+      "community_name": "ContactMessageStatus",
+      "norm_label": "metadata"
     },
     {
-      "label": "Locale",
+      "label": "AdminForgotPasswordRoute()",
       "file_type": "code",
-      "source_file": "src/core/config/i18n.ts",
+      "source_file": "src/app/[locale]/(admin)/admin/forgot-password/page.tsx",
       "source_location": "L13",
       "_origin": "ast",
-      "id": "src_core_config_i18n_locale",
-      "community": 15,
-      "community_name": "i18n.ts",
-      "norm_label": "locale"
+      "id": "src_app_locale_admin_admin_forgot_password_page_adminforgotpasswordroute",
+      "community": 1,
+      "community_name": "ContactMessageStatus",
+      "norm_label": "adminforgotpasswordroute()"
     },
     {
-      "label": "RTL_LOCALES",
+      "label": "login/page.tsx",
       "file_type": "code",
-      "source_file": "src/core/config/i18n.ts",
-      "source_location": "L19",
+      "source_file": "src/app/[locale]/(admin)/admin/login/page.tsx",
+      "source_location": "L1",
       "_origin": "ast",
-      "id": "src_core_config_i18n_rtl_locales",
-      "community": 15,
-      "community_name": "i18n.ts",
-      "norm_label": "rtl_locales"
+      "id": "src_app_locale_admin_admin_login_page",
+      "community": 1,
+      "community_name": "ContactMessageStatus",
+      "norm_label": "login/page.tsx"
     },
     {
-      "label": "isRTL()",
+      "label": "metadata",
       "file_type": "code",
-      "source_file": "src/core/config/i18n.ts",
-      "source_location": "L21",
+      "source_file": "src/app/[locale]/(admin)/admin/login/page.tsx",
+      "source_location": "L8",
       "_origin": "ast",
-      "id": "src_core_config_i18n_isrtl",
-      "community": 15,
-      "community_name": "i18n.ts",
-      "norm_label": "isrtl()"
+      "id": "src_app_locale_admin_admin_login_page_metadata",
+      "community": 1,
+      "community_name": "ContactMessageStatus",
+      "norm_label": "metadata"
+    },
+    {
+      "label": "AdminLoginRoute()",
+      "file_type": "code",
+      "source_file": "src/app/[locale]/(admin)/admin/login/page.tsx",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "src_app_locale_admin_admin_login_page_adminloginroute",
+      "community": 1,
+      "community_name": "ContactMessageStatus",
+      "norm_label": "adminloginroute()"
+    },
+    {
+      "label": "reset-password/page.tsx",
+      "file_type": "code",
+      "source_file": "src/app/[locale]/(admin)/admin/reset-password/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_app_locale_admin_admin_reset_password_page",
+      "community": 1,
+      "community_name": "ContactMessageStatus",
+      "norm_label": "reset-password/page.tsx"
+    },
+    {
+      "label": "metadata",
+      "file_type": "code",
+      "source_file": "src/app/[locale]/(admin)/admin/reset-password/page.tsx",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "src_app_locale_admin_admin_reset_password_page_metadata",
+      "community": 1,
+      "community_name": "ContactMessageStatus",
+      "norm_label": "metadata"
+    },
+    {
+      "label": "AdminResetPasswordRoute()",
+      "file_type": "code",
+      "source_file": "src/app/[locale]/(admin)/admin/reset-password/page.tsx",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "src_app_locale_admin_admin_reset_password_page_adminresetpasswordroute",
+      "community": 1,
+      "community_name": "ContactMessageStatus",
+      "norm_label": "adminresetpasswordroute()"
     },
     {
       "label": "auth.dto.ts",
@@ -64,10 +108,10 @@
       "source_file": "src/features/authentication/data/dto/auth.dto.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
-      "norm_label": "auth.dto.ts",
-      "id": "src_features_authentication_data_dto_auth_dto"
+      "id": "src_features_authentication_data_dto_auth_dto",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "auth.dto.ts"
     },
     {
       "label": "AdminProfileDTO",
@@ -75,10 +119,10 @@
       "source_file": "src/features/authentication/data/dto/auth.dto.ts",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
-      "norm_label": "adminprofiledto",
-      "id": "src_features_authentication_data_dto_auth_dto_adminprofiledto"
+      "id": "src_features_authentication_data_dto_auth_dto_adminprofiledto",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "adminprofiledto"
     },
     {
       "label": "AuthUserDTO",
@@ -86,10 +130,10 @@
       "source_file": "src/features/authentication/data/dto/auth.dto.ts",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
-      "norm_label": "authuserdto",
-      "id": "src_features_authentication_data_dto_auth_dto_authuserdto"
+      "id": "src_features_authentication_data_dto_auth_dto_authuserdto",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "authuserdto"
     },
     {
       "label": "auth.mapper.ts",
@@ -97,10 +141,10 @@
       "source_file": "src/features/authentication/data/mapper/auth.mapper.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
-      "norm_label": "auth.mapper.ts",
-      "id": "src_features_authentication_data_mapper_auth_mapper"
+      "id": "src_features_authentication_data_mapper_auth_mapper",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "auth.mapper.ts"
     },
     {
       "label": "toUserProfileEntity()",
@@ -108,10 +152,10 @@
       "source_file": "src/features/authentication/data/mapper/auth.mapper.ts",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 12,
-      "community_name": "SupabaseAuthRepository",
-      "norm_label": "touserprofileentity()",
-      "id": "src_features_authentication_data_mapper_auth_mapper_touserprofileentity"
+      "id": "src_features_authentication_data_mapper_auth_mapper_touserprofileentity",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "touserprofileentity()"
     },
     {
       "label": "supabase-auth.repository.ts",
@@ -119,10 +163,10 @@
       "source_file": "src/features/authentication/data/repositories/supabase-auth.repository.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
-      "norm_label": "supabase-auth.repository.ts",
-      "id": "src_features_authentication_data_repositories_supabase_auth_repository"
+      "id": "src_features_authentication_data_repositories_supabase_auth_repository",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "supabase-auth.repository.ts"
     },
     {
       "label": "SupabaseAuthRepository",
@@ -130,10 +174,10 @@
       "source_file": "src/features/authentication/data/repositories/supabase-auth.repository.ts",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 12,
-      "community_name": "SupabaseAuthRepository",
-      "norm_label": "supabaseauthrepository",
-      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository"
+      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "supabaseauthrepository"
     },
     {
       "label": ".supabase()",
@@ -141,10 +185,10 @@
       "source_file": "src/features/authentication/data/repositories/supabase-auth.repository.ts",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 12,
-      "community_name": "SupabaseAuthRepository",
-      "norm_label": ".supabase()",
-      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_supabase"
+      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_supabase",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".supabase()"
     },
     {
       "label": ".logActivity()",
@@ -152,10 +196,10 @@
       "source_file": "src/features/authentication/data/repositories/supabase-auth.repository.ts",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 12,
-      "community_name": "SupabaseAuthRepository",
-      "norm_label": ".logactivity()",
-      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_logactivity"
+      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_logactivity",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".logactivity()"
     },
     {
       "label": ".signIn()",
@@ -163,10 +207,10 @@
       "source_file": "src/features/authentication/data/repositories/supabase-auth.repository.ts",
       "source_location": "L43",
       "_origin": "ast",
-      "community": 12,
-      "community_name": "SupabaseAuthRepository",
-      "norm_label": ".signin()",
-      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signin"
+      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signin",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".signin()"
     },
     {
       "label": ".signOut()",
@@ -174,10 +218,10 @@
       "source_file": "src/features/authentication/data/repositories/supabase-auth.repository.ts",
       "source_location": "L91",
       "_origin": "ast",
-      "community": 12,
-      "community_name": "SupabaseAuthRepository",
-      "norm_label": ".signout()",
-      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signout"
+      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signout",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".signout()"
     },
     {
       "label": ".getCurrentUser()",
@@ -185,10 +229,10 @@
       "source_file": "src/features/authentication/data/repositories/supabase-auth.repository.ts",
       "source_location": "L102",
       "_origin": "ast",
-      "community": 12,
-      "community_name": "SupabaseAuthRepository",
-      "norm_label": ".getcurrentuser()",
-      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_getcurrentuser"
+      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_getcurrentuser",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".getcurrentuser()"
     },
     {
       "label": ".sendPasswordResetEmail()",
@@ -196,10 +240,10 @@
       "source_file": "src/features/authentication/data/repositories/supabase-auth.repository.ts",
       "source_location": "L127",
       "_origin": "ast",
-      "community": 13,
-      "community_name": "SendPasswordResetInput",
-      "norm_label": ".sendpasswordresetemail()",
-      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_sendpasswordresetemail"
+      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_sendpasswordresetemail",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".sendpasswordresetemail()"
     },
     {
       "label": ".resetPassword()",
@@ -207,10 +251,10 @@
       "source_file": "src/features/authentication/data/repositories/supabase-auth.repository.ts",
       "source_location": "L140",
       "_origin": "ast",
+      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_resetpassword",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": ".resetpassword()",
-      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_resetpassword"
+      "norm_label": ".resetpassword()"
     },
     {
       "label": ".changePassword()",
@@ -218,10 +262,10 @@
       "source_file": "src/features/authentication/data/repositories/supabase-auth.repository.ts",
       "source_location": "L150",
       "_origin": "ast",
-      "community": 11,
-      "community_name": "i-auth.repository.ts",
-      "norm_label": ".changepassword()",
-      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_changepassword"
+      "id": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_changepassword",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".changepassword()"
     },
     {
       "label": "i-auth.repository.ts",
@@ -229,10 +273,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
-      "community_name": "i-auth.repository.ts",
-      "norm_label": "i-auth.repository.ts",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository"
+      "id": "src_features_authentication_domain_repositories_i_auth_repository",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "i-auth.repository.ts"
     },
     {
       "label": "SignInInput",
@@ -240,10 +284,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 14,
-      "community_name": "sign-in.usecase.ts",
-      "norm_label": "signininput",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_signininput"
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_signininput",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "signininput"
     },
     {
       "label": "SendPasswordResetInput",
@@ -251,10 +295,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 13,
-      "community_name": "SendPasswordResetInput",
-      "norm_label": "sendpasswordresetinput",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput"
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "sendpasswordresetinput"
     },
     {
       "label": "ResetPasswordInput",
@@ -262,10 +306,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L18",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": "resetpasswordinput",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput"
+      "norm_label": "resetpasswordinput"
     },
     {
       "label": "ChangePasswordInput",
@@ -273,10 +317,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 11,
-      "community_name": "i-auth.repository.ts",
-      "norm_label": "changepasswordinput",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput"
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "changepasswordinput"
     },
     {
       "label": "IAuthRepository",
@@ -284,10 +328,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L27",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": "iauthrepository",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "norm_label": "iauthrepository"
     },
     {
       "label": ".signIn()",
@@ -295,10 +339,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 14,
-      "community_name": "sign-in.usecase.ts",
-      "norm_label": ".signin()",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_signin"
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_signin",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".signin()"
     },
     {
       "label": ".signOut()",
@@ -306,10 +350,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L29",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_signout",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": ".signout()",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_signout"
+      "norm_label": ".signout()"
     },
     {
       "label": ".getCurrentUser()",
@@ -317,10 +361,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L30",
       "_origin": "ast",
-      "community": 16,
-      "community_name": "get-current-user.usecase.ts",
-      "norm_label": ".getcurrentuser()",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_getcurrentuser"
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_getcurrentuser",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".getcurrentuser()"
     },
     {
       "label": ".sendPasswordResetEmail()",
@@ -328,10 +372,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 13,
-      "community_name": "SendPasswordResetInput",
-      "norm_label": ".sendpasswordresetemail()",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_sendpasswordresetemail"
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_sendpasswordresetemail",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".sendpasswordresetemail()"
     },
     {
       "label": ".resetPassword()",
@@ -339,10 +383,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L32",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_resetpassword",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": ".resetpassword()",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_resetpassword"
+      "norm_label": ".resetpassword()"
     },
     {
       "label": ".changePassword()",
@@ -350,10 +394,10 @@
       "source_file": "src/features/authentication/domain/repositories/i-auth.repository.ts",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 11,
-      "community_name": "i-auth.repository.ts",
-      "norm_label": ".changepassword()",
-      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_changepassword"
+      "id": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_changepassword",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".changepassword()"
     },
     {
       "label": "change-password.usecase.ts",
@@ -361,10 +405,10 @@
       "source_file": "src/features/authentication/domain/usecases/change-password.usecase.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
-      "community_name": "i-auth.repository.ts",
-      "norm_label": "change-password.usecase.ts",
-      "id": "src_features_authentication_domain_usecases_change_password_usecase"
+      "id": "src_features_authentication_domain_usecases_change_password_usecase",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "change-password.usecase.ts"
     },
     {
       "label": "ChangePasswordUseCase",
@@ -372,10 +416,10 @@
       "source_file": "src/features/authentication/domain/usecases/change-password.usecase.ts",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 11,
-      "community_name": "i-auth.repository.ts",
-      "norm_label": "changepasswordusecase",
-      "id": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase"
+      "id": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "changepasswordusecase"
     },
     {
       "label": ".constructor()",
@@ -383,10 +427,10 @@
       "source_file": "src/features/authentication/domain/usecases/change-password.usecase.ts",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 11,
-      "community_name": "i-auth.repository.ts",
-      "norm_label": ".constructor()",
-      "id": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase_constructor"
+      "id": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase_constructor",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".constructor()"
     },
     {
       "label": ".execute()",
@@ -394,10 +438,10 @@
       "source_file": "src/features/authentication/domain/usecases/change-password.usecase.ts",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 11,
-      "community_name": "i-auth.repository.ts",
-      "norm_label": ".execute()",
-      "id": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase_execute"
+      "id": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase_execute",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".execute()"
     },
     {
       "label": "get-current-user.usecase.ts",
@@ -405,10 +449,10 @@
       "source_file": "src/features/authentication/domain/usecases/get-current-user.usecase.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 16,
-      "community_name": "get-current-user.usecase.ts",
-      "norm_label": "get-current-user.usecase.ts",
-      "id": "src_features_authentication_domain_usecases_get_current_user_usecase"
+      "id": "src_features_authentication_domain_usecases_get_current_user_usecase",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "get-current-user.usecase.ts"
     },
     {
       "label": "GetCurrentUserUseCase",
@@ -416,10 +460,10 @@
       "source_file": "src/features/authentication/domain/usecases/get-current-user.usecase.ts",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 16,
-      "community_name": "get-current-user.usecase.ts",
-      "norm_label": "getcurrentuserusecase",
-      "id": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase"
+      "id": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "getcurrentuserusecase"
     },
     {
       "label": ".constructor()",
@@ -427,10 +471,10 @@
       "source_file": "src/features/authentication/domain/usecases/get-current-user.usecase.ts",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 16,
-      "community_name": "get-current-user.usecase.ts",
-      "norm_label": ".constructor()",
-      "id": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase_constructor"
+      "id": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase_constructor",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".constructor()"
     },
     {
       "label": ".execute()",
@@ -438,10 +482,10 @@
       "source_file": "src/features/authentication/domain/usecases/get-current-user.usecase.ts",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 16,
-      "community_name": "get-current-user.usecase.ts",
-      "norm_label": ".execute()",
-      "id": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase_execute"
+      "id": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase_execute",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".execute()"
     },
     {
       "label": "authentication/domain/usecases/index.ts",
@@ -449,10 +493,10 @@
       "source_file": "src/features/authentication/domain/usecases/index.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_usecases_index",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": "authentication/domain/usecases/index.ts",
-      "id": "src_features_authentication_domain_usecases_index"
+      "norm_label": "authentication/domain/usecases/index.ts"
     },
     {
       "label": "reset-password.usecase.ts",
@@ -460,10 +504,10 @@
       "source_file": "src/features/authentication/domain/usecases/reset-password.usecase.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_usecases_reset_password_usecase",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": "reset-password.usecase.ts",
-      "id": "src_features_authentication_domain_usecases_reset_password_usecase"
+      "norm_label": "reset-password.usecase.ts"
     },
     {
       "label": "ResetPasswordUseCase",
@@ -471,10 +515,10 @@
       "source_file": "src/features/authentication/domain/usecases/reset-password.usecase.ts",
       "source_location": "L6",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": "resetpasswordusecase",
-      "id": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase"
+      "norm_label": "resetpasswordusecase"
     },
     {
       "label": ".constructor()",
@@ -482,10 +526,10 @@
       "source_file": "src/features/authentication/domain/usecases/reset-password.usecase.ts",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase_constructor",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": ".constructor()",
-      "id": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase_constructor"
+      "norm_label": ".constructor()"
     },
     {
       "label": ".execute()",
@@ -493,10 +537,10 @@
       "source_file": "src/features/authentication/domain/usecases/reset-password.usecase.ts",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase_execute",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": ".execute()",
-      "id": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase_execute"
+      "norm_label": ".execute()"
     },
     {
       "label": "send-password-reset.usecase.ts",
@@ -504,10 +548,10 @@
       "source_file": "src/features/authentication/domain/usecases/send-password-reset.usecase.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 13,
-      "community_name": "SendPasswordResetInput",
-      "norm_label": "send-password-reset.usecase.ts",
-      "id": "src_features_authentication_domain_usecases_send_password_reset_usecase"
+      "id": "src_features_authentication_domain_usecases_send_password_reset_usecase",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "send-password-reset.usecase.ts"
     },
     {
       "label": "SendPasswordResetUseCase",
@@ -515,10 +559,10 @@
       "source_file": "src/features/authentication/domain/usecases/send-password-reset.usecase.ts",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 13,
-      "community_name": "SendPasswordResetInput",
-      "norm_label": "sendpasswordresetusecase",
-      "id": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase"
+      "id": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "sendpasswordresetusecase"
     },
     {
       "label": ".constructor()",
@@ -526,10 +570,10 @@
       "source_file": "src/features/authentication/domain/usecases/send-password-reset.usecase.ts",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 13,
-      "community_name": "SendPasswordResetInput",
-      "norm_label": ".constructor()",
-      "id": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase_constructor"
+      "id": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase_constructor",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".constructor()"
     },
     {
       "label": ".execute()",
@@ -537,10 +581,10 @@
       "source_file": "src/features/authentication/domain/usecases/send-password-reset.usecase.ts",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 13,
-      "community_name": "SendPasswordResetInput",
-      "norm_label": ".execute()",
-      "id": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase_execute"
+      "id": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase_execute",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".execute()"
     },
     {
       "label": "sign-in.usecase.ts",
@@ -548,10 +592,10 @@
       "source_file": "src/features/authentication/domain/usecases/sign-in.usecase.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 14,
-      "community_name": "sign-in.usecase.ts",
-      "norm_label": "sign-in.usecase.ts",
-      "id": "src_features_authentication_domain_usecases_sign_in_usecase"
+      "id": "src_features_authentication_domain_usecases_sign_in_usecase",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "sign-in.usecase.ts"
     },
     {
       "label": "SignInUseCase",
@@ -559,10 +603,10 @@
       "source_file": "src/features/authentication/domain/usecases/sign-in.usecase.ts",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 14,
-      "community_name": "sign-in.usecase.ts",
-      "norm_label": "signinusecase",
-      "id": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase"
+      "id": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": "signinusecase"
     },
     {
       "label": ".constructor()",
@@ -570,10 +614,10 @@
       "source_file": "src/features/authentication/domain/usecases/sign-in.usecase.ts",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 14,
-      "community_name": "sign-in.usecase.ts",
-      "norm_label": ".constructor()",
-      "id": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase_constructor"
+      "id": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase_constructor",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".constructor()"
     },
     {
       "label": ".execute()",
@@ -581,10 +625,10 @@
       "source_file": "src/features/authentication/domain/usecases/sign-in.usecase.ts",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 14,
-      "community_name": "sign-in.usecase.ts",
-      "norm_label": ".execute()",
-      "id": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase_execute"
+      "id": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase_execute",
+      "community": 10,
+      "community_name": "UserProfileEntity",
+      "norm_label": ".execute()"
     },
     {
       "label": "sign-out.usecase.ts",
@@ -592,10 +636,10 @@
       "source_file": "src/features/authentication/domain/usecases/sign-out.usecase.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_usecases_sign_out_usecase",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": "sign-out.usecase.ts",
-      "id": "src_features_authentication_domain_usecases_sign_out_usecase"
+      "norm_label": "sign-out.usecase.ts"
     },
     {
       "label": "SignOutUseCase",
@@ -603,10 +647,10 @@
       "source_file": "src/features/authentication/domain/usecases/sign-out.usecase.ts",
       "source_location": "L6",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": "signoutusecase",
-      "id": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase"
+      "norm_label": "signoutusecase"
     },
     {
       "label": ".constructor()",
@@ -614,10 +658,10 @@
       "source_file": "src/features/authentication/domain/usecases/sign-out.usecase.ts",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase_constructor",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": ".constructor()",
-      "id": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase_constructor"
+      "norm_label": ".constructor()"
     },
     {
       "label": ".execute()",
@@ -625,10 +669,10 @@
       "source_file": "src/features/authentication/domain/usecases/sign-out.usecase.ts",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase_execute",
       "community": 10,
       "community_name": "UserProfileEntity",
-      "norm_label": ".execute()",
-      "id": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase_execute"
+      "norm_label": ".execute()"
     },
     {
       "label": "change-password-modal.tsx",
@@ -636,10 +680,10 @@
       "source_file": "src/features/authentication/presentation/components/change-password-modal.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_change_password_modal",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "change-password-modal.tsx",
-      "id": "src_features_authentication_presentation_components_change_password_modal"
+      "norm_label": "change-password-modal.tsx"
     },
     {
       "label": "changePasswordSchema",
@@ -647,10 +691,10 @@
       "source_file": "src/features/authentication/presentation/components/change-password-modal.tsx",
       "source_location": "L25",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_change_password_modal_changepasswordschema",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "changepasswordschema",
-      "id": "src_features_authentication_presentation_components_change_password_modal_changepasswordschema"
+      "norm_label": "changepasswordschema"
     },
     {
       "label": "ChangePasswordFormValues",
@@ -658,10 +702,10 @@
       "source_file": "src/features/authentication/presentation/components/change-password-modal.tsx",
       "source_location": "L35",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_change_password_modal_changepasswordformvalues",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "changepasswordformvalues",
-      "id": "src_features_authentication_presentation_components_change_password_modal_changepasswordformvalues"
+      "norm_label": "changepasswordformvalues"
     },
     {
       "label": "ChangePasswordModal()",
@@ -669,10 +713,10 @@
       "source_file": "src/features/authentication/presentation/components/change-password-modal.tsx",
       "source_location": "L37",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_change_password_modal_changepasswordmodal",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "changepasswordmodal()",
-      "id": "src_features_authentication_presentation_components_change_password_modal_changepasswordmodal"
+      "norm_label": "changepasswordmodal()"
     },
     {
       "label": "forgot-password-form.tsx",
@@ -680,10 +724,10 @@
       "source_file": "src/features/authentication/presentation/components/forgot-password-form.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_forgot_password_form",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "forgot-password-form.tsx",
-      "id": "src_features_authentication_presentation_components_forgot_password_form"
+      "norm_label": "forgot-password-form.tsx"
     },
     {
       "label": "forgotPasswordSchema",
@@ -691,10 +735,10 @@
       "source_file": "src/features/authentication/presentation/components/forgot-password-form.tsx",
       "source_location": "L25",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordschema",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "forgotpasswordschema",
-      "id": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordschema"
+      "norm_label": "forgotpasswordschema"
     },
     {
       "label": "ForgotPasswordFormValues",
@@ -702,10 +746,10 @@
       "source_file": "src/features/authentication/presentation/components/forgot-password-form.tsx",
       "source_location": "L29",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordformvalues",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "forgotpasswordformvalues",
-      "id": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordformvalues"
+      "norm_label": "forgotpasswordformvalues"
     },
     {
       "label": "ForgotPasswordForm()",
@@ -713,10 +757,10 @@
       "source_file": "src/features/authentication/presentation/components/forgot-password-form.tsx",
       "source_location": "L31",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordform",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "forgotpasswordform()",
-      "id": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordform"
+      "norm_label": "forgotpasswordform()"
     },
     {
       "label": "authentication/presentation/components/index.ts",
@@ -724,10 +768,10 @@
       "source_file": "src/features/authentication/presentation/components/index.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_index",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "authentication/presentation/components/index.ts",
-      "id": "src_features_authentication_presentation_components_index"
+      "norm_label": "authentication/presentation/components/index.ts"
     },
     {
       "label": "login-form.tsx",
@@ -735,10 +779,10 @@
       "source_file": "src/features/authentication/presentation/components/login-form.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
-      "community_name": "ContactMessageStatus",
-      "norm_label": "login-form.tsx",
-      "id": "src_features_authentication_presentation_components_login_form"
+      "id": "src_features_authentication_presentation_components_login_form",
+      "community": 3,
+      "community_name": "use-contact-messages-hooks.ts",
+      "norm_label": "login-form.tsx"
     },
     {
       "label": "loginSchema",
@@ -746,10 +790,10 @@
       "source_file": "src/features/authentication/presentation/components/login-form.tsx",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 1,
-      "community_name": "ContactMessageStatus",
-      "norm_label": "loginschema",
-      "id": "src_features_authentication_presentation_components_login_form_loginschema"
+      "id": "src_features_authentication_presentation_components_login_form_loginschema",
+      "community": 3,
+      "community_name": "use-contact-messages-hooks.ts",
+      "norm_label": "loginschema"
     },
     {
       "label": "LoginFormValues",
@@ -757,10 +801,10 @@
       "source_file": "src/features/authentication/presentation/components/login-form.tsx",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 1,
-      "community_name": "ContactMessageStatus",
-      "norm_label": "loginformvalues",
-      "id": "src_features_authentication_presentation_components_login_form_loginformvalues"
+      "id": "src_features_authentication_presentation_components_login_form_loginformvalues",
+      "community": 3,
+      "community_name": "use-contact-messages-hooks.ts",
+      "norm_label": "loginformvalues"
     },
     {
       "label": "LoginForm()",
@@ -768,10 +812,10 @@
       "source_file": "src/features/authentication/presentation/components/login-form.tsx",
       "source_location": "L34",
       "_origin": "ast",
-      "community": 1,
-      "community_name": "ContactMessageStatus",
-      "norm_label": "loginform()",
-      "id": "src_features_authentication_presentation_components_login_form_loginform"
+      "id": "src_features_authentication_presentation_components_login_form_loginform",
+      "community": 3,
+      "community_name": "use-contact-messages-hooks.ts",
+      "norm_label": "loginform()"
     },
     {
       "label": "reset-password-form.tsx",
@@ -779,10 +823,10 @@
       "source_file": "src/features/authentication/presentation/components/reset-password-form.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_reset_password_form",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "reset-password-form.tsx",
-      "id": "src_features_authentication_presentation_components_reset_password_form"
+      "norm_label": "reset-password-form.tsx"
     },
     {
       "label": "resetPasswordSchema",
@@ -790,10 +834,10 @@
       "source_file": "src/features/authentication/presentation/components/reset-password-form.tsx",
       "source_location": "L24",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_reset_password_form_resetpasswordschema",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "resetpasswordschema",
-      "id": "src_features_authentication_presentation_components_reset_password_form_resetpasswordschema"
+      "norm_label": "resetpasswordschema"
     },
     {
       "label": "ResetPasswordFormValues",
@@ -801,10 +845,10 @@
       "source_file": "src/features/authentication/presentation/components/reset-password-form.tsx",
       "source_location": "L34",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_reset_password_form_resetpasswordformvalues",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "resetpasswordformvalues",
-      "id": "src_features_authentication_presentation_components_reset_password_form_resetpasswordformvalues"
+      "norm_label": "resetpasswordformvalues"
     },
     {
       "label": "ResetPasswordForm()",
@@ -812,10 +856,10 @@
       "source_file": "src/features/authentication/presentation/components/reset-password-form.tsx",
       "source_location": "L36",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_components_reset_password_form_resetpasswordform",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "resetpasswordform()",
-      "id": "src_features_authentication_presentation_components_reset_password_form_resetpasswordform"
+      "norm_label": "resetpasswordform()"
     },
     {
       "label": "forgot-password-page.tsx",
@@ -823,10 +867,10 @@
       "source_file": "src/features/authentication/presentation/pages/forgot-password-page.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_pages_forgot_password_page",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "forgot-password-page.tsx",
-      "id": "src_features_authentication_presentation_pages_forgot_password_page"
+      "norm_label": "forgot-password-page.tsx"
     },
     {
       "label": "ForgotPasswordPage()",
@@ -834,10 +878,10 @@
       "source_file": "src/features/authentication/presentation/pages/forgot-password-page.tsx",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_pages_forgot_password_page_forgotpasswordpage",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "forgotpasswordpage()",
-      "id": "src_features_authentication_presentation_pages_forgot_password_page_forgotpasswordpage"
+      "norm_label": "forgotpasswordpage()"
     },
     {
       "label": "authentication/presentation/pages/index.ts",
@@ -845,10 +889,10 @@
       "source_file": "src/features/authentication/presentation/pages/index.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_pages_index",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "authentication/presentation/pages/index.ts",
-      "id": "src_features_authentication_presentation_pages_index"
+      "norm_label": "authentication/presentation/pages/index.ts"
     },
     {
       "label": "login-page.tsx",
@@ -856,10 +900,10 @@
       "source_file": "src/features/authentication/presentation/pages/login-page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
-      "community_name": "ContactMessageStatus",
-      "norm_label": "login-page.tsx",
-      "id": "src_features_authentication_presentation_pages_login_page"
+      "id": "src_features_authentication_presentation_pages_login_page",
+      "community": 3,
+      "community_name": "use-contact-messages-hooks.ts",
+      "norm_label": "login-page.tsx"
     },
     {
       "label": "LoginPage()",
@@ -867,10 +911,10 @@
       "source_file": "src/features/authentication/presentation/pages/login-page.tsx",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_pages_login_page_loginpage",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "loginpage()",
-      "id": "src_features_authentication_presentation_pages_login_page_loginpage"
+      "norm_label": "loginpage()"
     },
     {
       "label": "reset-password-page.tsx",
@@ -878,10 +922,10 @@
       "source_file": "src/features/authentication/presentation/pages/reset-password-page.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_pages_reset_password_page",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "reset-password-page.tsx",
-      "id": "src_features_authentication_presentation_pages_reset_password_page"
+      "norm_label": "reset-password-page.tsx"
     },
     {
       "label": "ResetPasswordPage()",
@@ -889,10 +933,10 @@
       "source_file": "src/features/authentication/presentation/pages/reset-password-page.tsx",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_pages_reset_password_page_resetpasswordpage",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "resetpasswordpage()",
-      "id": "src_features_authentication_presentation_pages_reset_password_page_resetpasswordpage"
+      "norm_label": "resetpasswordpage()"
     },
     {
       "label": "auth.store.ts",
@@ -900,10 +944,10 @@
       "source_file": "src/features/authentication/presentation/stores/auth.store.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_stores_auth_store",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "auth.store.ts",
-      "id": "src_features_authentication_presentation_stores_auth_store"
+      "norm_label": "auth.store.ts"
     },
     {
       "label": "AuthState",
@@ -911,10 +955,10 @@
       "source_file": "src/features/authentication/presentation/stores/auth.store.ts",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_stores_auth_store_authstate",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "authstate",
-      "id": "src_features_authentication_presentation_stores_auth_store_authstate"
+      "norm_label": "authstate"
     },
     {
       "label": "useAuthStore",
@@ -922,10 +966,10 @@
       "source_file": "src/features/authentication/presentation/stores/auth.store.ts",
       "source_location": "L24",
       "_origin": "ast",
+      "id": "src_features_authentication_presentation_stores_auth_store_useauthstore",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "useauthstore",
-      "id": "src_features_authentication_presentation_stores_auth_store_useauthstore"
+      "norm_label": "useauthstore"
     },
     {
       "label": "middleware.ts",
@@ -933,10 +977,10 @@
       "source_file": "src/middleware.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_middleware",
       "community": 4,
       "community_name": "IContactMessagesRepository",
-      "norm_label": "middleware.ts",
-      "id": "src_middleware"
+      "norm_label": "middleware.ts"
     },
     {
       "label": "intlMiddleware",
@@ -944,10 +988,10 @@
       "source_file": "src/middleware.ts",
       "source_location": "L11",
       "_origin": "ast",
+      "id": "src_middleware_intlmiddleware",
       "community": 4,
       "community_name": "IContactMessagesRepository",
-      "norm_label": "intlmiddleware",
-      "id": "src_middleware_intlmiddleware"
+      "norm_label": "intlmiddleware"
     },
     {
       "label": "PUBLIC_EXCLUDE_PATHS",
@@ -955,10 +999,10 @@
       "source_file": "src/middleware.ts",
       "source_location": "L13",
       "_origin": "ast",
+      "id": "src_middleware_public_exclude_paths",
       "community": 4,
       "community_name": "IContactMessagesRepository",
-      "norm_label": "public_exclude_paths",
-      "id": "src_middleware_public_exclude_paths"
+      "norm_label": "public_exclude_paths"
     },
     {
       "label": "PUBLIC_AUTH_ROUTES",
@@ -966,10 +1010,10 @@
       "source_file": "src/middleware.ts",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "src_middleware_public_auth_routes",
       "community": 4,
       "community_name": "IContactMessagesRepository",
-      "norm_label": "public_auth_routes",
-      "id": "src_middleware_public_auth_routes"
+      "norm_label": "public_auth_routes"
     },
     {
       "label": "isExcludedPath()",
@@ -977,10 +1021,10 @@
       "source_file": "src/middleware.ts",
       "source_location": "L20",
       "_origin": "ast",
+      "id": "src_middleware_isexcludedpath",
       "community": 4,
       "community_name": "IContactMessagesRepository",
-      "norm_label": "isexcludedpath()",
-      "id": "src_middleware_isexcludedpath"
+      "norm_label": "isexcludedpath()"
     },
     {
       "label": "middleware()",
@@ -988,10 +1032,10 @@
       "source_file": "src/middleware.ts",
       "source_location": "L24",
       "_origin": "ast",
+      "id": "src_middleware_middleware",
       "community": 4,
       "community_name": "IContactMessagesRepository",
-      "norm_label": "middleware()",
-      "id": "src_middleware_middleware"
+      "norm_label": "middleware()"
     },
     {
       "label": "config",
@@ -999,10 +1043,10 @@
       "source_file": "src/middleware.ts",
       "source_location": "L65",
       "_origin": "ast",
+      "id": "src_middleware_config",
       "community": 4,
       "community_name": "IContactMessagesRepository",
-      "norm_label": "config",
-      "id": "src_middleware_config"
+      "norm_label": "config"
     },
     {
       "label": "use-auth-hooks.ts",
@@ -1010,10 +1054,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "use-auth-hooks.ts",
-      "id": "src_shared_hooks_auth_use_auth_hooks"
+      "norm_label": "use-auth-hooks.ts"
     },
     {
       "label": "repository",
@@ -1021,10 +1065,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L29",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_repository",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "repository",
-      "id": "src_shared_hooks_auth_use_auth_hooks_repository"
+      "norm_label": "repository"
     },
     {
       "label": "signInUseCase",
@@ -1032,10 +1076,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L30",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_signinusecase",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "signinusecase",
-      "id": "src_shared_hooks_auth_use_auth_hooks_signinusecase"
+      "norm_label": "signinusecase"
     },
     {
       "label": "signOutUseCase",
@@ -1043,10 +1087,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L31",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_signoutusecase",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "signoutusecase",
-      "id": "src_shared_hooks_auth_use_auth_hooks_signoutusecase"
+      "norm_label": "signoutusecase"
     },
     {
       "label": "getCurrentUserUseCase",
@@ -1054,10 +1098,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L32",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_getcurrentuserusecase",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "getcurrentuserusecase",
-      "id": "src_shared_hooks_auth_use_auth_hooks_getcurrentuserusecase"
+      "norm_label": "getcurrentuserusecase"
     },
     {
       "label": "sendPasswordResetUseCase",
@@ -1065,10 +1109,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L33",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_sendpasswordresetusecase",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "sendpasswordresetusecase",
-      "id": "src_shared_hooks_auth_use_auth_hooks_sendpasswordresetusecase"
+      "norm_label": "sendpasswordresetusecase"
     },
     {
       "label": "resetPasswordUseCase",
@@ -1076,10 +1120,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L34",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_resetpasswordusecase",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "resetpasswordusecase",
-      "id": "src_shared_hooks_auth_use_auth_hooks_resetpasswordusecase"
+      "norm_label": "resetpasswordusecase"
     },
     {
       "label": "changePasswordUseCase",
@@ -1087,10 +1131,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L35",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_changepasswordusecase",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "changepasswordusecase",
-      "id": "src_shared_hooks_auth_use_auth_hooks_changepasswordusecase"
+      "norm_label": "changepasswordusecase"
     },
     {
       "label": "useCurrentUser()",
@@ -1098,10 +1142,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L37",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_usecurrentuser",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "usecurrentuser()",
-      "id": "src_shared_hooks_auth_use_auth_hooks_usecurrentuser"
+      "norm_label": "usecurrentuser()"
     },
     {
       "label": "useSignIn()",
@@ -1109,10 +1153,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L62",
       "_origin": "ast",
-      "community": 1,
-      "community_name": "ContactMessageStatus",
-      "norm_label": "usesignin()",
-      "id": "src_shared_hooks_auth_use_auth_hooks_usesignin"
+      "id": "src_shared_hooks_auth_use_auth_hooks_usesignin",
+      "community": 3,
+      "community_name": "use-contact-messages-hooks.ts",
+      "norm_label": "usesignin()"
     },
     {
       "label": "useSignOut()",
@@ -1120,10 +1164,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L83",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_usesignout",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "usesignout()",
-      "id": "src_shared_hooks_auth_use_auth_hooks_usesignout"
+      "norm_label": "usesignout()"
     },
     {
       "label": "useSendPasswordReset()",
@@ -1131,10 +1175,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L105",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_usesendpasswordreset",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "usesendpasswordreset()",
-      "id": "src_shared_hooks_auth_use_auth_hooks_usesendpasswordreset"
+      "norm_label": "usesendpasswordreset()"
     },
     {
       "label": "useResetPassword()",
@@ -1142,10 +1186,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L117",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_useresetpassword",
       "community": 1,
       "community_name": "ContactMessageStatus",
-      "norm_label": "useresetpassword()",
-      "id": "src_shared_hooks_auth_use_auth_hooks_useresetpassword"
+      "norm_label": "useresetpassword()"
     },
     {
       "label": "useChangePassword()",
@@ -1153,10 +1197,10 @@
       "source_file": "src/shared/hooks/auth/use-auth-hooks.ts",
       "source_location": "L133",
       "_origin": "ast",
+      "id": "src_shared_hooks_auth_use_auth_hooks_usechangepassword",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "usechangepassword()",
-      "id": "src_shared_hooks_auth_use_auth_hooks_usechangepassword"
+      "norm_label": "usechangepassword()"
     },
     {
       "label": "admin-header.tsx",
@@ -1164,10 +1208,10 @@
       "source_file": "src/shared/layouts/admin-header.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_shared_layouts_admin_header",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "admin-header.tsx",
-      "id": "src_shared_layouts_admin_header"
+      "norm_label": "admin-header.tsx"
     },
     {
       "label": "AdminHeaderProps",
@@ -1175,10 +1219,10 @@
       "source_file": "src/shared/layouts/admin-header.tsx",
       "source_location": "L40",
       "_origin": "ast",
+      "id": "src_shared_layouts_admin_header_adminheaderprops",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "adminheaderprops",
-      "id": "src_shared_layouts_admin_header_adminheaderprops"
+      "norm_label": "adminheaderprops"
     },
     {
       "label": "LANGUAGES",
@@ -1186,10 +1230,10 @@
       "source_file": "src/shared/layouts/admin-header.tsx",
       "source_location": "L45",
       "_origin": "ast",
+      "id": "src_shared_layouts_admin_header_languages",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "languages",
-      "id": "src_shared_layouts_admin_header_languages"
+      "norm_label": "languages"
     },
     {
       "label": "AdminHeader()",
@@ -1197,10 +1241,10 @@
       "source_file": "src/shared/layouts/admin-header.tsx",
       "source_location": "L51",
       "_origin": "ast",
+      "id": "src_shared_layouts_admin_header_adminheader",
       "community": 3,
       "community_name": "use-contact-messages-hooks.ts",
-      "norm_label": "adminheader()",
-      "id": "src_shared_layouts_admin_header_adminheader"
+      "norm_label": "adminheader()"
     },
     {
       "label": "user-profile.entity.ts",
@@ -1208,8 +1252,8 @@
       "source_file": "src/features/authentication/domain/entities/user-profile.entity.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
+      "community": 10,
+      "community_name": "UserProfileEntity",
       "norm_label": "user-profile.entity.ts",
       "id": "src_features_authentication_domain_entities_user_profile_entity"
     },
@@ -1219,8 +1263,8 @@
       "source_file": "src/features/authentication/domain/entities/user-profile.entity.ts",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
+      "community": 10,
+      "community_name": "UserProfileEntity",
       "norm_label": "userprofileprops",
       "id": "src_features_authentication_domain_entities_user_profile_entity_userprofileprops"
     },
@@ -1230,8 +1274,8 @@
       "source_file": "src/features/authentication/domain/entities/user-profile.entity.ts",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
+      "community": 10,
+      "community_name": "UserProfileEntity",
       "norm_label": "userprofileentity",
       "id": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity"
     },
@@ -1241,8 +1285,8 @@
       "source_file": "src/features/authentication/domain/entities/user-profile.entity.ts",
       "source_location": "L29",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
+      "community": 10,
+      "community_name": "UserProfileEntity",
       "norm_label": ".constructor()",
       "id": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity_constructor"
     },
@@ -1252,8 +1296,8 @@
       "source_file": "src/features/authentication/domain/entities/user-profile.entity.ts",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
+      "community": 10,
+      "community_name": "UserProfileEntity",
       "norm_label": ".issuperadmin()",
       "id": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity_issuperadmin"
     },
@@ -1263,8 +1307,8 @@
       "source_file": "src/features/authentication/domain/entities/user-profile.entity.ts",
       "source_location": "L45",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
+      "community": 10,
+      "community_name": "UserProfileEntity",
       "norm_label": ".haspermission()",
       "id": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity_haspermission"
     },
@@ -1274,8 +1318,8 @@
       "source_file": "src/features/authentication/domain/entities/user-profile.entity.ts",
       "source_location": "L50",
       "_origin": "ast",
-      "community": 7,
-      "community_name": "page.tsx",
+      "community": 10,
+      "community_name": "UserProfileEntity",
       "norm_label": ".initials()",
       "id": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity_initials"
     },
@@ -1373,8 +1417,8 @@
       "source_file": "src/app/[locale]/(admin)/admin/contact-messages/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
-      "community_name": "contact-messages-table.tsx",
+      "community": 7,
+      "community_name": "page.tsx",
       "norm_label": "contact-messages/page.tsx",
       "id": "src_app_locale_admin_admin_contact_messages_page"
     },
@@ -1384,8 +1428,8 @@
       "source_file": "src/app/[locale]/(admin)/admin/contact-messages/page.tsx",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 0,
-      "community_name": "contact-messages-table.tsx",
+      "community": 7,
+      "community_name": "page.tsx",
       "norm_label": "metadata",
       "id": "src_app_locale_admin_admin_contact_messages_page_metadata"
     },
@@ -1395,8 +1439,8 @@
       "source_file": "src/app/[locale]/(admin)/admin/contact-messages/page.tsx",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 0,
-      "community_name": "contact-messages-table.tsx",
+      "community": 7,
+      "community_name": "page.tsx",
       "norm_label": "admincontactmessagespage()",
       "id": "src_app_locale_admin_admin_contact_messages_page_admincontactmessagespage"
     },
@@ -2341,8 +2385,8 @@
       "source_file": "src/features/contact-messages/presentation/pages/contact-messages-list-page.tsx",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 0,
-      "community_name": "contact-messages-table.tsx",
+      "community": 7,
+      "community_name": "page.tsx",
       "norm_label": "contactmessageslistpage()",
       "id": "src_features_contact_messages_presentation_pages_contact_messages_list_page_contactmessageslistpage"
     },
@@ -2352,8 +2396,8 @@
       "source_file": "src/features/contact-messages/presentation/pages/index.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
-      "community_name": "contact-messages-table.tsx",
+      "community": 7,
+      "community_name": "page.tsx",
       "norm_label": "contact-messages/presentation/pages/index.ts",
       "id": "src_features_contact_messages_presentation_pages_index"
     },
@@ -2571,45 +2615,139 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/core/config/i18n.ts",
-      "source_location": "L21",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_core_config_i18n",
-      "target": "src_core_config_i18n_isrtl",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/core/config/i18n.ts",
+      "source_file": "src/app/[locale]/(admin)/admin/forgot-password/page.tsx",
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_core_config_i18n",
-      "target": "src_core_config_i18n_locale",
+      "source": "src_app_locale_admin_admin_forgot_password_page",
+      "target": "src_app_locale_admin_admin_forgot_password_page_adminforgotpasswordroute",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/core/config/i18n.ts",
-      "source_location": "L7",
+      "source_file": "src/app/[locale]/(admin)/admin/forgot-password/page.tsx",
+      "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_core_config_i18n",
-      "target": "src_core_config_i18n_routing",
+      "source": "src_app_locale_admin_admin_forgot_password_page",
+      "target": "src_app_locale_admin_admin_forgot_password_page_metadata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/[locale]/(admin)/admin/forgot-password/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_locale_admin_admin_forgot_password_page",
+      "target": "src_features_authentication_presentation_pages_forgot_password_page_forgotpasswordpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/[locale]/(admin)/admin/forgot-password/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_locale_admin_admin_forgot_password_page",
+      "target": "src_features_authentication_presentation_pages_index",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/core/config/i18n.ts",
-      "source_location": "L19",
+      "source_file": "src/app/[locale]/(admin)/admin/login/page.tsx",
+      "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_core_config_i18n",
-      "target": "src_core_config_i18n_rtl_locales",
+      "source": "src_app_locale_admin_admin_login_page",
+      "target": "src_app_locale_admin_admin_login_page_adminloginroute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/[locale]/(admin)/admin/login/page.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_locale_admin_admin_login_page",
+      "target": "src_app_locale_admin_admin_login_page_metadata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/[locale]/(admin)/admin/login/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_locale_admin_admin_login_page",
+      "target": "src_features_authentication_presentation_pages_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/[locale]/(admin)/admin/login/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_locale_admin_admin_login_page",
+      "target": "src_features_authentication_presentation_pages_login_page_loginpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/[locale]/(admin)/admin/reset-password/page.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_locale_admin_admin_reset_password_page",
+      "target": "src_app_locale_admin_admin_reset_password_page_adminresetpasswordroute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/[locale]/(admin)/admin/reset-password/page.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_locale_admin_admin_reset_password_page",
+      "target": "src_app_locale_admin_admin_reset_password_page_metadata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/[locale]/(admin)/admin/reset-password/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_locale_admin_admin_reset_password_page",
+      "target": "src_features_authentication_presentation_pages_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/[locale]/(admin)/admin/reset-password/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_locale_admin_admin_reset_password_page",
+      "target": "src_features_authentication_presentation_pages_reset_password_page_resetpasswordpage",
       "confidence_score": 1.0
     },
     {
@@ -2619,9 +2757,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_dto_auth_dto",
-      "target": "src_features_authentication_data_dto_auth_dto_adminprofiledto"
+      "target": "src_features_authentication_data_dto_auth_dto_adminprofiledto",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -2630,9 +2768,9 @@
       "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_dto_auth_dto",
-      "target": "src_features_authentication_data_dto_auth_dto_authuserdto"
+      "target": "src_features_authentication_data_dto_auth_dto_authuserdto",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -2642,9 +2780,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_mapper_auth_mapper",
-      "target": "src_features_authentication_data_dto_auth_dto"
+      "target": "src_features_authentication_data_dto_auth_dto",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -2654,9 +2792,9 @@
       "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_data_dto_auth_dto"
+      "target": "src_features_authentication_data_dto_auth_dto",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2666,9 +2804,9 @@
       "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_data_dto_auth_dto_adminprofiledto"
+      "target": "src_features_authentication_data_dto_auth_dto_adminprofiledto",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2678,9 +2816,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_mapper_auth_mapper",
-      "target": "src_features_authentication_data_dto_auth_dto_authuserdto"
+      "target": "src_features_authentication_data_dto_auth_dto_authuserdto",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -2689,9 +2827,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_mapper_auth_mapper",
-      "target": "src_features_authentication_data_mapper_auth_mapper_touserprofileentity"
+      "target": "src_features_authentication_data_mapper_auth_mapper_touserprofileentity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -2701,9 +2839,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_mapper_auth_mapper",
-      "target": "src_features_authentication_domain_entities_user_profile_entity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2713,9 +2851,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_mapper_auth_mapper",
-      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -2725,9 +2863,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_data_mapper_auth_mapper"
+      "target": "src_features_authentication_data_mapper_auth_mapper",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2737,9 +2875,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_data_mapper_auth_mapper_touserprofileentity"
+      "target": "src_features_authentication_data_mapper_auth_mapper_touserprofileentity",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -2772,9 +2910,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -2784,9 +2922,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_domain_entities_user_profile_entity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2796,9 +2934,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -2808,9 +2946,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2820,9 +2958,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2832,9 +2970,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2844,9 +2982,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2856,9 +2994,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2868,9 +3006,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -2880,9 +3018,9 @@
       "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -2891,9 +3029,9 @@
       "source_location": "L150",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_changepassword"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_changepassword",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -2902,9 +3040,9 @@
       "source_location": "L102",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_getcurrentuser"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_getcurrentuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -2913,9 +3051,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_logactivity"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_logactivity",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -2924,9 +3062,9 @@
       "source_location": "L140",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_resetpassword"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_resetpassword",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -2935,9 +3073,9 @@
       "source_location": "L127",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_sendpasswordresetemail"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_sendpasswordresetemail",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -2946,9 +3084,9 @@
       "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signin"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signin",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -2957,9 +3095,9 @@
       "source_location": "L91",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signout"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signout",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -2968,9 +3106,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_supabase"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_supabase",
+      "confidence_score": 1.0
     },
     {
       "relation": "implements",
@@ -2980,9 +3118,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -2992,9 +3130,9 @@
       "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -3004,9 +3142,9 @@
       "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signin",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_logactivity"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_logactivity",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -3016,9 +3154,9 @@
       "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signout",
-      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_logactivity"
+      "target": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_logactivity",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3028,9 +3166,9 @@
       "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_signin",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3040,9 +3178,9 @@
       "source_location": "L127",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_sendpasswordresetemail",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3052,9 +3190,9 @@
       "source_location": "L140",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_resetpassword",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3064,9 +3202,9 @@
       "source_location": "L150",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_data_repositories_supabase_auth_repository_supabaseauthrepository_changepassword",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3076,9 +3214,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository",
-      "target": "src_features_authentication_domain_entities_user_profile_entity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3088,9 +3226,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository",
-      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3099,9 +3237,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3110,9 +3248,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3121,9 +3259,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3132,9 +3270,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3143,9 +3281,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3155,9 +3293,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_change_password_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3167,9 +3305,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_get_current_user_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3179,9 +3317,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_reset_password_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3191,9 +3329,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_send_password_reset_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3203,9 +3341,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_in_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3215,9 +3353,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_out_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3227,9 +3365,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3239,9 +3377,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_in_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3251,9 +3389,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase_execute",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3263,9 +3401,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_signininput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3275,9 +3413,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_send_password_reset_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3287,9 +3425,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase_execute",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3299,9 +3437,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_sendpasswordresetinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3311,9 +3449,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_reset_password_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3323,9 +3461,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase_execute",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3335,9 +3473,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_resetpasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3347,9 +3485,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_change_password_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3359,9 +3497,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase_execute",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3371,9 +3509,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_changepasswordinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3382,9 +3520,9 @@
       "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_changepassword"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_changepassword",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3393,9 +3531,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_getcurrentuser"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_getcurrentuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3404,9 +3542,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_resetpassword"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_resetpassword",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3415,9 +3553,9 @@
       "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_sendpasswordresetemail"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_sendpasswordresetemail",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3426,9 +3564,9 @@
       "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_signin"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_signin",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3437,9 +3575,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_signout"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository_signout",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3449,9 +3587,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_change_password_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3461,9 +3599,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase_constructor",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3473,9 +3611,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_get_current_user_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3485,9 +3623,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase_constructor",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3497,9 +3635,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_reset_password_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3509,9 +3647,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase_constructor",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3521,9 +3659,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_send_password_reset_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3533,9 +3671,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase_constructor",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3545,9 +3683,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_in_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3557,9 +3695,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase_constructor",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3569,9 +3707,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_out_usecase",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -3581,9 +3719,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase_constructor",
-      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository"
+      "target": "src_features_authentication_domain_repositories_i_auth_repository_iauthrepository",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -3664,9 +3802,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_change_password_usecase",
-      "target": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase"
+      "target": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -3676,9 +3814,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_index",
-      "target": "src_features_authentication_domain_usecases_change_password_usecase"
+      "target": "src_features_authentication_domain_usecases_change_password_usecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3687,9 +3825,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase",
-      "target": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase_constructor"
+      "target": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase_constructor",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3698,9 +3836,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase",
-      "target": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase_execute"
+      "target": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase_execute",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3710,9 +3848,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase"
+      "target": "src_features_authentication_domain_usecases_change_password_usecase_changepasswordusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3722,9 +3860,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_get_current_user_usecase",
-      "target": "src_features_authentication_domain_entities_user_profile_entity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3734,9 +3872,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_get_current_user_usecase",
-      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3745,9 +3883,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_get_current_user_usecase",
-      "target": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase"
+      "target": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -3757,9 +3895,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_index",
-      "target": "src_features_authentication_domain_usecases_get_current_user_usecase"
+      "target": "src_features_authentication_domain_usecases_get_current_user_usecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3768,9 +3906,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase",
-      "target": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase_constructor"
+      "target": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase_constructor",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3779,9 +3917,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase",
-      "target": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase_execute"
+      "target": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase_execute",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3791,9 +3929,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase"
+      "target": "src_features_authentication_domain_usecases_get_current_user_usecase_getcurrentuserusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -3803,9 +3941,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_index",
-      "target": "src_features_authentication_domain_usecases_reset_password_usecase"
+      "target": "src_features_authentication_domain_usecases_reset_password_usecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -3815,9 +3953,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_index",
-      "target": "src_features_authentication_domain_usecases_send_password_reset_usecase"
+      "target": "src_features_authentication_domain_usecases_send_password_reset_usecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -3827,9 +3965,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_index",
-      "target": "src_features_authentication_domain_usecases_sign_in_usecase"
+      "target": "src_features_authentication_domain_usecases_sign_in_usecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -3839,9 +3977,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_index",
-      "target": "src_features_authentication_domain_usecases_sign_out_usecase"
+      "target": "src_features_authentication_domain_usecases_sign_out_usecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3851,9 +3989,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_usecases_index"
+      "target": "src_features_authentication_domain_usecases_index",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3862,9 +4000,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_reset_password_usecase",
-      "target": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase"
+      "target": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3873,9 +4011,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase",
-      "target": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase_constructor"
+      "target": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase_constructor",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3884,9 +4022,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase",
-      "target": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase_execute"
+      "target": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase_execute",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3896,9 +4034,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase"
+      "target": "src_features_authentication_domain_usecases_reset_password_usecase_resetpasswordusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3907,9 +4045,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_send_password_reset_usecase",
-      "target": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase"
+      "target": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3918,9 +4056,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase",
-      "target": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase_constructor"
+      "target": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase_constructor",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3929,9 +4067,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase",
-      "target": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase_execute"
+      "target": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase_execute",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3941,9 +4079,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase"
+      "target": "src_features_authentication_domain_usecases_send_password_reset_usecase_sendpasswordresetusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3953,9 +4091,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_in_usecase",
-      "target": "src_features_authentication_domain_entities_user_profile_entity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -3965,9 +4103,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_in_usecase",
-      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3976,9 +4114,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_in_usecase",
-      "target": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase"
+      "target": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3987,9 +4125,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase",
-      "target": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase_constructor"
+      "target": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase_constructor",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -3998,9 +4136,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase",
-      "target": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase_execute"
+      "target": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase_execute",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -4010,9 +4148,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase"
+      "target": "src_features_authentication_domain_usecases_sign_in_usecase_signinusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4021,9 +4159,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_out_usecase",
-      "target": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase"
+      "target": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -4032,9 +4170,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase",
-      "target": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase_constructor"
+      "target": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase_constructor",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -4043,9 +4181,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase",
-      "target": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase_execute"
+      "target": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase_execute",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -4055,9 +4193,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase"
+      "target": "src_features_authentication_domain_usecases_sign_out_usecase_signoutusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4066,9 +4204,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_change_password_modal",
-      "target": "src_features_authentication_presentation_components_change_password_modal_changepasswordformvalues"
+      "target": "src_features_authentication_presentation_components_change_password_modal_changepasswordformvalues",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4077,9 +4215,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_change_password_modal",
-      "target": "src_features_authentication_presentation_components_change_password_modal_changepasswordmodal"
+      "target": "src_features_authentication_presentation_components_change_password_modal_changepasswordmodal",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4088,9 +4226,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_change_password_modal",
-      "target": "src_features_authentication_presentation_components_change_password_modal_changepasswordschema"
+      "target": "src_features_authentication_presentation_components_change_password_modal_changepasswordschema",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4100,9 +4238,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_change_password_modal",
-      "target": "src_features_authentication_presentation_stores_auth_store"
+      "target": "src_features_authentication_presentation_stores_auth_store",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -4112,9 +4250,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_change_password_modal",
-      "target": "src_features_authentication_presentation_stores_auth_store_useauthstore"
+      "target": "src_features_authentication_presentation_stores_auth_store_useauthstore",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4124,9 +4262,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_change_password_modal",
-      "target": "src_shared_hooks_auth_use_auth_hooks"
+      "target": "src_shared_hooks_auth_use_auth_hooks",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -4136,9 +4274,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_change_password_modal",
-      "target": "src_shared_hooks_auth_use_auth_hooks_usechangepassword"
+      "target": "src_shared_hooks_auth_use_auth_hooks_usechangepassword",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -4148,9 +4286,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_index",
-      "target": "src_features_authentication_presentation_components_change_password_modal"
+      "target": "src_features_authentication_presentation_components_change_password_modal",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4160,9 +4298,9 @@
       "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_layouts_admin_header",
-      "target": "src_features_authentication_presentation_components_change_password_modal"
+      "target": "src_features_authentication_presentation_components_change_password_modal",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -4196,9 +4334,9 @@
       "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_layouts_admin_header",
-      "target": "src_features_authentication_presentation_components_change_password_modal_changepasswordmodal"
+      "target": "src_features_authentication_presentation_components_change_password_modal_changepasswordmodal",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4207,9 +4345,9 @@
       "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_forgot_password_form",
-      "target": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordform"
+      "target": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordform",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4218,9 +4356,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_forgot_password_form",
-      "target": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordformvalues"
+      "target": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordformvalues",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4229,9 +4367,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_forgot_password_form",
-      "target": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordschema"
+      "target": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordschema",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4241,9 +4379,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_forgot_password_form",
-      "target": "src_shared_hooks_auth_use_auth_hooks"
+      "target": "src_shared_hooks_auth_use_auth_hooks",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -4253,9 +4391,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_forgot_password_form",
-      "target": "src_shared_hooks_auth_use_auth_hooks_usesendpasswordreset"
+      "target": "src_shared_hooks_auth_use_auth_hooks_usesendpasswordreset",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -4265,9 +4403,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_index",
-      "target": "src_features_authentication_presentation_components_forgot_password_form"
+      "target": "src_features_authentication_presentation_components_forgot_password_form",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4277,9 +4415,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_forgot_password_page",
-      "target": "src_features_authentication_presentation_components_forgot_password_form"
+      "target": "src_features_authentication_presentation_components_forgot_password_form",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -4301,9 +4439,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_forgot_password_page",
-      "target": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordform"
+      "target": "src_features_authentication_presentation_components_forgot_password_form_forgotpasswordform",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -4313,9 +4451,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_index",
-      "target": "src_features_authentication_presentation_components_login_form"
+      "target": "src_features_authentication_presentation_components_login_form",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -4325,9 +4463,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_index",
-      "target": "src_features_authentication_presentation_components_reset_password_form"
+      "target": "src_features_authentication_presentation_components_reset_password_form",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4336,9 +4474,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_login_form",
-      "target": "src_features_authentication_presentation_components_login_form_loginform"
+      "target": "src_features_authentication_presentation_components_login_form_loginform",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4347,9 +4485,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_login_form",
-      "target": "src_features_authentication_presentation_components_login_form_loginformvalues"
+      "target": "src_features_authentication_presentation_components_login_form_loginformvalues",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4358,9 +4496,9 @@
       "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_login_form",
-      "target": "src_features_authentication_presentation_components_login_form_loginschema"
+      "target": "src_features_authentication_presentation_components_login_form_loginschema",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4370,9 +4508,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_login_form",
-      "target": "src_shared_hooks_auth_use_auth_hooks"
+      "target": "src_shared_hooks_auth_use_auth_hooks",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -4382,9 +4520,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_login_form",
-      "target": "src_shared_hooks_auth_use_auth_hooks_usesignin"
+      "target": "src_shared_hooks_auth_use_auth_hooks_usesignin",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4394,9 +4532,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_login_page",
-      "target": "src_features_authentication_presentation_components_login_form"
+      "target": "src_features_authentication_presentation_components_login_form",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -4418,9 +4556,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_login_page",
-      "target": "src_features_authentication_presentation_components_login_form_loginform"
+      "target": "src_features_authentication_presentation_components_login_form_loginform",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4429,9 +4567,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_reset_password_form",
-      "target": "src_features_authentication_presentation_components_reset_password_form_resetpasswordform"
+      "target": "src_features_authentication_presentation_components_reset_password_form_resetpasswordform",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4440,9 +4578,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_reset_password_form",
-      "target": "src_features_authentication_presentation_components_reset_password_form_resetpasswordformvalues"
+      "target": "src_features_authentication_presentation_components_reset_password_form_resetpasswordformvalues",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4451,9 +4589,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_reset_password_form",
-      "target": "src_features_authentication_presentation_components_reset_password_form_resetpasswordschema"
+      "target": "src_features_authentication_presentation_components_reset_password_form_resetpasswordschema",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4463,9 +4601,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_reset_password_form",
-      "target": "src_shared_hooks_auth_use_auth_hooks"
+      "target": "src_shared_hooks_auth_use_auth_hooks",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -4475,9 +4613,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_components_reset_password_form",
-      "target": "src_shared_hooks_auth_use_auth_hooks_useresetpassword"
+      "target": "src_shared_hooks_auth_use_auth_hooks_useresetpassword",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4487,9 +4625,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_reset_password_page",
-      "target": "src_features_authentication_presentation_components_reset_password_form"
+      "target": "src_features_authentication_presentation_components_reset_password_form",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -4511,9 +4649,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_reset_password_page",
-      "target": "src_features_authentication_presentation_components_reset_password_form_resetpasswordform"
+      "target": "src_features_authentication_presentation_components_reset_password_form_resetpasswordform",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4522,9 +4660,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_forgot_password_page",
-      "target": "src_features_authentication_presentation_pages_forgot_password_page_forgotpasswordpage"
+      "target": "src_features_authentication_presentation_pages_forgot_password_page_forgotpasswordpage",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -4534,9 +4672,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_index",
-      "target": "src_features_authentication_presentation_pages_forgot_password_page"
+      "target": "src_features_authentication_presentation_pages_forgot_password_page",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -4546,9 +4684,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_index",
-      "target": "src_features_authentication_presentation_pages_forgot_password_page_forgotpasswordpage"
+      "target": "src_features_authentication_presentation_pages_forgot_password_page_forgotpasswordpage",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -4558,9 +4696,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_index",
-      "target": "src_features_authentication_presentation_pages_login_page"
+      "target": "src_features_authentication_presentation_pages_login_page",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -4570,9 +4708,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_index",
-      "target": "src_features_authentication_presentation_pages_login_page_loginpage"
+      "target": "src_features_authentication_presentation_pages_login_page_loginpage",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -4582,9 +4720,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_index",
-      "target": "src_features_authentication_presentation_pages_reset_password_page"
+      "target": "src_features_authentication_presentation_pages_reset_password_page",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -4594,9 +4732,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_index",
-      "target": "src_features_authentication_presentation_pages_reset_password_page_resetpasswordpage"
+      "target": "src_features_authentication_presentation_pages_reset_password_page_resetpasswordpage",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4605,9 +4743,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_login_page",
-      "target": "src_features_authentication_presentation_pages_login_page_loginpage"
+      "target": "src_features_authentication_presentation_pages_login_page_loginpage",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4616,9 +4754,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_pages_reset_password_page",
-      "target": "src_features_authentication_presentation_pages_reset_password_page_resetpasswordpage"
+      "target": "src_features_authentication_presentation_pages_reset_password_page_resetpasswordpage",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4628,9 +4766,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_stores_auth_store",
-      "target": "src_features_authentication_domain_entities_user_profile_entity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -4640,9 +4778,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_stores_auth_store",
-      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity"
+      "target": "src_features_authentication_domain_entities_user_profile_entity_userprofileentity",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4651,9 +4789,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_stores_auth_store",
-      "target": "src_features_authentication_presentation_stores_auth_store_authstate"
+      "target": "src_features_authentication_presentation_stores_auth_store_authstate",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4662,9 +4800,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_features_authentication_presentation_stores_auth_store",
-      "target": "src_features_authentication_presentation_stores_auth_store_useauthstore"
+      "target": "src_features_authentication_presentation_stores_auth_store_useauthstore",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4674,9 +4812,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_presentation_stores_auth_store"
+      "target": "src_features_authentication_presentation_stores_auth_store",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4686,9 +4824,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_layouts_admin_header",
-      "target": "src_features_authentication_presentation_stores_auth_store"
+      "target": "src_features_authentication_presentation_stores_auth_store",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -4698,9 +4836,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_features_authentication_presentation_stores_auth_store_useauthstore"
+      "target": "src_features_authentication_presentation_stores_auth_store_useauthstore",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -4758,9 +4896,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_layouts_admin_header",
-      "target": "src_features_authentication_presentation_stores_auth_store_useauthstore"
+      "target": "src_features_authentication_presentation_stores_auth_store_useauthstore",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -4781,9 +4919,9 @@
       "source_location": "L65",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_middleware",
-      "target": "src_middleware_config"
+      "target": "src_middleware_config",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4792,9 +4930,9 @@
       "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_middleware",
-      "target": "src_middleware_intlmiddleware"
+      "target": "src_middleware_intlmiddleware",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4803,9 +4941,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_middleware",
-      "target": "src_middleware_isexcludedpath"
+      "target": "src_middleware_isexcludedpath",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4814,9 +4952,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_middleware",
-      "target": "src_middleware_middleware"
+      "target": "src_middleware_middleware",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4825,9 +4963,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_middleware",
-      "target": "src_middleware_public_auth_routes"
+      "target": "src_middleware_public_auth_routes",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4836,9 +4974,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_middleware",
-      "target": "src_middleware_public_exclude_paths"
+      "target": "src_middleware_public_exclude_paths",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -4848,9 +4986,9 @@
       "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_middleware_middleware",
-      "target": "src_middleware_intlmiddleware"
+      "target": "src_middleware_intlmiddleware",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -4884,9 +5022,9 @@
       "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_middleware_middleware",
-      "target": "src_middleware_isexcludedpath"
+      "target": "src_middleware_isexcludedpath",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4896,9 +5034,9 @@
       "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_core_constants_query_keys"
+      "target": "src_core_constants_query_keys",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -4908,9 +5046,9 @@
       "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_core_constants_query_keys_querykeys"
+      "target": "src_core_constants_query_keys_querykeys",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4919,9 +5057,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_changepasswordusecase"
+      "target": "src_shared_hooks_auth_use_auth_hooks_changepasswordusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4930,9 +5068,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_getcurrentuserusecase"
+      "target": "src_shared_hooks_auth_use_auth_hooks_getcurrentuserusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4941,9 +5079,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_repository"
+      "target": "src_shared_hooks_auth_use_auth_hooks_repository",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4952,9 +5090,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_resetpasswordusecase"
+      "target": "src_shared_hooks_auth_use_auth_hooks_resetpasswordusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4963,9 +5101,9 @@
       "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_sendpasswordresetusecase"
+      "target": "src_shared_hooks_auth_use_auth_hooks_sendpasswordresetusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4974,9 +5112,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_signinusecase"
+      "target": "src_shared_hooks_auth_use_auth_hooks_signinusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4985,9 +5123,9 @@
       "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_signoutusecase"
+      "target": "src_shared_hooks_auth_use_auth_hooks_signoutusecase",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4996,9 +5134,9 @@
       "source_location": "L133",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_usechangepassword"
+      "target": "src_shared_hooks_auth_use_auth_hooks_usechangepassword",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5007,9 +5145,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_usecurrentuser"
+      "target": "src_shared_hooks_auth_use_auth_hooks_usecurrentuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5018,9 +5156,9 @@
       "source_location": "L117",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_useresetpassword"
+      "target": "src_shared_hooks_auth_use_auth_hooks_useresetpassword",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5029,9 +5167,9 @@
       "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_usesendpasswordreset"
+      "target": "src_shared_hooks_auth_use_auth_hooks_usesendpasswordreset",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5040,9 +5178,9 @@
       "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_usesignin"
+      "target": "src_shared_hooks_auth_use_auth_hooks_usesignin",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5051,9 +5189,9 @@
       "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_hooks_auth_use_auth_hooks",
-      "target": "src_shared_hooks_auth_use_auth_hooks_usesignout"
+      "target": "src_shared_hooks_auth_use_auth_hooks_usesignout",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -5063,9 +5201,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_layouts_admin_header",
-      "target": "src_shared_hooks_auth_use_auth_hooks"
+      "target": "src_shared_hooks_auth_use_auth_hooks",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -5075,9 +5213,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_layouts_admin_header",
-      "target": "src_shared_hooks_auth_use_auth_hooks_usesignout"
+      "target": "src_shared_hooks_auth_use_auth_hooks_usesignout",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -5098,9 +5236,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_layouts_admin_header",
-      "target": "src_shared_layouts_admin_header_adminheader"
+      "target": "src_shared_layouts_admin_header_adminheader",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5109,9 +5247,9 @@
       "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_layouts_admin_header",
-      "target": "src_shared_layouts_admin_header_adminheaderprops"
+      "target": "src_shared_layouts_admin_header_adminheaderprops",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5120,9 +5258,9 @@
       "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_shared_layouts_admin_header",
-      "target": "src_shared_layouts_admin_header_languages"
+      "target": "src_shared_layouts_admin_header_languages",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -8233,5 +8371,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "3d652a54c34462154fcd8aff683cd2789a35099a"
+  "built_at_commit": "29414643ddb212499f7224501acbad1ef89e78e3"
 }
