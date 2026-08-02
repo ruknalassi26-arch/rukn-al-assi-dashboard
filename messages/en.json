@@ -146,6 +146,40 @@
       "timeline": "Timeline",
       "team": "Management Team",
       "certificates": "Certificates"
+    },
+    "overview": {
+      "title": "Company Overview & Details",
+      "subtitle": "Configure company name, establish date, descriptions, headquarters, and contact profiles.",
+      "saveBtn": "Save Company Info",
+      "nameEn": "Company Name (English)",
+      "nameAr": "Company Name (Arabic)",
+      "shortEn": "Short Summary (English)",
+      "shortAr": "Short Summary (Arabic)",
+      "fullEn": "Full Company Story (English)",
+      "fullAr": "Full Company Story (Arabic)",
+      "estYear": "Established Year",
+      "headquarters": "Headquarters Location",
+      "phone": "Official Phone",
+      "email": "Official Email",
+      "website": "Website Link"
+    },
+    "mission": {
+      "title": "Company Mission",
+      "subtitle": "Core objective and purpose of the organization.",
+      "saveBtn": "Save Mission",
+      "titleEn": "Title (English)",
+      "titleAr": "Title (Arabic)",
+      "contentEn": "Content (English)",
+      "contentAr": "Content (Arabic)"
+    },
+    "vision": {
+      "title": "Company Vision",
+      "subtitle": "Long-term aspirations and strategic direction.",
+      "saveBtn": "Save Vision",
+      "titleEn": "Title (English)",
+      "titleAr": "Title (Arabic)",
+      "contentEn": "Content (English)",
+      "contentAr": "Content (Arabic)"
     }
   },
   "dashboard": {
@@ -153,6 +187,7 @@
     "subtitle": "Welcome back! Here's an overview of your business.",
     "stats": {
       "totalProducts": "Total Products",
+      "totalCategories": "Total Categories",
       "totalServices": "Total Services",
       "totalProjects": "Total Projects",
       "totalRfqs": "Total RFQs",

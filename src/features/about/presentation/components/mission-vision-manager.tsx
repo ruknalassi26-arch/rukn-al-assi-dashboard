@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2, Save, Target, Eye } from "lucide-react";
 import {
   Card,
@@ -41,6 +42,10 @@ const sectionSchema = z.object({
 type SectionFormValues = z.infer<typeof sectionSchema>;
 
 export function MissionVisionManager() {
+  const tMission = useTranslations("aboutAdmin.mission");
+  const tVision = useTranslations("aboutAdmin.vision");
+  const tCommon = useTranslations("common");
+
   const { data: mission, isLoading: isMissionLoading, error: missionError, refetch: refetchMission } = useMission();
   const { data: vision, isLoading: isVisionLoading, error: visionError, refetch: refetchVision } = useVision();
 
@@ -99,11 +104,11 @@ export function MissionVisionManager() {
     }
   }, [vision, visionForm]);
 
-  const onSaveMission = async (values: SectionFormValues) => {
+  const onMissionSubmit = async (values: SectionFormValues) => {
     await updateMissionMutation.mutateAsync(values);
   };
 
-  const onSaveVision = async (values: SectionFormValues) => {
+  const onVisionSubmit = async (values: SectionFormValues) => {
     await updateVisionMutation.mutateAsync(values);
   };
 
@@ -111,12 +116,24 @@ export function MissionVisionManager() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><Skeleton className="h-6 w-36" /></CardHeader>
-          <CardContent className="space-y-4"><Skeleton className="h-32 w-full" /></CardContent>
+          <CardHeader>
+            <Skeleton className="h-6 w-36" />
+            <Skeleton className="h-4 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader><Skeleton className="h-6 w-36" /></CardHeader>
-          <CardContent className="space-y-4"><Skeleton className="h-32 w-full" /></CardContent>
+          <CardHeader>
+            <Skeleton className="h-6 w-36" />
+            <Skeleton className="h-4 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </CardContent>
         </Card>
       </div>
     );
@@ -125,8 +142,8 @@ export function MissionVisionManager() {
   if (missionError || visionError) {
     return (
       <ErrorState
-        title="Failed to load mission/vision data"
-        error={missionError ?? visionError}
+        title={tCommon("error")}
+        error={missionError ?? visionError ?? new Error("Failed to load")}
         onRetry={() => {
           refetchMission();
           refetchVision();
@@ -137,16 +154,16 @@ export function MissionVisionManager() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* MISSION CARD */}
-      <form onSubmit={missionForm.handleSubmit(onSaveMission)}>
-        <Card>
+      {/* Company Mission Form */}
+      <form onSubmit={missionForm.handleSubmit(onMissionSubmit)}>
+        <Card className="h-full flex flex-col justify-between">
           <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-emerald-600" />
-              <div>
-                <CardTitle>Company Mission</CardTitle>
-                <CardDescription>Core objective and purpose of the organization.</CardDescription>
+            <div>
+              <div className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-emerald-500" />
+                <CardTitle>{tMission("title")}</CardTitle>
               </div>
+              <CardDescription>{tMission("subtitle")}</CardDescription>
             </div>
             <Button type="submit" disabled={updateMissionMutation.isPending} size="sm" className="gap-2">
               {updateMissionMutation.isPending ? (
@@ -154,48 +171,50 @@ export function MissionVisionManager() {
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              Save Mission
+              {tMission("saveBtn")}
             </Button>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1">
             <BilingualTabs
               englishFields={
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label>Title (English)</Label>
-                    <Input {...missionForm.register("titleEn")} />
+                    <Label htmlFor="mTitleEn">{tMission("titleEn")}</Label>
+                    <Input id="mTitleEn" {...missionForm.register("titleEn")} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Content (English)</Label>
-                    <Textarea rows={4} {...missionForm.register("contentEn")} />
+                    <Label htmlFor="mContentEn">{tMission("contentEn")}</Label>
+                    <Textarea id="mContentEn" rows={4} {...missionForm.register("contentEn")} />
                   </div>
                 </div>
               }
               arabicFields={
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label>العنوان (بالعربية)</Label>
-                    <Input dir="rtl" {...missionForm.register("titleAr")} />
+                    <Label htmlFor="mTitleAr">{tMission("titleAr")}</Label>
+                    <Input id="mTitleAr" dir="rtl" {...missionForm.register("titleAr")} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>المحتوى (بالعربية)</Label>
-                    <Textarea rows={4} dir="rtl" {...missionForm.register("contentAr")} />
+                    <Label htmlFor="mContentAr">{tMission("contentAr")}</Label>
+                    <Textarea id="mContentAr" dir="rtl" rows={4} {...missionForm.register("contentAr")} />
                   </div>
                 </div>
               }
             />
 
-            <div className="space-y-1.5 pt-2 border-t">
-              <Label>Status</Label>
+            <div className="space-y-1.5 pt-2">
+              <Label htmlFor="mStatus">{tCommon("status")}</Label>
               <Select
                 value={missionForm.watch("status")}
-                onValueChange={(val: "active" | "draft") => missionForm.setValue("status", val)}
+                onValueChange={(val) => missionForm.setValue("status", val as "active" | "draft")}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="mStatus">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -203,16 +222,16 @@ export function MissionVisionManager() {
         </Card>
       </form>
 
-      {/* VISION CARD */}
-      <form onSubmit={visionForm.handleSubmit(onSaveVision)}>
-        <Card>
+      {/* Company Vision Form */}
+      <form onSubmit={visionForm.handleSubmit(onVisionSubmit)}>
+        <Card className="h-full flex flex-col justify-between">
           <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-blue-600" />
-              <div>
-                <CardTitle>Company Vision</CardTitle>
-                <CardDescription>Long-term aspirations and strategic direction.</CardDescription>
+            <div>
+              <div className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-blue-500" />
+                <CardTitle>{tVision("title")}</CardTitle>
               </div>
+              <CardDescription>{tVision("subtitle")}</CardDescription>
             </div>
             <Button type="submit" disabled={updateVisionMutation.isPending} size="sm" className="gap-2">
               {updateVisionMutation.isPending ? (
@@ -220,48 +239,50 @@ export function MissionVisionManager() {
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              Save Vision
+              {tVision("saveBtn")}
             </Button>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1">
             <BilingualTabs
               englishFields={
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label>Title (English)</Label>
-                    <Input {...visionForm.register("titleEn")} />
+                    <Label htmlFor="vTitleEn">{tVision("titleEn")}</Label>
+                    <Input id="vTitleEn" {...visionForm.register("titleEn")} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Content (English)</Label>
-                    <Textarea rows={4} {...visionForm.register("contentEn")} />
+                    <Label htmlFor="vContentEn">{tVision("contentEn")}</Label>
+                    <Textarea id="vContentEn" rows={4} {...visionForm.register("contentEn")} />
                   </div>
                 </div>
               }
               arabicFields={
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label>العنوان (بالعربية)</Label>
-                    <Input dir="rtl" {...visionForm.register("titleAr")} />
+                    <Label htmlFor="vTitleAr">{tVision("titleAr")}</Label>
+                    <Input id="vTitleAr" dir="rtl" {...visionForm.register("titleAr")} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>المحتوى (بالعربية)</Label>
-                    <Textarea rows={4} dir="rtl" {...visionForm.register("contentAr")} />
+                    <Label htmlFor="vContentAr">{tVision("contentAr")}</Label>
+                    <Textarea id="vContentAr" dir="rtl" rows={4} {...visionForm.register("contentAr")} />
                   </div>
                 </div>
               }
             />
 
-            <div className="space-y-1.5 pt-2 border-t">
-              <Label>Status</Label>
+            <div className="space-y-1.5 pt-2">
+              <Label htmlFor="vStatus">{tCommon("status")}</Label>
               <Select
                 value={visionForm.watch("status")}
-                onValueChange={(val: "active" | "draft") => visionForm.setValue("status", val)}
+                onValueChange={(val) => visionForm.setValue("status", val as "active" | "draft")}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="vStatus">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2, Save, Building } from "lucide-react";
 import {
   Card,
@@ -47,6 +48,8 @@ const companyInfoSchema = z.object({
 type CompanyInfoFormValues = z.infer<typeof companyInfoSchema>;
 
 export function CompanyInfoManager() {
+  const t = useTranslations("aboutAdmin.overview");
+  const tCommon = useTranslations("common");
   const { data: companyData, isLoading, error, refetch } = useCompanyInfo();
   const updateMutation = useUpdateCompanyInfo();
 
@@ -118,7 +121,7 @@ export function CompanyInfoManager() {
   if (error) {
     return (
       <ErrorState
-        title="Failed to load company information"
+        title={tCommon("error")}
         error={error}
         onRetry={() => refetch()}
       />
@@ -132,10 +135,10 @@ export function CompanyInfoManager() {
           <div>
             <div className="flex items-center gap-2">
               <Building className="h-5 w-5 text-primary" />
-              <CardTitle>Company Overview & Details</CardTitle>
+              <CardTitle>{t("title")}</CardTitle>
             </div>
             <CardDescription>
-              Configure company name, establish date, descriptions, headquarters, and contact profiles.
+              {t("subtitle")}
             </CardDescription>
           </div>
           <Button type="submit" disabled={updateMutation.isPending} className="gap-2">
@@ -144,7 +147,7 @@ export function CompanyInfoManager() {
             ) : (
               <Save className="h-4 w-4" />
             )}
-            Save Company Info
+            {t("saveBtn")}
           </Button>
         </CardHeader>
 
@@ -153,18 +156,18 @@ export function CompanyInfoManager() {
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="companyNameEn">Company Name (English) *</Label>
+                  <Label htmlFor="companyNameEn">{t("nameEn")} *</Label>
                   <Input id="companyNameEn" {...register("companyNameEn")} />
                   {errors.companyNameEn && (
                     <span className="text-xs text-destructive">{errors.companyNameEn.message}</span>
                   )}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="shortDescriptionEn">Short Summary (English)</Label>
+                  <Label htmlFor="shortDescriptionEn">{t("shortEn")}</Label>
                   <Textarea id="shortDescriptionEn" rows={2} {...register("shortDescriptionEn")} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="fullDescriptionEn">Full Company Story / About (English)</Label>
+                  <Label htmlFor="fullDescriptionEn">{t("fullEn")}</Label>
                   <Textarea id="fullDescriptionEn" rows={5} {...register("fullDescriptionEn")} />
                 </div>
               </div>
@@ -172,18 +175,18 @@ export function CompanyInfoManager() {
             arabicFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="companyNameAr">اسم الشركة (بالعربية) *</Label>
+                  <Label htmlFor="companyNameAr">{t("nameAr")} *</Label>
                   <Input id="companyNameAr" dir="rtl" {...register("companyNameAr")} />
                   {errors.companyNameAr && (
                     <span className="text-xs text-destructive">{errors.companyNameAr.message}</span>
                   )}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="shortDescriptionAr">الملخص القصير (بالعربية)</Label>
+                  <Label htmlFor="shortDescriptionAr">{t("shortAr")}</Label>
                   <Textarea id="shortDescriptionAr" dir="rtl" rows={2} {...register("shortDescriptionAr")} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="fullDescriptionAr">قصة الشركة / نبذة تعريفية (بالعربية)</Label>
+                  <Label htmlFor="fullDescriptionAr">{t("fullAr")}</Label>
                   <Textarea id="fullDescriptionAr" dir="rtl" rows={5} {...register("fullDescriptionAr")} />
                 </div>
               </div>
@@ -193,7 +196,7 @@ export function CompanyInfoManager() {
           {/* Meta & Global Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 border p-4 rounded-lg bg-muted/10">
             <div className="space-y-1.5">
-              <Label htmlFor="establishedYear">Established Year</Label>
+              <Label htmlFor="establishedYear">{t("estYear")}</Label>
               <Input
                 id="establishedYear"
                 type="number"
@@ -203,36 +206,36 @@ export function CompanyInfoManager() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="headquarters">Headquarters Location</Label>
+              <Label htmlFor="headquarters">{t("headquarters")}</Label>
               <Input id="headquarters" {...register("headquarters")} placeholder="Riyadh, KSA" />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="phone">Official Phone</Label>
+              <Label htmlFor="phone">{t("phone")}</Label>
               <Input id="phone" {...register("phone")} placeholder="+966 ..." />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="email">Official Email</Label>
+              <Label htmlFor="email">{t("email")}</Label>
               <Input id="email" type="email" {...register("email")} placeholder="info@..." />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="website">Website Link</Label>
-              <Input id="website" {...register("website")} placeholder="https://..." />
+              <Label htmlFor="website">{t("website")}</Label>
+              <Input id="website" type="url" {...register("website")} placeholder="https://..." />
             </div>
 
             <div className="space-y-1.5">
-              <Label>Status</Label>
-              <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
-                <SelectTrigger>
+              <Label htmlFor="status">{tCommon("status")}</Label>
+              <Select value={status} onValueChange={(val) => setValue("status", val as "active" | "draft")}>
+                <SelectTrigger id="status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active (Visible)</SelectItem>
-                  <SelectItem value="draft">Draft (Hidden)</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
