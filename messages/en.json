@@ -2,7 +2,38 @@
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong",
+    "error500Title": "Internal Server Error",
+    "error500Desc": "Our servers encountered an unhandled issue. Our engineering team has been notified.",
+    "errorGlobalTitle": "Critical System Error",
+    "errorGlobalDesc": "A critical error occurred while initializing the application layout.",
+    "reloadApp": "Reload Application",
+    "goHome": "Go to Dashboard",
     "retry": "Try again",
+    "dialogs": {
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes",
+      "add": "Add",
+      "edit": "Edit",
+      "titleEn": "Title (English) *",
+      "titleAr": "Title (Arabic) *",
+      "descEn": "Description (English)",
+      "descAr": "Description (Arabic)",
+      "sortOrder": "Sort Order",
+      "icon": "Icon",
+      "yearTimeframe": "Year / Timeframe",
+      "uploadImage": "Click to upload image",
+      "imageFormats": "SVG, PNG, JPG, or WebP (max 5MB)",
+      "roleEn": "Role / Position (English) *",
+      "roleAr": "Role / Position (Arabic) *",
+      "nameEn": "Name (English) *",
+      "nameAr": "Name (Arabic) *",
+      "bioEn": "Biography (English)",
+      "bioAr": "Biography (Arabic)",
+      "issuerEn": "Issuing Organization (English)",
+      "issuerAr": "Issuing Organization (Arabic)",
+      "issueDate": "Issue Date",
+      "expiryDate": "Expiry Date"
+    },
     "back": "Back",
     "readMore": "Read more",
     "viewAll": "View all",
@@ -180,6 +211,38 @@
       "titleAr": "Title (Arabic)",
       "contentEn": "Content (English)",
       "contentAr": "Content (Arabic)"
+    },
+    "coreValues": {
+      "title": "Core Values",
+      "subtitle": "Define organization principles, culture pillar cards, and corporate ethics.",
+      "addBtn": "Add Core Value",
+      "searchPlaceholder": "Search values...",
+      "emptyTitle": "No core values found",
+      "emptyDesc": "Click the button above to add company core values."
+    },
+    "timeline": {
+      "title": "Company Timeline & History",
+      "subtitle": "Manage key company milestones, historical accomplishments, and expansion journey events.",
+      "addBtn": "Add Milestone",
+      "searchPlaceholder": "Search timeline...",
+      "emptyTitle": "No timeline events found",
+      "emptyDesc": "Click the button above to add historical company milestones."
+    },
+    "team": {
+      "title": "Management & Engineering Team",
+      "subtitle": "Manage leadership, engineers, technicians, and executive team profiles.",
+      "addBtn": "Add Team Member",
+      "searchPlaceholder": "Search team...",
+      "emptyTitle": "No team members found",
+      "emptyDesc": "Click the button above to add leadership and staff profiles."
+    },
+    "certificates": {
+      "title": "Quality & ISO Certificates",
+      "subtitle": "Upload and manage company quality standard accreditation files.",
+      "addBtn": "Add Certificate",
+      "searchPlaceholder": "Search certificates...",
+      "emptyTitle": "No certificates found",
+      "emptyDesc": "Click the button above to upload company certificates."
     }
   },
   "dashboard": {

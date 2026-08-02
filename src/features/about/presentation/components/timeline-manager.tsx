@@ -37,8 +37,11 @@ import { ConfirmDialog } from "@shared/dialogs/confirm-dialog";
 import { EmptyState } from "@shared/components/empty-state";
 import { ErrorState } from "@shared/components/error-state";
 import type { TimelineEntity } from "../../domain/entities/about.entity";
+import { useTranslations } from "next-intl";
 
 export function TimelineManager() {
+  const t = useTranslations("aboutAdmin.timeline");
+  const tCommon = useTranslations("common");
   const { data: timeline, isLoading, error, refetch } = useTimeline();
   const createMutation = useCreateTimeline();
   const updateMutation = useUpdateTimeline();
@@ -62,7 +65,7 @@ export function TimelineManager() {
       const matchesSearch =
         item.titleEn.toLowerCase().includes(search.toLowerCase()) ||
         item.titleAr.includes(search) ||
-        item.year.includes(search);
+        item.year.toString().includes(search);
       const matchesStatus = statusFilter === "all" || item.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -72,7 +75,7 @@ export function TimelineManager() {
     if (selectedIds.length === filteredTimeline.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredTimeline.map((t) => t.id));
+      setSelectedIds(filteredTimeline.map((v) => v.id));
     }
   };
 
@@ -118,9 +121,10 @@ export function TimelineManager() {
   };
 
   const handleBulkStatus = async (status: "active" | "draft") => {
-    if (selectedIds.length === 0) return;
-    await bulkStatusMutation.mutateAsync({ ids: selectedIds, status });
-    setSelectedIds([]);
+    if (selectedIds.length > 0) {
+      await bulkStatusMutation.mutateAsync({ ids: selectedIds, status });
+      setSelectedIds([]);
+    }
   };
 
   const handleMove = async (index: number, direction: "up" | "down") => {
@@ -132,7 +136,7 @@ export function TimelineManager() {
     const [moved] = newTimeline.splice(index, 1);
     newTimeline.splice(targetIndex, 0, moved);
 
-    await reorderMutation.mutateAsync(newTimeline.map((t) => t.id));
+    await reorderMutation.mutateAsync(newTimeline.map((v) => v.id));
   };
 
   if (isLoading) {
@@ -146,7 +150,7 @@ export function TimelineManager() {
 
   if (error) {
     return (
-      <ErrorState title="Failed to load company timeline" error={error} onRetry={() => refetch()} />
+      <ErrorState title={tCommon("error")} error={error} onRetry={() => refetch()} />
     );
   }
 
@@ -155,11 +159,11 @@ export function TimelineManager() {
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <CardTitle>Company Timeline & History</CardTitle>
-            <CardDescription>Manage key company milestones, historical accomplishments, and expansion journey events.</CardDescription>
+            <CardTitle>{t("title")}</CardTitle>
+            <CardDescription>{t("subtitle")}</CardDescription>
           </div>
           <Button onClick={handleOpenCreate} className="gap-2 shrink-0">
-            <Plus className="h-4 w-4" /> Add Milestone
+            <Plus className="h-4 w-4" /> {t("addBtn")}
           </Button>
         </CardHeader>
 
@@ -169,28 +173,28 @@ export function TimelineManager() {
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search timeline..."
+                  placeholder={t("searchPlaceholder")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 text-xs"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+                <SelectTrigger className="w-32 text-xs"><SelectValue placeholder={tCommon("status")} /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="all">{tCommon("all")}</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {selectedIds.length > 0 && (
               <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span className="text-xs text-muted-foreground font-medium me-1">{selectedIds.length} selected</span>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")} className="text-xs">Set Active</Button>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")} className="text-xs">Set Draft</Button>
-                <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleting(true)} className="text-xs">Delete Selected</Button>
+                <span className="text-xs text-muted-foreground font-medium me-1">{selectedIds.length} {tCommon("items")}</span>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")} className="text-xs">{tCommon("active")}</Button>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")} className="text-xs">{tCommon("draft")}</Button>
+                <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleting(true)} className="text-xs">{tCommon("delete")}</Button>
               </div>
             )}
           </div>
@@ -198,9 +202,9 @@ export function TimelineManager() {
           {filteredTimeline.length === 0 ? (
             <EmptyState
               icon={History}
-              title="No timeline events found"
-              description="Click the button above to add historical company milestones."
-              action={<Button onClick={handleOpenCreate} size="sm" className="gap-2"><Plus className="h-4 w-4" /> Add Milestone</Button>}
+              title={t("emptyTitle")}
+              description={t("emptyDesc")}
+              action={<Button onClick={handleOpenCreate} size="sm" className="gap-2"><Plus className="h-4 w-4" /> {t("addBtn")}</Button>}
             />
           ) : (
             <div className="space-y-3">

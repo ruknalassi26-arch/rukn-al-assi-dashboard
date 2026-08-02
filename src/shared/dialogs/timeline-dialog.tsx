@@ -1,12 +1,13 @@
 "use client";
 // ==============================================================================
 // shared/dialogs/timeline-dialog.tsx
-// Dialog form for creating/editing a Timeline Milestone with Bilingual Tabs
+// Dialog form for creating/editing a Timeline Milestone with Bilingual Tabs & next-intl
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -56,6 +57,10 @@ export function TimelineDialog({
   initialData,
   isLoading = false,
 }: TimelineDialogProps) {
+  const tTimeline = useTranslations("aboutAdmin.timeline");
+  const tCommon = useTranslations("common");
+  const tDialogs = useTranslations("common.dialogs");
+
   const {
     register,
     handleSubmit,
@@ -116,14 +121,14 @@ export function TimelineDialog({
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Timeline Milestone" : "Add Timeline Milestone"}
+            {initialData ? `${tDialogs("edit")} ${tTimeline("title")}` : tTimeline("addBtn")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label htmlFor="year">Year / Timeframe *</Label>
-            <Input id="year" {...register("year")} placeholder="e.g. 2015 or Q1 2020" />
+            <Label htmlFor="year">{tDialogs("yearTimeframe")} *</Label>
+            <Input id="year" {...register("year")} placeholder="e.g. 2015" />
             {errors.year && <span className="text-xs text-destructive">{errors.year.message}</span>}
           </div>
 
@@ -131,12 +136,12 @@ export function TimelineDialog({
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleEn">Title (English) *</Label>
+                  <Label htmlFor="titleEn">{tDialogs("titleEn")}</Label>
                   <Input id="titleEn" {...register("titleEn")} placeholder="Expanded Factory Operations" />
                   {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="descriptionEn">Description (English)</Label>
+                  <Label htmlFor="descriptionEn">{tDialogs("descEn")}</Label>
                   <Textarea id="descriptionEn" rows={3} {...register("descriptionEn")} />
                 </div>
               </div>
@@ -144,12 +149,12 @@ export function TimelineDialog({
             arabicFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleAr">العنوان (بالعربية) *</Label>
+                  <Label htmlFor="titleAr">{tDialogs("titleAr")}</Label>
                   <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="توسعة عمليات المصنع" />
                   {errors.titleAr && <span className="text-xs text-destructive">{errors.titleAr.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="descriptionAr">الوصف (بالعربية)</Label>
+                  <Label htmlFor="descriptionAr">{tDialogs("descAr")}</Label>
                   <Textarea id="descriptionAr" rows={3} dir="rtl" {...register("descriptionAr")} />
                 </div>
               </div>
@@ -157,7 +162,7 @@ export function TimelineDialog({
           />
 
           <ImageUploader
-            label="Milestone Image"
+            label={tDialogs("uploadImage")}
             value={image ?? null}
             onChange={(url) => setValue("image", url)}
             folder="timeline"
@@ -165,26 +170,28 @@ export function TimelineDialog({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label>{tCommon("status")}</Label>
               <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Label htmlFor="sortOrder">{tDialogs("sortOrder")}</Label>
               <Input id="sortOrder" type="number" {...register("sortOrder", { valueAsNumber: true })} />
             </div>
           </div>
 
           <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+              {tDialogs("cancel")}
+            </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? "Save Changes" : "Add Milestone"}
+              {initialData ? tDialogs("saveChanges") : tTimeline("addBtn")}
             </Button>
           </DialogFooter>
         </form>

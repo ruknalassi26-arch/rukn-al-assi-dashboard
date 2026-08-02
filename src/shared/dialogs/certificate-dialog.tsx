@@ -1,12 +1,13 @@
 "use client";
 // ==============================================================================
 // shared/dialogs/certificate-dialog.tsx
-// Dialog form for creating/editing a Certificate with Bilingual Tabs
+// Dialog form for creating/editing a Certificate with Bilingual Tabs & next-intl
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -59,6 +60,10 @@ export function CertificateDialog({
   initialData,
   isLoading = false,
 }: CertificateDialogProps) {
+  const tCert = useTranslations("aboutAdmin.certificates");
+  const tCommon = useTranslations("common");
+  const tDialogs = useTranslations("common.dialogs");
+
   const {
     register,
     handleSubmit,
@@ -125,13 +130,13 @@ export function CertificateDialog({
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Certificate" : "Add Certificate"}
+            {initialData ? `${tDialogs("edit")} ${tCert("title")}` : tCert("addBtn")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
           <ImageUploader
-            label="Certificate Badge / Document"
+            label={tDialogs("uploadImage")}
             value={image ?? null}
             onChange={(url) => setValue("image", url)}
             folder="certificates"
@@ -141,12 +146,12 @@ export function CertificateDialog({
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleEn">Title (English) *</Label>
+                  <Label htmlFor="titleEn">{tDialogs("titleEn")}</Label>
                   <Input id="titleEn" {...register("titleEn")} placeholder="ISO 9001:2015 Certification" />
                   {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="descriptionEn">Description (English)</Label>
+                  <Label htmlFor="descriptionEn">{tDialogs("descEn")}</Label>
                   <Textarea id="descriptionEn" rows={3} {...register("descriptionEn")} />
                 </div>
               </div>
@@ -154,12 +159,12 @@ export function CertificateDialog({
             arabicFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleAr">العنوان (بالعربية) *</Label>
+                  <Label htmlFor="titleAr">{tDialogs("titleAr")}</Label>
                   <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="شهادة الآيزو ٩٠٠١" />
                   {errors.titleAr && <span className="text-xs text-destructive">{errors.titleAr.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="descriptionAr">الوصف (بالعربية)</Label>
+                  <Label htmlFor="descriptionAr">{tDialogs("descAr")}</Label>
                   <Textarea id="descriptionAr" rows={3} dir="rtl" {...register("descriptionAr")} />
                 </div>
               </div>
@@ -168,41 +173,43 @@ export function CertificateDialog({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t pt-3">
             <div>
-              <Label className="text-xs" htmlFor="organization">Issuing Body</Label>
-              <Input id="organization" size={1} {...register("organization")} placeholder="e.g. TÜV Rheinland" />
+              <Label className="text-xs" htmlFor="organization">{tDialogs("issuerEn")}</Label>
+              <Input id="organization" {...register("organization")} placeholder="e.g. TÜV Rheinland" />
             </div>
             <div>
-              <Label className="text-xs" htmlFor="issueDate">Issue Date</Label>
-              <Input id="issueDate" size={1} type="date" {...register("issueDate")} />
+              <Label className="text-xs" htmlFor="issueDate">{tDialogs("issueDate")}</Label>
+              <Input id="issueDate" type="date" {...register("issueDate")} />
             </div>
             <div>
-              <Label className="text-xs" htmlFor="expiryDate">Expiry Date</Label>
-              <Input id="expiryDate" size={1} type="date" {...register("expiryDate")} />
+              <Label className="text-xs" htmlFor="expiryDate">{tDialogs("expiryDate")}</Label>
+              <Input id="expiryDate" type="date" {...register("expiryDate")} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label>{tCommon("status")}</Label>
               <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Label htmlFor="sortOrder">{tDialogs("sortOrder")}</Label>
               <Input id="sortOrder" type="number" {...register("sortOrder", { valueAsNumber: true })} />
             </div>
           </div>
 
           <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+              {tDialogs("cancel")}
+            </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? "Save Changes" : "Add Certificate"}
+              {initialData ? tDialogs("saveChanges") : tCert("addBtn")}
             </Button>
           </DialogFooter>
         </form>

@@ -1,12 +1,13 @@
 "use client";
 // ==============================================================================
 // shared/dialogs/team-member-dialog.tsx
-// Dialog form for creating/editing a Management Team Member with Bilingual Tabs
+// Dialog form for creating/editing a Management Team Member with Bilingual Tabs & next-intl
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -60,6 +61,10 @@ export function TeamMemberDialog({
   initialData,
   isLoading = false,
 }: TeamMemberDialogProps) {
+  const tTeam = useTranslations("aboutAdmin.team");
+  const tCommon = useTranslations("common");
+  const tDialogs = useTranslations("common.dialogs");
+
   const {
     register,
     handleSubmit,
@@ -132,13 +137,13 @@ export function TeamMemberDialog({
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Team Member" : "Add Team Member"}
+            {initialData ? `${tDialogs("edit")} ${tTeam("title")}` : tTeam("addBtn")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
           <ImageUploader
-            label="Member Photo"
+            label={tDialogs("uploadImage")}
             value={photo ?? null}
             onChange={(url) => setValue("photo", url)}
             folder="team"
@@ -148,16 +153,16 @@ export function TeamMemberDialog({
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="fullNameEn">Full Name (English) *</Label>
+                  <Label htmlFor="fullNameEn">{tDialogs("nameEn")}</Label>
                   <Input id="fullNameEn" {...register("fullNameEn")} placeholder="e.g. Eng. Ahmad Al-Assi" />
                   {errors.fullNameEn && <span className="text-xs text-destructive">{errors.fullNameEn.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="positionEn">Position / Title (English)</Label>
+                  <Label htmlFor="positionEn">{tDialogs("roleEn")}</Label>
                   <Input id="positionEn" {...register("positionEn")} placeholder="Chief Executive Officer" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="biographyEn">Biography (English)</Label>
+                  <Label htmlFor="biographyEn">{tDialogs("bioEn")}</Label>
                   <Textarea id="biographyEn" rows={3} {...register("biographyEn")} />
                 </div>
               </div>
@@ -165,59 +170,46 @@ export function TeamMemberDialog({
             arabicFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="fullNameAr">الاسم الكامل (بالعربية) *</Label>
+                  <Label htmlFor="fullNameAr">{tDialogs("nameAr")}</Label>
                   <Input id="fullNameAr" dir="rtl" {...register("fullNameAr")} placeholder="م. أحمد العاصي" />
                   {errors.fullNameAr && <span className="text-xs text-destructive">{errors.fullNameAr.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="positionAr">المسمى الوظيفي (بالعربية)</Label>
+                  <Label htmlFor="positionAr">{tDialogs("roleAr")}</Label>
                   <Input id="positionAr" dir="rtl" {...register("positionAr")} placeholder="الرئيس التنفيذي" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="biographyAr">السيرة الذاتية / النبذة (بالعربية)</Label>
+                  <Label htmlFor="biographyAr">{tDialogs("bioAr")}</Label>
                   <Textarea id="biographyAr" rows={3} dir="rtl" {...register("biographyAr")} />
                 </div>
               </div>
             }
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t pt-3">
-            <div>
-              <Label className="text-xs" htmlFor="linkedin">LinkedIn URL</Label>
-              <Input id="linkedin" size={1} {...register("linkedin")} placeholder="https://linkedin.com/in/..." />
-            </div>
-            <div>
-              <Label className="text-xs" htmlFor="email">Email</Label>
-              <Input id="email" size={1} type="email" {...register("email")} placeholder="email@..." />
-            </div>
-            <div>
-              <Label className="text-xs" htmlFor="phone">Phone</Label>
-              <Input id="phone" size={1} {...register("phone")} placeholder="+966 ..." />
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label>{tCommon("status")}</Label>
               <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Label htmlFor="sortOrder">{tDialogs("sortOrder")}</Label>
               <Input id="sortOrder" type="number" {...register("sortOrder", { valueAsNumber: true })} />
             </div>
           </div>
 
           <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+              {tDialogs("cancel")}
+            </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? "Save Changes" : "Add Team Member"}
+              {initialData ? tDialogs("saveChanges") : tTeam("addBtn")}
             </Button>
           </DialogFooter>
         </form>

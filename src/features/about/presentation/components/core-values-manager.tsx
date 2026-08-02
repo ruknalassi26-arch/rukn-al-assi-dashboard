@@ -4,6 +4,7 @@
 // Core Values Manager with Search, Filter, Bulk Actions & Reordering
 // ==============================================================================
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Pencil, Trash2, Search, ArrowUp, ArrowDown, ShieldCheck, Award, Zap, Users, Heart, CheckCircle } from "lucide-react";
 import {
   Card,
@@ -47,6 +48,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 export function CoreValuesManager() {
+  const t = useTranslations("aboutAdmin.coreValues");
+  const tCommon = useTranslations("common");
   const { data: values, isLoading, error, refetch } = useCoreValues();
   const createMutation = useCreateCoreValue();
   const updateMutation = useUpdateCoreValue();
@@ -94,8 +97,8 @@ export function CoreValuesManager() {
     setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (val: CoreValueEntity) => {
-    setEditingValue(val);
+  const handleOpenEdit = (item: CoreValueEntity) => {
+    setEditingValue(item);
     setIsFormOpen(true);
   };
 
@@ -125,9 +128,10 @@ export function CoreValuesManager() {
   };
 
   const handleBulkStatus = async (status: "active" | "draft") => {
-    if (selectedIds.length === 0) return;
-    await bulkStatusMutation.mutateAsync({ ids: selectedIds, status });
-    setSelectedIds([]);
+    if (selectedIds.length > 0) {
+      await bulkStatusMutation.mutateAsync({ ids: selectedIds, status });
+      setSelectedIds([]);
+    }
   };
 
   const handleMove = async (index: number, direction: "up" | "down") => {
@@ -153,7 +157,7 @@ export function CoreValuesManager() {
 
   if (error) {
     return (
-      <ErrorState title="Failed to load core values" error={error} onRetry={() => refetch()} />
+      <ErrorState title={tCommon("error")} error={error} onRetry={() => refetch()} />
     );
   }
 
@@ -162,11 +166,11 @@ export function CoreValuesManager() {
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <CardTitle>Core Values</CardTitle>
-            <CardDescription>Define organization principles, culture pillar cards, and corporate ethics.</CardDescription>
+            <CardTitle>{t("title")}</CardTitle>
+            <CardDescription>{t("subtitle")}</CardDescription>
           </div>
           <Button onClick={handleOpenCreate} className="gap-2 shrink-0">
-            <Plus className="h-4 w-4" /> Add Core Value
+            <Plus className="h-4 w-4" /> {t("addBtn")}
           </Button>
         </CardHeader>
 
@@ -176,28 +180,28 @@ export function CoreValuesManager() {
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search values..."
+                  placeholder={t("searchPlaceholder")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 text-xs"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+                <SelectTrigger className="w-32 text-xs"><SelectValue placeholder={tCommon("status")} /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="all">{tCommon("all")}</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {selectedIds.length > 0 && (
               <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span className="text-xs text-muted-foreground font-medium me-1">{selectedIds.length} selected</span>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")} className="text-xs">Set Active</Button>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")} className="text-xs">Set Draft</Button>
-                <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleting(true)} className="text-xs">Delete Selected</Button>
+                <span className="text-xs text-muted-foreground font-medium me-1">{selectedIds.length} {tCommon("items")}</span>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")} className="text-xs">{tCommon("active")}</Button>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")} className="text-xs">{tCommon("draft")}</Button>
+                <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleting(true)} className="text-xs">{tCommon("delete")}</Button>
               </div>
             )}
           </div>
@@ -205,9 +209,9 @@ export function CoreValuesManager() {
           {filteredValues.length === 0 ? (
             <EmptyState
               icon={ShieldCheck}
-              title="No core values found"
-              description="Click the button above to add company core values."
-              action={<Button onClick={handleOpenCreate} size="sm" className="gap-2"><Plus className="h-4 w-4" /> Add Core Value</Button>}
+              title={t("emptyTitle")}
+              description={t("emptyDesc")}
+              action={<Button onClick={handleOpenCreate} size="sm" className="gap-2"><Plus className="h-4 w-4" /> {t("addBtn")}</Button>}
             />
           ) : (
             <div className="space-y-3">
