@@ -4,7 +4,7 @@
 // 8 KPI Stat Widgets Card Grid
 // ==============================================================================
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Package,
   FolderKanban,
@@ -16,12 +16,14 @@ import {
   Mail,
   ArrowUpRight,
 } from "lucide-react";
-import { Card, CardContent, Skeleton, Badge, Button } from "@shared/ui";
+import { Card, CardContent, Skeleton, Badge } from "@shared/ui";
 import { useDashboardStats } from "@shared/hooks/dashboard/use-dashboard-hooks";
 import { ErrorState } from "@shared/components/error-state";
 
 export function DashboardStats() {
   const locale = useLocale();
+  const t = useTranslations("dashboard.stats");
+  const tCommon = useTranslations("common");
   const { data: stats, isLoading, error, refetch } = useDashboardStats();
 
   if (isLoading) {
@@ -46,7 +48,7 @@ export function DashboardStats() {
   if (error || !stats) {
     return (
       <ErrorState
-        title="Failed to load dashboard statistics"
+        title={t("errorTitle")}
         error={error ?? new Error("No stats data")}
         onRetry={() => refetch()}
       />
@@ -55,69 +57,67 @@ export function DashboardStats() {
 
   const statCards = [
     {
-      title: "Total Products",
+      title: t("totalProducts"),
       value: stats.totalProducts,
-      subtext: `${stats.activeProducts} active products`,
+      subtext: `${stats.activeProducts} ${tCommon("active")}`,
       icon: Package,
       color: "text-blue-500 bg-blue-500/10",
       href: `/${locale}/admin/products`,
     },
     {
-      title: "Total Categories",
+      title: t("totalCategories"),
       value: stats.totalCategories,
-      subtext: "Product catalog categories",
+      subtext: tCommon("all"),
       icon: FolderKanban,
       color: "text-indigo-500 bg-indigo-500/10",
       href: `/${locale}/admin/categories`,
     },
     {
-      title: "Total Services",
+      title: t("totalServices"),
       value: stats.totalServices,
-      subtext: `${stats.activeServices} active services`,
+      subtext: `${stats.activeServices} ${tCommon("active")}`,
       icon: Wrench,
       color: "text-cyan-500 bg-cyan-500/10",
       href: `/${locale}/admin/services`,
     },
     {
-      title: "Total Projects",
+      title: t("totalProjects"),
       value: stats.totalProjects,
-      subtext: `${stats.completedProjects} completed projects`,
+      subtext: `${stats.completedProjects} ${tCommon("completed")}`,
       icon: FolderOpen,
       color: "text-emerald-500 bg-emerald-500/10",
       href: `/${locale}/admin/projects`,
     },
     {
-      title: "Total Certificates",
+      title: t("certificates"),
       value: stats.totalCertificates,
-      subtext: "Quality & ISO certifications",
+      subtext: tCommon("active"),
       icon: ShieldCheck,
       color: "text-amber-500 bg-amber-500/10",
       href: `/${locale}/admin/certificates`,
     },
     {
-      title: "Team Members",
+      title: tCommon("team") || "Team Members",
       value: stats.totalTeamMembers,
-      subtext: "Company staff & personnel",
+      subtext: tCommon("active"),
       icon: Users,
       color: "text-purple-500 bg-purple-500/10",
       href: `/${locale}/admin/team`,
     },
     {
-      title: "Total RFQs",
+      title: t("totalRfqs"),
       value: stats.totalRfqs,
-      badge: stats.pendingRfqs > 0 ? `${stats.pendingRfqs} Pending` : null,
-      badgeVariant: "warning" as const,
-      subtext: "Quotation inquiries received",
+      badge: stats.pendingRfqs > 0 ? `${stats.pendingRfqs}` : null,
+      subtext: t("unreadRfqs"),
       icon: FileText,
       color: "text-orange-500 bg-orange-500/10",
       href: `/${locale}/admin/rfq`,
     },
     {
-      title: "Contact Messages",
+      title: t("totalContacts"),
       value: stats.totalContacts,
-      badge: stats.unreadContacts > 0 ? `${stats.unreadContacts} New` : null,
-      badgeVariant: "default" as const,
-      subtext: "Direct customer submissions",
+      badge: stats.unreadContacts > 0 ? `${stats.unreadContacts}` : null,
+      subtext: t("unreadContacts"),
       icon: Mail,
       color: "text-rose-500 bg-rose-500/10",
       href: `/${locale}/admin/contact-messages`,
@@ -157,7 +157,7 @@ export function DashboardStats() {
                   href={card.href}
                   className="text-primary hover:underline flex items-center gap-0.5 font-medium shrink-0"
                 >
-                  <span>View</span>
+                  <span>{tCommon("viewAll")}</span>
                   <ArrowUpRight className="h-3 w-3" />
                 </Link>
               </div>

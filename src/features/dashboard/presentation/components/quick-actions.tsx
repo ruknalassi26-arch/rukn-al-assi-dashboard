@@ -4,46 +4,47 @@
 // Quick Actions Bar with Shortcuts to Common Admin Tasks
 // ==============================================================================
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Plus, Package, Wrench, FolderKanban, ShieldCheck, Users, FileText } from "lucide-react";
 import { Button } from "@shared/ui";
 
 export function QuickActions() {
   const locale = useLocale();
+  const t = useTranslations("dashboard.quickActions");
 
   const actions = [
     {
-      label: "Add Product",
+      key: "addProduct",
       href: `/${locale}/admin/products/create`,
       icon: Package,
       variant: "default" as const,
     },
     {
-      label: "Add Service",
+      key: "addService",
       href: `/${locale}/admin/services/create`,
       icon: Wrench,
       variant: "outline" as const,
     },
     {
-      label: "Add Category",
+      key: "addCategory",
       href: `/${locale}/admin/categories/create`,
       icon: FolderKanban,
       variant: "outline" as const,
     },
     {
-      label: "Add Certificate",
+      key: "addCertificate",
       href: `/${locale}/admin/certificates/create`,
       icon: ShieldCheck,
       variant: "outline" as const,
     },
     {
-      label: "Add Team Member",
+      key: "addTeamMember",
       href: `/${locale}/admin/team/create`,
       icon: Users,
       variant: "outline" as const,
     },
     {
-      label: "View RFQs",
+      key: "viewRfqs",
       href: `/${locale}/admin/rfq`,
       icon: FileText,
       variant: "secondary" as const,
@@ -53,13 +54,13 @@ export function QuickActions() {
   return (
     <div className="flex flex-wrap items-center gap-2.5 p-3 rounded-xl border bg-card/60 backdrop-blur-xs shadow-2xs">
       <span className="text-xs font-semibold text-muted-foreground me-1 px-1 hidden sm:inline">
-        Quick Actions:
+        {t("title")}:
       </span>
-      {actions.map((action, index) => {
+      {actions.map((action) => {
         const Icon = action.icon;
         return (
           <Button
-            key={index}
+            key={action.key}
             variant={action.variant}
             size="sm"
             asChild
@@ -67,7 +68,7 @@ export function QuickActions() {
           >
             <Link href={action.href}>
               <Plus className="h-3.5 w-3.5" />
-              <span>{action.label}</span>
+              <span>{t(action.key)}</span>
             </Link>
           </Button>
         );

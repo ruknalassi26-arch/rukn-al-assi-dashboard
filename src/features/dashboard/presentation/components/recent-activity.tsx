@@ -3,12 +3,15 @@
 // features/dashboard/presentation/components/recent-activity.tsx
 // Activity log timeline stream card
 // ==============================================================================
-import { Activity, Clock, User, Shield, Package, Wrench, FileText, Mail } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, Skeleton, Badge } from "@shared/ui";
+import { useTranslations, useLocale } from "next-intl";
+import { Activity, Shield, Package, Wrench, FileText, Mail } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, Skeleton } from "@shared/ui";
 import { useRecentActivity } from "@shared/hooks/dashboard/use-dashboard-hooks";
 import { ErrorState } from "@shared/components/error-state";
 
 export function RecentActivity() {
+  const t = useTranslations("dashboard.activity");
+  const locale = useLocale();
   const { data: activities, isLoading, error, refetch } = useRecentActivity(8);
 
   const getActionIcon = (entityType: string) => {
@@ -29,15 +32,11 @@ export function RecentActivity() {
     }
   };
 
-  const formatTimeAgo = (date: Date) => {
-    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
-    if (seconds < 60) return "Just now";
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat(locale === "ar" ? "ar" : locale === "ckb" ? "ckb" : "en-US", {
+      dateStyle: "short",
+      timeStyle: "short",
+    }).format(new Date(date));
   };
 
   if (isLoading) {
@@ -63,7 +62,7 @@ export function RecentActivity() {
   }
 
   if (error) {
-    return <ErrorState title="Failed to load activity stream" error={error} onRetry={() => refetch()} />;
+    return <ErrorState title={t("errorTitle")} error={error} onRetry={() => refetch()} />;
   }
 
   return (
@@ -71,45 +70,36 @@ export function RecentActivity() {
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-bold flex items-center gap-2">
           <Activity className="h-4 w-4 text-primary" />
-          Recent Activity
+          {t("title")}
         </CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
-          Real-time audit log of system actions and updates
+          {t("emptyDescription")}
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-2">
+
+      <CardContent>
         {!activities || activities.length === 0 ? (
-          <div className="text-center py-8 space-y-2 border border-dashed rounded-lg bg-muted/20">
-            <Clock className="h-8 w-8 mx-auto text-muted-foreground/50" />
-            <p className="text-xs font-semibold text-muted-foreground">No Recent Activity</p>
-            <p className="text-[11px] text-muted-foreground/80">Admin and user actions will be logged here.</p>
+          <div className="py-8 text-center text-muted-foreground border border-dashed rounded-lg">
+            <Activity className="h-7 w-7 mx-auto mb-2 opacity-50" />
+            <p className="text-xs font-semibold">{t("emptyTitle")}</p>
+            <p className="text-[11px] text-muted-foreground">{t("emptyDescription")}</p>
           </div>
         ) : (
-          <div className="relative space-y-4 before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:-translate-x-1/2 before:bg-border">
-            {activities.map((item) => (
-              <div key={item.id} className="relative flex items-start gap-3 text-xs group">
-                <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border bg-card shadow-xs group-hover:border-primary transition-colors">
-                  {getActionIcon(item.entityType)}
+          <div className="space-y-4 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-muted">
+            {activities.map((act) => (
+              <div key={act.id} className="flex items-start gap-3 relative z-10">
+                <div className="p-1.5 rounded-full bg-background border shadow-xs shrink-0">
+                  {getActionIcon(act.entityType)}
                 </div>
 
-                <div className="flex-1 space-y-0.5 pt-0.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="font-semibold text-foreground truncate max-w-[180px]">
-                      {item.entityTitle || `${item.action} in ${item.entityType}`}
-                    </p>
-                    <span className="text-[10px] text-muted-foreground shrink-0 flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {formatTimeAgo(item.createdAt)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <span className="capitalize text-foreground font-medium">{item.action}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-foreground leading-tight truncate">
+                    {act.action} — {act.entityTitle || act.entityType}
+                  </p>
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                    <span>{act.userEmail}</span>
                     <span>•</span>
-                    <span className="truncate max-w-[140px] flex items-center gap-1">
-                      <User className="h-3 w-3 inline" />
-                      {item.userEmail || "System"}
-                    </span>
+                    <span>{formatDate(act.createdAt)}</span>
                   </div>
                 </div>
               </div>

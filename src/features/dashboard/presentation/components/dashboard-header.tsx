@@ -4,7 +4,7 @@
 // Header controls with Title, Refresh Button, and Last Updated Timestamp
 // ==============================================================================
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { RotateCw, LayoutDashboard } from "lucide-react";
 import { Button } from "@shared/ui";
 import { useRefetchDashboard } from "@shared/hooks/dashboard/use-dashboard-hooks";
@@ -12,6 +12,8 @@ import { toast } from "sonner";
 
 export function DashboardHeader() {
   const t = useTranslations("dashboard");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const refetchAll = useRefetchDashboard();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -29,7 +31,7 @@ export function DashboardHeader() {
     }
   };
 
-  const formattedTime = new Intl.DateTimeFormat("en-US", {
+  const formattedTime = new Intl.DateTimeFormat(locale === "ar" ? "ar" : locale === "ckb" ? "ckb" : "en-US", {
     timeStyle: "short",
   }).format(lastUpdated);
 
@@ -45,7 +47,7 @@ export function DashboardHeader() {
 
       <div className="flex items-center gap-3">
         <span className="text-xs text-muted-foreground font-medium hidden sm:inline">
-          Updated: <span className="text-foreground font-semibold">{formattedTime}</span>
+          {tCommon("date")}: <span className="text-foreground font-semibold">{formattedTime}</span>
         </span>
 
         <Button
@@ -56,7 +58,7 @@ export function DashboardHeader() {
           className="gap-2 text-xs"
         >
           <RotateCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-primary" : ""}`} />
-          <span>Refresh Data</span>
+          <span>{tCommon("retry")}</span>
         </Button>
       </div>
     </div>
