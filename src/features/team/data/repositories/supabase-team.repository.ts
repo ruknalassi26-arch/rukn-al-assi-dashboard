@@ -1,9 +1,9 @@
 // ==============================================================================
 // features/team/data/repositories/supabase-team.repository.ts
 // Supabase Data Repository Implementation for Team Members Management
+// Strictly matching official SQL Schema (team_members & team_member_translations)
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
-import type { UpdateTables } from "@core/types/database.types";
 import type {
   ITeamRepository,
   TeamFilterParams,
@@ -13,8 +13,6 @@ import type {
 } from "../../domain/repositories/i-team.repository";
 import { TeamMemberEntity } from "../../domain/entities/team-member.entity";
 import type { TeamMemberStatus } from "../../domain/entities/team-member.entity";
-import { toTeamMemberEntity } from "../mapper/team-member.mapper";
-import type { TeamMemberDTO } from "../dto/team-member.dto";
 
 export class SupabaseTeamRepository implements ITeamRepository {
   private get supabase() {
@@ -29,14 +27,12 @@ export class SupabaseTeamRepository implements ITeamRepository {
   ) {
     try {
       const { data: userData } = await this.supabase.auth.getUser();
-      await this.supabase.from("activity_logs").insert({
+      await (this.supabase.from("activity_log" as any) as any).insert({
         action,
-        entity_type: "homepage",
+        entity_type: "team",
         entity_id: entityId,
-        entity_title: entityTitle,
-        user_id: userData.user?.id ?? null,
-        user_email: userData.user?.email ?? null,
-        metadata: metadata ?? null,
+        details: { entity_title: entityTitle, ...metadata },
+        admin_user_id: userData.user?.id ?? null,
       });
     } catch {
       // Non-blocking activity log
@@ -47,157 +43,176 @@ export class SupabaseTeamRepository implements ITeamRepository {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 10;
     const offset = (page - 1) * limit;
-    const sortBy = params?.sortBy ?? "sort_order";
-    const sortOrder = params?.sortOrder ?? "asc";
 
-    let query = this.supabase
-      .from("management_team")
-      .select("*", { count: "exact" });
+    try {
+      const { data, count, error } = await (this.supabase.from("team_members" as any) as any)
+        .select("*, team_member_translations(*)", { count: "exact" })
+        .is("deleted_at", null)
+        .order("sort_order", { ascending: true })
+        .range(offset, offset + limit - 1);
 
-    // Search filter
-    if (params?.search && params.search.trim() !== "") {
-      const searchStr = params.search.trim();
-      query = query.or(
-        `full_name_en.ilike.%${searchStr}%,full_name_ar.ilike.%${searchStr}%,position_en.ilike.%${searchStr}%,email.ilike.%${searchStr}%`
-      );
-    }
+      if (error || !data) {
+        return { items: [], total: 0, page, limit, totalPages: 0 };
+      }
 
-    // Status filter
-    if (params?.status && params.status !== "all") {
-      query = query.eq("status", params.status);
-    }
+      const items = data.map((item: any) => {
+        const transList: any[] = item.team_member_translations || [];
+        const en = transList.find((t: any) => t.language_code === "en") || {};
+        const ar = transList.find((t: any) => t.language_code === "ar") || {};
+        const ku = transList.find((t: any) => t.language_code === "ku") || {};
+        return new TeamMemberEntity({
+          id: item.id,
+          fullNameEn: en.name || "Team Member",
+          fullNameAr: ar.name || "عضو الفريق",
+          fullNameKu: ku.name || "",
+          positionEn: en.position || "",
+          positionAr: ar.position || "",
+          positionKu: ku.position || "",
+          departmentEn: "",
+          departmentAr: "",
+          departmentKu: "",
+          biographyEn: en.bio || "",
+          biographyAr: ar.bio || "",
+          biographyKu: ku.bio || "",
+          photo: item.photo_url || "",
+          linkedin: "",
+          email: "",
+          phone: "",
+          sortOrder: item.sort_order ?? 0,
+          status: item.status === "published" ? "active" : "draft",
+          createdAt: item.created_at ? new Date(item.created_at) : new Date(),
+          updatedAt: item.updated_at ? new Date(item.updated_at) : new Date(),
+        });
+      });
 
-    query = query.order(sortBy, { ascending: sortOrder === "asc" }).range(offset, offset + limit - 1);
+      const total = count ?? items.length;
+      const totalPages = Math.ceil(total / limit);
 
-    const { data, count, error } = await query;
-
-    if (error || !data) {
+      return { items, total, page, limit, totalPages };
+    } catch {
       return { items: [], total: 0, page, limit, totalPages: 0 };
     }
-
-    const items = (data as TeamMemberDTO[]).map(toTeamMemberEntity);
-    const total = count ?? 0;
-    const totalPages = Math.ceil(total / limit);
-
-    return { items, total, page, limit, totalPages };
   }
 
   async getTeamMemberById(id: string): Promise<TeamMemberEntity | null> {
-    const { data, error } = await this.supabase
-      .from("management_team")
-      .select("*")
-      .eq("id", id)
-      .single();
+    try {
+      const { data, error } = await (this.supabase.from("team_members" as any) as any)
+        .select("*, team_member_translations(*)")
+        .eq("id", id)
+        .single();
 
-    if (error || !data) return null;
-    return toTeamMemberEntity(data as TeamMemberDTO);
+      if (error || !data) return null;
+
+      const transList: any[] = data.team_member_translations || [];
+      const en = transList.find((t: any) => t.language_code === "en") || {};
+      const ar = transList.find((t: any) => t.language_code === "ar") || {};
+      const ku = transList.find((t: any) => t.language_code === "ku") || {};
+
+      return new TeamMemberEntity({
+        id: data.id,
+        fullNameEn: en.name || "Team Member",
+        fullNameAr: ar.name || "عضو الفريق",
+        fullNameKu: ku.name || "",
+        positionEn: en.position || "",
+        positionAr: ar.position || "",
+        positionKu: ku.position || "",
+        departmentEn: "",
+        departmentAr: "",
+        departmentKu: "",
+        biographyEn: en.bio || "",
+        biographyAr: ar.bio || "",
+        biographyKu: ku.bio || "",
+        photo: data.photo_url || "",
+        linkedin: "",
+        email: "",
+        phone: "",
+        sortOrder: data.sort_order ?? 0,
+        status: data.status === "published" ? "active" : "draft",
+        createdAt: data.created_at ? new Date(data.created_at) : new Date(),
+        updatedAt: data.updated_at ? new Date(data.updated_at) : new Date(),
+      });
+    } catch {
+      return null;
+    }
   }
 
   async createTeamMember(input: CreateTeamMemberInput): Promise<TeamMemberEntity> {
-    const payload = {
-      full_name_en: input.fullNameEn,
-      full_name_ar: input.fullNameAr,
-      full_name_ku: input.fullNameKu ?? null,
-      position_en: input.positionEn ?? null,
-      position_ar: input.positionAr ?? null,
-      position_ku: input.positionKu ?? null,
-      department_en: input.departmentEn ?? null,
-      department_ar: input.departmentAr ?? null,
-      department_ku: input.departmentKu ?? null,
-      biography_en: input.biographyEn ?? null,
-      biography_ar: input.biographyAr ?? null,
-      biography_ku: input.biographyKu ?? null,
-      photo: input.photo ?? null,
-      linkedin: input.linkedin ?? null,
-      email: input.email ?? null,
-      phone: input.phone ?? null,
-      sort_order: input.sortOrder ?? 0,
-      status: input.status ?? "active",
-    };
-
-    const { data, error } = await this.supabase
-      .from("management_team")
-      .insert(payload)
+    const { data, error } = await (this.supabase.from("team_members" as any) as any)
+      .insert({
+        photo_url: input.photo ?? null,
+        sort_order: input.sortOrder ?? 0,
+        status: input.status === "active" ? "published" : "draft",
+      })
       .select("*")
       .single();
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create team member");
 
-    const created = toTeamMemberEntity(data as TeamMemberDTO);
+    await (this.supabase.from("team_member_translations" as any) as any).insert([
+      { team_member_id: data.id, language_code: "en", name: input.fullNameEn, position: input.positionEn, bio: input.biographyEn },
+      { team_member_id: data.id, language_code: "ar", name: input.fullNameAr, position: input.positionAr, bio: input.biographyAr },
+      { team_member_id: data.id, language_code: "ku", name: input.fullNameKu ?? input.fullNameEn, position: input.positionKu, bio: input.biographyKu },
+    ]);
+
+    const created = (await this.getTeamMemberById(data.id))!;
     await this.logActivity("created", created.id, created.fullNameEn);
     return created;
   }
 
   async updateTeamMember(input: UpdateTeamMemberInput): Promise<TeamMemberEntity> {
-    const payload: UpdateTables<"management_team"> = {
-      updated_at: new Date().toISOString(),
-    };
+    await (this.supabase.from("team_members" as any) as any)
+      .update({
+        photo_url: input.photo,
+        sort_order: input.sortOrder,
+        status: input.status === "active" ? "published" : "draft",
+      })
+      .eq("id", input.id);
 
-    if (input.fullNameEn !== undefined) payload.full_name_en = input.fullNameEn;
-    if (input.fullNameAr !== undefined) payload.full_name_ar = input.fullNameAr;
-    if (input.fullNameKu !== undefined) payload.full_name_ku = input.fullNameKu;
-    if (input.positionEn !== undefined) payload.position_en = input.positionEn;
-    if (input.positionAr !== undefined) payload.position_ar = input.positionAr;
-    if (input.positionKu !== undefined) payload.position_ku = input.positionKu;
-    if (input.departmentEn !== undefined) payload.department_en = input.departmentEn;
-    if (input.departmentAr !== undefined) payload.department_ar = input.departmentAr;
-    if (input.departmentKu !== undefined) payload.department_ku = input.departmentKu;
-    if (input.biographyEn !== undefined) payload.biography_en = input.biographyEn;
-    if (input.biographyAr !== undefined) payload.biography_ar = input.biographyAr;
-    if (input.biographyKu !== undefined) payload.biography_ku = input.biographyKu;
-    if (input.photo !== undefined) payload.photo = input.photo;
-    if (input.linkedin !== undefined) payload.linkedin = input.linkedin;
-    if (input.email !== undefined) payload.email = input.email;
-    if (input.phone !== undefined) payload.phone = input.phone;
-    if (input.sortOrder !== undefined) payload.sort_order = input.sortOrder;
-    if (input.status !== undefined) payload.status = input.status;
+    if (input.fullNameEn !== undefined || input.positionEn !== undefined || input.biographyEn !== undefined) {
+      await (this.supabase.from("team_member_translations" as any) as any).upsert({
+        team_member_id: input.id,
+        language_code: "en",
+        name: input.fullNameEn || "",
+        position: input.positionEn || "",
+        bio: input.biographyEn || "",
+      });
+    }
+    if (input.fullNameAr !== undefined || input.positionAr !== undefined || input.biographyAr !== undefined) {
+      await (this.supabase.from("team_member_translations" as any) as any).upsert({
+        team_member_id: input.id,
+        language_code: "ar",
+        name: input.fullNameAr || "",
+        position: input.positionAr || "",
+        bio: input.biographyAr || "",
+      });
+    }
 
-    const { data, error } = await this.supabase
-      .from("management_team")
-      .update(payload)
-      .eq("id", input.id)
-      .select("*")
-      .single();
-
-    if (error || !data) throw new Error(error?.message ?? "Failed to update team member");
-
-    const updated = toTeamMemberEntity(data as TeamMemberDTO);
+    const updated = (await this.getTeamMemberById(input.id))!;
     await this.logActivity("updated", updated.id, updated.fullNameEn);
     return updated;
   }
 
   async deleteTeamMember(id: string): Promise<void> {
     const existing = await this.getTeamMemberById(id);
-
-    const { error } = await this.supabase
-      .from("management_team")
-      .delete()
+    await (this.supabase.from("team_members" as any) as any)
+      .update({ deleted_at: new Date().toISOString() })
       .eq("id", id);
-
-    if (error) throw new Error(error.message);
-
     await this.logActivity("deleted", id, existing?.fullNameEn ?? "Team Member");
   }
 
   async bulkDeleteTeamMembers(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
-    const { error } = await this.supabase
-      .from("management_team")
-      .delete()
+    await (this.supabase.from("team_members" as any) as any)
+      .update({ deleted_at: new Date().toISOString() })
       .in("id", ids);
-
-    if (error) throw new Error(error.message);
     await this.logActivity("deleted", null, `${ids.length} team members`, { count: ids.length });
   }
 
   async bulkUpdateTeamMemberStatus(ids: string[], status: TeamMemberStatus): Promise<void> {
     if (ids.length === 0) return;
-    const { error } = await this.supabase
-      .from("management_team")
-      .update({ status, updated_at: new Date().toISOString() })
+    await (this.supabase.from("team_members" as any) as any)
+      .update({ status: status === "active" ? "published" : "draft" })
       .in("id", ids);
-
-    if (error) throw new Error(error.message);
     await this.logActivity("updated", null, `Bulk updated status to ${status}`, { ids, status });
   }
 }

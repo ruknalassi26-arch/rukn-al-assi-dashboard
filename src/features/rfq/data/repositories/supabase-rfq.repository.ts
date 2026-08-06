@@ -27,14 +27,12 @@ export class SupabaseRfqRepository implements IRfqRepository {
   ) {
     try {
       const { data: userData } = await this.supabase.auth.getUser();
-      await this.supabase.from("activity_logs").insert({
+      await (this.supabase.from("activity_log" as any) as any).insert({
         action,
         entity_type: "rfq",
         entity_id: entityId,
-        entity_title: entityTitle,
-        user_id: userData.user?.id ?? null,
-        user_email: userData.user?.email ?? null,
-        metadata: metadata ?? null,
+        details: { entity_title: entityTitle, ...metadata },
+        admin_user_id: userData.user?.id ?? null,
       });
     } catch {
       // Non-blocking activity log
@@ -56,7 +54,7 @@ export class SupabaseRfqRepository implements IRfqRepository {
     if (params?.search && params.search.trim() !== "") {
       const searchStr = params.search.trim();
       query = query.or(
-        `reference_number.ilike.%${searchStr}%,company_name.ilike.%${searchStr}%,contact_name.ilike.%${searchStr}%,email.ilike.%${searchStr}%,product_name.ilike.%${searchStr}%`
+        `company_name.ilike.%${searchStr}%,full_name.ilike.%${searchStr}%,phone.ilike.%${searchStr}%`
       );
     }
 

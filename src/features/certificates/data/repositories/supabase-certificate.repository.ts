@@ -1,9 +1,9 @@
 // ==============================================================================
 // features/certificates/data/repositories/supabase-certificate.repository.ts
 // Supabase Data Repository Implementation for Certificates Management
+// Strictly matching official SQL Schema (certifications & certification_translations)
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
-import type { UpdateTables } from "@core/types/database.types";
 import type {
   ICertificateRepository,
   CertificateFilterParams,
@@ -13,8 +13,6 @@ import type {
 } from "../../domain/repositories/i-certificate.repository";
 import { CertificateEntity } from "../../domain/entities/certificate.entity";
 import type { CertificateStatus } from "../../domain/entities/certificate.entity";
-import { toCertificateEntity } from "../mapper/certificate.mapper";
-import type { CertificateDTO } from "../dto/certificate.dto";
 
 export class SupabaseCertificateRepository implements ICertificateRepository {
   private get supabase() {
@@ -29,14 +27,12 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
   ) {
     try {
       const { data: userData } = await this.supabase.auth.getUser();
-      await this.supabase.from("activity_logs").insert({
+      await (this.supabase.from("activity_log" as any) as any).insert({
         action,
-        entity_type: "homepage",
+        entity_type: "certificates",
         entity_id: entityId,
-        entity_title: entityTitle,
-        user_id: userData.user?.id ?? null,
-        user_email: userData.user?.email ?? null,
-        metadata: metadata ?? null,
+        details: { entity_title: entityTitle, ...metadata },
+        admin_user_id: userData.user?.id ?? null,
       });
     } catch {
       // Non-blocking activity log
@@ -47,147 +43,169 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 10;
     const offset = (page - 1) * limit;
-    const sortBy = params?.sortBy ?? "sort_order";
-    const sortOrder = params?.sortOrder ?? "asc";
 
-    let query = this.supabase
-      .from("certificates")
-      .select("*", { count: "exact" });
+    try {
+      const { data, count, error } = await (this.supabase.from("certifications" as any) as any)
+        .select("*, certification_translations(*)", { count: "exact" })
+        .is("deleted_at", null)
+        .order("sort_order", { ascending: true })
+        .range(offset, offset + limit - 1);
 
-    // Search filter
-    if (params?.search && params.search.trim() !== "") {
-      const searchStr = params.search.trim();
-      query = query.or(`title_en.ilike.%${searchStr}%,title_ar.ilike.%${searchStr}%,organization.ilike.%${searchStr}%`);
-    }
+      if (error || !data) {
+        return { items: [], total: 0, page, limit, totalPages: 0 };
+      }
 
-    // Status filter
-    if (params?.status && params.status !== "all") {
-      query = query.eq("status", params.status);
-    }
+      const items = data.map((item: any) => {
+        const transList: any[] = item.certification_translations || [];
+        const en = transList.find((t: any) => t.language_code === "en") || {};
+        const ar = transList.find((t: any) => t.language_code === "ar") || {};
+        const ku = transList.find((t: any) => t.language_code === "ku") || {};
+        return new CertificateEntity({
+          id: item.id,
+          titleEn: en.title || "Certification",
+          titleAr: ar.title || "شهادة اعتمادات",
+          titleKu: ku.title || "",
+          descriptionEn: en.description || "",
+          descriptionAr: ar.description || "",
+          descriptionKu: ku.description || "",
+          image: item.image_url || "",
+          issueDate: item.issued_date || "",
+          expiryDate: "",
+          organization: item.issued_by || "",
+          organizationAr: "",
+          organizationKu: "",
+          sortOrder: item.sort_order ?? 0,
+          status: item.status === "published" ? "active" : "draft",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      });
 
-    query = query.order(sortBy, { ascending: sortOrder === "asc" }).range(offset, offset + limit - 1);
+      const total = count ?? items.length;
+      const totalPages = Math.ceil(total / limit);
 
-    const { data, count, error } = await query;
-
-    if (error || !data) {
+      return { items, total, page, limit, totalPages };
+    } catch {
       return { items: [], total: 0, page, limit, totalPages: 0 };
     }
-
-    const items = (data as CertificateDTO[]).map(toCertificateEntity);
-    const total = count ?? 0;
-    const totalPages = Math.ceil(total / limit);
-
-    return { items, total, page, limit, totalPages };
   }
 
   async getCertificateById(id: string): Promise<CertificateEntity | null> {
-    const { data, error } = await this.supabase
-      .from("certificates")
-      .select("*")
-      .eq("id", id)
-      .single();
+    try {
+      const { data, error } = await (this.supabase.from("certifications" as any) as any)
+        .select("*, certification_translations(*)")
+        .eq("id", id)
+        .single();
 
-    if (error || !data) return null;
-    return toCertificateEntity(data as CertificateDTO);
+      if (error || !data) return null;
+
+      const transList: any[] = data.certification_translations || [];
+      const en = transList.find((t: any) => t.language_code === "en") || {};
+      const ar = transList.find((t: any) => t.language_code === "ar") || {};
+      const ku = transList.find((t: any) => t.language_code === "ku") || {};
+
+      return new CertificateEntity({
+        id: data.id,
+        titleEn: en.title || "Certification",
+        titleAr: ar.title || "شهادة اعتمادات",
+        titleKu: ku.title || "",
+        descriptionEn: en.description || "",
+        descriptionAr: ar.description || "",
+        descriptionKu: ku.description || "",
+        image: data.image_url || "",
+        issueDate: data.issued_date || "",
+        expiryDate: "",
+        organization: data.issued_by || "",
+        organizationAr: "",
+        organizationKu: "",
+        sortOrder: data.sort_order ?? 0,
+        status: data.status === "published" ? "active" : "draft",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    } catch {
+      return null;
+    }
   }
 
   async createCertificate(input: CreateCertificateInput): Promise<CertificateEntity> {
-    const payload = {
-      title_en: input.titleEn,
-      title_ar: input.titleAr,
-      title_ku: input.titleKu ?? null,
-      description_en: input.descriptionEn ?? null,
-      description_ar: input.descriptionAr ?? null,
-      description_ku: input.descriptionKu ?? null,
-      image: input.image ?? null,
-      issue_date: input.issueDate ?? null,
-      expiry_date: input.expiryDate ?? null,
-      organization: input.organization ?? null,
-      organization_ar: input.organizationAr ?? null,
-      organization_ku: input.organizationKu ?? null,
-      sort_order: input.sortOrder ?? 0,
-      status: input.status ?? "active",
-    };
-
-    const { data, error } = await this.supabase
-      .from("certificates")
-      .insert(payload)
+    const { data, error } = await (this.supabase.from("certifications" as any) as any)
+      .insert({
+        image_url: input.image ?? null,
+        issued_by: input.organization ?? null,
+        issued_date: input.issueDate ?? null,
+        sort_order: input.sortOrder ?? 0,
+        status: input.status === "active" ? "published" : "draft",
+      })
       .select("*")
       .single();
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create certificate");
 
-    const created = toCertificateEntity(data as CertificateDTO);
+    await (this.supabase.from("certification_translations" as any) as any).insert([
+      { certification_id: data.id, language_code: "en", title: input.titleEn, description: input.descriptionEn },
+      { certification_id: data.id, language_code: "ar", title: input.titleAr, description: input.descriptionAr },
+    ]);
+
+    const created = (await this.getCertificateById(data.id))!;
     await this.logActivity("created", created.id, created.titleEn);
     return created;
   }
 
   async updateCertificate(input: UpdateCertificateInput): Promise<CertificateEntity> {
-    const payload: UpdateTables<"certificates"> = {
-      updated_at: new Date().toISOString(),
-    };
+    await (this.supabase.from("certifications" as any) as any)
+      .update({
+        image_url: input.image,
+        issued_by: input.organization,
+        issued_date: input.issueDate ?? null,
+        sort_order: input.sortOrder,
+        status: input.status === "active" ? "published" : "draft",
+      })
+      .eq("id", input.id);
 
-    if (input.titleEn !== undefined) payload.title_en = input.titleEn;
-    if (input.titleAr !== undefined) payload.title_ar = input.titleAr;
-    if (input.titleKu !== undefined) payload.title_ku = input.titleKu;
-    if (input.descriptionEn !== undefined) payload.description_en = input.descriptionEn;
-    if (input.descriptionAr !== undefined) payload.description_ar = input.descriptionAr;
-    if (input.descriptionKu !== undefined) payload.description_ku = input.descriptionKu;
-    if (input.image !== undefined) payload.image = input.image;
-    if (input.issueDate !== undefined) payload.issue_date = input.issueDate;
-    if (input.expiryDate !== undefined) payload.expiry_date = input.expiryDate;
-    if (input.organization !== undefined) payload.organization = input.organization;
-    if (input.organizationAr !== undefined) payload.organization_ar = input.organizationAr;
-    if (input.organizationKu !== undefined) payload.organization_ku = input.organizationKu;
-    if (input.sortOrder !== undefined) payload.sort_order = input.sortOrder;
-    if (input.status !== undefined) payload.status = input.status;
+    if (input.titleEn !== undefined || input.descriptionEn !== undefined) {
+      await (this.supabase.from("certification_translations" as any) as any).upsert({
+        certification_id: input.id,
+        language_code: "en",
+        title: input.titleEn || "",
+        description: input.descriptionEn || "",
+      });
+    }
+    if (input.titleAr !== undefined || input.descriptionAr !== undefined) {
+      await (this.supabase.from("certification_translations" as any) as any).upsert({
+        certification_id: input.id,
+        language_code: "ar",
+        title: input.titleAr || "",
+        description: input.descriptionAr || "",
+      });
+    }
 
-    const { data, error } = await this.supabase
-      .from("certificates")
-      .update(payload)
-      .eq("id", input.id)
-      .select("*")
-      .single();
-
-    if (error || !data) throw new Error(error?.message ?? "Failed to update certificate");
-
-    const updated = toCertificateEntity(data as CertificateDTO);
+    const updated = (await this.getCertificateById(input.id))!;
     await this.logActivity("updated", updated.id, updated.titleEn);
     return updated;
   }
 
   async deleteCertificate(id: string): Promise<void> {
     const existing = await this.getCertificateById(id);
-
-    const { error } = await this.supabase
-      .from("certificates")
-      .delete()
+    await (this.supabase.from("certifications" as any) as any)
+      .update({ deleted_at: new Date().toISOString() })
       .eq("id", id);
-
-    if (error) throw new Error(error.message);
-
     await this.logActivity("deleted", id, existing?.titleEn ?? "Certificate");
   }
 
   async bulkDeleteCertificates(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
-    const { error } = await this.supabase
-      .from("certificates")
-      .delete()
+    await (this.supabase.from("certifications" as any) as any)
+      .update({ deleted_at: new Date().toISOString() })
       .in("id", ids);
-
-    if (error) throw new Error(error.message);
     await this.logActivity("deleted", null, `${ids.length} certificates`, { count: ids.length });
   }
 
   async bulkUpdateCertificateStatus(ids: string[], status: CertificateStatus): Promise<void> {
     if (ids.length === 0) return;
-    const { error } = await this.supabase
-      .from("certificates")
-      .update({ status, updated_at: new Date().toISOString() })
+    await (this.supabase.from("certifications" as any) as any)
+      .update({ status: status === "active" ? "published" : "draft" })
       .in("id", ids);
-
-    if (error) throw new Error(error.message);
     await this.logActivity("updated", null, `Bulk updated status to ${status}`, { ids, status });
   }
 }
