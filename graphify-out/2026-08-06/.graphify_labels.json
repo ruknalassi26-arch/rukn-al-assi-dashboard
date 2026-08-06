@@ -15,9 +15,5 @@
   "13": "SendPasswordResetInput",
   "14": "sign-in.usecase.ts",
   "15": "i18n.ts",
-  "16": "get-current-user.usecase.ts",
-  "17": "SupabaseSeoRepository",
-  "18": "SupabaseSettingsRepository",
-  "19": "SupabaseActivityLogRepository",
-  "20": "SupabaseGlobalSearchRepository"
+  "16": "get-current-user.usecase.ts"
 }
