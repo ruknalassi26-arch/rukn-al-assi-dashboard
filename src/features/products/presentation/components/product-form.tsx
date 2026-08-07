@@ -26,7 +26,7 @@ import {
   SelectValue,
   Switch,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
 import { useProductCategories, useCreateProduct, useUpdateProduct } from "@shared/hooks/products/use-product-hooks";
 import type { ProductEntity } from "../../domain/entities/product.entity";
@@ -35,14 +35,19 @@ const productSchema = z.object({
   slug: z.string().min(2, "Slug is required").regex(/^[a-z0-9-]+$/, "Slug must contain lowercase letters, numbers, and hyphens"),
   nameEn: z.string().min(2, "English name is required"),
   nameAr: z.string().min(2, "Arabic name is required"),
+  nameKu: z.string().optional().nullable(),
   shortDescriptionEn: z.string().optional().nullable(),
   shortDescriptionAr: z.string().optional().nullable(),
+  shortDescriptionKu: z.string().optional().nullable(),
   descriptionEn: z.string().optional().nullable(),
   descriptionAr: z.string().optional().nullable(),
+  descriptionKu: z.string().optional().nullable(),
   seoTitleEn: z.string().optional().nullable(),
   seoTitleAr: z.string().optional().nullable(),
+  seoTitleKu: z.string().optional().nullable(),
   seoDescriptionEn: z.string().optional().nullable(),
   seoDescriptionAr: z.string().optional().nullable(),
+  seoDescriptionKu: z.string().optional().nullable(),
   categoryId: z.string().optional().nullable(),
   images: z.array(z.object({ url: z.string() })),
   thumbnail: z.string().optional().nullable(),
@@ -83,14 +88,19 @@ export function ProductForm({ initialData }: ProductFormProps) {
       slug: "",
       nameEn: "",
       nameAr: "",
+      nameKu: "",
       shortDescriptionEn: "",
       shortDescriptionAr: "",
+      shortDescriptionKu: "",
       descriptionEn: "",
       descriptionAr: "",
+      descriptionKu: "",
       seoTitleEn: "",
       seoTitleAr: "",
+      seoTitleKu: "",
       seoDescriptionEn: "",
       seoDescriptionAr: "",
+      seoDescriptionKu: "",
       categoryId: "",
       images: [],
       thumbnail: null,
@@ -113,14 +123,19 @@ export function ProductForm({ initialData }: ProductFormProps) {
         slug: initialData.slug,
         nameEn: initialData.nameEn,
         nameAr: initialData.nameAr,
+        nameKu: (initialData as any).nameKu ?? "",
         shortDescriptionEn: initialData.shortDescriptionEn ?? "",
         shortDescriptionAr: initialData.shortDescriptionAr ?? "",
+        shortDescriptionKu: (initialData as any).shortDescriptionKu ?? "",
         descriptionEn: initialData.descriptionEn ?? "",
         descriptionAr: initialData.descriptionAr ?? "",
+        descriptionKu: (initialData as any).descriptionKu ?? "",
         seoTitleEn: initialData.seoTitleEn ?? "",
         seoTitleAr: initialData.seoTitleAr ?? "",
+        seoTitleKu: (initialData as any).seoTitleKu ?? "",
         seoDescriptionEn: initialData.seoDescriptionEn ?? "",
         seoDescriptionAr: initialData.seoDescriptionAr ?? "",
+        seoDescriptionKu: (initialData as any).seoDescriptionKu ?? "",
         categoryId: initialData.categoryId ?? "",
         images: (initialData.images ?? []).map((url) => ({ url })),
         thumbnail: initialData.thumbnail,
@@ -225,7 +240,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
             </CardHeader>
 
             <CardContent className="space-y-4">
-              <BilingualTabs
+              <MultilingualTabs
                 englishFields={
                   <div className="space-y-4">
                     <div className="space-y-1.5">
@@ -286,6 +301,37 @@ export function ProductForm({ initialData }: ProductFormProps) {
                       <div className="space-y-1.5">
                         <Label htmlFor="seoDescriptionAr">وصف SEO (بالعربية)</Label>
                         <Textarea id="seoDescriptionAr" dir="rtl" rows={2} {...register("seoDescriptionAr")} />
+                      </div>
+                    </div>
+                  </div>
+                }
+                kurdishFields={
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="nameKu">Product Name (Kurdish)</Label>
+                      <Input id="nameKu" dir="rtl" {...register("nameKu")} />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="shortDescriptionKu">Short Summary (Kurdish)</Label>
+                      <Textarea id="shortDescriptionKu" dir="rtl" rows={2} {...register("shortDescriptionKu")} />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="descriptionKu">Full Description & Specifications (Kurdish)</Label>
+                      <Textarea id="descriptionKu" dir="rtl" rows={6} {...register("descriptionKu")} />
+                    </div>
+
+                    {/* SEO Kurdish Sub-section */}
+                    <div className="border p-4 rounded-lg bg-muted/10 space-y-3">
+                      <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">SEO Meta (Kurdish)</h4>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="seoTitleKu">Meta Title (Kurdish)</Label>
+                        <Input id="seoTitleKu" dir="rtl" {...register("seoTitleKu")} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="seoDescriptionKu">Meta Description (Kurdish)</Label>
+                        <Textarea id="seoDescriptionKu" dir="rtl" rows={2} {...register("seoDescriptionKu")} />
                       </div>
                     </div>
                   </div>

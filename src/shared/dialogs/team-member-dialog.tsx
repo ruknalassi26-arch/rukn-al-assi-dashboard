@@ -25,17 +25,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
 import type { TeamMemberEntity } from "@features/about/domain/entities/about.entity";
 
 const teamMemberSchema = z.object({
   fullNameEn: z.string().min(2, "English name is required"),
   fullNameAr: z.string().min(2, "Arabic name is required"),
+  fullNameKu: z.string().optional().nullable(),
   positionEn: z.string().optional().nullable(),
   positionAr: z.string().optional().nullable(),
+  positionKu: z.string().optional().nullable(),
   biographyEn: z.string().optional().nullable(),
   biographyAr: z.string().optional().nullable(),
+  biographyKu: z.string().optional().nullable(),
   linkedin: z.string().optional().nullable(),
   email: z.string().optional().nullable(),
   phone: z.string().optional().nullable(),
@@ -77,10 +80,13 @@ export function TeamMemberDialog({
     defaultValues: {
       fullNameEn: "",
       fullNameAr: "",
+      fullNameKu: "",
       positionEn: "",
       positionAr: "",
+      positionKu: "",
       biographyEn: "",
       biographyAr: "",
+      biographyKu: "",
       linkedin: "",
       email: "",
       phone: "",
@@ -95,10 +101,13 @@ export function TeamMemberDialog({
       reset({
         fullNameEn: initialData.fullNameEn,
         fullNameAr: initialData.fullNameAr,
+        fullNameKu: (initialData as any).fullNameKu ?? "",
         positionEn: initialData.positionEn ?? "",
         positionAr: initialData.positionAr ?? "",
+        positionKu: (initialData as any).positionKu ?? "",
         biographyEn: initialData.biographyEn ?? "",
         biographyAr: initialData.biographyAr ?? "",
+        biographyKu: (initialData as any).biographyKu ?? "",
         linkedin: initialData.linkedin ?? "",
         email: initialData.email ?? "",
         phone: initialData.phone ?? "",
@@ -110,10 +119,13 @@ export function TeamMemberDialog({
       reset({
         fullNameEn: "",
         fullNameAr: "",
+        fullNameKu: "",
         positionEn: "",
         positionAr: "",
+        positionKu: "",
         biographyEn: "",
         biographyAr: "",
+        biographyKu: "",
         linkedin: "",
         email: "",
         phone: "",
@@ -149,7 +161,7 @@ export function TeamMemberDialog({
             folder="team"
           />
 
-          <BilingualTabs
+          <MultilingualTabs
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -181,6 +193,22 @@ export function TeamMemberDialog({
                 <div className="space-y-1.5">
                   <Label htmlFor="biographyAr">{tDialogs("bioAr")}</Label>
                   <Textarea id="biographyAr" rows={3} dir="rtl" {...register("biographyAr")} />
+                </div>
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="fullNameKu">{tDialogs("nameKu")}</Label>
+                  <Input id="fullNameKu" dir="rtl" {...register("fullNameKu")} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="positionKu">{tDialogs("roleKu")}</Label>
+                  <Input id="positionKu" dir="rtl" {...register("positionKu")} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="biographyKu">{tDialogs("bioKu")}</Label>
+                  <Textarea id="biographyKu" rows={3} dir="rtl" {...register("biographyKu")} />
                 </div>
               </div>
             }

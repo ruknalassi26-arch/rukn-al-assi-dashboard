@@ -23,13 +23,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
 import type { ClientEntity } from "@features/homepage/domain/entities/homepage.entity";
 
 const clientSchema = z.object({
   nameEn: z.string().min(2, "English name is required"),
   nameAr: z.string().min(2, "Arabic name is required"),
+  nameKu: z.string().optional().nullable(),
   logoUrl: z.string().optional().nullable(),
   websiteUrl: z.string().optional().nullable(),
   sortOrder: z.number().min(0),
@@ -65,6 +66,7 @@ export function ClientDialog({
     defaultValues: {
       nameEn: "",
       nameAr: "",
+      nameKu: "",
       logoUrl: null,
       websiteUrl: "",
       sortOrder: 1,
@@ -77,6 +79,7 @@ export function ClientDialog({
       reset({
         nameEn: initialData.nameEn,
         nameAr: initialData.nameAr,
+        nameKu: (initialData as any).nameKu ?? "",
         logoUrl: initialData.logoUrl,
         websiteUrl: initialData.websiteUrl ?? "",
         sortOrder: initialData.sortOrder,
@@ -86,6 +89,7 @@ export function ClientDialog({
       reset({
         nameEn: "",
         nameAr: "",
+        nameKu: "",
         logoUrl: null,
         websiteUrl: "",
         sortOrder: 1,
@@ -119,7 +123,7 @@ export function ClientDialog({
             folder="clients"
           />
 
-          <BilingualTabs
+          <MultilingualTabs
             englishFields={
               <div className="space-y-1.5">
                 <Label htmlFor="nameEn">Client Name (English) *</Label>
@@ -132,6 +136,12 @@ export function ClientDialog({
                 <Label htmlFor="nameAr">اسم العميل (بالعربية) *</Label>
                 <Input id="nameAr" dir="rtl" {...register("nameAr")} placeholder="أرامكو السعودية" />
                 {errors.nameAr && <span className="text-xs text-destructive">{errors.nameAr.message}</span>}
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-1.5">
+                <Label htmlFor="nameKu">Client Name (Kurdish)</Label>
+                <Input id="nameKu" dir="rtl" {...register("nameKu")} />
               </div>
             }
           />

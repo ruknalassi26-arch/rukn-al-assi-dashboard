@@ -26,6 +26,7 @@ import {
   User,
   Activity,
   Bell,
+  Briefcase,
 } from "lucide-react";
 import { cn } from "@core/utils/cn";
 import { useRTL } from "@core/hooks/use-rtl";
@@ -54,11 +55,15 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/certificates", labelKey: "certificates", icon: Shield },
   { href: "/admin/team", labelKey: "team", icon: Users },
   { href: "/admin/projects", labelKey: "projects", icon: FolderKanban },
+  { href: "/admin/careers/postings", labelKey: "jobPostings", icon: Briefcase },
+  { href: "/admin/careers/applications", labelKey: "careerApplications", icon: FileText },
   { href: "/admin/rfq", labelKey: "rfq", icon: FileText },
   { href: "/admin/branches", labelKey: "branches", icon: Building2 },
   { href: "/admin/contact-messages", labelKey: "contactMessages", icon: Mail },
   { href: "/admin/homepage", labelKey: "homepage", icon: Home },
   { href: "/admin/seo", labelKey: "seo", icon: Search },
+  { href: "/admin/users", labelKey: "users", icon: Users },
+  { href: "/admin/roles", labelKey: "roles", icon: Shield },
   { href: "/admin/profile", labelKey: "profile", icon: User },
   { href: "/admin/activity-log", labelKey: "activityLog", icon: Activity },
   { href: "/admin/notifications", labelKey: "notifications", icon: Bell },

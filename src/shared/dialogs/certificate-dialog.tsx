@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
 import type { CertificateEntity } from "@features/homepage/domain/entities/homepage.entity";
 import type { AboutCertificateEntity } from "@features/about/domain/entities/about.entity";
@@ -33,8 +33,10 @@ import type { AboutCertificateEntity } from "@features/about/domain/entities/abo
 const certificateSchema = z.object({
   titleEn: z.string().min(2, "English title is required"),
   titleAr: z.string().min(2, "Arabic title is required"),
+  titleKu: z.string().optional().nullable(),
   descriptionEn: z.string().optional().nullable(),
   descriptionAr: z.string().optional().nullable(),
+  descriptionKu: z.string().optional().nullable(),
   image: z.string().optional().nullable(),
   issueDate: z.string().optional().nullable(),
   expiryDate: z.string().optional().nullable(),
@@ -76,8 +78,10 @@ export function CertificateDialog({
     defaultValues: {
       titleEn: "",
       titleAr: "",
+      titleKu: "",
       descriptionEn: "",
       descriptionAr: "",
+      descriptionKu: "",
       image: null,
       issueDate: "",
       expiryDate: "",
@@ -92,8 +96,10 @@ export function CertificateDialog({
       reset({
         titleEn: initialData.titleEn,
         titleAr: initialData.titleAr,
+        titleKu: (initialData as any).titleKu ?? "",
         descriptionEn: "descriptionEn" in initialData ? (initialData.descriptionEn ?? "") : "",
         descriptionAr: "descriptionAr" in initialData ? (initialData.descriptionAr ?? "") : "",
+        descriptionKu: (initialData as any).descriptionKu ?? "",
         image: initialData.image,
         issueDate: initialData.issueDate ?? "",
         expiryDate: "expiryDate" in initialData ? (initialData.expiryDate ?? "") : "",
@@ -105,8 +111,10 @@ export function CertificateDialog({
       reset({
         titleEn: "",
         titleAr: "",
+        titleKu: "",
         descriptionEn: "",
         descriptionAr: "",
+        descriptionKu: "",
         image: null,
         issueDate: "",
         expiryDate: "",
@@ -142,7 +150,7 @@ export function CertificateDialog({
             folder="certificates"
           />
 
-          <BilingualTabs
+          <MultilingualTabs
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -166,6 +174,18 @@ export function CertificateDialog({
                 <div className="space-y-1.5">
                   <Label htmlFor="descriptionAr">{tDialogs("descAr")}</Label>
                   <Textarea id="descriptionAr" rows={3} dir="rtl" {...register("descriptionAr")} />
+                </div>
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="titleKu">{tDialogs("titleKu")}</Label>
+                  <Input id="titleKu" dir="rtl" {...register("titleKu")} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="descriptionKu">{tDialogs("descKu")}</Label>
+                  <Textarea id="descriptionKu" rows={3} dir="rtl" {...register("descriptionKu")} />
                 </div>
               </div>
             }

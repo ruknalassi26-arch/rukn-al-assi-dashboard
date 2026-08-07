@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // shared/dialogs/value-dialog.tsx
-// Dialog form for creating/editing a Core Value with Bilingual Tabs & next-intl
+// Dialog form for creating/editing a Core Value with Multilingual Tabs & next-intl
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -25,14 +25,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import type { CoreValueEntity } from "@features/about/domain/entities/about.entity";
 
 const valueSchema = z.object({
   titleEn: z.string().min(2, "English title is required"),
   titleAr: z.string().min(2, "Arabic title is required"),
+  titleKu: z.string().optional().nullable(),
   descriptionEn: z.string().optional().nullable(),
   descriptionAr: z.string().optional().nullable(),
+  descriptionKu: z.string().optional().nullable(),
   icon: z.string().optional().nullable(),
   sortOrder: z.number().min(0),
   status: z.enum(["active", "draft"]),
@@ -71,8 +73,10 @@ export function ValueDialog({
     defaultValues: {
       titleEn: "",
       titleAr: "",
+      titleKu: "",
       descriptionEn: "",
       descriptionAr: "",
+      descriptionKu: "",
       icon: "ShieldCheck",
       sortOrder: 1,
       status: "active",
@@ -84,8 +88,10 @@ export function ValueDialog({
       reset({
         titleEn: initialData.titleEn,
         titleAr: initialData.titleAr,
+        titleKu: (initialData as any).titleKu ?? "",
         descriptionEn: initialData.descriptionEn ?? "",
         descriptionAr: initialData.descriptionAr ?? "",
+        descriptionKu: (initialData as any).descriptionKu ?? "",
         icon: initialData.icon ?? "ShieldCheck",
         sortOrder: initialData.sortOrder,
         status: initialData.status,
@@ -94,8 +100,10 @@ export function ValueDialog({
       reset({
         titleEn: "",
         titleAr: "",
+        titleKu: "",
         descriptionEn: "",
         descriptionAr: "",
+        descriptionKu: "",
         icon: "ShieldCheck",
         sortOrder: 1,
         status: "active",
@@ -121,7 +129,7 @@ export function ValueDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
-          <BilingualTabs
+          <MultilingualTabs
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -149,6 +157,18 @@ export function ValueDialog({
                 <div className="space-y-1.5">
                   <Label htmlFor="descriptionAr">{tDialogs("descAr")}</Label>
                   <Textarea id="descriptionAr" rows={3} dir="rtl" {...register("descriptionAr")} />
+                </div>
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="titleKu">{tDialogs("titleKu")}</Label>
+                  <Input id="titleKu" dir="rtl" {...register("titleKu")} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="descriptionKu">{tDialogs("descKu")}</Label>
+                  <Textarea id="descriptionKu" rows={3} dir="rtl" {...register("descriptionKu")} />
                 </div>
               </div>
             }

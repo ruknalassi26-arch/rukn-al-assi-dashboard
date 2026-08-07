@@ -43,7 +43,7 @@ import { SEO_PAGE_LABELS } from "../../domain/enums/seo.enums";
 import type { SeoPageKey } from "../../domain/entities/seo-setting.entity";
 
 const seoSchema = z.object({
-  pageKey: z.enum(["home", "about", "products", "categories", "services", "projects", "certificates", "contact"]),
+  pageKey: z.enum(["home", "about", "products", "categories", "services", "projects", "certificates", "contact", "careers"]),
   metaTitleEn: z.string().max(70, "Meta Title should be under 70 characters").optional().nullable(),
   metaTitleAr: z.string().max(70, "عنوان SEO يجب ألا يتجاوز 70 حرفاً").optional().nullable(),
   metaTitleKu: z.string().optional().nullable(),

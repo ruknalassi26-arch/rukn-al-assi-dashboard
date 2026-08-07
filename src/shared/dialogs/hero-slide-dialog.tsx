@@ -24,20 +24,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
 import type { HeroSlideEntity } from "@features/homepage/domain/entities/homepage.entity";
 
 const heroSlideSchema = z.object({
   titleEn: z.string().min(2, "English title is required"),
   titleAr: z.string().min(2, "Arabic title is required"),
+  titleKu: z.string().optional().nullable(),
   subtitleEn: z.string().optional().nullable(),
   subtitleAr: z.string().optional().nullable(),
+  subtitleKu: z.string().optional().nullable(),
   primaryButtonTextEn: z.string().optional().nullable(),
   primaryButtonTextAr: z.string().optional().nullable(),
+  primaryButtonTextKu: z.string().optional().nullable(),
   primaryButtonUrl: z.string().optional().nullable(),
   secondaryButtonTextEn: z.string().optional().nullable(),
   secondaryButtonTextAr: z.string().optional().nullable(),
+  secondaryButtonTextKu: z.string().optional().nullable(),
   secondaryButtonUrl: z.string().optional().nullable(),
   backgroundImage: z.string().optional().nullable(),
   overlayOpacity: z.number().min(0).max(100),
@@ -74,13 +78,17 @@ export function HeroSlideDialog({
     defaultValues: {
       titleEn: "",
       titleAr: "",
+      titleKu: "",
       subtitleEn: "",
       subtitleAr: "",
+      subtitleKu: "",
       primaryButtonTextEn: "",
       primaryButtonTextAr: "",
+      primaryButtonTextKu: "",
       primaryButtonUrl: "",
       secondaryButtonTextEn: "",
       secondaryButtonTextAr: "",
+      secondaryButtonTextKu: "",
       secondaryButtonUrl: "",
       backgroundImage: null,
       overlayOpacity: 40,
@@ -94,13 +102,17 @@ export function HeroSlideDialog({
       reset({
         titleEn: initialData.titleEn,
         titleAr: initialData.titleAr,
+        titleKu: (initialData as any).titleKu ?? "",
         subtitleEn: initialData.subtitleEn ?? "",
         subtitleAr: initialData.subtitleAr ?? "",
+        subtitleKu: (initialData as any).subtitleKu ?? "",
         primaryButtonTextEn: initialData.primaryButtonTextEn ?? "",
         primaryButtonTextAr: initialData.primaryButtonTextAr ?? "",
+        primaryButtonTextKu: (initialData as any).primaryButtonTextKu ?? "",
         primaryButtonUrl: initialData.primaryButtonUrl ?? "",
         secondaryButtonTextEn: initialData.secondaryButtonTextEn ?? "",
         secondaryButtonTextAr: initialData.secondaryButtonTextAr ?? "",
+        secondaryButtonTextKu: (initialData as any).secondaryButtonTextKu ?? "",
         secondaryButtonUrl: initialData.secondaryButtonUrl ?? "",
         backgroundImage: initialData.backgroundImage,
         overlayOpacity: initialData.overlayOpacity ?? 40,
@@ -111,13 +123,17 @@ export function HeroSlideDialog({
       reset({
         titleEn: "",
         titleAr: "",
+        titleKu: "",
         subtitleEn: "",
         subtitleAr: "",
+        subtitleKu: "",
         primaryButtonTextEn: "",
         primaryButtonTextAr: "",
+        primaryButtonTextKu: "",
         primaryButtonUrl: "",
         secondaryButtonTextEn: "",
         secondaryButtonTextAr: "",
+        secondaryButtonTextKu: "",
         secondaryButtonUrl: "",
         backgroundImage: null,
         overlayOpacity: 40,
@@ -152,7 +168,7 @@ export function HeroSlideDialog({
             folder="hero"
           />
 
-          <BilingualTabs
+          <MultilingualTabs
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -195,6 +211,28 @@ export function HeroSlideDialog({
                   <div>
                     <Label className="text-xs">زر ثانوي (بالعربية)</Label>
                     <Input dir="rtl" {...register("secondaryButtonTextAr")} placeholder="اتصل بنا" />
+                  </div>
+                </div>
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="titleKu">Title (Kurdish)</Label>
+                  <Input id="titleKu" dir="rtl" {...register("titleKu")} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="subtitleKu">Subtitle (Kurdish)</Label>
+                  <Textarea id="subtitleKu" rows={2} dir="rtl" {...register("subtitleKu")} />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border p-3 rounded-lg bg-muted/20">
+                  <div>
+                    <Label className="text-xs">Primary Btn (KU)</Label>
+                    <Input dir="rtl" {...register("primaryButtonTextKu")} />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Secondary Btn (KU)</Label>
+                    <Input dir="rtl" {...register("secondaryButtonTextKu")} />
                   </div>
                 </div>
               </div>

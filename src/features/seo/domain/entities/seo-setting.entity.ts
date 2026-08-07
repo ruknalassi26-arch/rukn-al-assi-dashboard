@@ -11,7 +11,8 @@ export type SeoPageKey =
   | "services"
   | "projects"
   | "certificates"
-  | "contact";
+  | "contact"
+  | "careers";
 
 export interface SeoSettingProps {
   id: string;

@@ -622,7 +622,7 @@ export interface Database {
       seo_settings: {
         Row: {
           id: string;
-          page_key: "home" | "about" | "products" | "categories" | "services" | "projects" | "certificates" | "contact";
+          page_key: "home" | "about" | "products" | "categories" | "services" | "projects" | "certificates" | "contact" | "careers";
           meta_title_en: string | null;
           meta_title_ar: string | null;
           meta_title_ku?: string | null;
@@ -645,6 +645,68 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["seo_settings"]["Insert"]>;
         Relationships: [];
       };
+      job_postings: {
+        Row: {
+          id: string;
+          slug: string;
+          title_en: string;
+          title_ar: string;
+          title_ku: string | null;
+          description_en: string | null;
+          description_ar: string | null;
+          description_ku: string | null;
+          requirements_en: string | null;
+          requirements_ar: string | null;
+          requirements_ku: string | null;
+          department: string | null;
+          employment_type: "full_time" | "part_time" | "contract" | "internship";
+          location: string | null;
+          closing_date: string | null;
+          sort_order: number;
+          status: "draft" | "published" | "archived";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["job_postings"]["Row"], "id" | "created_at" | "updated_at"> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["job_postings"]["Insert"]>;
+        Relationships: [];
+      };
+      career_applications: {
+        Row: {
+          id: string;
+          job_id: string | null;
+          job_title: string | null;
+          applicant_name: string;
+          email: string;
+          phone: string;
+          cover_message: string | null;
+          cv_file_url: string;
+          cv_file_name: string;
+          status: "new" | "reviewed" | "shortlisted" | "rejected" | "hired";
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["career_applications"]["Row"], "id" | "created_at" | "updated_at"> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["career_applications"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "career_applications_job_id_fkey";
+            columns: ["job_id"];
+            isOneToOne: false;
+            referencedRelation: "job_postings";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -654,8 +716,11 @@ export interface Database {
       rfq_status: "pending" | "reviewed" | "quoted" | "closed";
       contact_status: "new" | "read" | "replied";
       activity_action: "created" | "updated" | "deleted" | "login" | "logout" | "settings_updated" | "seo_updated";
-      activity_entity_type: "product" | "service" | "project" | "rfq" | "contact" | "homepage" | "settings" | "seo" | "auth";
+      activity_entity_type: "product" | "service" | "project" | "rfq" | "contact" | "homepage" | "settings" | "seo" | "auth" | "career";
       certificate_status: "active" | "draft";
+      employment_type: "full_time" | "part_time" | "contract" | "internship";
+      job_posting_status: "draft" | "published" | "archived";
+      career_application_status: "new" | "reviewed" | "shortlisted" | "rejected" | "hired";
     };
   };
 }

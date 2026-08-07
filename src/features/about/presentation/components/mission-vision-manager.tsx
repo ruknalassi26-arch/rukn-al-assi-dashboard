@@ -26,15 +26,17 @@ import {
   SelectValue,
   Skeleton,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { useMission, useUpdateMission, useVision, useUpdateVision } from "@shared/hooks/about/use-about-hooks";
 import { ErrorState } from "@shared/components/error-state";
 
 const sectionSchema = z.object({
   titleEn: z.string().min(2, "English title is required"),
   titleAr: z.string().min(2, "Arabic title is required"),
+  titleKu: z.string().optional().nullable(),
   contentEn: z.string().optional().nullable(),
   contentAr: z.string().optional().nullable(),
+  contentKu: z.string().optional().nullable(),
   icon: z.string().optional().nullable(),
   status: z.enum(["active", "draft"]),
 });
@@ -58,8 +60,10 @@ export function MissionVisionManager() {
     defaultValues: {
       titleEn: "Our Mission",
       titleAr: "مهمتنا",
+      titleKu: "",
       contentEn: "",
       contentAr: "",
+      contentKu: "",
       icon: "Target",
       status: "active",
     },
@@ -71,8 +75,10 @@ export function MissionVisionManager() {
     defaultValues: {
       titleEn: "Our Vision",
       titleAr: "رؤيتنا",
+      titleKu: "",
       contentEn: "",
       contentAr: "",
+      contentKu: "",
       icon: "Eye",
       status: "active",
     },
@@ -83,8 +89,10 @@ export function MissionVisionManager() {
       missionForm.reset({
         titleEn: mission.titleEn,
         titleAr: mission.titleAr,
+        titleKu: (mission as any).titleKu ?? "",
         contentEn: mission.contentEn ?? "",
         contentAr: mission.contentAr ?? "",
+        contentKu: (mission as any).contentKu ?? "",
         icon: mission.icon ?? "Target",
         status: mission.status,
       });
@@ -96,8 +104,10 @@ export function MissionVisionManager() {
       visionForm.reset({
         titleEn: vision.titleEn,
         titleAr: vision.titleAr,
+        titleKu: (vision as any).titleKu ?? "",
         contentEn: vision.contentEn ?? "",
         contentAr: vision.contentAr ?? "",
+        contentKu: (vision as any).contentKu ?? "",
         icon: vision.icon ?? "Eye",
         status: vision.status,
       });
@@ -105,11 +115,11 @@ export function MissionVisionManager() {
   }, [vision, visionForm]);
 
   const onMissionSubmit = async (values: SectionFormValues) => {
-    await updateMissionMutation.mutateAsync(values);
+    await updateMissionMutation.mutateAsync(values as any);
   };
 
   const onVisionSubmit = async (values: SectionFormValues) => {
-    await updateVisionMutation.mutateAsync(values);
+    await updateVisionMutation.mutateAsync(values as any);
   };
 
   if (isMissionLoading || isVisionLoading) {
@@ -176,7 +186,7 @@ export function MissionVisionManager() {
           </CardHeader>
 
           <CardContent className="space-y-4 flex-1">
-            <BilingualTabs
+            <MultilingualTabs
               englishFields={
                 <div className="space-y-3">
                   <div className="space-y-1.5">
@@ -198,6 +208,18 @@ export function MissionVisionManager() {
                   <div className="space-y-1.5">
                     <Label htmlFor="mContentAr">{tMission("contentAr")}</Label>
                     <Textarea id="mContentAr" dir="rtl" rows={4} {...missionForm.register("contentAr")} />
+                  </div>
+                </div>
+              }
+              kurdishFields={
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="mTitleKu">{tMission("titleKu")}</Label>
+                    <Input id="mTitleKu" dir="rtl" {...missionForm.register("titleKu")} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="mContentKu">{tMission("contentKu")}</Label>
+                    <Textarea id="mContentKu" dir="rtl" rows={4} {...missionForm.register("contentKu")} />
                   </div>
                 </div>
               }
@@ -244,7 +266,7 @@ export function MissionVisionManager() {
           </CardHeader>
 
           <CardContent className="space-y-4 flex-1">
-            <BilingualTabs
+            <MultilingualTabs
               englishFields={
                 <div className="space-y-3">
                   <div className="space-y-1.5">
@@ -266,6 +288,18 @@ export function MissionVisionManager() {
                   <div className="space-y-1.5">
                     <Label htmlFor="vContentAr">{tVision("contentAr")}</Label>
                     <Textarea id="vContentAr" dir="rtl" rows={4} {...visionForm.register("contentAr")} />
+                  </div>
+                </div>
+              }
+              kurdishFields={
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="vTitleKu">{tVision("titleKu")}</Label>
+                    <Input id="vTitleKu" dir="rtl" {...visionForm.register("titleKu")} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="vContentKu">{tVision("contentKu")}</Label>
+                    <Textarea id="vContentKu" dir="rtl" rows={4} {...visionForm.register("contentKu")} />
                   </div>
                 </div>
               }

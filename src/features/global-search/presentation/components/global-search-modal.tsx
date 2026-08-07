@@ -72,22 +72,18 @@ export function GlobalSearchModal() {
     { value: "contact", label: t("tabs.contact") },
   ];
 
-  // Global Ctrl+K / Cmd+K Hotkey Listener
+  // Global Ctrl+K / Cmd+K Hotkey Listener (works across English, Arabic, Kurdish keyboard layouts)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
+      if ((e.ctrlKey || e.metaKey) && (e.key?.toLowerCase() === "k" || e.code === "KeyK")) {
         e.preventDefault();
-        if (isOpen) {
-          closeModal();
-        } else {
-          openModal();
-        }
+        useGlobalSearchStore.getState().toggleModal();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, openModal, closeModal]);
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, []);
 
   const { data, isLoading } = useGlobalSearchQuery(query, moduleFilter, page, 10);
 

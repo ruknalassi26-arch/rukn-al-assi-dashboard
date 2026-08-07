@@ -23,12 +23,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import type { CompanyStatEntity } from "@features/homepage/domain/entities/homepage.entity";
 
 const statSchema = z.object({
   titleEn: z.string().min(2, "English title is required"),
   titleAr: z.string().min(2, "Arabic title is required"),
+  titleKu: z.string().optional().nullable(),
   value: z.string().min(1, "Stat value is required"),
   icon: z.string().optional().nullable(),
   sortOrder: z.number().min(0),
@@ -64,6 +65,7 @@ export function StatDialog({
     defaultValues: {
       titleEn: "",
       titleAr: "",
+      titleKu: "",
       value: "",
       icon: "Building",
       sortOrder: 1,
@@ -76,6 +78,7 @@ export function StatDialog({
       reset({
         titleEn: initialData.titleEn,
         titleAr: initialData.titleAr,
+        titleKu: (initialData as any).titleKu ?? "",
         value: initialData.value,
         icon: initialData.icon ?? "Building",
         sortOrder: initialData.sortOrder,
@@ -85,6 +88,7 @@ export function StatDialog({
       reset({
         titleEn: "",
         titleAr: "",
+        titleKu: "",
         value: "",
         icon: "Building",
         sortOrder: 1,
@@ -117,7 +121,7 @@ export function StatDialog({
             {errors.value && <span className="text-xs text-destructive">{errors.value.message}</span>}
           </div>
 
-          <BilingualTabs
+          <MultilingualTabs
             englishFields={
               <div className="space-y-1.5">
                 <Label htmlFor="titleEn">Title (English) *</Label>
@@ -130,6 +134,12 @@ export function StatDialog({
                 <Label htmlFor="titleAr">العنوان (بالعربية) *</Label>
                 <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="مشروع مكتمل" />
                 {errors.titleAr && <span className="text-xs text-destructive">{errors.titleAr.message}</span>}
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-1.5">
+                <Label htmlFor="titleKu">Title (Kurdish)</Label>
+                <Input id="titleKu" dir="rtl" {...register("titleKu")} />
               </div>
             }
           />

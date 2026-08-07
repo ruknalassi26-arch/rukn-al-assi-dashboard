@@ -16,8 +16,10 @@
       "edit": "Edit",
       "titleEn": "Title (English) *",
       "titleAr": "Title (Arabic) *",
+      "titleKu": "Title (Kurdish)",
       "descEn": "Description (English)",
       "descAr": "Description (Arabic)",
+      "descKu": "Description (Kurdish)",
       "sortOrder": "Sort Order",
       "icon": "Icon",
       "yearTimeframe": "Year / Timeframe",
@@ -25,14 +27,27 @@
       "imageFormats": "SVG, PNG, JPG, or WebP (max 5MB)",
       "roleEn": "Role / Position (English) *",
       "roleAr": "Role / Position (Arabic) *",
+      "roleKu": "Role / Position (Kurdish)",
       "nameEn": "Name (English) *",
       "nameAr": "Name (Arabic) *",
+      "nameKu": "Name (Kurdish)",
       "bioEn": "Biography (English)",
       "bioAr": "Biography (Arabic)",
+      "bioKu": "Biography (Kurdish)",
       "issuerEn": "Issuing Organization (English)",
       "issuerAr": "Issuing Organization (Arabic)",
+      "issuerKu": "Issuing Organization (Kurdish)",
       "issueDate": "Issue Date",
-      "expiryDate": "Expiry Date"
+      "expiryDate": "Expiry Date",
+      "subtitleEn": "Subtitle (English)",
+      "subtitleAr": "Subtitle (Arabic)",
+      "subtitleKu": "Subtitle (Kurdish)",
+      "buttonTextEn": "Button Text (English)",
+      "buttonTextAr": "Button Text (Arabic)",
+      "buttonTextKu": "Button Text (Kurdish)",
+      "headingEn": "Heading (English)",
+      "headingAr": "Heading (Arabic)",
+      "headingKu": "Heading (Kurdish)"
     },
     "back": "Back",
     "readMore": "Read more",
@@ -69,6 +84,7 @@
     "products": "Products",
     "services": "Services",
     "projects": "Projects",
+    "careers": "Careers",
     "contact": "Contact",
     "rfq": "Request a Quote"
   },
@@ -83,6 +99,12 @@
     "projects": "Projects",
     "rfq": "RFQ Requests",
     "branches": "Company Branches",
+    "careers": "Careers",
+    "jobPostings": "Job Postings",
+    "careerApplications": "Career Applications",
+    "administration": "Administration",
+    "users": "Users & Personnel",
+    "roles": "Roles & Permissions",
     "contactMessages": "Contact Messages",
     "contacts": "Contact Messages",
     "homepage": "Homepage",
@@ -185,10 +207,13 @@
       "saveBtn": "Save Company Info",
       "nameEn": "Company Name (English)",
       "nameAr": "Company Name (Arabic)",
+      "nameKu": "Company Name (Kurdish)",
       "shortEn": "Short Summary (English)",
       "shortAr": "Short Summary (Arabic)",
+      "shortKu": "Short Summary (Kurdish)",
       "fullEn": "Full Company Story (English)",
       "fullAr": "Full Company Story (Arabic)",
+      "fullKu": "Full Company Story (Kurdish)",
       "estYear": "Established Year",
       "headquarters": "Headquarters Location",
       "phone": "Official Phone",
@@ -201,8 +226,10 @@
       "saveBtn": "Save Mission",
       "titleEn": "Title (English)",
       "titleAr": "Title (Arabic)",
+      "titleKu": "Title (Kurdish)",
       "contentEn": "Content (English)",
-      "contentAr": "Content (Arabic)"
+      "contentAr": "Content (Arabic)",
+      "contentKu": "Content (Kurdish)"
     },
     "vision": {
       "title": "Company Vision",
@@ -538,5 +565,144 @@
     "title": "My Profile",
     "subtitle": "Manage your administrative profile, display name, avatar, and security credentials.",
     "save": "Save Profile"
+  },
+  "careersAdmin": {
+    "postingsTitle": "Job Postings",
+    "postingsSubtitle": "Manage career opportunities, job requirements, positions, and publishing status.",
+    "addPosting": "Create Job Posting",
+    "editPosting": "Edit Job Posting",
+    "applicationsTitle": "Career Applications",
+    "applicationsSubtitle": "Review candidate job applications, cover letters, CV attachments, and recruitment pipeline status.",
+    "table": {
+      "title": "Position Title",
+      "department": "Department",
+      "type": "Employment Type",
+      "location": "Location",
+      "status": "Status",
+      "closingDate": "Closing Date",
+      "sortOrder": "Sort Order",
+      "createdAt": "Created At",
+      "actions": "Actions",
+      "applicant": "Applicant Name",
+      "email": "Email",
+      "phone": "Phone",
+      "position": "Job Position",
+      "cv": "Curriculum Vitae (CV)",
+      "submittedDate": "Submitted Date"
+    },
+    "types": {
+      "full_time": "Full Time",
+      "part_time": "Part Time",
+      "contract": "Contract",
+      "internship": "Internship"
+    },
+    "postingStatus": {
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "appStatus": {
+      "new": "New",
+      "reviewed": "Reviewed",
+      "shortlisted": "Shortlisted",
+      "rejected": "Rejected",
+      "hired": "Hired"
+    },
+    "form": {
+      "positionTitle": "Position Title",
+      "slug": "URL Slug",
+      "department": "Department / Team",
+      "employmentType": "Employment Type",
+      "location": "Job Location",
+      "closingDate": "Closing Date",
+      "sortOrder": "Sort Order",
+      "status": "Publishing Status",
+      "description": "Job Description & Responsibilities",
+      "requirements": "Key Qualifications & Requirements",
+      "savePosting": "Save Job Posting"
+    },
+    "details": {
+      "modalTitle": "Applicant Details & Resume",
+      "notesLabel": "Internal Admin Notes",
+      "updateStatus": "Update Status",
+      "downloadCv": "Download CV",
+      "coverMessage": "Cover Letter / Message"
+    }
+  },
+  "careersPublic": {
+    "title": "Build Your Career With Rukn Al Assi",
+    "subtitle": "Join our team of engineering experts, hydraulic technicians, and industrial pioneers.",
+    "openPositions": "Open Opportunities",
+    "noJobsTitle": "No Open Postings Available",
+    "noJobsDesc": "We currently do not have active openings matching your criteria. Check back soon!",
+    "applyNow": "Apply Now",
+    "closingOn": "Closing on",
+    "department": "Department",
+    "type": "Type",
+    "location": "Location",
+    "backToCareers": "Back to Careers",
+    "jobOverview": "Job Overview",
+    "requirements": "Key Requirements",
+    "applyHeader": "Submit Your Application",
+    "fullName": "Full Name *",
+    "email": "Email Address *",
+    "phone": "Phone Number *",
+    "coverMessage": "Cover Message / Pitch",
+    "uploadCv": "Upload Resume (PDF, DOC, DOCX - max 10MB) *",
+    "submitApp": "Submit Application",
+    "submitting": "Uploading CV & Submitting...",
+    "successMessage": "Thank you! Your application has been submitted successfully. Our HR team will review your resume."
+  },
+  "usersAdmin": {
+    "title": "User Management",
+    "subtitle": "Manage administrative team members, credential access, roles, and account status.",
+    "addUser": "Create Admin User",
+    "editUser": "Edit Admin User",
+    "deactivate": "Deactivate Account",
+    "activate": "Activate Account",
+    "table": {
+      "avatar": "Avatar",
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "role": "Assigned Role",
+      "status": "Account Status",
+      "lastLogin": "Last Login",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "form": {
+      "fullName": "Full Name *",
+      "email": "Email Address *",
+      "role": "Role Assignment *",
+      "status": "Account Status",
+      "activeLabel": "Active (Can log in)",
+      "inactiveLabel": "Inactive (Suspended access)",
+      "saveUser": "Save User Account"
+    }
+  },
+  "rolesAdmin": {
+    "title": "Roles & Permissions",
+    "subtitle": "Define administrative access control levels, security roles, and granular permission matrices.",
+    "addRole": "Create Security Role",
+    "editRole": "Edit Security Role",
+    "viewDetails": "View Role Details",
+    "table": {
+      "roleName": "Role Name",
+      "description": "Description",
+      "usersCount": "Assigned Users",
+      "permissionsCount": "Granted Permissions",
+      "actions": "Actions"
+    },
+    "form": {
+      "roleName": "Role Name *",
+      "description": "Description & Scope",
+      "permissionsHeader": "Granular Module Permissions",
+      "saveRole": "Save Security Role"
+    },
+    "details": {
+      "title": "Role Details & Access Matrix",
+      "assignedUsers": "Assigned Administrative Users",
+      "grantedPermissions": "Granted System Permissions"
+    }
   }
 }

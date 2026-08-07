@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated tool output
+.qodo/
+graphify-out/
+next-env.d.ts

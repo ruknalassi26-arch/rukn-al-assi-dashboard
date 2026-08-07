@@ -26,17 +26,20 @@ import {
   SelectValue,
   Skeleton,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { useCompanyInfo, useUpdateCompanyInfo } from "@shared/hooks/about/use-about-hooks";
 import { ErrorState } from "@shared/components/error-state";
 
 const companyInfoSchema = z.object({
   companyNameEn: z.string().min(2, "English company name is required"),
   companyNameAr: z.string().min(2, "Arabic company name is required"),
+  companyNameKu: z.string().optional().nullable(),
   shortDescriptionEn: z.string().optional().nullable(),
   shortDescriptionAr: z.string().optional().nullable(),
+  shortDescriptionKu: z.string().optional().nullable(),
   fullDescriptionEn: z.string().optional().nullable(),
   fullDescriptionAr: z.string().optional().nullable(),
+  fullDescriptionKu: z.string().optional().nullable(),
   establishedYear: z.number().nullable().optional(),
   headquarters: z.string().optional().nullable(),
   website: z.string().optional().nullable(),
@@ -65,10 +68,13 @@ export function CompanyInfoManager() {
     defaultValues: {
       companyNameEn: "Rukn Al Assi",
       companyNameAr: "ركن العاصي",
+      companyNameKu: "",
       shortDescriptionEn: "",
       shortDescriptionAr: "",
+      shortDescriptionKu: "",
       fullDescriptionEn: "",
       fullDescriptionAr: "",
+      fullDescriptionKu: "",
       establishedYear: 2010,
       headquarters: "Riyadh, Saudi Arabia",
       website: "https://ruknalassi.com",
@@ -83,10 +89,13 @@ export function CompanyInfoManager() {
       reset({
         companyNameEn: companyData.companyNameEn,
         companyNameAr: companyData.companyNameAr,
+        companyNameKu: (companyData as any).companyNameKu ?? "",
         shortDescriptionEn: companyData.shortDescriptionEn ?? "",
         shortDescriptionAr: companyData.shortDescriptionAr ?? "",
+        shortDescriptionKu: (companyData as any).shortDescriptionKu ?? "",
         fullDescriptionEn: companyData.fullDescriptionEn ?? "",
         fullDescriptionAr: companyData.fullDescriptionAr ?? "",
+        fullDescriptionKu: (companyData as any).fullDescriptionKu ?? "",
         establishedYear: companyData.establishedYear,
         headquarters: companyData.headquarters ?? "",
         website: companyData.website ?? "",
@@ -100,7 +109,7 @@ export function CompanyInfoManager() {
   const status = watch("status");
 
   const onSubmit = async (values: CompanyInfoFormValues) => {
-    await updateMutation.mutateAsync(values);
+    await updateMutation.mutateAsync(values as any);
   };
 
   if (isLoading) {
@@ -152,7 +161,7 @@ export function CompanyInfoManager() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <BilingualTabs
+          <MultilingualTabs
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -188,6 +197,22 @@ export function CompanyInfoManager() {
                 <div className="space-y-1.5">
                   <Label htmlFor="fullDescriptionAr">{t("fullAr")}</Label>
                   <Textarea id="fullDescriptionAr" dir="rtl" rows={5} {...register("fullDescriptionAr")} />
+                </div>
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="companyNameKu">{t("nameKu")}</Label>
+                  <Input id="companyNameKu" dir="rtl" {...register("companyNameKu")} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="shortDescriptionKu">{t("shortKu")}</Label>
+                  <Textarea id="shortDescriptionKu" dir="rtl" rows={2} {...register("shortDescriptionKu")} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="fullDescriptionKu">{t("fullKu")}</Label>
+                  <Textarea id="fullDescriptionKu" dir="rtl" rows={5} {...register("fullDescriptionKu")} />
                 </div>
               </div>
             }

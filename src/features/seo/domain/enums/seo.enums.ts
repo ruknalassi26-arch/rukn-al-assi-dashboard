@@ -13,4 +13,5 @@ export const SEO_PAGE_LABELS: Record<SeoPageKey, { label: string; urlPath: strin
   projects: { label: "Projects Portfolio Page", urlPath: "/projects" },
   certificates: { label: "Certificates Page", urlPath: "/certificates" },
   contact: { label: "Contact Us Page", urlPath: "/contact" },
+  careers: { label: "Careers Page", urlPath: "/careers" },
 };

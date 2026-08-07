@@ -25,7 +25,7 @@ import {
   SelectValue,
   Skeleton,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
 import { useAboutPreview, useUpdateAboutPreview } from "@shared/hooks/homepage/use-homepage-hooks";
 import { ErrorState } from "@shared/components/error-state";
@@ -33,14 +33,18 @@ import { ErrorState } from "@shared/components/error-state";
 const aboutSchema = z.object({
   titleEn: z.string().min(2, "English title is required"),
   titleAr: z.string().min(2, "Arabic title is required"),
+  titleKu: z.string().optional().nullable(),
   descriptionEn: z.string().optional().nullable(),
   descriptionAr: z.string().optional().nullable(),
+  descriptionKu: z.string().optional().nullable(),
   imageUrl: z.string().optional().nullable(),
   buttonTextEn: z.string().optional().nullable(),
   buttonTextAr: z.string().optional().nullable(),
+  buttonTextKu: z.string().optional().nullable(),
   buttonUrl: z.string().optional().nullable(),
   highlightsEn: z.array(z.object({ value: z.string() })),
   highlightsAr: z.array(z.object({ value: z.string() })),
+  highlightsKu: z.array(z.object({ value: z.string() })),
   status: z.enum(["active", "draft"]),
 });
 
@@ -63,14 +67,18 @@ export function AboutSectionManager() {
     defaultValues: {
       titleEn: "",
       titleAr: "",
+      titleKu: "",
       descriptionEn: "",
       descriptionAr: "",
+      descriptionKu: "",
       imageUrl: null,
       buttonTextEn: "Learn More About Us",
       buttonTextAr: "اقرأ المزيد عنا",
+      buttonTextKu: "",
       buttonUrl: "/about",
       highlightsEn: [{ value: "ISO 9001 Certified Quality Standards" }],
       highlightsAr: [{ value: "معايير جودة معتمدة بشهادة الآيزو" }],
+      highlightsKu: [],
       status: "active",
     },
   });
@@ -87,19 +95,29 @@ export function AboutSectionManager() {
     remove: removeAr,
   } = useFieldArray({ control, name: "highlightsAr" });
 
+  const {
+    fields: highlightsKuFields,
+    append: appendKu,
+    remove: removeKu,
+  } = useFieldArray({ control, name: "highlightsKu" });
+
   useEffect(() => {
     if (aboutData) {
       reset({
         titleEn: aboutData.titleEn,
         titleAr: aboutData.titleAr,
+        titleKu: (aboutData as any).titleKu ?? "",
         descriptionEn: aboutData.descriptionEn ?? "",
         descriptionAr: aboutData.descriptionAr ?? "",
+        descriptionKu: (aboutData as any).descriptionKu ?? "",
         imageUrl: aboutData.imageUrl,
         buttonTextEn: aboutData.buttonTextEn ?? "",
         buttonTextAr: aboutData.buttonTextAr ?? "",
+        buttonTextKu: (aboutData as any).buttonTextKu ?? "",
         buttonUrl: aboutData.buttonUrl ?? "",
         highlightsEn: (aboutData.highlightsEn ?? []).map((val) => ({ value: val })),
         highlightsAr: (aboutData.highlightsAr ?? []).map((val) => ({ value: val })),
+        highlightsKu: ((aboutData as any).highlightsKu ?? []).map((val: string) => ({ value: val })),
         status: aboutData.status,
       });
     }
@@ -113,7 +131,8 @@ export function AboutSectionManager() {
       ...values,
       highlightsEn: values.highlightsEn.map((h) => h.value).filter(Boolean),
       highlightsAr: values.highlightsAr.map((h) => h.value).filter(Boolean),
-    });
+      highlightsKu: values.highlightsKu.map((h) => h.value).filter(Boolean),
+    } as any);
   };
 
   if (isLoading) {
@@ -160,7 +179,7 @@ export function AboutSectionManager() {
             folder="about"
           />
 
-          <BilingualTabs
+          <MultilingualTabs
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -204,12 +223,12 @@ export function AboutSectionManager() {
             arabicFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleAr">عنوان القسم (بالعربية) *</Label>
+                  <Label htmlFor="titleAr">العنوان (بالعربية) *</Label>
                   <Input id="titleAr" dir="rtl" {...register("titleAr")} />
                   {errors.titleAr && <span className="text-xs text-destructive">{errors.titleAr.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="descriptionAr">نص الوصف (بالعربية)</Label>
+                  <Label htmlFor="descriptionAr">الفقرة الوصفية (بالعربية)</Label>
                   <Textarea id="descriptionAr" rows={4} dir="rtl" {...register("descriptionAr")} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -218,22 +237,57 @@ export function AboutSectionManager() {
                     <Input id="buttonTextAr" dir="rtl" {...register("buttonTextAr")} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="buttonUrlAr">رابط الزر</Label>
-                    <Input id="buttonUrlAr" {...register("buttonUrl")} />
+                    <Label htmlFor="buttonUrl">رابط الزر</Label>
+                    <Input id="buttonUrl" {...register("buttonUrl")} />
                   </div>
                 </div>
 
                 <div className="space-y-2 border p-3 rounded-lg bg-muted/10">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-semibold">أبرز النقاط المميزة (بالعربية)</Label>
+                    <Label className="text-xs font-semibold">أبرز النقاط (بالعربية)</Label>
                     <Button type="button" variant="outline" size="sm" onClick={() => appendAr({ value: "" })} className="gap-1 text-xs">
                       <Plus className="h-3 w-3" /> إضافة نقطة
                     </Button>
                   </div>
                   {highlightsArFields.map((field, index) => (
                     <div key={field.id} className="flex items-center gap-2">
-                      <Input dir="rtl" {...register(`highlightsAr.${index}.value`)} placeholder="مثال: خبرة تزيد عن 15 عاماً" className="text-xs" />
+                      <Input {...register(`highlightsAr.${index}.value`)} dir="rtl" placeholder="مثال: خبرة صناعية أكثر من ١٥ سنة" className="text-xs" />
                       <Button type="button" variant="destructive" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeAr(index)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="titleKu">Section Heading (Kurdish)</Label>
+                  <Input id="titleKu" dir="rtl" {...register("titleKu")} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="descriptionKu">Description Paragraph (Kurdish)</Label>
+                  <Textarea id="descriptionKu" rows={4} dir="rtl" {...register("descriptionKu")} />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="buttonTextKu">Button Text (Kurdish)</Label>
+                    <Input id="buttonTextKu" dir="rtl" {...register("buttonTextKu")} />
+                  </div>
+                </div>
+
+                <div className="space-y-2 border p-3 rounded-lg bg-muted/10">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-semibold">Key Highlights (Kurdish)</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={() => appendKu({ value: "" })} className="gap-1 text-xs">
+                      <Plus className="h-3 w-3" /> Add Highlight
+                    </Button>
+                  </div>
+                  {highlightsKuFields.map((field, index) => (
+                    <div key={field.id} className="flex items-center gap-2">
+                      <Input {...register(`highlightsKu.${index}.value`)} dir="rtl" className="text-xs" />
+                      <Button type="button" variant="destructive" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeKu(index)}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>

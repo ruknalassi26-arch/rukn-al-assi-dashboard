@@ -20,7 +20,7 @@ import {
   Textarea,
   Skeleton,
 } from "@shared/ui";
-import { BilingualTabs } from "@shared/components/bilingual-tabs";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
 import { useContactCta, useUpdateContactCta } from "@shared/hooks/homepage/use-homepage-hooks";
 import { ErrorState } from "@shared/components/error-state";
@@ -28,10 +28,13 @@ import { ErrorState } from "@shared/components/error-state";
 const ctaSchema = z.object({
   headingEn: z.string().min(2, "English heading is required"),
   headingAr: z.string().min(2, "Arabic heading is required"),
+  headingKu: z.string().optional().nullable(),
   descriptionEn: z.string().optional().nullable(),
   descriptionAr: z.string().optional().nullable(),
+  descriptionKu: z.string().optional().nullable(),
   buttonTextEn: z.string().optional().nullable(),
   buttonTextAr: z.string().optional().nullable(),
+  buttonTextKu: z.string().optional().nullable(),
   buttonUrl: z.string().optional().nullable(),
   backgroundImage: z.string().optional().nullable(),
 });
@@ -54,10 +57,13 @@ export function ContactCtaManager() {
     defaultValues: {
       headingEn: "Ready to Partner With Us?",
       headingAr: "جاهز للشراكة معنا؟",
+      headingKu: "",
       descriptionEn: "Request a custom industrial quote or speak directly with our engineering advisory team.",
       descriptionAr: "اطلب عرض سعر صناعي مخصص أو تحدث مباشرة مع فريقنا الاستشاري الهندسي.",
+      descriptionKu: "",
       buttonTextEn: "Request a Quote",
       buttonTextAr: "طلب عرض سعر",
+      buttonTextKu: "",
       buttonUrl: "/contact",
       backgroundImage: null,
     },
@@ -68,10 +74,13 @@ export function ContactCtaManager() {
       reset({
         headingEn: ctaData.headingEn,
         headingAr: ctaData.headingAr,
+        headingKu: (ctaData as any).headingKu ?? "",
         descriptionEn: ctaData.descriptionEn ?? "",
         descriptionAr: ctaData.descriptionAr ?? "",
+        descriptionKu: (ctaData as any).descriptionKu ?? "",
         buttonTextEn: ctaData.buttonTextEn ?? "",
         buttonTextAr: ctaData.buttonTextAr ?? "",
+        buttonTextKu: (ctaData as any).buttonTextKu ?? "",
         buttonUrl: ctaData.buttonUrl ?? "",
         backgroundImage: ctaData.backgroundImage,
       });
@@ -81,7 +90,7 @@ export function ContactCtaManager() {
   const backgroundImage = watch("backgroundImage");
 
   const onSubmit = async (values: CtaFormValues) => {
-    await updateMutation.mutateAsync(values);
+    await updateMutation.mutateAsync(values as any);
   };
 
   if (isLoading) {
@@ -128,7 +137,7 @@ export function ContactCtaManager() {
             folder="cta"
           />
 
-          <BilingualTabs
+          <MultilingualTabs
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -160,6 +169,22 @@ export function ContactCtaManager() {
                 <div className="space-y-1.5">
                   <Label htmlFor="buttonTextAr">نص الزر (بالعربية)</Label>
                   <Input id="buttonTextAr" dir="rtl" {...register("buttonTextAr")} />
+                </div>
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="headingKu">Heading Title (Kurdish)</Label>
+                  <Input id="headingKu" dir="rtl" {...register("headingKu")} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="descriptionKu">Description Text (Kurdish)</Label>
+                  <Textarea id="descriptionKu" rows={3} dir="rtl" {...register("descriptionKu")} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="buttonTextKu">Button Text (Kurdish)</Label>
+                  <Input id="buttonTextKu" dir="rtl" {...register("buttonTextKu")} />
                 </div>
               </div>
             }
