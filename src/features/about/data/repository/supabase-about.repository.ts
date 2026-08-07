@@ -774,13 +774,20 @@ export class SupabaseAboutRepository implements IAboutRepository {
     metadata?: Record<string, unknown>
   ): Promise<void> {
     try {
-      const user = (await this.supabase.auth.getUser()).data.user;
+      const { data: userData } = await this.supabase.auth.getUser();
+      let validAdminId: string | null = null;
+      if (userData?.user?.id) {
+        const { data: profile } = await (this.supabase.from("admin_profiles" as any) as any)
+          .select("id")
+          .eq("id", userData.user.id)
+          .maybeSingle();
+        if (profile) validAdminId = profile.id;
+      }
       await (this.supabase.from("activity_log" as any) as any).insert({
         action,
         entity_type: entityType,
-        entity_id: null,
         details: { entity_title: entityTitle, ...metadata },
-        admin_user_id: user?.id ?? null,
+        admin_user_id: validAdminId,
       });
     } catch {
       // Non-blocking log insertion

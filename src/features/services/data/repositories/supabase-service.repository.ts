@@ -29,14 +29,12 @@ export class SupabaseServiceRepository implements IServiceRepository {
   ) {
     try {
       const { data: userData } = await this.supabase.auth.getUser();
-      await this.supabase.from("activity_logs").insert({
+      await (this.supabase.from("activity_log" as any) as any).insert({
         action,
-        entity_type: "service",
+        entity_type: "services",
         entity_id: entityId,
-        entity_title: entityTitle,
-        user_id: userData.user?.id ?? null,
-        user_email: userData.user?.email ?? null,
-        metadata: metadata ?? null,
+        details: { entity_title: entityTitle, ...metadata },
+        admin_user_id: userData.user?.id ?? null,
       });
     } catch {
       // Non-blocking activity log

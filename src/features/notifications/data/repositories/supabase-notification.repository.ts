@@ -1,6 +1,7 @@
 // ==============================================================================
 // features/notifications/data/repositories/supabase-notification.repository.ts
 // Supabase Concrete Implementation of INotificationRepository
+// Strictly matching official SQL Schema v2
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
 import type {
@@ -59,7 +60,7 @@ export class SupabaseNotificationRepository implements INotificationRepository {
       // Fall through to dynamic fallback stream
     }
 
-    // Dynamic Fallback Stream: synthesized real notifications from rfq_requests & contact_submissions
+    // Dynamic Fallback Stream: synthesized real notifications from rfq_requests & contact_messages
     return this.getFallbackNotifications(filters, page, pageSize);
   }
 
@@ -76,12 +77,16 @@ export class SupabaseNotificationRepository implements INotificationRepository {
     }
 
     // Fallback unread count from new rfqs + new contacts
-    const [rfqRes, contactRes] = await Promise.all([
-      this.supabase.from("rfq_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
-      this.supabase.from("contact_submissions").select("*", { count: "exact", head: true }).eq("status", "new"),
-    ]);
+    try {
+      const [rfqRes, contactRes] = await Promise.all([
+        (this.supabase.from("rfq_requests" as any) as any).select("*", { count: "exact", head: true }).eq("status", "new"),
+        (this.supabase.from("contact_messages" as any) as any).select("*", { count: "exact", head: true }).eq("status", "new"),
+      ]);
 
-    return (rfqRes.count ?? 0) + (contactRes.count ?? 0);
+      return (rfqRes.count ?? 0) + (contactRes.count ?? 0);
+    } catch {
+      return 0;
+    }
   }
 
   async markAsRead(id: string): Promise<void> {
@@ -122,87 +127,96 @@ export class SupabaseNotificationRepository implements INotificationRepository {
     page: number,
     pageSize: number
   ): Promise<PaginatedNotifications> {
-    const [rfqsRes, contactsRes] = await Promise.all([
-      this.supabase
-        .from("rfq_requests")
-        .select("id, contact_name, email, company_name, status, created_at")
-        .order("created_at", { ascending: false })
-        .limit(20),
-      this.supabase
-        .from("contact_submissions")
-        .select("id, name, email, subject, status, created_at")
-        .order("created_at", { ascending: false })
-        .limit(20),
-    ]);
+    try {
+      const [rfqsRes, contactsRes] = await Promise.all([
+        (this.supabase.from("rfq_requests" as any) as any)
+          .select("id, full_name, phone, company_name, status, created_at")
+          .order("created_at", { ascending: false })
+          .limit(20),
+        (this.supabase.from("contact_messages" as any) as any)
+          .select("id, full_name, email, subject, status, created_at")
+          .order("created_at", { ascending: false })
+          .limit(20),
+      ]);
 
-    const generatedItems: NotificationEntity[] = [];
+      const generatedItems: NotificationEntity[] = [];
 
-    if (rfqsRes.data) {
-      rfqsRes.data.forEach((rfq) => {
-        generatedItems.push(
-          new NotificationEntity({
-            id: `rfq-${rfq.id}`,
-            type: "rfq_new",
-            title: `New RFQ: ${rfq.contact_name}`,
-            message: `${rfq.company_name || rfq.email} submitted a new quotation inquiry request.`,
-            link: "/admin/rfq",
-            isRead: rfq.status !== "pending",
-            createdAt: new Date(rfq.created_at),
-          })
+      if (rfqsRes.data) {
+        rfqsRes.data.forEach((rfq: any) => {
+          generatedItems.push(
+            new NotificationEntity({
+              id: `rfq-${rfq.id}`,
+              type: "rfq_new",
+              title: `New RFQ: ${rfq.full_name || "Customer"}`,
+              message: `${rfq.company_name || rfq.phone || "A customer"} submitted a new quotation inquiry request.`,
+              link: "/admin/rfq",
+              isRead: rfq.status !== "new",
+              createdAt: rfq.created_at ? new Date(rfq.created_at) : new Date(),
+            })
+          );
+        });
+      }
+
+      if (contactsRes.data) {
+        contactsRes.data.forEach((contact: any) => {
+          generatedItems.push(
+            new NotificationEntity({
+              id: `contact-${contact.id}`,
+              type: "contact_new",
+              title: `Contact Message: ${contact.full_name || "Customer"}`,
+              message: contact.subject || `${contact.email || "Customer"} sent a message via website contact form.`,
+              link: "/admin/contact-messages",
+              isRead: contact.status !== "new",
+              createdAt: contact.created_at ? new Date(contact.created_at) : new Date(),
+            })
+          );
+        });
+      }
+
+      // Sort combined stream descending by creation date
+      generatedItems.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+      // Apply filter conditions
+      let filtered = generatedItems;
+      if (filters.search) {
+        const s = filters.search.toLowerCase();
+        filtered = filtered.filter(
+          (n) => n.title.toLowerCase().includes(s) || n.message.toLowerCase().includes(s)
         );
-      });
+      }
+
+      if (filters.type && filters.type !== "all") {
+        filtered = filtered.filter((n) => n.type === filters.type);
+      }
+
+      if (filters.readStatus === "unread") {
+        filtered = filtered.filter((n) => !n.isRead);
+      } else if (filters.readStatus === "read") {
+        filtered = filtered.filter((n) => n.isRead);
+      }
+
+      const total = filtered.length;
+      const unreadCount = generatedItems.filter((n) => !n.isRead).length;
+      const totalPages = Math.ceil(total / pageSize);
+      const paginatedItems = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+      return {
+        items: paginatedItems,
+        total,
+        unreadCount,
+        page,
+        pageSize,
+        totalPages,
+      };
+    } catch {
+      return {
+        items: [],
+        total: 0,
+        unreadCount: 0,
+        page,
+        pageSize,
+        totalPages: 0,
+      };
     }
-
-    if (contactsRes.data) {
-      contactsRes.data.forEach((contact) => {
-        generatedItems.push(
-          new NotificationEntity({
-            id: `contact-${contact.id}`,
-            type: "contact_new",
-            title: `Contact Message: ${contact.name}`,
-            message: contact.subject || `${contact.email} sent a message via website contact form.`,
-            link: "/admin/contact-messages",
-            isRead: contact.status !== "new",
-            createdAt: new Date(contact.created_at),
-          })
-        );
-      });
-    }
-
-    // Sort combined stream descending by creation date
-    generatedItems.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-    // Apply filter conditions
-    let filtered = generatedItems;
-    if (filters.search) {
-      const s = filters.search.toLowerCase();
-      filtered = filtered.filter(
-        (n) => n.title.toLowerCase().includes(s) || n.message.toLowerCase().includes(s)
-      );
-    }
-
-    if (filters.type && filters.type !== "all") {
-      filtered = filtered.filter((n) => n.type === filters.type);
-    }
-
-    if (filters.readStatus === "unread") {
-      filtered = filtered.filter((n) => !n.isRead);
-    } else if (filters.readStatus === "read") {
-      filtered = filtered.filter((n) => n.isRead);
-    }
-
-    const total = filtered.length;
-    const unreadCount = generatedItems.filter((n) => !n.isRead).length;
-    const totalPages = Math.ceil(total / pageSize);
-    const paginatedItems = filtered.slice((page - 1) * pageSize, page * pageSize);
-
-    return {
-      items: paginatedItems,
-      total,
-      unreadCount,
-      page,
-      pageSize,
-      totalPages,
-    };
   }
 }

@@ -23,7 +23,7 @@ export class SupabaseActivityLogRepository implements IActivityLogRepository {
 
     try {
       const { data, count, error } = await (this.supabase.from("activity_log" as any) as any)
-        .select("*, admin_profiles(full_name)", { count: "exact" })
+        .select("*", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, from + pageSize - 1);
 
@@ -56,7 +56,7 @@ export class SupabaseActivityLogRepository implements IActivityLogRepository {
   async getActivityLogById(id: string): Promise<ActivityLogEntity | null> {
     try {
       const { data, error } = await (this.supabase.from("activity_log" as any) as any)
-        .select("*, admin_profiles(full_name)")
+        .select("*")
         .eq("id", id)
         .maybeSingle();
 

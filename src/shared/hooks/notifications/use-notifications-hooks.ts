@@ -94,7 +94,7 @@ export function useNotificationsRealtime() {
         { event: "INSERT", schema: "public", table: "rfq_requests" },
         (payload) => {
           toast.info("New RFQ Request Received!", {
-            description: `From: ${payload.new.contact_name || payload.new.email}`,
+            description: `From: ${payload.new.full_name || payload.new.phone}`,
           });
           queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
           queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
@@ -102,10 +102,10 @@ export function useNotificationsRealtime() {
       )
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "contact_submissions" },
+        { event: "INSERT", schema: "public", table: "contact_messages" },
         (payload) => {
           toast.info("New Contact Message Received!", {
-            description: `From: ${payload.new.name || payload.new.email}`,
+            description: `From: ${payload.new.full_name || payload.new.email}`,
           });
           queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
           queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });

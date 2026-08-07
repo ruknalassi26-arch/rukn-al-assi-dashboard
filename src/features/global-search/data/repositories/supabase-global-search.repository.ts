@@ -1,7 +1,7 @@
 // ==============================================================================
 // features/global-search/data/repositories/supabase-global-search.repository.ts
 // Supabase Implementation of IGlobalSearchRepository
-// Strictly matching official SQL Schema v2
+// Strictly matching official SQL Schema v2 (no invalid created_at columns)
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
 import type {
@@ -20,7 +20,6 @@ export class SupabaseGlobalSearchRepository implements IGlobalSearchRepository {
     const q = filters.query.trim();
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.max(1, Math.min(50, filters.pageSize ?? 10));
-    const term = `%${q}%`;
 
     const moduleCounts: Record<string, number> = {
       all: 0,
@@ -48,11 +47,11 @@ export class SupabaseGlobalSearchRepository implements IGlobalSearchRepository {
         contactRes,
       ] = await Promise.all([
         (this.supabase.from("products" as any) as any).select("id, created_at").limit(15),
-        (this.supabase.from("product_categories" as any) as any).select("id, created_at").limit(15),
+        (this.supabase.from("product_categories" as any) as any).select("id").limit(15),
         (this.supabase.from("services" as any) as any).select("id, created_at").limit(15),
         (this.supabase.from("projects" as any) as any).select("id, created_at").limit(15),
-        (this.supabase.from("certifications" as any) as any).select("id, created_at").limit(15),
-        (this.supabase.from("team_members" as any) as any).select("id, created_at").limit(15),
+        (this.supabase.from("certifications" as any) as any).select("id").limit(15),
+        (this.supabase.from("team_members" as any) as any).select("id").limit(15),
         (this.supabase.from("rfq_requests" as any) as any).select("id, full_name, company_name, created_at").limit(15),
         (this.supabase.from("contact_messages" as any) as any).select("id, full_name, email, subject, created_at").limit(15),
       ]);
@@ -85,7 +84,7 @@ export class SupabaseGlobalSearchRepository implements IGlobalSearchRepository {
               title: "Category Item",
               description: null,
               link: `/admin/categories/edit/${c.id}`,
-              createdAt: c.created_at ? new Date(c.created_at) : new Date(),
+              createdAt: new Date(),
             })
           );
         });
@@ -136,7 +135,7 @@ export class SupabaseGlobalSearchRepository implements IGlobalSearchRepository {
               title: "Certificate Item",
               description: null,
               link: `/admin/certificates/edit/${cert.id}`,
-              createdAt: cert.created_at ? new Date(cert.created_at) : new Date(),
+              createdAt: new Date(),
             })
           );
         });
@@ -153,7 +152,7 @@ export class SupabaseGlobalSearchRepository implements IGlobalSearchRepository {
               title: "Team Member",
               description: null,
               link: `/admin/team/edit/${tm.id}`,
-              createdAt: tm.created_at ? new Date(tm.created_at) : new Date(),
+              createdAt: new Date(),
             })
           );
         });

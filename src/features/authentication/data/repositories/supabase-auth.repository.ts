@@ -1,6 +1,6 @@
 // ==============================================================================
 // features/authentication/data/repositories/supabase-auth.repository.ts
-// Supabase Authentication Repository Implementation with Network Exception Handling
+// Supabase Authentication Repository Implementation with Safe Foreign Key Checks
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
 import type {
@@ -19,6 +19,19 @@ export class SupabaseAuthRepository implements IAuthRepository {
     return createClient();
   }
 
+  private async getValidAdminId(userId: string | null | undefined): Promise<string | null> {
+    if (!userId) return null;
+    try {
+      const { data } = await (this.supabase.from("admin_profiles" as any) as any)
+        .select("id")
+        .eq("id", userId)
+        .maybeSingle();
+      return data?.id ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   private async logActivity(
     action: "login" | "logout" | "created" | "updated" | "deleted",
     userId: string,
@@ -26,14 +39,13 @@ export class SupabaseAuthRepository implements IAuthRepository {
     metadata?: Record<string, unknown>
   ) {
     try {
-      await this.supabase.from("activity_logs").insert({
+      const validAdminId = await this.getValidAdminId(userId);
+      await (this.supabase.from("activity_log" as any) as any).insert({
         action,
         entity_type: "auth",
-        entity_id: userId,
-        entity_title: `Authentication: ${action}`,
-        user_id: userId,
-        user_email: userEmail,
-        metadata: metadata ?? null,
+        entity_id: userId || null,
+        details: { entity_title: `Authentication: ${action}`, user_email: userEmail, ...metadata },
+        admin_user_id: validAdminId,
       });
     } catch {
       // Non-blocking log insertion
@@ -51,7 +63,6 @@ export class SupabaseAuthRepository implements IAuthRepository {
         throw new Error(error?.message || "Invalid email or password");
       }
 
-      // Fetch user profile from admin_profiles if table exists
       let profile: AdminProfileDTO | null = null;
       try {
         const { data: profileData } = await (this.supabase as any)
@@ -67,7 +78,6 @@ export class SupabaseAuthRepository implements IAuthRepository {
         // Fallback
       }
 
-      // Update last_login_at
       try {
         await (this.supabase as any)
           .from("admin_profiles")
@@ -107,7 +117,7 @@ export class SupabaseAuthRepository implements IAuthRepository {
       }
     } catch (err: any) {
       if (err.name === "TypeError" || err.message === "Failed to fetch") {
-        return; // Gracefully complete signout on network failure
+        return;
       }
       throw err;
     }

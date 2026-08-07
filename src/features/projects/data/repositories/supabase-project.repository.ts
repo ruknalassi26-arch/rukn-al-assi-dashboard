@@ -239,19 +239,23 @@ export class SupabaseProjectRepository implements IProjectRepository {
     return toProjectEntity(data as ProjectDTO);
   }
 
-  private async logActivity(action: string, entityId: string, entityTitle: string) {
+  private async logActivity(
+    action: "created" | "updated" | "deleted",
+    entityId: string | null,
+    entityTitle: string | null,
+    metadata?: Record<string, unknown>
+  ) {
     try {
       const { data: userData } = await this.supabase.auth.getUser();
-      await (this.supabase as any).from("activity_logs").insert({
+      await (this.supabase.from("activity_log" as any) as any).insert({
         action,
-        entity_type: "project",
+        entity_type: "projects",
         entity_id: entityId,
-        entity_title: entityTitle,
-        user_id: userData?.user?.id ?? null,
-        user_email: userData?.user?.email ?? null,
+        details: { entity_title: entityTitle, ...metadata },
+        admin_user_id: userData.user?.id ?? null,
       });
     } catch {
-      // Non-blocking fallback
+      // Non-blocking activity log
     }
   }
 }
