@@ -97,21 +97,23 @@ export class SupabaseRoleRepository implements IRoleRepository {
 
     const permissionIds = (permRows ?? []).map((p: any) => p.permission_id);
     const permissions = (permRows ?? []).map((p: any) => {
-      const name = p.permissions?.name || "";
-      const derivedModule = p.permissions?.module
-        ? p.permissions.module
-        : name.includes(":")
-        ? name.split(":")[0]
-        : name.includes("_")
-        ? name.split("_")[0]
+      const permObj = p.permissions || {};
+      const codeStr = permObj.code || permObj.name || permObj.id || "";
+      const displayTitle = permObj.name || permObj.code || permObj.id || "";
+      const derivedModule = permObj.module
+        ? permObj.module
+        : codeStr.includes(":")
+        ? codeStr.split(":")[0]
+        : codeStr.includes("_")
+        ? codeStr.split("_")[0]
         : "General";
 
       return new PermissionEntity({
-        id: p.permissions.id,
-        code: p.permissions.code ?? name,
-        name,
+        id: permObj.id || p.permission_id,
+        code: codeStr as any,
+        name: displayTitle,
         module: derivedModule as any,
-        description: p.permissions.description ?? null,
+        description: permObj.description ?? null,
       });
     });
 
@@ -134,29 +136,34 @@ export class SupabaseRoleRepository implements IRoleRepository {
 
   async getAllPermissions(): Promise<PermissionEntity[]> {
     const { data, error } = await (this.supabase.from("permissions" as any) as any)
-      .select("*")
-      .order("name", { ascending: true });
+      .select("*");
 
     if (error) throw new Error(error.message);
 
-    return (data ?? []).map((p: any) => {
-      const name = p.name || "";
+    const items = (data ?? []).map((p: any) => {
+      const codeStr = p.code || p.name || p.id || "";
+      const displayTitle = p.name || p.code || p.id || "";
       const derivedModule = p.module
         ? p.module
-        : name.includes(":")
-        ? name.split(":")[0]
-        : name.includes("_")
-        ? name.split("_")[0]
+        : codeStr.includes(":")
+        ? codeStr.split(":")[0]
+        : codeStr.includes("_")
+        ? codeStr.split("_")[0]
         : "General";
 
       return new PermissionEntity({
         id: p.id,
-        code: p.code ?? p.name,
-        name: p.name,
+        code: codeStr as any,
+        name: displayTitle,
         module: derivedModule as any,
         description: p.description ?? null,
       });
     });
+
+    // Sort in memory by module and name safely
+    return items.sort((a: PermissionEntity, b: PermissionEntity) =>
+      a.module.localeCompare(b.module) || a.name.localeCompare(b.name)
+    );
   }
 
   async createRole(input: CreateRoleInput): Promise<RoleEntity> {
