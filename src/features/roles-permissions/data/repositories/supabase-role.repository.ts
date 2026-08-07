@@ -96,13 +96,24 @@ export class SupabaseRoleRepository implements IRoleRepository {
       .eq("role_id", id);
 
     const permissionIds = (permRows ?? []).map((p: any) => p.permission_id);
-    const permissions = (permRows ?? []).map((p: any) => new PermissionEntity({
-      id: p.permissions.id,
-      code: p.permissions.code ?? p.permissions.name,
-      name: p.permissions.name,
-      module: p.permissions.module ?? "settings",
-      description: p.permissions.description ?? null,
-    }));
+    const permissions = (permRows ?? []).map((p: any) => {
+      const name = p.permissions?.name || "";
+      const derivedModule = p.permissions?.module
+        ? p.permissions.module
+        : name.includes(":")
+        ? name.split(":")[0]
+        : name.includes("_")
+        ? name.split("_")[0]
+        : "General";
+
+      return new PermissionEntity({
+        id: p.permissions.id,
+        code: p.permissions.code ?? name,
+        name,
+        module: derivedModule as any,
+        description: p.permissions.description ?? null,
+      });
+    });
 
     const roleEntity = new RoleEntity({
       id: roleRow.id,
@@ -124,18 +135,28 @@ export class SupabaseRoleRepository implements IRoleRepository {
   async getAllPermissions(): Promise<PermissionEntity[]> {
     const { data, error } = await (this.supabase.from("permissions" as any) as any)
       .select("*")
-      .order("module", { ascending: true })
       .order("name", { ascending: true });
 
     if (error) throw new Error(error.message);
 
-    return (data ?? []).map((p: any) => new PermissionEntity({
-      id: p.id,
-      code: p.code ?? p.name,
-      name: p.name,
-      module: p.module ?? "settings",
-      description: p.description ?? null,
-    }));
+    return (data ?? []).map((p: any) => {
+      const name = p.name || "";
+      const derivedModule = p.module
+        ? p.module
+        : name.includes(":")
+        ? name.split(":")[0]
+        : name.includes("_")
+        ? name.split("_")[0]
+        : "General";
+
+      return new PermissionEntity({
+        id: p.id,
+        code: p.code ?? p.name,
+        name: p.name,
+        module: derivedModule as any,
+        description: p.description ?? null,
+      });
+    });
   }
 
   async createRole(input: CreateRoleInput): Promise<RoleEntity> {
