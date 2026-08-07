@@ -79,7 +79,7 @@ export function ClientDialog({
       reset({
         nameEn: initialData.nameEn,
         nameAr: initialData.nameAr,
-        nameKu: (initialData as any).nameKu ?? "",
+        nameKu: ((initialData as unknown as Record<string, unknown>).nameKu as string) ?? "",
         logoUrl: initialData.logoUrl,
         websiteUrl: initialData.websiteUrl ?? "",
         sortOrder: initialData.sortOrder,

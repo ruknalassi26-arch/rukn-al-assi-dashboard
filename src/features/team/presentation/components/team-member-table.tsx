@@ -200,7 +200,7 @@ export function TeamMemberTable() {
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
             {/* Status Filter */}
-            <Select value={status} onValueChange={(val) => setStatus(val as any)}>
+            <Select value={status} onValueChange={(val: TeamMemberStatus | "all") => setStatus(val)}>
               <SelectTrigger className="w-[140px] h-9">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>

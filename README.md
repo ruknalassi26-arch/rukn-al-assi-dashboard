@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rukn Al Assi — Industrial & Engineering Dashboard & Portal
 
-## Getting Started
+An enterprise-grade administrative dashboard and public website portal for **Rukn Al Assi**, built with Next.js 15 (App Router), TypeScript, Clean Architecture, Supabase Auth & Storage, React Query, shadcn/ui, and trilingual support (English, Arabic, Kurdish Sorani).
 
-First, run the development server:
+---
 
+## 🌟 Key Features & Modules
+
+### 1. Careers & Job Applications
+- **Job Postings Management**: Create, edit, publish, archive, and delete career opportunities with trilingual titles, requirements, and responsibilities.
+- **Applicant Submissions**: Public career portal (`/careers` and `/careers/[slug]`) allowing candidate resumes (PDF, DOC, DOCX) to be uploaded to Supabase Storage (`career-cvs`).
+- **Application Review**: Admin review table with candidate status workflow (New, Reviewed, Shortlisted, Rejected, Hired), notes, and direct CV download.
+
+### 2. User & Security Role Management
+- **Secure Auth Admin Integration**: Server-side user creation via `/api/admin/users` utilizing Supabase Auth Admin API and non-exposing service role operations.
+- **Granular Security Roles**: Role management (`/admin/roles`) with dynamic module permission matrices (Products, Services, Projects, Homepage, RFQ, Contact, Users, Roles, Settings, Activity Log).
+- **Admin User Control**: Manage user profiles (`/admin/users`), assign roles, toggle active/inactive account status, and view last login timestamps.
+
+### 3. Trilingual Localization (`next-intl`)
+- Complete first-class support for **English (`en`)**, **Arabic (`ar`)**, and **Kurdish Sorani (`ckb`)**.
+- Dynamic RTL (Right-to-Left) and LTR layout switching with localized tabs and form fields across all admin managers.
+
+### 4. Global Search & Command Palette
+- Instant `Ctrl+K` / `Cmd+K` Command Palette accessible across all OS keyboard input layouts (English, Arabic, Kurdish).
+- Search products, services, projects, RFQs, job postings, team members, and settings.
+
+### 5. Audit Activity Logging
+- Automated background logging into `activity_log` for all administrative actions across users, roles, careers, products, services, settings, and SEO configuration.
+
+---
+
+## 🏗️ Architecture & Technology Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript (Strict Mode)
+- **Database & Auth**: Supabase (PostgreSQL, Supabase Auth, Storage Buckets)
+- **State & Data Fetching**: TanStack React Query v5
+- **Forms & Validation**: React Hook Form + Zod
+- **UI Components**: Tailwind CSS + shadcn/ui
+- **Localization**: next-intl
+
+### Clean Architecture Pattern
+```
+src/
+├── app/                  # Next.js App Router (Pages & Server API routes)
+├── core/                 # Shared types, Supabase clients & infrastructure
+├── features/             # Feature-first modules
+│   ├── careers/          # Domain, Data DTOs, Repositories, Use Cases, UI
+│   ├── roles-permissions/# Domain, Data DTOs, Repositories, Use Cases, UI
+│   ├── products/         # Product catalog management
+│   ├── services/         # Engineering services
+│   └── ...
+└── shared/               # Reusable UI components, dialogs, hooks, layouts
+```
+
+---
+
+## 🚀 Getting Started
+
+### Package Manager Requirement
+> **ALWAYS use Bun (`bun`) for development, building, and package management.**
+
+### Development Server
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Type Checking & Linting
+```bash
+bun run type-check
+bun run lint
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production Build
+```bash
+bun run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🔒 Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+Copy `.env.example` to `.env.local` and populate your Supabase credentials:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```

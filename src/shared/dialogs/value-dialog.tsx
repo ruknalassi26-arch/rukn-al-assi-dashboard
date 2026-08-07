@@ -88,10 +88,10 @@ export function ValueDialog({
       reset({
         titleEn: initialData.titleEn,
         titleAr: initialData.titleAr,
-        titleKu: (initialData as any).titleKu ?? "",
+        titleKu: ((initialData as unknown as Record<string, unknown>).titleKu as string) ?? "",
         descriptionEn: initialData.descriptionEn ?? "",
         descriptionAr: initialData.descriptionAr ?? "",
-        descriptionKu: (initialData as any).descriptionKu ?? "",
+        descriptionKu: ((initialData as unknown as Record<string, unknown>).descriptionKu as string) ?? "",
         icon: initialData.icon ?? "ShieldCheck",
         sortOrder: initialData.sortOrder,
         status: initialData.status,

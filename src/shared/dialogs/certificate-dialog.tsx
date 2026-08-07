@@ -96,10 +96,10 @@ export function CertificateDialog({
       reset({
         titleEn: initialData.titleEn,
         titleAr: initialData.titleAr,
-        titleKu: (initialData as any).titleKu ?? "",
+        titleKu: ((initialData as unknown as Record<string, unknown>).titleKu as string) ?? "",
         descriptionEn: "descriptionEn" in initialData ? (initialData.descriptionEn ?? "") : "",
         descriptionAr: "descriptionAr" in initialData ? (initialData.descriptionAr ?? "") : "",
-        descriptionKu: (initialData as any).descriptionKu ?? "",
+        descriptionKu: ((initialData as unknown as Record<string, unknown>).descriptionKu as string) ?? "",
         image: initialData.image,
         issueDate: initialData.issueDate ?? "",
         expiryDate: "expiryDate" in initialData ? (initialData.expiryDate ?? "") : "",

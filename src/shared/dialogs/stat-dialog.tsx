@@ -78,7 +78,7 @@ export function StatDialog({
       reset({
         titleEn: initialData.titleEn,
         titleAr: initialData.titleAr,
-        titleKu: (initialData as any).titleKu ?? "",
+        titleKu: ((initialData as unknown as Record<string, unknown>).titleKu as string) ?? "",
         value: initialData.value,
         icon: initialData.icon ?? "Building",
         sortOrder: initialData.sortOrder,

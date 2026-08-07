@@ -29,9 +29,9 @@ export class SupabaseServiceRepository implements IServiceRepository {
   ) {
     try {
       const { data: userData } = await this.supabase.auth.getUser();
-      await (this.supabase.from("activity_log" as any) as any).insert({
+      await this.supabase.from("activity_log").insert({
         action,
-        entity_type: "services",
+        entity_type: "service",
         entity_id: entityId,
         details: { entity_title: entityTitle, ...metadata },
         admin_user_id: userData.user?.id ?? null,

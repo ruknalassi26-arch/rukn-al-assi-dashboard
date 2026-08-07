@@ -271,7 +271,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
             <CardHeader className="pb-3 border-b">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-bold">{t("form.multilingualContent")}</CardTitle>
-                <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="w-auto">
+                <Tabs value={activeTab} onValueChange={(val: string) => setActiveTab(val as "en" | "ar" | "ckb")} className="w-auto">
                   <TabsList className="h-8">
                     <TabsTrigger value="en" className="text-xs px-3">English 🇺🇸</TabsTrigger>
                     <TabsTrigger value="ar" className="text-xs px-3">العربية 🇸🇦</TabsTrigger>

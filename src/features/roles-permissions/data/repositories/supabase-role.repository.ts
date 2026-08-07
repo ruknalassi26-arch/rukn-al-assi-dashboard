@@ -1,10 +1,10 @@
 // ==============================================================================
 // features/roles-permissions/data/repositories/supabase-role.repository.ts
-// Supabase Implementation of IRoleRepository using ONLY existing schema
-// (roles, permissions, role_permissions, admin_user_roles, activity_log)
+// Supabase Implementation of IRoleRepository using strongly typed Supabase DTOs
 // ==============================================================================
 
 import { createClient } from "@core/lib/supabase/client";
+import type { UpdateTables } from "@core/types/database.types";
 import type {
   IRoleRepository,
   GetRolesFilterParams,
@@ -15,20 +15,64 @@ import type {
 import { RoleEntity } from "../../domain/entities/role.entity";
 import { PermissionEntity } from "../../domain/entities/permission.entity";
 
+interface RoleRowDTO {
+  id: string;
+  name: string;
+  code?: string | null;
+  description: string | null;
+  is_system?: boolean | null;
+  created_at: string;
+  admin_user_roles?: { count: number }[];
+  role_permissions?: { count: number }[];
+}
+
+interface PermissionRowDTO {
+  id: string;
+  code?: string | null;
+  name?: string | null;
+  module?: string | null;
+  description?: string | null;
+}
+
+interface RolePermissionJoinDTO {
+  permission_id: string;
+  permissions: PermissionRowDTO | PermissionRowDTO[] | null;
+}
+
+function mapPermissionDTOToEntity(permObj: PermissionRowDTO, fallbackId: string): PermissionEntity {
+  const codeStr = permObj.code || permObj.name || permObj.id || "";
+  const displayTitle = permObj.name || permObj.code || permObj.id || "";
+  const derivedModule = permObj.module
+    ? permObj.module
+    : codeStr.includes(":")
+    ? codeStr.split(":")[0]
+    : codeStr.includes("_")
+    ? codeStr.split("_")[0]
+    : "General";
+
+  return new PermissionEntity({
+    id: permObj.id || fallbackId,
+    code: codeStr as any,
+    name: displayTitle,
+    module: derivedModule as any,
+    description: permObj.description ?? null,
+  });
+}
+
 export class SupabaseRoleRepository implements IRoleRepository {
   private get supabase() {
     return createClient();
   }
 
   private async logActivity(
-    action: "created" | "updated" | "deleted",
+    action: string,
     entityId: string | null,
     entityTitle: string | null,
     metadata?: Record<string, unknown>
-  ) {
+  ): Promise<void> {
     try {
       const { data: userData } = await this.supabase.auth.getUser();
-      await (this.supabase.from("activity_log" as any) as any).insert({
+      await this.supabase.from("activity_log").insert({
         action,
         entity_type: "settings",
         entity_id: entityId,
@@ -45,7 +89,8 @@ export class SupabaseRoleRepository implements IRoleRepository {
     const pageSize = Math.max(1, Math.min(100, params?.pageSize ?? 10));
     const offset = (page - 1) * pageSize;
 
-    let query = (this.supabase.from("roles" as any) as any)
+    let query = this.supabase
+      .from("roles")
       .select("*, admin_user_roles(count), role_permissions(count)", { count: "exact" });
 
     if (params?.search && params.search.trim() !== "") {
@@ -58,11 +103,14 @@ export class SupabaseRoleRepository implements IRoleRepository {
     const { data, count, error } = await query;
     if (error) throw new Error(error.message);
 
-    const items = (data ?? []).map((row: any) => {
+    const rawRows = (data as unknown as RoleRowDTO[]) ?? [];
+
+    const items = rawRows.map((row) => {
+      const roleCode = (row.code ?? row.name.toLowerCase().replace(/\s+/g, "_")) as any;
       const roleEntity = new RoleEntity({
         id: row.id,
         name: row.name,
-        code: row.code ?? row.name.toLowerCase().replace(/\s+/g, "_"),
+        code: roleCode,
         description: row.description ?? null,
         isSystemRole: row.code === "super_admin" || row.is_system === true,
       });
@@ -83,7 +131,8 @@ export class SupabaseRoleRepository implements IRoleRepository {
   }
 
   async getRoleById(id: string) {
-    const { data: roleRow, error } = await (this.supabase.from("roles" as any) as any)
+    const { data: roleRow, error } = await this.supabase
+      .from("roles")
       .select("*, admin_user_roles(count)")
       .eq("id", id)
       .maybeSingle();
@@ -91,41 +140,31 @@ export class SupabaseRoleRepository implements IRoleRepository {
     if (error) throw new Error(error.message);
     if (!roleRow) return null;
 
-    const { data: permRows } = await (this.supabase.from("role_permissions" as any) as any)
+    const rawRole = roleRow as unknown as RoleRowDTO;
+
+    const { data: permRows } = await this.supabase
+      .from("role_permissions")
       .select("permission_id, permissions(*)")
       .eq("role_id", id);
 
-    const permissionIds = (permRows ?? []).map((p: any) => p.permission_id);
-    const permissions = (permRows ?? []).map((p: any) => {
-      const permObj = p.permissions || {};
-      const codeStr = permObj.code || permObj.name || permObj.id || "";
-      const displayTitle = permObj.name || permObj.code || permObj.id || "";
-      const derivedModule = permObj.module
-        ? permObj.module
-        : codeStr.includes(":")
-        ? codeStr.split(":")[0]
-        : codeStr.includes("_")
-        ? codeStr.split("_")[0]
-        : "General";
+    const rawPermRows = (permRows as unknown as RolePermissionJoinDTO[]) ?? [];
 
-      return new PermissionEntity({
-        id: permObj.id || p.permission_id,
-        code: codeStr as any,
-        name: displayTitle,
-        module: derivedModule as any,
-        description: permObj.description ?? null,
-      });
+    const permissionIds = rawPermRows.map((p) => p.permission_id);
+    const permissions = rawPermRows.map((p) => {
+      const permObj = Array.isArray(p.permissions) ? p.permissions[0] : p.permissions;
+      return mapPermissionDTOToEntity(permObj || { id: p.permission_id }, p.permission_id);
     });
 
+    const roleCode = (rawRole.code ?? rawRole.name.toLowerCase().replace(/\s+/g, "_")) as any;
     const roleEntity = new RoleEntity({
-      id: roleRow.id,
-      name: roleRow.name,
-      code: roleRow.code ?? roleRow.name.toLowerCase().replace(/\s+/g, "_"),
-      description: roleRow.description ?? null,
-      isSystemRole: roleRow.code === "super_admin" || roleRow.is_system === true,
+      id: rawRole.id,
+      name: rawRole.name,
+      code: roleCode,
+      description: rawRole.description ?? null,
+      isSystemRole: rawRole.code === "super_admin" || rawRole.is_system === true,
     });
 
-    const usersCount = roleRow.admin_user_roles?.[0]?.count ?? 0;
+    const usersCount = rawRole.admin_user_roles?.[0]?.count ?? 0;
 
     return Object.assign(roleEntity, {
       usersCount,
@@ -135,32 +174,14 @@ export class SupabaseRoleRepository implements IRoleRepository {
   }
 
   async getAllPermissions(): Promise<PermissionEntity[]> {
-    const { data, error } = await (this.supabase.from("permissions" as any) as any)
-      .select("*");
+    const { data, error } = await this.supabase.from("permissions").select("*");
 
     if (error) throw new Error(error.message);
 
-    const items = (data ?? []).map((p: any) => {
-      const codeStr = p.code || p.name || p.id || "";
-      const displayTitle = p.name || p.code || p.id || "";
-      const derivedModule = p.module
-        ? p.module
-        : codeStr.includes(":")
-        ? codeStr.split(":")[0]
-        : codeStr.includes("_")
-        ? codeStr.split("_")[0]
-        : "General";
+    const rawPermissions = (data as unknown as PermissionRowDTO[]) ?? [];
 
-      return new PermissionEntity({
-        id: p.id,
-        code: codeStr as any,
-        name: displayTitle,
-        module: derivedModule as any,
-        description: p.description ?? null,
-      });
-    });
+    const items = rawPermissions.map((p) => mapPermissionDTOToEntity(p, p.id));
 
-    // Sort in memory by module and name safely
     return items.sort((a: PermissionEntity, b: PermissionEntity) =>
       a.module.localeCompare(b.module) || a.name.localeCompare(b.name)
     );
@@ -169,7 +190,8 @@ export class SupabaseRoleRepository implements IRoleRepository {
   async createRole(input: CreateRoleInput): Promise<RoleEntity> {
     const code = input.code || input.name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
 
-    const { data: roleRow, error } = await (this.supabase.from("roles" as any) as any)
+    const { data: roleRow, error } = await this.supabase
+      .from("roles")
       .insert({
         name: input.name,
         description: input.description ?? null,
@@ -179,19 +201,22 @@ export class SupabaseRoleRepository implements IRoleRepository {
 
     if (error) throw new Error(error.message);
 
+    const rawRole = roleRow as unknown as RoleRowDTO;
+
     if (input.permissionIds && input.permissionIds.length > 0) {
       const inserts = input.permissionIds.map((pId) => ({
-        role_id: roleRow.id,
+        role_id: rawRole.id,
         permission_id: pId,
       }));
-      await (this.supabase.from("role_permissions" as any) as any).insert(inserts);
+      await this.supabase.from("role_permissions").insert(inserts);
     }
 
+    const roleCode = (rawRole.code ?? code) as any;
     const entity = new RoleEntity({
-      id: roleRow.id,
-      name: roleRow.name,
-      code: roleRow.code ?? code,
-      description: roleRow.description,
+      id: rawRole.id,
+      name: rawRole.name,
+      code: roleCode,
+      description: rawRole.description,
     });
 
     await this.logActivity("created", entity.id, `Created Role: ${entity.name}`);
@@ -199,13 +224,14 @@ export class SupabaseRoleRepository implements IRoleRepository {
   }
 
   async updateRole(id: string, input: UpdateRoleInput): Promise<RoleEntity> {
-    const payload: Record<string, any> = {
+    const payload: UpdateTables<"roles"> = {
       updated_at: new Date().toISOString(),
     };
     if (input.name !== undefined) payload.name = input.name;
     if (input.description !== undefined) payload.description = input.description;
 
-    const { data: roleRow, error } = await (this.supabase.from("roles" as any) as any)
+    const { data: roleRow, error } = await this.supabase
+      .from("roles")
       .update(payload)
       .eq("id", id)
       .select("*")
@@ -213,26 +239,26 @@ export class SupabaseRoleRepository implements IRoleRepository {
 
     if (error) throw new Error(error.message);
 
+    const rawRole = roleRow as unknown as RoleRowDTO;
+
     if (input.permissionIds !== undefined) {
-      // Clear old permissions and insert updated set
-      await (this.supabase.from("role_permissions" as any) as any)
-        .delete()
-        .eq("role_id", id);
+      await this.supabase.from("role_permissions").delete().eq("role_id", id);
 
       if (input.permissionIds.length > 0) {
         const inserts = input.permissionIds.map((pId) => ({
           role_id: id,
           permission_id: pId,
         }));
-        await (this.supabase.from("role_permissions" as any) as any).insert(inserts);
+        await this.supabase.from("role_permissions").insert(inserts);
       }
     }
 
+    const roleCode = (rawRole.code ?? rawRole.name.toLowerCase().replace(/\s+/g, "_")) as any;
     const entity = new RoleEntity({
-      id: roleRow.id,
-      name: roleRow.name,
-      code: roleRow.code,
-      description: roleRow.description,
+      id: rawRole.id,
+      name: rawRole.name,
+      code: roleCode,
+      description: rawRole.description,
     });
 
     await this.logActivity("updated", id, `Updated Role: ${entity.name}`);
@@ -245,9 +271,7 @@ export class SupabaseRoleRepository implements IRoleRepository {
       throw new Error("Cannot delete Super Admin system role.");
     }
 
-    const { error } = await (this.supabase.from("roles" as any) as any)
-      .delete()
-      .eq("id", id);
+    const { error } = await this.supabase.from("roles").delete().eq("id", id);
 
     if (error) throw new Error(error.message);
 

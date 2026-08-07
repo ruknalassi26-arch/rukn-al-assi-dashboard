@@ -11,6 +11,21 @@ import type {
 import { SeoSettingEntity } from "../../domain/entities/seo-setting.entity";
 import type { SeoPageKey } from "../../domain/entities/seo-setting.entity";
 
+interface SeoMetaRowDTO {
+  id?: string;
+  entity_type?: string;
+  language_code?: string;
+  meta_title?: string;
+  meta_description?: string;
+  og_image_url?: string;
+  page?: string;
+  title_en?: string;
+  title_ar?: string;
+  description_en?: string;
+  description_ar?: string;
+  og_image?: string;
+}
+
 export class SupabaseSeoRepository implements ISeoRepository {
   private get supabase() {
     return createClient();
@@ -21,10 +36,10 @@ export class SupabaseSeoRepository implements ISeoRepository {
     entityId: string | null,
     entityTitle: string | null,
     metadata?: Record<string, unknown>
-  ) {
+  ): Promise<void> {
     try {
       const { data: userData } = await this.supabase.auth.getUser();
-      await (this.supabase.from("activity_log" as any) as any).insert({
+      await this.supabase.from("activity_log").insert({
         action,
         entity_type: "seo",
         entity_id: entityId,
@@ -38,15 +53,14 @@ export class SupabaseSeoRepository implements ISeoRepository {
 
   async getAllSeoSettings(): Promise<SeoSettingEntity[]> {
     try {
-      const { data, error } = await (this.supabase.from("seo_meta" as any) as any)
-        .select("*");
+      const { data, error } = await this.supabase.from("seo_meta").select("*");
 
       if (!error && data) {
-        // Group rows by entity_type or page_key
-        const pageKeys: SeoPageKey[] = ["home", "about", "services", "products", "projects", "contact"];
+        const rawRows = data as unknown as SeoMetaRowDTO[];
+        const pageKeys: SeoPageKey[] = ["home", "about", "services", "products", "projects", "contact", "careers"];
         return pageKeys.map((pk) => {
-          const en = data.find((row: any) => row.entity_type === pk && row.language_code === "en") || {};
-          const ar = data.find((row: any) => row.entity_type === pk && row.language_code === "ar") || {};
+          const en = rawRows.find((row) => row.entity_type === pk && row.language_code === "en") || {};
+          const ar = rawRows.find((row) => row.entity_type === pk && row.language_code === "ar") || {};
           return new SeoSettingEntity({
             id: String(en.id || `seo-${pk}`),
             pageKey: pk,
@@ -74,7 +88,7 @@ export class SupabaseSeoRepository implements ISeoRepository {
   }
 
   private getDefaultSeoSettings(): SeoSettingEntity[] {
-    const pageKeys: SeoPageKey[] = ["home", "about", "services", "products", "projects", "contact"];
+    const pageKeys: SeoPageKey[] = ["home", "about", "services", "products", "projects", "contact", "careers"];
     return pageKeys.map((pk) => new SeoSettingEntity({
       id: `seo-${pk}`,
       pageKey: pk,
@@ -101,7 +115,7 @@ export class SupabaseSeoRepository implements ISeoRepository {
 
   async updateSeoSetting(input: UpdateSeoSettingInput): Promise<SeoSettingEntity> {
     try {
-      await (this.supabase.from("seo_meta" as any) as any).upsert([
+      await (this.supabase.from("seo_meta") as any).upsert([
         {
           entity_type: input.pageKey,
           language_code: "en",
@@ -122,7 +136,7 @@ export class SupabaseSeoRepository implements ISeoRepository {
     }
 
     const updated = (await this.getSeoSettingByPageKey(input.pageKey))!;
-    await this.logActivity("updated", updated.id, `SEO Metadata for Page: ${input.pageKey}`);
+    await this.logActivity("updated", updated.id, `SEO Settings for ${input.pageKey}`);
     return updated;
   }
 }

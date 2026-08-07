@@ -1,7 +1,7 @@
 // ==============================================================================
 // features/notifications/data/repositories/supabase-notification.repository.ts
 // Supabase Concrete Implementation of INotificationRepository
-// Strictly matching official SQL Schema v2
+// Strongly typed DTOs matching official SQL Schema
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
 import type {
@@ -12,6 +12,24 @@ import type {
 import { NotificationEntity } from "../../domain/entities/notification.entity";
 import { toNotificationEntity } from "../mapper/notification.mapper";
 import type { NotificationDTO } from "../dto/notification.dto";
+
+interface RfqFallbackRowDTO {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  company_name: string | null;
+  status: string | null;
+  created_at: string | null;
+}
+
+interface ContactFallbackRowDTO {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  subject: string | null;
+  status: string | null;
+  created_at: string | null;
+}
 
 export class SupabaseNotificationRepository implements INotificationRepository {
   private get supabase() {
@@ -60,7 +78,6 @@ export class SupabaseNotificationRepository implements INotificationRepository {
       // Fall through to dynamic fallback stream
     }
 
-    // Dynamic Fallback Stream: synthesized real notifications from rfq_requests & contact_messages
     return this.getFallbackNotifications(filters, page, pageSize);
   }
 
@@ -76,11 +93,10 @@ export class SupabaseNotificationRepository implements INotificationRepository {
       // Fallback
     }
 
-    // Fallback unread count from new rfqs + new contacts
     try {
       const [rfqRes, contactRes] = await Promise.all([
-        (this.supabase.from("rfq_requests" as any) as any).select("*", { count: "exact", head: true }).eq("status", "new"),
-        (this.supabase.from("contact_messages" as any) as any).select("*", { count: "exact", head: true }).eq("status", "new"),
+        this.supabase.from("rfq_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        this.supabase.from("contact_messages").select("*", { count: "exact", head: true }).eq("status", "new"),
       ]);
 
       return (rfqRes.count ?? 0) + (contactRes.count ?? 0);
@@ -129,11 +145,13 @@ export class SupabaseNotificationRepository implements INotificationRepository {
   ): Promise<PaginatedNotifications> {
     try {
       const [rfqsRes, contactsRes] = await Promise.all([
-        (this.supabase.from("rfq_requests" as any) as any)
+        this.supabase
+          .from("rfq_requests")
           .select("id, full_name, phone, company_name, status, created_at")
           .order("created_at", { ascending: false })
           .limit(20),
-        (this.supabase.from("contact_messages" as any) as any)
+        this.supabase
+          .from("contact_messages")
           .select("id, full_name, email, subject, status, created_at")
           .order("created_at", { ascending: false })
           .limit(20),
@@ -142,7 +160,8 @@ export class SupabaseNotificationRepository implements INotificationRepository {
       const generatedItems: NotificationEntity[] = [];
 
       if (rfqsRes.data) {
-        rfqsRes.data.forEach((rfq: any) => {
+        const rawRfqs = rfqsRes.data as unknown as RfqFallbackRowDTO[];
+        rawRfqs.forEach((rfq) => {
           generatedItems.push(
             new NotificationEntity({
               id: `rfq-${rfq.id}`,
@@ -158,7 +177,8 @@ export class SupabaseNotificationRepository implements INotificationRepository {
       }
 
       if (contactsRes.data) {
-        contactsRes.data.forEach((contact: any) => {
+        const rawContacts = contactsRes.data as unknown as ContactFallbackRowDTO[];
+        rawContacts.forEach((contact) => {
           generatedItems.push(
             new NotificationEntity({
               id: `contact-${contact.id}`,
@@ -173,10 +193,8 @@ export class SupabaseNotificationRepository implements INotificationRepository {
         });
       }
 
-      // Sort combined stream descending by creation date
       generatedItems.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-      // Apply filter conditions
       let filtered = generatedItems;
       if (filters.search) {
         const s = filters.search.toLowerCase();

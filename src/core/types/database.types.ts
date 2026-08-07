@@ -707,6 +707,212 @@ export interface Database {
           }
         ];
       };
+      admin_profiles: {
+        Row: {
+          id: string;
+          full_name: string;
+          email: string;
+          avatar_url: string | null;
+          is_active: boolean;
+          last_login_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          full_name: string;
+          email: string;
+          avatar_url?: string | null;
+          is_active?: boolean;
+          last_login_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["admin_profiles"]["Insert"]>;
+        Relationships: [];
+      };
+      team_members: {
+        Row: {
+          id: string;
+          photo_url: string | null;
+          sort_order: number;
+          status: string;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          photo_url?: string | null;
+          sort_order?: number;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["team_members"]["Insert"]>;
+        Relationships: [];
+      };
+      team_member_translations: {
+        Row: {
+          id: string;
+          team_member_id: string;
+          language_code: string;
+          name: string | null;
+          position: string | null;
+          bio: string | null;
+        };
+        Insert: {
+          id?: string;
+          team_member_id: string;
+          language_code: string;
+          name?: string | null;
+          position?: string | null;
+          bio?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["team_member_translations"]["Insert"]>;
+        Relationships: [];
+      };
+      roles: {
+        Row: {
+          id: string;
+          name: string;
+          code?: string | null;
+          description: string | null;
+          is_system?: boolean | null;
+          created_at: string;
+          updated_at?: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          code?: string | null;
+          description?: string | null;
+          is_system?: boolean | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["roles"]["Insert"]>;
+        Relationships: [];
+      };
+      permissions: {
+        Row: {
+          id: string;
+          code?: string | null;
+          name?: string | null;
+          module?: string | null;
+          description?: string | null;
+          created_at?: string;
+        };
+        Insert: {
+          id?: string;
+          code?: string | null;
+          name?: string | null;
+          module?: string | null;
+          description?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["permissions"]["Insert"]>;
+        Relationships: [];
+      };
+      role_permissions: {
+        Row: {
+          role_id: string;
+          permission_id: string;
+        };
+        Insert: {
+          role_id: string;
+          permission_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["role_permissions"]["Insert"]>;
+        Relationships: [];
+      };
+      admin_user_roles: {
+        Row: {
+          user_id: string;
+          role_id: string;
+        };
+        Insert: {
+          user_id: string;
+          role_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["admin_user_roles"]["Insert"]>;
+        Relationships: [];
+      };
+      activity_log: {
+        Row: {
+          id: string;
+          admin_user_id: string | null;
+          action: string;
+          entity_type: string;
+          entity_id: string | null;
+          details: Record<string, unknown> | null;
+          ip_address: string | null;
+          user_agent: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          admin_user_id?: string | null;
+          action: string;
+          entity_type: string;
+          entity_id?: string | null;
+          details?: Record<string, unknown> | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["activity_log"]["Insert"]>;
+        Relationships: [];
+      };
+      settings: {
+        Row: {
+          key: string;
+          value: string | null;
+          updated_at?: string | null;
+        };
+        Insert: {
+          key: string;
+          value: string | null;
+          updated_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["settings"]["Insert"]>;
+        Relationships: [];
+      };
+      seo_meta: {
+        Row: {
+          id: string;
+          page: string;
+          title_en: string | null;
+          title_ar: string | null;
+          title_ku: string | null;
+          description_en: string | null;
+          description_ar: string | null;
+          description_ku: string | null;
+          keywords_en: string | null;
+          keywords_ar: string | null;
+          keywords_ku: string | null;
+          og_image: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          page: string;
+          title_en?: string | null;
+          title_ar?: string | null;
+          title_ku?: string | null;
+          description_en?: string | null;
+          description_ar?: string | null;
+          description_ku?: string | null;
+          keywords_en?: string | null;
+          keywords_ar?: string | null;
+          keywords_ku?: string | null;
+          og_image?: string | null;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["seo_meta"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

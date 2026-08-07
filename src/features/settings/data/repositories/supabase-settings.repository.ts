@@ -23,7 +23,7 @@ export class SupabaseSettingsRepository implements ISettingsRepository {
   ) {
     try {
       const { data: userData } = await this.supabase.auth.getUser();
-      await (this.supabase.from("activity_log" as any) as any).insert({
+      await this.supabase.from("activity_log").insert({
         action,
         entity_type: "settings",
         entity_id: entityId,
@@ -37,15 +37,16 @@ export class SupabaseSettingsRepository implements ISettingsRepository {
 
   async getSettings(): Promise<WebsiteSettingsEntity | null> {
     try {
-      const { data, error } = await (this.supabase.from("settings" as any) as any)
+      const { data, error } = await this.supabase
+        .from("settings")
         .select("*");
 
       if (error || !data) {
         return this.getDefaultSettings();
       }
 
-      const settingsMap: Record<string, any> = {};
-      data.forEach((row: any) => {
+      const settingsMap: Record<string, string | null> = {};
+      data.forEach((row) => {
         settingsMap[row.key] = row.value;
       });
 
@@ -147,7 +148,9 @@ export class SupabaseSettingsRepository implements ISettingsRepository {
     }
 
     try {
-      await (this.supabase.from("settings" as any) as any).upsert(keysToUpsert);
+      await this.supabase.from("settings").upsert(
+        keysToUpsert.map((item) => ({ key: item.key, value: item.value }))
+      );
     } catch (e) {
       console.warn("updateSettings query warning:", e);
     }
