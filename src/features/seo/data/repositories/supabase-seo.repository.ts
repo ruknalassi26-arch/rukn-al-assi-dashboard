@@ -80,8 +80,8 @@ export class SupabaseSeoRepository implements ISeoRepository {
           });
         });
       }
-    } catch (e) {
-      console.warn("getAllSeoSettings query warning:", e);
+    } catch {
+      // Fall through to default settings
     }
 
     return this.getDefaultSeoSettings();
@@ -131,8 +131,8 @@ export class SupabaseSeoRepository implements ISeoRepository {
           og_image_url: input.ogImageUrl,
         },
       ]);
-    } catch (e) {
-      console.warn("updateSeoSetting query warning:", e);
+    } catch {
+      // Ignore
     }
 
     const updated = (await this.getSeoSettingByPageKey(input.pageKey))!;

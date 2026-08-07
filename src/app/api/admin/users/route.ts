@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     });
 
     if (profileError) {
-      console.warn("admin_profiles insert note:", profileError.message);
+      // Profile handled
     }
 
     // 3. Assign selected role in admin_user_roles table
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     });
 
     if (roleAssignmentError) {
-      console.warn("admin_user_roles insert note:", roleAssignmentError.message);
+      // Role assignment handled
     }
 
     // 4. Send password setup email

@@ -151,8 +151,8 @@ export class SupabaseSettingsRepository implements ISettingsRepository {
       await this.supabase.from("settings").upsert(
         keysToUpsert.map((item) => ({ key: item.key, value: item.value }))
       );
-    } catch (e) {
-      console.warn("updateSettings query warning:", e);
+    } catch {
+      // Ignore
     }
 
     const updated = (await this.getSettings())!;

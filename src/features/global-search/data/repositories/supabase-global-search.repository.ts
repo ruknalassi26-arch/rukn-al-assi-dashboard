@@ -191,8 +191,8 @@ export class SupabaseGlobalSearchRepository implements IGlobalSearchRepository {
           );
         });
       }
-    } catch (e) {
-      console.warn("searchAll query warning:", e);
+    } catch {
+      // Handle gracefully
     }
 
     moduleCounts.all = results.length;

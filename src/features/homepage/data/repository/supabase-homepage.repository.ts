@@ -58,8 +58,8 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
           }),
         ];
       }
-    } catch (e) {
-      console.warn("getHeroSlides query error:", e);
+    } catch {
+      // Return defaults
     }
 
     return [
@@ -151,8 +151,8 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
           });
         });
       }
-    } catch (e) {
-      console.warn("getCompanyStats query error:", e);
+    } catch {
+      // Return defaults
     }
 
     return [
@@ -245,8 +245,8 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
           });
         });
       }
-    } catch (e) {
-      console.warn("getClients query error:", e);
+    } catch {
+      // Return empty array
     }
 
     return [];
@@ -306,8 +306,8 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
           });
         });
       }
-    } catch (e) {
-      console.warn("getCertificates query error:", e);
+    } catch {
+      // Return empty array
     }
 
     return [];

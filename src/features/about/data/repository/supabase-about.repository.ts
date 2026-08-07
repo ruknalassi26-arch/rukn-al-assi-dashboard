@@ -52,8 +52,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
           updatedAt: new Date(),
         });
       }
-    } catch (e) {
-      console.warn("getCompanyInfo query error:", e);
+    } catch {
+      // Fallback
     }
 
     return new CompanyInfoEntity({
@@ -88,8 +88,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
           history: data.fullDescriptionAr || data.shortDescriptionAr || "",
         },
       ]);
-    } catch (e) {
-      console.warn("updateCompanyInfo query error:", e);
+    } catch {
+      // Fallback
     }
 
     return (await this.getCompanyInfo())!;
@@ -118,8 +118,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
           updatedAt: new Date(),
         });
       }
-    } catch (e) {
-      console.warn("getMission query error:", e);
+    } catch {
+      // Fallback
     }
 
     return new MissionEntity({
@@ -148,8 +148,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
           mission: data.contentAr || "",
         },
       ]);
-    } catch (e) {
-      console.warn("updateMission query error:", e);
+    } catch {
+      // Fallback
     }
 
     return (await this.getMission())!;
@@ -178,8 +178,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
           updatedAt: new Date(),
         });
       }
-    } catch (e) {
-      console.warn("getVision query error:", e);
+    } catch {
+      // Fallback
     }
 
     return new VisionEntity({
@@ -208,8 +208,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
           vision: data.contentAr || "",
         },
       ]);
-    } catch (e) {
-      console.warn("updateVision query error:", e);
+    } catch {
+      // Fallback
     }
 
     return (await this.getVision())!;
@@ -244,8 +244,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
           });
         });
       }
-    } catch (e) {
-      console.warn("getCoreValues query error:", e);
+    } catch {
+      // Fallback
     }
 
     return [];
@@ -374,8 +374,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
           });
         });
       }
-    } catch (e) {
-      console.warn("getTimeline query error:", e);
+    } catch {
+      // Fallback
     }
 
     return [];
@@ -510,8 +510,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
           });
         });
       }
-    } catch (e) {
-      console.warn("getTeamMembers query error:", e);
+    } catch {
+      // Fallback
     }
 
     return [];
@@ -654,8 +654,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
           });
         });
       }
-    } catch (e) {
-      console.warn("getCertificates query error:", e);
+    } catch {
+      // Fallback
     }
 
     return [];

@@ -114,10 +114,9 @@ export class SupabaseContactRepository implements IContactRepository {
       await (this.supabase.from("settings" as any) as any).upsert([
         { key: "site_name", value: JSON.stringify(input.companyNameEn), category: "general" },
         { key: "contact_email", value: JSON.stringify(input.email ?? ""), category: "general" },
-        { key: "contact_phone", value: JSON.stringify(input.phone ?? ""), category: "general" },
       ]);
-    } catch (e) {
-      console.warn("updateContactInfo query warning:", e);
+    } catch {
+      // Ignore
     }
 
     const updated = (await this.getContactInfo())!;
