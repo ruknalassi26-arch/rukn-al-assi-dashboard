@@ -773,6 +773,32 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["team_member_translations"]["Insert"]>;
         Relationships: [];
       };
+      contact_messages: {
+        Row: {
+          id: string;
+          full_name: string;
+          email: string;
+          phone: string | null;
+          subject: string | null;
+          message: string | null;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          full_name: string;
+          email: string;
+          phone?: string | null;
+          subject?: string | null;
+          message?: string | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["contact_messages"]["Insert"]>;
+        Relationships: [];
+      };
       roles: {
         Row: {
           id: string;
