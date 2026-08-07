@@ -19,11 +19,5 @@
   "17": "SupabaseSeoRepository",
   "18": "SupabaseSettingsRepository",
   "19": "SupabaseActivityLogRepository",
-  "20": "SupabaseGlobalSearchRepository",
-  "21": "use-notifications-hooks.ts",
-  "22": "SupabaseProductRepository",
-  "23": "SupabaseProjectRepository",
-  "24": "SupabaseServiceRepository",
-  "25": "SupabaseAuthRepository",
-  "26": "SupabaseCategoryRepository"
+  "20": "SupabaseGlobalSearchRepository"
 }

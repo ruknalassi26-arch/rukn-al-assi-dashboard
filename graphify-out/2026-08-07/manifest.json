@@ -10,18 +10,18 @@
     "semantic_hash": ""
   },
   "messages/ar.json": {
-    "mtime": 1786028514.6163235,
-    "ast_hash": "e70856e324f5a77cce3a6dc9ad433144",
+    "mtime": 1785655022.4937737,
+    "ast_hash": "9d928d71789a0208152dc9cb95dee540",
     "semantic_hash": ""
   },
   "messages/ckb.json": {
-    "mtime": 1786028535.698461,
-    "ast_hash": "fff6031ec68a2f33a95e054924004584",
+    "mtime": 1785655031.2890372,
+    "ast_hash": "2d0516f68bb85551bf39bb8a891baee3",
     "semantic_hash": ""
   },
   "messages/en.json": {
-    "mtime": 1786028500.442067,
-    "ast_hash": "3b53ace8f2e057fa389514bb54e81c35",
+    "mtime": 1785655014.2442267,
+    "ast_hash": "e9388da0ede9df27454475dfcebff507",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -400,8 +400,8 @@
     "semantic_hash": ""
   },
   "src/features/about/data/repository/supabase-about.repository.ts": {
-    "mtime": 1786027819.7000952,
-    "ast_hash": "68c5a478a9ef50dd93bf4ce0b4c0c10b",
+    "mtime": 1786021791.2163687,
+    "ast_hash": "c6735ae1d5f5137d3889e52a0a1b803d",
     "semantic_hash": ""
   },
   "src/features/about/domain/entities/about.entity.ts": {
@@ -590,8 +590,8 @@
     "semantic_hash": ""
   },
   "src/features/categories/data/repositories/supabase-category.repository.ts": {
-    "mtime": 1786027473.3341248,
-    "ast_hash": "4037ca8aa264e388206ccdd95abf9042",
+    "mtime": 1785420994.4663796,
+    "ast_hash": "13c2fa126cfaf3fa3db5f29d3f545ffc",
     "semantic_hash": ""
   },
   "src/features/categories/domain/entities/category.entity.ts": {
@@ -1455,8 +1455,8 @@
     "semantic_hash": ""
   },
   "src/features/products/data/repositories/supabase-product.repository.ts": {
-    "mtime": 1786027458.608828,
-    "ast_hash": "d6ea0242d7e41b96164d372b0cb0cfd9",
+    "mtime": 1785420745.7860422,
+    "ast_hash": "77cf20b0a1902e41dc389488181500cc",
     "semantic_hash": ""
   },
   "src/features/products/domain/entities/product.entity.ts": {
@@ -1815,8 +1815,8 @@
     "semantic_hash": ""
   },
   "src/features/services/data/repositories/supabase-service.repository.ts": {
-    "mtime": 1786027395.9787197,
-    "ast_hash": "30470a22c1dd1320375648b8358490a1",
+    "mtime": 1785421645.2854328,
+    "ast_hash": "286d207833ea6e78cac3b0f95abf337d",
     "semantic_hash": ""
   },
   "src/features/services/domain/entities/service.entity.ts": {
@@ -2505,8 +2505,8 @@
     "semantic_hash": ""
   },
   "src/features/authentication/data/repositories/supabase-auth.repository.ts": {
-    "mtime": 1786027752.2729814,
-    "ast_hash": "6246b12a7defada6f2c482ca0db75e8a",
+    "mtime": 1785692676.086792,
+    "ast_hash": "04fecdce8141a15eaf6f35731faad048",
     "semantic_hash": ""
   },
   "src/features/authentication/domain/repositories/i-auth.repository.ts": {
@@ -2670,8 +2670,8 @@
     "semantic_hash": ""
   },
   "src/features/activity-log/data/repositories/supabase-activity-log.repository.ts": {
-    "mtime": 1786028077.943048,
-    "ast_hash": "0cd17882d3dd0ad47049b9e9bc0eeef3",
+    "mtime": 1786025619.360418,
+    "ast_hash": "59c8a28cc3be2b66962c27869a6752f0",
     "semantic_hash": ""
   },
   "src/features/activity-log/domain/entities/activity-log.entity.ts": {
@@ -2740,8 +2740,8 @@
     "semantic_hash": ""
   },
   "src/features/global-search/data/repositories/supabase-global-search.repository.ts": {
-    "mtime": 1786028294.0679195,
-    "ast_hash": "09949d3e27149162dc52208d25d0cee7",
+    "mtime": 1786026437.222804,
+    "ast_hash": "cce12e8c14c29d50c61ac93248bc1955",
     "semantic_hash": ""
   },
   "src/features/global-search/domain/entities/global-search.entity.ts": {
@@ -2800,8 +2800,8 @@
     "semantic_hash": ""
   },
   "src/features/notifications/data/repositories/supabase-notification.repository.ts": {
-    "mtime": 1786027536.396767,
-    "ast_hash": "2593f3ab2ed9a0ed6aff163278011798",
+    "mtime": 1785568752.0189757,
+    "ast_hash": "45123096376b74d46864421bdfdc9a4d",
     "semantic_hash": ""
   },
   "src/features/notifications/domain/entities/notification.entity.ts": {
@@ -2985,8 +2985,8 @@
     "semantic_hash": ""
   },
   "src/features/projects/data/repositories/supabase-project.repository.ts": {
-    "mtime": 1786027420.7291012,
-    "ast_hash": "90800c768db8ba01cead6323f34c5257",
+    "mtime": 1785570530.7589629,
+    "ast_hash": "3604cd11ad149a8444847d0195bb2885",
     "semantic_hash": ""
   },
   "src/features/projects/domain/entities/project.entity.ts": {
@@ -3180,8 +3180,8 @@
     "semantic_hash": ""
   },
   "src/shared/hooks/notifications/use-notifications-hooks.ts": {
-    "mtime": 1786027553.382618,
-    "ast_hash": "b21f42d43f894ae2ed8de5c1b738a79d",
+    "mtime": 1785568504.948879,
+    "ast_hash": "5fc30bc536d57f1570420ac9ea81de70",
     "semantic_hash": ""
   },
   "src/shared/hooks/profile/use-profile-hooks.ts": {
