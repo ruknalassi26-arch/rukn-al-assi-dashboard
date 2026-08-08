@@ -278,7 +278,7 @@ export function ContactMessagesTable() {
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-end">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -291,7 +291,7 @@ export function ContactMessagesTable() {
                       <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
-                      <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded" /></TableCell>
+                      <TableCell className="text-end"><Skeleton className="h-8 w-8 ms-auto rounded" /></TableCell>
                     </TableRow>
                   ))
                 ) : messages.length === 0 ? (
@@ -358,7 +358,7 @@ export function ContactMessagesTable() {
                         </TableCell>
 
                         {/* Actions */}
-                        <TableCell className="text-right">
+                        <TableCell className="text-end">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8">

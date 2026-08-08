@@ -6,6 +6,7 @@
 import { useEffect, type ReactNode } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { cn } from "@core/utils/cn";
+import { useRTL } from "@core/hooks/use-rtl";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -32,6 +33,8 @@ export function ConfirmDialog({
   isLoading = false,
   icon,
 }: ConfirmDialogProps) {
+  const isRtl = useRTL();
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen && !isLoading) {
@@ -63,6 +66,7 @@ export function ConfirmDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
+        dir={isRtl ? "rtl" : "ltr"}
         className="relative z-10 w-full max-w-md rounded-lg border bg-card p-6 shadow-lg animate-scale-in"
       >
         <div className="flex items-start gap-4">

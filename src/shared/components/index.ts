@@ -8,3 +8,4 @@ export * from "./skeleton-card";
 export * from "./error-state";
 export * from "./success-state";
 export * from "./network-error-ui";
+export * from "./data-table-pagination";

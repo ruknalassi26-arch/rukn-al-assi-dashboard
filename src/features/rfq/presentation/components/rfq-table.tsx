@@ -46,7 +46,8 @@ import {
   TableRow,
   Skeleton,
 } from "@shared/ui";
-import { EmptyState } from "@shared/components/empty-state";
+import { useTranslations } from "next-intl";
+import { EmptyState, DataTablePagination } from "@shared/components";
 import { ErrorState } from "@shared/components/error-state";
 import { ConfirmDialog } from "@shared/dialogs/confirm-dialog";
 import { useRfqStore } from "../stores/rfq.store";
@@ -56,10 +57,11 @@ import {
   useBulkDeleteRfqs,
   useBulkUpdateRfqStatus,
 } from "@shared/hooks/rfq/use-rfq-hooks";
-import { RFQ_STATUS_LABELS, RFQ_STATUS_VARIANTS } from "../../domain/enums/rfq.enums";
+import { RFQ_STATUS_VARIANTS } from "../../domain/enums/rfq.enums";
 import type { RfqRequestEntity, RfqStatus } from "../../domain/entities/rfq-request.entity";
 
 export function RfqTable() {
+  const t = useTranslations("rfqAdmin");
   const {
     search,
     status,
@@ -178,19 +180,19 @@ export function RfqTable() {
         <div>
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
-            RFQ Requests Management
+            {t("title")}
           </CardTitle>
           <CardDescription>
-            View and process quotation requests from potential clients, respond by email, and manage statuses.
+            {t("subtitle")}
           </CardDescription>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={rfqs.length === 0} className="gap-1.5">
-            <Download className="h-4 w-4" /> Export CSV
+            <Download className="h-4 w-4" /> {t("exportCsv")}
           </Button>
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="gap-1.5">
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> {t("refresh")}
           </Button>
         </div>
       </CardHeader>
@@ -226,17 +228,17 @@ export function RfqTable() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
             <div className="relative w-full sm:w-64">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search reference, company..."
+                placeholder={t("searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-9"
+                className="ps-9 h-9"
               />
             </div>
 
             <Input
-              placeholder="Filter by company..."
+              placeholder={t("companyFilter")}
               value={companyFilter}
               onChange={(e) => setCompanyFilter(e.target.value)}
               className="w-full sm:w-48 h-9"
@@ -247,14 +249,14 @@ export function RfqTable() {
             {/* Status Filter */}
             <Select value={status} onValueChange={(val: RfqStatus | "all") => setStatus(val)}>
               <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder="All Statuses" />
+                <SelectValue placeholder={t("allStatuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="reviewed">In Review</SelectItem>
-                <SelectItem value="quoted">Quoted</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="all">{t("allStatuses")}</SelectItem>
+                <SelectItem value="pending">{t("statuses.pending")}</SelectItem>
+                <SelectItem value="reviewed">{t("statuses.reviewed")}</SelectItem>
+                <SelectItem value="quoted">{t("statuses.quoted")}</SelectItem>
+                <SelectItem value="closed">{t("statuses.closed")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -279,32 +281,32 @@ export function RfqTable() {
                       onCheckedChange={handleSelectAllToggle}
                     />
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSortToggle("reference_number")}>
+                  <TableHead className="cursor-pointer text-start" onClick={() => handleSortToggle("reference_number")}>
                     <div className="flex items-center gap-1">
-                      <span>Ref #</span>
+                      <span>{t("headers.ref")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSortToggle("company_name")}>
+                  <TableHead className="cursor-pointer text-start" onClick={() => handleSortToggle("company_name")}>
                     <div className="flex items-center gap-1">
-                      <span>Company / Contact</span>
+                      <span>{t("headers.company")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Requested Item</TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSortToggle("created_at")}>
+                  <TableHead className="text-start">{t("headers.item")}</TableHead>
+                  <TableHead className="cursor-pointer text-start" onClick={() => handleSortToggle("created_at")}>
                     <div className="flex items-center gap-1">
-                      <span>Date</span>
+                      <span>{t("headers.date")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSortToggle("status")}>
+                  <TableHead className="cursor-pointer text-start" onClick={() => handleSortToggle("status")}>
                     <div className="flex items-center gap-1">
-                      <span>Status</span>
+                      <span>{t("headers.status")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-end">{t("headers.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -317,7 +319,7 @@ export function RfqTable() {
                       <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
-                      <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded" /></TableCell>
+                      <TableCell className="text-end"><Skeleton className="h-8 w-8 ms-auto rounded" /></TableCell>
                     </TableRow>
                   ))
                 ) : rfqs.length === 0 ? (
@@ -325,8 +327,8 @@ export function RfqTable() {
                     <TableCell colSpan={7} className="h-64 text-center">
                       <EmptyState
                         icon={FileText}
-                        title="No RFQ requests found"
-                        description="There are currently no quotation requests matching your search criteria."
+                        title={t("emptyTitle")}
+                        description={t("emptyDescription")}
                       />
                     </TableCell>
                   </TableRow>
@@ -384,12 +386,12 @@ export function RfqTable() {
                         {/* Status */}
                         <TableCell>
                           <Badge variant={RFQ_STATUS_VARIANTS[rfq.status]}>
-                            {RFQ_STATUS_LABELS[rfq.status]}
+                            {t(`statuses.${rfq.status}`)}
                           </Badge>
                         </TableCell>
 
                         {/* Actions */}
-                        <TableCell className="text-right">
+                        <TableCell className="text-end">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -398,17 +400,17 @@ export function RfqTable() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => openDrawer(rfq.id)}>
-                                <Eye className="mr-2 h-4 w-4 text-blue-500" /> View Details
+                                <Eye className="me-2 h-4 w-4 text-blue-500" /> View Details
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => openEmailModal(rfq.id)}>
-                                <Mail className="mr-2 h-4 w-4 text-emerald-500" /> Reply by Email
+                                <Mail className="me-2 h-4 w-4 text-emerald-500" /> Reply by Email
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
                                 onClick={() => setDeleteId(rfq.id)}
                               >
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                <Trash2 className="me-2 h-4 w-4" /> Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -423,32 +425,12 @@ export function RfqTable() {
         )}
 
         {/* Pagination Footer */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-2">
-            <p className="text-xs text-muted-foreground">
-              Showing page <span className="font-semibold">{page}</span> of{" "}
-              <span className="font-semibold">{totalPages}</span> ({total} total RFQ requests)
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(page - 1)}
-                disabled={page <= 1}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(page + 1)}
-                disabled={page >= totalPages}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        )}
+        <DataTablePagination
+          page={page}
+          totalPages={totalPages}
+          totalItems={total}
+          onPageChange={setPage}
+        />
       </CardContent>
 
       {/* Delete Confirmation Dialog */}

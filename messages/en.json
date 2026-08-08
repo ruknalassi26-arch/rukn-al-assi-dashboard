@@ -9,6 +9,13 @@
     "reloadApp": "Reload Application",
     "goHome": "Go to Dashboard",
     "retry": "Try again",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "showingPage": "Showing page",
+      "of": "of",
+      "total": "total items"
+    },
     "dialogs": {
       "cancel": "Cancel",
       "saveChanges": "Save Changes",
@@ -456,6 +463,31 @@
       "draft": "Draft",
       "archived": "Archived"
     }
+  },
+  "rfqAdmin": {
+    "title": "RFQ Requests Management",
+    "subtitle": "View and process quotation requests from potential clients, respond by email, and manage statuses.",
+    "exportCsv": "Export CSV",
+    "refresh": "Refresh",
+    "searchPlaceholder": "Search reference, company...",
+    "companyFilter": "Filter by company...",
+    "allStatuses": "All Statuses",
+    "statuses": {
+      "pending": "Pending",
+      "reviewed": "In Review",
+      "quoted": "Quoted",
+      "closed": "Closed"
+    },
+    "headers": {
+      "ref": "Ref #",
+      "company": "Company / Contact",
+      "item": "Requested Item",
+      "date": "Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "emptyTitle": "No RFQ requests found",
+    "emptyDescription": "There are currently no quotation requests matching your search criteria."
   },
   "rfq": {
     "title": "Request a Quote",

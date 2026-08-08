@@ -161,8 +161,9 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
               const linkContent = (
                 <Link
                   href={`/${locale}${item.href}`}
+                  dir={isRtl ? "rtl" : "ltr"}
                   className={cn(
-                    "group flex items-center gap-3.5 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-all duration-200",
+                    "group flex items-center gap-3.5 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-all duration-200 text-start",
                     active
                       ? "bg-primary/10 text-primary shadow-sm"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -179,7 +180,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                     )}
                   />
                   {!collapsed && (
-                    <span className="truncate">{label}</span>
+                    <span className="truncate flex-1 text-start">{label}</span>
                   )}
                   {!collapsed && item.badge !== undefined && item.badge > 0 && (
                     <span className="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">
