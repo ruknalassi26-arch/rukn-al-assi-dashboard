@@ -3,11 +3,11 @@
 // features/activity-log/presentation/pages/activity-log-page.tsx
 // Main Activity Log Admin Page
 // ==============================================================================
-import { useTranslations } from "next-intl";
 import { Activity, ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { ActivityLogDrawer } from "../components/activity-log-drawer";
 import { ActivityLogFilters } from "../components/activity-log-filters";
 import { ActivityLogTable } from "../components/activity-log-table";
-import { ActivityLogDrawer } from "../components/activity-log-drawer";
 
 export function ActivityLogPage() {
   const t = useTranslations("activityLog");
