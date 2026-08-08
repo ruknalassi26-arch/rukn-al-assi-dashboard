@@ -288,12 +288,6 @@ export function CertificateTable() {
                       />
                     </TableCell>
                   </TableRow>
-                            <Button size="sm"><Plus className="mr-2 h-4 w-4" />Add Certificate</Button>
-                          </Link>
-                        }
-                      />
-                    </TableCell>
-                  </TableRow>
                 ) : (
                   certificates.map((cert: CertificateEntity) => {
                     const isSelected = selectedIds.includes(cert.id);
