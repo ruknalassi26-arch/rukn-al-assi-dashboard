@@ -1,13 +1,10 @@
 "use client";
-// ==============================================================================
-// features/team/presentation/components/team-member-form.tsx
-// Team Member Creation / Editing Form with RHF + Zod + MultilingualTabs
-// ==============================================================================
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2, Save, ArrowLeft, Users } from "lucide-react";
 import {
   Card,
@@ -58,38 +55,69 @@ interface TeamMemberFormProps {
 }
 
 export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
+  const tForm = useTranslations("teamForm");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const isEditing = !!initialData;
 
   const createTeamMemberMutation = useCreateTeamMember();
   const updateTeamMemberMutation = useUpdateTeamMember();
-  const isSubmitting = createTeamMemberMutation.isPending || updateTeamMemberMutation.isPending;
 
-  const form = useForm<TeamMemberFormValues>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<TeamMemberFormValues>({
     resolver: zodResolver(teamMemberSchema),
     defaultValues: {
-      fullNameEn: initialData?.fullNameEn ?? "",
-      fullNameAr: initialData?.fullNameAr ?? "",
-      fullNameKu: initialData?.fullNameKu ?? "",
-      positionEn: initialData?.positionEn ?? "",
-      positionAr: initialData?.positionAr ?? "",
-      positionKu: initialData?.positionKu ?? "",
-      departmentEn: initialData?.departmentEn ?? "",
-      departmentAr: initialData?.departmentAr ?? "",
-      departmentKu: initialData?.departmentKu ?? "",
-      biographyEn: initialData?.biographyEn ?? "",
-      biographyAr: initialData?.biographyAr ?? "",
-      biographyKu: initialData?.biographyKu ?? "",
-      photo: initialData?.photo ?? "",
-      linkedin: initialData?.linkedin ?? "",
-      email: initialData?.email ?? "",
-      phone: initialData?.phone ?? "",
-      status: initialData?.status ?? "active",
-      sortOrder: initialData?.sortOrder ?? 0,
+      fullNameEn: "",
+      fullNameAr: "",
+      fullNameKu: "",
+      positionEn: "",
+      positionAr: "",
+      positionKu: "",
+      departmentEn: "",
+      departmentAr: "",
+      departmentKu: "",
+      biographyEn: "",
+      biographyAr: "",
+      biographyKu: "",
+      photo: null,
+      linkedin: "",
+      email: "",
+      phone: "",
+      status: "active",
+      sortOrder: 0,
     },
   });
 
-  const { watch, setValue, register, handleSubmit, formState: { errors } } = form;
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        fullNameEn: initialData.fullNameEn,
+        fullNameAr: initialData.fullNameAr,
+        fullNameKu: initialData.fullNameKu ?? "",
+        positionEn: initialData.positionEn ?? "",
+        positionAr: initialData.positionAr ?? "",
+        positionKu: initialData.positionKu ?? "",
+        departmentEn: initialData.departmentEn ?? "",
+        departmentAr: initialData.departmentAr ?? "",
+        departmentKu: initialData.departmentKu ?? "",
+        biographyEn: initialData.biographyEn ?? "",
+        biographyAr: initialData.biographyAr ?? "",
+        biographyKu: initialData.biographyKu ?? "",
+        photo: initialData.photo ?? null,
+        linkedin: initialData.linkedin ?? "",
+        email: initialData.email ?? "",
+        phone: initialData.phone ?? "",
+        status: initialData.status,
+        sortOrder: initialData.sortOrder,
+      });
+    }
+  }, [initialData, reset]);
 
   const onSubmit = async (values: TeamMemberFormValues) => {
     try {
@@ -122,10 +150,10 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {isEditing ? `Edit Team Member: ${initialData.fullNameEn}` : "Add New Team Member"}
+              {isEditing ? `${tForm("editTitle")}: ${initialData.fullNameEn}` : tForm("createTitle")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Manage leadership, executives, and company personnel profiles.
+              {isEditing ? tForm("editSubtitle") : tForm("createSubtitle")}
             </p>
           </div>
         </div>
@@ -137,16 +165,16 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
             onClick={() => router.push("/admin/team")}
             disabled={isSubmitting}
           >
-            Cancel
+            {tForm("cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="gap-2 min-w-[140px]">
             {isSubmitting ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+                <Loader2 className="h-4 w-4 animate-spin" /> {tForm("saving")}
               </>
             ) : (
               <>
-                <Save className="h-4 w-4" /> {isEditing ? "Update Profile" : "Save Member"}
+                <Save className="h-4 w-4" /> {isEditing ? tForm("updateBtn") : tForm("saveBtn")}
               </>
             )}
           </Button>
@@ -160,10 +188,10 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-primary" />
-                Member Multilingual Profile
+                {tForm("contentTitle")}
               </CardTitle>
               <CardDescription>
-                Provide full name, position title, department, and biography in English, Arabic, and Kurdish Sorani.
+                {tForm("contentSubtitle")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -171,10 +199,9 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
                 englishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="fullNameEn">Full Name (English) *</Label>
+                      <Label htmlFor="fullNameEn">{tForm("nameEn")} *</Label>
                       <Input
                         id="fullNameEn"
-                        placeholder="e.g. Johnathan Smith"
                         {...register("fullNameEn")}
                       />
                       {errors.fullNameEn && (
@@ -182,26 +209,23 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="positionEn">Job Position / Title (English)</Label>
+                      <Label htmlFor="positionEn">{tForm("positionEn")}</Label>
                       <Input
                         id="positionEn"
-                        placeholder="e.g. Chief Executive Officer"
                         {...register("positionEn")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="departmentEn">Department (English)</Label>
+                      <Label htmlFor="departmentEn">{tForm("deptEn")}</Label>
                       <Input
                         id="departmentEn"
-                        placeholder="e.g. Executive Management / Engineering"
                         {...register("departmentEn")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="biographyEn">Biography (English)</Label>
+                      <Label htmlFor="biographyEn">{tForm("bioEn")}</Label>
                       <Textarea
                         id="biographyEn"
-                        placeholder="Professional bio and background summary..."
                         className="min-h-[140px]"
                         {...register("biographyEn")}
                       />
@@ -211,10 +235,10 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
                 arabicFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="fullNameAr">الاسم الكامل (بالعربية) *</Label>
+                      <Label htmlFor="fullNameAr">{tForm("nameAr")} *</Label>
                       <Input
                         id="fullNameAr"
-                        placeholder="مثال: جونثان سميث"
+                        dir="rtl"
                         {...register("fullNameAr")}
                       />
                       {errors.fullNameAr && (
@@ -222,26 +246,26 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="positionAr">المسمى الوظيفي (بالعربية)</Label>
+                      <Label htmlFor="positionAr">{tForm("positionAr")}</Label>
                       <Input
                         id="positionAr"
-                        placeholder="مثال: الرئيس التنفيذي"
+                        dir="rtl"
                         {...register("positionAr")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="departmentAr">القسم / الإدارة (بالعربية)</Label>
+                      <Label htmlFor="departmentAr">{tForm("deptAr")}</Label>
                       <Input
                         id="departmentAr"
-                        placeholder="مثال: الإدارة العليا / قسم الهندسة"
+                        dir="rtl"
                         {...register("departmentAr")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="biographyAr">السيرة الذاتية (بالعربية)</Label>
+                      <Label htmlFor="biographyAr">{tForm("bioAr")}</Label>
                       <Textarea
                         id="biographyAr"
-                        placeholder="نبذة عن المؤهلات والخبرات..."
+                        dir="rtl"
                         className="min-h-[140px]"
                         {...register("biographyAr")}
                       />
@@ -251,34 +275,34 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
                 kurdishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="fullNameKu">ناوی تەواو (بە کوردی)</Label>
+                      <Label htmlFor="fullNameKu">{tForm("nameKu")}</Label>
                       <Input
                         id="fullNameKu"
-                        placeholder="ناوی سیانی بە کوردی"
+                        dir="rtl"
                         {...register("fullNameKu")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="positionKu">پۆستی کار (بە کوردی)</Label>
+                      <Label htmlFor="positionKu">{tForm("positionKu")}</Label>
                       <Input
                         id="positionKu"
-                        placeholder="نموونە: بەڕێوەبەری جێبەجێکار"
+                        dir="rtl"
                         {...register("positionKu")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="departmentKu">بەش / بەڕێوەبەرایەتی (بە کوردی)</Label>
+                      <Label htmlFor="departmentKu">{tForm("deptKu")}</Label>
                       <Input
                         id="departmentKu"
-                        placeholder="نموونە: بەشی ئەندازیاری"
+                        dir="rtl"
                         {...register("departmentKu")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="biographyKu">ژیاننامە (بە کوردی)</Label>
+                      <Label htmlFor="biographyKu">{tForm("bioKu")}</Label>
                       <Textarea
                         id="biographyKu"
-                        placeholder="پوختەی ئەزموون و کارەکان..."
+                        dir="rtl"
                         className="min-h-[140px]"
                         {...register("biographyKu")}
                       />
@@ -295,27 +319,27 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
           {/* Status & Ordering */}
           <Card>
             <CardHeader>
-              <CardTitle>Status & Order</CardTitle>
+              <CardTitle>{tForm("statusTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="status">Publishing Status</Label>
+                <Label htmlFor="status">{tForm("status")}</Label>
                 <Select
                   value={watch("status")}
                   onValueChange={(val) => setValue("status", val as "active" | "draft")}
                 >
                   <SelectTrigger id="status">
-                    <SelectValue placeholder="Select Status" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active (Visible)</SelectItem>
-                    <SelectItem value="draft">Draft (Hidden)</SelectItem>
+                    <SelectItem value="active">{tCommon("active")}</SelectItem>
+                    <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sortOrder">Display Order (Sort Order)</Label>
+                <Label htmlFor="sortOrder">{tForm("sortOrder")}</Label>
                 <Input
                   id="sortOrder"
                   type="number"
@@ -329,11 +353,11 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
           {/* Contact Details */}
           <Card>
             <CardHeader>
-              <CardTitle>Contact Information</CardTitle>
+              <CardTitle>{tForm("contactTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{tForm("email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -346,7 +370,7 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone">{tForm("phone")}</Label>
                 <Input
                   id="phone"
                   placeholder="+964 7XX XXX XXXX"
@@ -355,7 +379,7 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
+                <Label htmlFor="linkedin">{tForm("linkedin")}</Label>
                 <Input
                   id="linkedin"
                   placeholder="https://linkedin.com/in/username"
@@ -368,7 +392,7 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
           {/* Photo Upload (team-photos bucket) */}
           <Card>
             <CardHeader>
-              <CardTitle>Profile Photo</CardTitle>
+              <CardTitle>{tForm("photoTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <ImageUploader
