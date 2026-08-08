@@ -4,6 +4,7 @@
 // Company Statistics Section manager with Search, Filter, Bulk Actions & Reordering
 // ==============================================================================
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Pencil, Trash2, Search, ArrowUp, ArrowDown, Award, Users, Briefcase, Wrench, Package, CheckCircle, Clock } from "lucide-react";
 import {
   Card,
@@ -48,6 +49,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 export function StatsSectionManager() {
+  const t = useTranslations("homepageAdmin");
+  const tCommon = useTranslations("common");
   const { data: stats, isLoading, error, refetch } = useCompanyStats();
   const createMutation = useCreateCompanyStat();
   const updateMutation = useUpdateCompanyStat();
@@ -102,14 +105,16 @@ export function StatsSectionManager() {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = async (values: Record<string, unknown>) => {
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingStat(null);
+  };
+
+  const handleFormSubmit = async (values: any) => {
     if (editingStat) {
-      await updateMutation.mutateAsync({
-        id: editingStat.id,
-        stat: values as Partial<CompanyStatEntity>,
-      });
+      await updateMutation.mutateAsync({ id: editingStat.id, stat: values });
     } else {
-      await createMutation.mutateAsync(values as Omit<CompanyStatEntity, "id" | "createdAt" | "updatedAt">);
+      await createMutation.mutateAsync(values);
     }
   };
 
@@ -117,28 +122,25 @@ export function StatsSectionManager() {
     if (!deletingId) return;
     await deleteMutation.mutateAsync(deletingId);
     setDeletingId(null);
-    setSelectedIds((prev) => prev.filter((i) => i !== deletingId));
   };
 
   const handleConfirmBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
     await bulkDeleteMutation.mutateAsync(selectedIds);
     setSelectedIds([]);
     setIsBulkDeleting(false);
   };
 
   const handleBulkStatus = async (status: "active" | "draft") => {
-    if (selectedIds.length === 0) return;
     await bulkStatusMutation.mutateAsync({ ids: selectedIds, status });
     setSelectedIds([]);
   };
 
   const handleMove = async (index: number, direction: "up" | "down") => {
     if (!stats) return;
-    const newStats = [...stats];
     const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= newStats.length) return;
+    if (targetIndex < 0 || targetIndex >= stats.length) return;
 
+    const newStats = [...stats];
     const [moved] = newStats.splice(index, 1);
     newStats.splice(targetIndex, 0, moved);
 
@@ -173,93 +175,93 @@ export function StatsSectionManager() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <CardTitle>Company Statistics</CardTitle>
-            <CardDescription>
-              Manage key numerical metrics displayed in the homepage counter bar (e.g., Years Experience, Projects Completed).
-            </CardDescription>
-          </div>
-          <Button onClick={handleOpenCreate} className="gap-2 shrink-0">
-            <Plus className="h-4 w-4" /> Add Statistic
-          </Button>
-        </CardHeader>
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <CardTitle>{t("statsTitle")}</CardTitle>
+          <CardDescription>
+            {t("statsSubtitle")}
+          </CardDescription>
+        </div>
+        <Button onClick={handleOpenCreate} className="gap-2 shrink-0">
+          <Plus className="h-4 w-4" /> {t("addStat")}
+        </Button>
+      </CardHeader>
 
-        <CardContent className="space-y-4">
-          {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 rounded-lg border bg-muted/20">
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search statistics..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 text-xs"
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32 text-xs">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                </SelectContent>
-              </Select>
+      <CardContent className="space-y-4">
+        {/* Controls Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 rounded-lg border bg-muted/20">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t("searchStats")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 text-xs"
+              />
             </div>
-
-            {/* Bulk actions */}
-            {selectedIds.length > 0 && (
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span className="text-xs text-muted-foreground font-medium me-1">
-                  {selectedIds.length} selected
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleBulkStatus("active")}
-                  disabled={bulkStatusMutation.isPending}
-                  className="text-xs"
-                >
-                  Set Active
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleBulkStatus("draft")}
-                  disabled={bulkStatusMutation.isPending}
-                  className="text-xs"
-                >
-                  Set Draft
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setIsBulkDeleting(true)}
-                  disabled={bulkDeleteMutation.isPending}
-                  className="text-xs"
-                >
-                  Delete Selected
-                </Button>
-              </div>
-            )}
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-32 text-xs">
+                <SelectValue placeholder={tCommon("status")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{tCommon("allStatuses")}</SelectItem>
+                <SelectItem value="active">{tCommon("active")}</SelectItem>
+                <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* List */}
-          {filteredStats.length === 0 ? (
-            <EmptyState
-              icon={Award}
-              title="No company statistics found"
-              description="Try adjusting your search query or add a new statistic."
-              action={
-                <Button onClick={handleOpenCreate} size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" /> Add Statistic
-                </Button>
-              }
-            />
-          ) : (
+          {/* Bulk actions */}
+          {selectedIds.length > 0 && (
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <span className="text-xs text-muted-foreground font-medium me-1">
+                {selectedIds.length} {tCommon("selected")}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkStatus("active")}
+                disabled={bulkStatusMutation.isPending}
+                className="text-xs"
+              >
+                {tCommon("setActive")}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkStatus("draft")}
+                disabled={bulkStatusMutation.isPending}
+                className="text-xs"
+              >
+                {tCommon("setDraft")}
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setIsBulkDeleting(true)}
+                disabled={bulkDeleteMutation.isPending}
+                className="text-xs"
+              >
+                {tCommon("deleteSelected")}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* List */}
+        {filteredStats.length === 0 ? (
+          <EmptyState
+            icon={Award}
+            title={t("emptyStatsTitle")}
+            description={t("emptyStatsDesc")}
+            action={
+              <Button onClick={handleOpenCreate} size="sm" className="gap-2">
+                <Plus className="h-4 w-4" /> {t("addStat")}
+              </Button>
+            }
+          />
+        ) : (
             <div className="space-y-3">
               <div className="flex items-center justify-between px-2 text-xs font-semibold text-muted-foreground">
                 <div className="flex items-center gap-3">

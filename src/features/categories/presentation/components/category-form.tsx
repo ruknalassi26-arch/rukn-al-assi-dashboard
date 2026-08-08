@@ -1,13 +1,11 @@
 "use client";
-// ==============================================================================
-// features/categories/presentation/components/category-form.tsx
-// Category Creation / Editing Form with RHF + Zod + MultilingualTabs
-// ==============================================================================
+
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2, Save, ArrowLeft, Sparkles, FolderKanban } from "lucide-react";
 import {
   Card,
@@ -59,6 +57,8 @@ interface CategoryFormProps {
 
 export function CategoryForm({ initialData }: CategoryFormProps) {
   const router = useRouter();
+  const tForm = useTranslations("categoryForm");
+  const tCommon = useTranslations("common");
   const isEditing = !!initialData;
 
   const createCategoryMutation = useCreateCategory();
@@ -135,10 +135,10 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {isEditing ? `Edit Category: ${initialData.nameEn}` : "Create New Category"}
+              {isEditing ? `${tForm("editTitle")}: ${initialData.nameEn}` : tForm("createTitle")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Configure multilingual category attributes, images, and display parameters.
+              {isEditing ? tForm("editSubtitle") : tForm("createSubtitle")}
             </p>
           </div>
         </div>
@@ -150,16 +150,16 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
             onClick={() => router.push("/admin/categories")}
             disabled={isSubmitting}
           >
-            Cancel
+            {tForm("cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="gap-2 min-w-[140px]">
             {isSubmitting ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+                <Loader2 className="h-4 w-4 animate-spin" /> {tForm("saving")}
               </>
             ) : (
               <>
-                <Save className="h-4 w-4" /> {isEditing ? "Update Category" : "Save Category"}
+                <Save className="h-4 w-4" /> {isEditing ? tForm("updateBtn") : tForm("saveBtn")}
               </>
             )}
           </Button>
@@ -173,10 +173,10 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FolderKanban className="h-5 w-5 text-primary" />
-                Category Content
+                {tForm("contentTitle")}
               </CardTitle>
               <CardDescription>
-                Provide translatable names and descriptions using the language tabs below.
+                {tForm("contentSubtitle")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -184,10 +184,9 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                 englishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="nameEn">Category Name (English) *</Label>
+                      <Label htmlFor="nameEn">{tForm("nameEn")} *</Label>
                       <Input
                         id="nameEn"
-                        placeholder="e.g. Hydraulic Pumps"
                         {...register("nameEn")}
                       />
                       {errors.nameEn && (
@@ -195,23 +194,22 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="descriptionEn">Description (English)</Label>
+                      <Label htmlFor="descriptionEn">{tForm("descEn")}</Label>
                       <Textarea
                         id="descriptionEn"
-                        placeholder="Provide a detailed description of this category..."
                         className="min-h-[120px]"
                         {...register("descriptionEn")}
                       />
                     </div>
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">SEO Meta Settings (English)</h4>
+                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">SEO Meta (English)</h4>
                       <div className="space-y-2">
                         <Label htmlFor="seoTitleEn">Meta Title (English)</Label>
-                        <Input id="seoTitleEn" placeholder="SEO Title for search engines" {...register("seoTitleEn")} />
+                        <Input id="seoTitleEn" {...register("seoTitleEn")} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="seoDescriptionEn">Meta Description (English)</Label>
-                        <Textarea id="seoDescriptionEn" placeholder="SEO Description summary" className="min-h-[70px]" {...register("seoDescriptionEn")} />
+                        <Textarea id="seoDescriptionEn" className="min-h-[70px]" {...register("seoDescriptionEn")} />
                       </div>
                     </div>
                   </div>
@@ -219,10 +217,10 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                 arabicFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="nameAr">اسم الفئة (بالعربية) *</Label>
+                      <Label htmlFor="nameAr">{tForm("nameAr")} *</Label>
                       <Input
                         id="nameAr"
-                        placeholder="مثال: المضخات الهيدروليكية"
+                        dir="rtl"
                         {...register("nameAr")}
                       />
                       {errors.nameAr && (
@@ -230,23 +228,23 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="descriptionAr">الوصف (بالعربية)</Label>
+                      <Label htmlFor="descriptionAr">{tForm("descAr")}</Label>
                       <Textarea
                         id="descriptionAr"
-                        placeholder="أدخل وصفاً تفصيلياً لهذه الفئة..."
+                        dir="rtl"
                         className="min-h-[120px]"
                         {...register("descriptionAr")}
                       />
                     </div>
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">إعدادات SEO (بالعربية)</h4>
+                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">تهيئة محركات البحث SEO (بالعربية)</h4>
                       <div className="space-y-2">
                         <Label htmlFor="seoTitleAr">عنوان SEO (بالعربية)</Label>
-                        <Input id="seoTitleAr" placeholder="عنوان الصفحات في محركات البحث" {...register("seoTitleAr")} />
+                        <Input id="seoTitleAr" dir="rtl" {...register("seoTitleAr")} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="seoDescriptionAr">وصف SEO (بالعربية)</Label>
-                        <Textarea id="seoDescriptionAr" placeholder="ملخص المحتوى لمحركات البحث" className="min-h-[70px]" {...register("seoDescriptionAr")} />
+                        <Textarea id="seoDescriptionAr" dir="rtl" className="min-h-[70px]" {...register("seoDescriptionAr")} />
                       </div>
                     </div>
                   </div>
@@ -254,18 +252,18 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                 kurdishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="nameKu">ناوی هاوپۆل (بە کوردی)</Label>
+                      <Label htmlFor="nameKu">{tForm("nameKu")}</Label>
                       <Input
                         id="nameKu"
-                        placeholder="نموونە: پەمپە هایدرۆلیکییەکان"
+                        dir="rtl"
                         {...register("nameKu")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="descriptionKu">وەسفی هاوپۆل (بە کوردی)</Label>
+                      <Label htmlFor="descriptionKu">{tForm("descKu")}</Label>
                       <Textarea
                         id="descriptionKu"
-                        placeholder="زانیاری و ووردەکاری دەربارەی ئەم هاوپۆلە..."
+                        dir="rtl"
                         className="min-h-[120px]"
                         {...register("descriptionKu")}
                       />
@@ -274,11 +272,11 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                       <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">ڕێکخستنەکانی SEO (بە کوردی)</h4>
                       <div className="space-y-2">
                         <Label htmlFor="seoTitleKu">نیشانی SEO (بە کوردی)</Label>
-                        <Input id="seoTitleKu" placeholder="نیشانی پەڕە بۆ بزوێنەرەکانی گەڕان" {...register("seoTitleKu")} />
+                        <Input id="seoTitleKu" dir="rtl" {...register("seoTitleKu")} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="seoDescriptionKu">وەسفی SEO (بە کوردی)</Label>
-                        <Textarea id="seoDescriptionKu" placeholder="پوختەی ناوەڕۆک بۆ بزوێنەرەکانی گەڕان" className="min-h-[70px]" {...register("seoDescriptionKu")} />
+                        <Textarea id="seoDescriptionKu" dir="rtl" className="min-h-[70px]" {...register("seoDescriptionKu")} />
                       </div>
                     </div>
                   </div>
@@ -293,12 +291,12 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
           {/* Status & Display Settings */}
           <Card>
             <CardHeader>
-              <CardTitle>Settings & Status</CardTitle>
+              <CardTitle>{tForm("settingsTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="slug">URL Slug *</Label>
+                  <Label htmlFor="slug">{tForm("slug")} *</Label>
                   <Button
                     type="button"
                     variant="ghost"
@@ -315,33 +313,33 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                       }
                     }}
                   >
-                    <Sparkles className="h-3 w-3" /> Auto Slug
+                    <Sparkles className="h-3 w-3" /> {tForm("autoSlug")}
                   </Button>
                 </div>
-                <Input id="slug" placeholder="e.g. hydraulic-pumps" {...register("slug")} />
+                <Input id="slug" {...register("slug")} />
                 {errors.slug && (
                   <p className="text-xs font-semibold text-destructive">{errors.slug.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Publishing Status</Label>
+                <Label htmlFor="status">{tForm("status")}</Label>
                 <Select
                   value={watch("status")}
                   onValueChange={(val) => setValue("status", val as "active" | "draft")}
                 >
                   <SelectTrigger id="status">
-                    <SelectValue placeholder="Select Status" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active (Visible)</SelectItem>
-                    <SelectItem value="draft">Draft (Hidden)</SelectItem>
+                    <SelectItem value="active">{tCommon("active")}</SelectItem>
+                    <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sortOrder">Display Order (Sort Order)</Label>
+                <Label htmlFor="sortOrder">{tForm("sortOrder")}</Label>
                 <Input
                   id="sortOrder"
                   type="number"
@@ -351,8 +349,8 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="icon">Lucide Icon Identifier (Optional)</Label>
-                <Input id="icon" placeholder="e.g. Wrench, Shield, Zap" {...register("icon")} />
+                <Label htmlFor="icon">{tForm("icon")}</Label>
+                <Input id="icon" {...register("icon")} />
               </div>
             </CardContent>
           </Card>
@@ -360,7 +358,7 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
           {/* Category Image Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Category Image</CardTitle>
+              <CardTitle>{tForm("imageTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <ImageUploader

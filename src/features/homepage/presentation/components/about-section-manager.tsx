@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2, Save, Plus, Trash2, FileText } from "lucide-react";
 import {
   Card,
@@ -51,6 +52,8 @@ const aboutSchema = z.object({
 type AboutFormValues = z.infer<typeof aboutSchema>;
 
 export function AboutSectionManager() {
+  const t = useTranslations("homepageAdmin");
+  const tCommon = useTranslations("common");
   const { data: aboutData, isLoading, error, refetch } = useAboutPreview();
   const updateMutation = useUpdateAboutPreview();
 
@@ -103,22 +106,23 @@ export function AboutSectionManager() {
 
   useEffect(() => {
     if (aboutData) {
+      const data = aboutData as any;
       reset({
-        titleEn: aboutData.titleEn,
-        titleAr: aboutData.titleAr,
-        titleKu: (aboutData as any).titleKu ?? "",
-        descriptionEn: aboutData.descriptionEn ?? "",
-        descriptionAr: aboutData.descriptionAr ?? "",
-        descriptionKu: (aboutData as any).descriptionKu ?? "",
-        imageUrl: aboutData.imageUrl,
-        buttonTextEn: aboutData.buttonTextEn ?? "",
-        buttonTextAr: aboutData.buttonTextAr ?? "",
-        buttonTextKu: (aboutData as any).buttonTextKu ?? "",
-        buttonUrl: aboutData.buttonUrl ?? "",
-        highlightsEn: (aboutData.highlightsEn ?? []).map((val) => ({ value: val })),
-        highlightsAr: (aboutData.highlightsAr ?? []).map((val) => ({ value: val })),
-        highlightsKu: ((aboutData as any).highlightsKu ?? []).map((val: string) => ({ value: val })),
-        status: aboutData.status,
+        titleEn: data.titleEn,
+        titleAr: data.titleAr,
+        titleKu: data.titleKu ?? "",
+        descriptionEn: data.descriptionEn ?? "",
+        descriptionAr: data.descriptionAr ?? "",
+        descriptionKu: data.descriptionKu ?? "",
+        imageUrl: data.imageUrl,
+        buttonTextEn: data.buttonTextEn ?? "",
+        buttonTextAr: data.buttonTextAr ?? "",
+        buttonTextKu: data.buttonTextKu ?? "",
+        buttonUrl: data.buttonUrl ?? "/about",
+        highlightsEn: (data.highlightsEn ?? []).map((h: string) => ({ value: h })),
+        highlightsAr: (data.highlightsAr ?? []).map((h: string) => ({ value: h })),
+        highlightsKu: (data.highlightsKu ?? []).map((h: string) => ({ value: h })),
+        status: data.status,
       });
     }
   }, [aboutData, reset]);
@@ -155,10 +159,10 @@ export function AboutSectionManager() {
           <div>
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-emerald-600" />
-              <CardTitle>About Section Preview</CardTitle>
+              <CardTitle>{t("aboutTitle")}</CardTitle>
             </div>
             <CardDescription>
-              Configure the company introduction snippet and highlight points shown on the homepage.
+              {t("aboutSubtitle")}
             </CardDescription>
           </div>
           <Button type="submit" disabled={updateMutation.isPending} className="gap-2">
@@ -167,13 +171,13 @@ export function AboutSectionManager() {
             ) : (
               <Save className="h-4 w-4" />
             )}
-            Save About Section
+            {t("saveAbout")}
           </Button>
         </CardHeader>
 
         <CardContent className="space-y-6">
           <ImageUploader
-            label="Section Feature Image"
+            label={t("featureImage")}
             value={imageUrl ?? null}
             onChange={(url) => setValue("imageUrl", url)}
             folder="about"
@@ -183,12 +187,12 @@ export function AboutSectionManager() {
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleEn">Section Heading (English) *</Label>
+                  <Label htmlFor="titleEn">{t("headingEn")} *</Label>
                   <Input id="titleEn" {...register("titleEn")} />
                   {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="descriptionEn">Description Paragraph (English)</Label>
+                  <Label htmlFor="descriptionEn">{t("descEn")}</Label>
                   <Textarea id="descriptionEn" rows={4} {...register("descriptionEn")} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

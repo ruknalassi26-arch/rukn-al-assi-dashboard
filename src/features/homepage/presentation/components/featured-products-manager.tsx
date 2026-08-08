@@ -1,10 +1,7 @@
 "use client";
-// ==============================================================================
-// features/homepage/presentation/components/featured-products-manager.tsx
-// Manager for toggling featured products on Homepage
-// ==============================================================================
 import { useState, useMemo } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Package, Search } from "lucide-react";
 import {
   Card,
@@ -22,6 +19,8 @@ import { EmptyState } from "@shared/components/empty-state";
 import { ErrorState } from "@shared/components/error-state";
 
 export function FeaturedProductsManager() {
+  const t = useTranslations("homepageAdmin");
+  const tCommon = useTranslations("common");
   const { data: products, isLoading, error, refetch } = useFeaturedProducts();
   const toggleMutation = useToggleFeaturedProduct();
   const [search, setSearch] = useState("");
@@ -55,16 +54,16 @@ export function FeaturedProductsManager() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Featured Products</CardTitle>
+        <CardTitle>{t("featuredProductsTitle")}</CardTitle>
         <CardDescription>
-          Toggle which catalog products appear on the homepage featured carousel.
+          {t("featuredProductsSubtitle")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search products..."
+            placeholder={t("searchProducts")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 text-xs"
@@ -74,8 +73,8 @@ export function FeaturedProductsManager() {
         {filteredProducts.length === 0 ? (
           <EmptyState
             icon={Package}
-            title="No products found"
-            description="Create products first in the Products module to feature them here."
+            title={t("emptyProductsTitle")}
+            description={t("emptyProductsDesc")}
           />
         ) : (
           <div className="space-y-3">
@@ -98,7 +97,7 @@ export function FeaturedProductsManager() {
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-sm text-foreground truncate">{prod.titleEn}</span>
                       <Badge variant={prod.isFeatured ? "default" : "secondary"}>
-                        {prod.isFeatured ? "Featured" : "Standard"}
+                        {prod.isFeatured ? tCommon("featured") : tCommon("standard")}
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground truncate" dir="rtl">{prod.titleAr}</p>
@@ -107,7 +106,7 @@ export function FeaturedProductsManager() {
 
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-xs font-medium text-muted-foreground">
-                    {prod.isFeatured ? "Featured" : "Hidden"}
+                    {prod.isFeatured ? tCommon("featured") : tCommon("hidden")}
                   </span>
                   <Switch
                     checked={prod.isFeatured}

@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -61,6 +62,9 @@ export function HeroSlideDialog({
   initialData,
   isLoading = false,
 }: HeroSlideDialogProps) {
+  const t = useTranslations("homepageAdmin");
+  const tCommon = useTranslations("common");
+
   const {
     register,
     handleSubmit,
@@ -102,7 +106,7 @@ export function HeroSlideDialog({
         secondaryButtonTextAr: initialData.secondaryButtonTextAr ?? "",
         secondaryButtonUrl: initialData.secondaryButtonUrl ?? "",
         backgroundImage: initialData.backgroundImage,
-        overlayOpacity: initialData.overlayOpacity,
+        overlayOpacity: initialData.overlayOpacity ?? 0.5,
         status: initialData.status,
         sortOrder: initialData.sortOrder,
       });
@@ -127,7 +131,6 @@ export function HeroSlideDialog({
   }, [initialData, reset, isOpen]);
 
   const backgroundImage = watch("backgroundImage");
-  const overlayOpacity = watch("overlayOpacity");
   const status = watch("status");
 
   const onFormSubmit = async (values: HeroSlideFormValues) => {
@@ -140,60 +143,46 @@ export function HeroSlideDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Hero Slide" : "Create Hero Slide"}
+            {initialData ? t("editHeroSlide") : t("addHeroSlide")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
-          {/* Titles */}
+          {/* Background Image Uploader */}
+          <ImageUploader
+            label={t("bgImage")}
+            value={backgroundImage ?? null}
+            onChange={(url) => setValue("backgroundImage", url)}
+            folder="hero"
+          />
+
+          {/* Titles Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="titleEn">Title (English) *</Label>
-              <Input id="titleEn" {...register("titleEn")} placeholder="e.g. Premium Hydraulic Services" />
+              <Label htmlFor="titleEn">Headline Title (EN) *</Label>
+              <Input id="titleEn" {...register("titleEn")} placeholder="Engineering & Industrial Solutions" />
               {errors.titleEn && (
                 <span className="text-xs text-destructive">{errors.titleEn.message}</span>
               )}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="titleAr">Title (Arabic) *</Label>
-              <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="مثال: خدمات هيدروليكية متميزة" />
+              <Label htmlFor="titleAr">Headline Title (AR) *</Label>
+              <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="حلول الهيدروليك والهندسة الصناعية" />
               {errors.titleAr && (
                 <span className="text-xs text-destructive">{errors.titleAr.message}</span>
               )}
             </div>
           </div>
 
-          {/* Subtitles */}
+          {/* Subtitles Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="subtitleEn">Subtitle (English)</Label>
-              <Textarea id="subtitleEn" rows={2} {...register("subtitleEn")} placeholder="Hero subtitle..." />
+              <Label htmlFor="subtitleEn">Subheadline Text (EN)</Label>
+              <Textarea id="subtitleEn" rows={2} {...register("subtitleEn")} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="subtitleAr">Subtitle (Arabic)</Label>
-              <Textarea id="subtitleAr" dir="rtl" rows={2} {...register("subtitleAr")} placeholder="الوصف الفرعي..." />
-            </div>
-          </div>
-
-          {/* Background Image & Overlay */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-            <ImageUploader
-              label="Background Image"
-              value={backgroundImage ?? null}
-              onChange={(url) => setValue("backgroundImage", url)}
-              folder="hero"
-            />
-            <div className="space-y-2">
-              <Label>Overlay Opacity ({Math.round(overlayOpacity * 100)}%)</Label>
-              <Input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={overlayOpacity}
-                onChange={(e) => setValue("overlayOpacity", parseFloat(e.target.value))}
-                className="cursor-pointer"
-              />
+              <Label htmlFor="subtitleAr">Subheadline Text (AR)</Label>
+              <Textarea id="subtitleAr" dir="rtl" rows={2} {...register("subtitleAr")} />
             </div>
           </div>
 
@@ -242,19 +231,19 @@ export function HeroSlideDialog({
           {/* Status & Sort Order */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label>{tCommon("status")}</Label>
               <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Label htmlFor="sortOrder">{tCommon("sortOrder")}</Label>
               <Input
                 id="sortOrder"
                 type="number"
@@ -263,13 +252,13 @@ export function HeroSlideDialog({
             </div>
           </div>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter className="mt-6 gap-3">
             <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-              Cancel
+              {tCommon("cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? "Save Changes" : "Create Slide"}
+              {initialData ? tCommon("save") : t("addHeroSlide")}
             </Button>
           </DialogFooter>
         </form>

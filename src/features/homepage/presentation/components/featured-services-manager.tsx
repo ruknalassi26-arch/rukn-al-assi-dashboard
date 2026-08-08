@@ -20,7 +20,11 @@ import { useFeaturedServices, useToggleFeaturedService } from "@shared/hooks/hom
 import { EmptyState } from "@shared/components/empty-state";
 import { ErrorState } from "@shared/components/error-state";
 
+import { useTranslations } from "next-intl";
+
 export function FeaturedServicesManager() {
+  const t = useTranslations("homepageAdmin");
+  const tCommon = useTranslations("common");
   const { data: services, isLoading, error, refetch } = useFeaturedServices();
   const toggleMutation = useToggleFeaturedService();
   const [search, setSearch] = useState("");
@@ -77,14 +81,14 @@ export function FeaturedServicesManager() {
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <CardTitle>Featured Services</CardTitle>
+            <CardTitle>{t("featuredServicesTitle")}</CardTitle>
             <Badge variant="outline" className="gap-1">
               <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
-              {featuredCount} Featured
+              {featuredCount} {tCommon("featured")}
             </Badge>
           </div>
           <CardDescription>
-            Select which existing services appear in the homepage Featured Services section.
+            {t("featuredServicesSubtitle")}
           </CardDescription>
         </div>
       </CardHeader>
@@ -94,7 +98,7 @@ export function FeaturedServicesManager() {
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search services..."
+            placeholder={t("searchServices")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 text-xs"
@@ -105,8 +109,8 @@ export function FeaturedServicesManager() {
         {filteredServices.length === 0 ? (
           <EmptyState
             icon={Wrench}
-            title="No services found"
-            description="Create services first in the Services module to feature them here."
+            title={t("emptyServicesTitle")}
+            description={t("emptyServicesDesc")}
           />
         ) : (
           <div className="space-y-3">
@@ -132,7 +136,7 @@ export function FeaturedServicesManager() {
                       </span>
                       {service.isFeatured && (
                         <Badge className="bg-amber-500 text-white gap-1 text-[10px]">
-                          <Check className="h-3 w-3" /> Featured
+                          <Check className="h-3 w-3" /> {tCommon("featured")}
                         </Badge>
                       )}
                     </div>
@@ -144,7 +148,7 @@ export function FeaturedServicesManager() {
 
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-xs font-medium text-muted-foreground">
-                    {service.isFeatured ? "Featured" : "Hidden"}
+                    {service.isFeatured ? tCommon("featured") : tCommon("hidden")}
                   </span>
                   <Switch
                     checked={service.isFeatured}

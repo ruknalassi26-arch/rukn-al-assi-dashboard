@@ -177,8 +177,8 @@ export function CareerApplicationsTable() {
                 <TableCell colSpan={8} className="text-center py-12">
                   <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                     <FileText className="h-10 w-10 text-muted-foreground/50" />
-                    <p className="font-medium text-base">No career applications found</p>
-                    <p className="text-xs">Applications submitted by job seekers on the public website will appear here.</p>
+                    <p className="font-medium text-base">{t("emptyAppsTitle")}</p>
+                    <p className="text-xs">{t("emptyAppsDescription")}</p>
                   </div>
                 </TableCell>
               </TableRow>

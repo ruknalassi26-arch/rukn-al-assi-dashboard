@@ -1,10 +1,7 @@
 "use client";
-// ==============================================================================
-// features/homepage/presentation/components/featured-projects-manager.tsx
-// Management component for selecting & sorting Featured Projects on homepage
-// ==============================================================================
 import { useState, useMemo } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Search, Star, FolderKanban, Check } from "lucide-react";
 import {
   Card,
@@ -22,6 +19,8 @@ import { EmptyState } from "@shared/components/empty-state";
 import { ErrorState } from "@shared/components/error-state";
 
 export function FeaturedProjectsManager() {
+  const t = useTranslations("homepageAdmin");
+  const tCommon = useTranslations("common");
   const { data: projects, isLoading, error, refetch } = useFeaturedProjects();
   const toggleMutation = useToggleFeaturedProject();
   const [search, setSearch] = useState("");
@@ -78,14 +77,14 @@ export function FeaturedProjectsManager() {
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <CardTitle>Featured Projects</CardTitle>
+            <CardTitle>{t("featuredProjectsTitle")}</CardTitle>
             <Badge variant="outline" className="gap-1">
               <Star className="h-3 w-3 fill-violet-500 text-violet-500" />
-              {featuredCount} Featured
+              {featuredCount} {tCommon("featured")}
             </Badge>
           </div>
           <CardDescription>
-            Select portfolio projects to feature on the homepage case studies grid.
+            {t("featuredProjectsSubtitle")}
           </CardDescription>
         </div>
       </CardHeader>
@@ -94,7 +93,7 @@ export function FeaturedProjectsManager() {
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search projects..."
+            placeholder={t("searchProjects")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 text-xs"
@@ -104,8 +103,8 @@ export function FeaturedProjectsManager() {
         {filteredProjects.length === 0 ? (
           <EmptyState
             icon={FolderKanban}
-            title="No projects found"
-            description="Create projects first in the Projects module to feature them here."
+            title={t("emptyProjectsTitle")}
+            description={t("emptyProjectsDesc")}
           />
         ) : (
           <div className="space-y-3">
@@ -138,7 +137,7 @@ export function FeaturedProjectsManager() {
                       </span>
                       {project.isFeatured && (
                         <Badge className="bg-violet-600 text-white gap-1 text-[10px]">
-                          <Check className="h-3 w-3" /> Featured
+                          <Check className="h-3 w-3" /> {tCommon("featured")}
                         </Badge>
                       )}
                     </div>
@@ -150,7 +149,7 @@ export function FeaturedProjectsManager() {
 
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-xs font-medium text-muted-foreground">
-                    {project.isFeatured ? "Featured" : "Hidden"}
+                    {project.isFeatured ? tCommon("featured") : tCommon("hidden")}
                   </span>
                   <Switch
                     checked={project.isFeatured}

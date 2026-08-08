@@ -1,13 +1,10 @@
 "use client";
-// ==============================================================================
-// features/certificates/presentation/components/certificate-form.tsx
-// Certificate Creation / Editing Form with RHF + Zod + MultilingualTabs
-// ==============================================================================
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2, Save, ArrowLeft, Shield } from "lucide-react";
 import {
   Card,
@@ -55,6 +52,8 @@ interface CertificateFormProps {
 
 export function CertificateForm({ initialData }: CertificateFormProps) {
   const router = useRouter();
+  const tForm = useTranslations("certificateForm");
+  const tCommon = useTranslations("common");
   const isEditing = !!initialData;
 
   const createCertificateMutation = useCreateCertificate();
@@ -114,10 +113,10 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {isEditing ? `Edit Certificate: ${initialData.titleEn}` : "Add New Certificate"}
+              {isEditing ? `${tForm("editTitle")}: ${initialData.titleEn}` : tForm("createTitle")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Manage ISO, quality, and compliance certificates for your organization.
+              {isEditing ? tForm("editSubtitle") : tForm("createSubtitle")}
             </p>
           </div>
         </div>
@@ -129,16 +128,16 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
             onClick={() => router.push("/admin/certificates")}
             disabled={isSubmitting}
           >
-            Cancel
+            {tForm("cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="gap-2 min-w-[140px]">
             {isSubmitting ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+                <Loader2 className="h-4 w-4 animate-spin" /> {tForm("saving")}
               </>
             ) : (
               <>
-                <Save className="h-4 w-4" /> {isEditing ? "Update Certificate" : "Save Certificate"}
+                <Save className="h-4 w-4" /> {isEditing ? tForm("updateBtn") : tForm("saveBtn")}
               </>
             )}
           </Button>
@@ -152,10 +151,10 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
-                Certificate Information
+                {tForm("infoTitle")}
               </CardTitle>
               <CardDescription>
-                Provide certificate titles, descriptions, and issuing bodies in each language tab.
+                {tForm("infoSubtitle")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -163,10 +162,9 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
                 englishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="titleEn">Certificate Title (English) *</Label>
+                      <Label htmlFor="titleEn">{tForm("titleEn")} *</Label>
                       <Input
                         id="titleEn"
-                        placeholder="e.g. ISO 9001:2015 Quality Management"
                         {...register("titleEn")}
                       />
                       {errors.titleEn && (
@@ -174,18 +172,16 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="organization">Issuing Organization (English)</Label>
+                      <Label htmlFor="organization">{tForm("orgEn")}</Label>
                       <Input
                         id="organization"
-                        placeholder="e.g. International Organization for Standardization"
                         {...register("organization")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="descriptionEn">Description (English)</Label>
+                      <Label htmlFor="descriptionEn">{tForm("descEn")}</Label>
                       <Textarea
                         id="descriptionEn"
-                        placeholder="Details about certificate scope and standards..."
                         className="min-h-[140px]"
                         {...register("descriptionEn")}
                       />
@@ -195,10 +191,10 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
                 arabicFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="titleAr">عنوان الشهادة (بالعربية) *</Label>
+                      <Label htmlFor="titleAr">{tForm("titleAr")} *</Label>
                       <Input
                         id="titleAr"
-                        placeholder="مثال: شهادة نظام إدارة الجودة آيزو 9001"
+                        dir="rtl"
                         {...register("titleAr")}
                       />
                       {errors.titleAr && (
@@ -206,18 +202,18 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="organizationAr">الجهة المانحة (بالعربية)</Label>
+                      <Label htmlFor="organizationAr">{tForm("orgAr")}</Label>
                       <Input
                         id="organizationAr"
-                        placeholder="اسم الهيئة أو الجهة المصدرة للشهادة"
+                        dir="rtl"
                         {...register("organizationAr")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="descriptionAr">الوصف (بالعربية)</Label>
+                      <Label htmlFor="descriptionAr">{tForm("descAr")}</Label>
                       <Textarea
                         id="descriptionAr"
-                        placeholder="تفاصيل حول نطاق ورخصة الشهادة..."
+                        dir="rtl"
                         className="min-h-[140px]"
                         {...register("descriptionAr")}
                       />
@@ -227,26 +223,26 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
                 kurdishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="titleKu">سەرناوی بڕوانامە (بە کوردی)</Label>
+                      <Label htmlFor="titleKu">{tForm("titleKu")}</Label>
                       <Input
                         id="titleKu"
-                        placeholder="نموونە: بڕوانامەی کوالیتی ISO 9001"
+                        dir="rtl"
                         {...register("titleKu")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="organizationKu">دەستەی بەخشەر (بە کوردی)</Label>
+                      <Label htmlFor="organizationKu">{tForm("orgKu")}</Label>
                       <Input
                         id="organizationKu"
-                        placeholder="ناوی دامەزراوە یان ڕێکخراوی بەخشەر"
+                        dir="rtl"
                         {...register("organizationKu")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="descriptionKu">وەسفی بڕوانامە (بە کوردی)</Label>
+                      <Label htmlFor="descriptionKu">{tForm("descKu")}</Label>
                       <Textarea
                         id="descriptionKu"
-                        placeholder="زانیاری و ووردەکارییەکانی بڕوانامەکە..."
+                        dir="rtl"
                         className="min-h-[140px]"
                         {...register("descriptionKu")}
                       />
@@ -262,27 +258,27 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Dates & Status</CardTitle>
+              <CardTitle>{tForm("datesTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="status">Publishing Status</Label>
+                <Label htmlFor="status">{tForm("status")}</Label>
                 <Select
                   value={watch("status")}
                   onValueChange={(val) => setValue("status", val as "active" | "draft")}
                 >
                   <SelectTrigger id="status">
-                    <SelectValue placeholder="Select Status" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active (Published)</SelectItem>
-                    <SelectItem value="draft">Draft (Hidden)</SelectItem>
+                    <SelectItem value="active">{tCommon("active")}</SelectItem>
+                    <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="issueDate">Issue Date</Label>
+                <Label htmlFor="issueDate">{tForm("issueDate")}</Label>
                 <Input
                   id="issueDate"
                   type="date"
@@ -291,7 +287,7 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="expiryDate">Expiry Date (Optional)</Label>
+                <Label htmlFor="expiryDate">{tForm("expiryDate")}</Label>
                 <Input
                   id="expiryDate"
                   type="date"
@@ -300,7 +296,7 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sortOrder">Display Order (Sort Order)</Label>
+                <Label htmlFor="sortOrder">{tForm("sortOrder")}</Label>
                 <Input
                   id="sortOrder"
                   type="number"
@@ -314,7 +310,7 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
           {/* Certificate Image / Document Preview */}
           <Card>
             <CardHeader>
-              <CardTitle>Certificate Image</CardTitle>
+              <CardTitle>{tForm("imageTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <ImageUploader

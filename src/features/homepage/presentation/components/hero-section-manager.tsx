@@ -5,6 +5,7 @@
 // ==============================================================================
 import { useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Plus, Pencil, Trash2, Eye, ArrowUp, ArrowDown, ImageIcon } from "lucide-react";
 import {
   Card,
@@ -31,6 +32,8 @@ import { ErrorState } from "@shared/components/error-state";
 import type { HeroSlideEntity } from "../../domain/entities/homepage.entity";
 
 export function HeroSectionManager() {
+  const t = useTranslations("homepageAdmin");
+  const tCommon = useTranslations("common");
   const { data: slides, isLoading, error, refetch } = useHeroSlides();
   const createMutation = useCreateHeroSlide();
   const updateMutation = useUpdateHeroSlide();
@@ -100,7 +103,7 @@ export function HeroSectionManager() {
   if (error) {
     return (
       <ErrorState
-        title="Failed to load hero section slides"
+        title="Failed to load hero slides"
         error={error}
         onRetry={() => refetch()}
       />
@@ -112,13 +115,13 @@ export function HeroSectionManager() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Hero Section Slides</CardTitle>
+            <CardTitle>{t("heroTitle")}</CardTitle>
             <CardDescription>
-              Manage background images, headlines, and call-to-action buttons for the main homepage banner.
+              {t("heroSubtitle")}
             </CardDescription>
           </div>
           <Button onClick={handleOpenCreate} className="gap-2">
-            <Plus className="h-4 w-4" /> Add Hero Slide
+            <Plus className="h-4 w-4" /> {t("addHeroSlide")}
           </Button>
         </CardHeader>
 
@@ -126,11 +129,11 @@ export function HeroSectionManager() {
           {!slides || slides.length === 0 ? (
             <EmptyState
               icon={ImageIcon}
-              title="No hero slides created"
-              description="Click the button above to add your first homepage hero banner slide."
+              title={t("noSlidesTitle")}
+              description={t("noSlidesDescription")}
               action={
                 <Button onClick={handleOpenCreate} size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" /> Add Hero Slide
+                  <Plus className="h-4 w-4" /> {t("addHeroSlide")}
                 </Button>
               }
             />
