@@ -48,7 +48,7 @@ interface AdminHeaderProps {
 
 const LANGUAGES = [
   { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "ar", label: "العربية", flag: "🇸🇦" },
+  { code: "ar", label: "العربية", flag: "🇮🇶" },
   { code: "ckb", label: "کوردی", flag: "☀️" },
 ];
 

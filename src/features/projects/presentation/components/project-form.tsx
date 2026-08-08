@@ -274,7 +274,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                 <Tabs value={activeTab} onValueChange={(val: string) => setActiveTab(val as "en" | "ar" | "ckb")} className="w-auto">
                   <TabsList className="h-8">
                     <TabsTrigger value="en" className="text-xs px-3">English 🇺🇸</TabsTrigger>
-                    <TabsTrigger value="ar" className="text-xs px-3">العربية 🇸🇦</TabsTrigger>
+                    <TabsTrigger value="ar" className="text-xs px-3">العربية 🇮🇶</TabsTrigger>
                     <TabsTrigger value="ckb" className="text-xs px-3">کوردی ☀️</TabsTrigger>
                   </TabsList>
                 </Tabs>

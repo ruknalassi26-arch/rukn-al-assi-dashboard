@@ -28,7 +28,7 @@ export function BilingualTabs({
           <span className="text-base leading-none">🇺🇸</span> English
         </TabsTrigger>
         <TabsTrigger value="ar" className="gap-2 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
-          <span className="text-base leading-none">🇸🇦</span> العربية
+          <span className="text-base leading-none">🇮🇶</span> العربية
         </TabsTrigger>
       </TabsList>
 

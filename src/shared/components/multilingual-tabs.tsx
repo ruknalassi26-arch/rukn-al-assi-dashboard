@@ -31,7 +31,7 @@ export function MultilingualTabs({
           <span className="text-base leading-none">🇺🇸</span> English
         </TabsTrigger>
         <TabsTrigger value="ar" className="gap-2 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
-          <span className="text-base leading-none">🇸🇦</span> العربية
+          <span className="text-base leading-none">🇮🇶</span> العربية
         </TabsTrigger>
         {hasKurdish && (
           <TabsTrigger value="ckb" className="gap-2 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
@@ -40,22 +40,22 @@ export function MultilingualTabs({
         )}
       </TabsList>
 
-      <TabsContent value="en" className="space-y-4 focus-visible:outline-none" dir="ltr">
+      <TabsContent value="en" className="space-y-4 focus-visible:outline-none">
         {englishFields}
       </TabsContent>
 
-      <TabsContent value="ar" className="space-y-4 focus-visible:outline-none" dir="rtl">
+      <TabsContent value="ar" className="space-y-4 focus-visible:outline-none">
         {arabicFields}
       </TabsContent>
 
       {hasKurdish && (
-        <TabsContent value="ckb" className="space-y-4 focus-visible:outline-none" dir="rtl">
+        <TabsContent value="ckb" className="space-y-4 focus-visible:outline-none">
           {kurdishFields}
         </TabsContent>
       )}
 
       {hasKurdish && (
-        <TabsContent value="ku" className="space-y-4 focus-visible:outline-none" dir="rtl">
+        <TabsContent value="ku" className="space-y-4 focus-visible:outline-none">
           {kurdishFields}
         </TabsContent>
       )}
