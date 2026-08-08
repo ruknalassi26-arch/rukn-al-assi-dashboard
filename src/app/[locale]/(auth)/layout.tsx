@@ -39,7 +39,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const handleLocaleSwitch = (newLocale: string) => {
     if (newLocale === locale) return;
     const pathWithoutLocale = pathname.replace(/^\/(en|ar|ckb|ku)/, "");
-    router.push(`/${newLocale}${pathWithoutLocale}`);
+    window.location.href = `/${newLocale}${pathWithoutLocale}`;
   };
 
   const toggleTheme = () => {
