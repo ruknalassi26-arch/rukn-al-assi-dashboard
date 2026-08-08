@@ -202,13 +202,13 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                       />
                     </div>
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">SEO Meta (English)</h4>
+                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingEn")}</h4>
                       <div className="space-y-2">
-                        <Label htmlFor="seoTitleEn">Meta Title (English)</Label>
+                        <Label htmlFor="seoTitleEn">{tForm("seoTitleEn")}</Label>
                         <Input id="seoTitleEn" {...register("seoTitleEn")} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionEn">Meta Description (English)</Label>
+                        <Label htmlFor="seoDescriptionEn">{tForm("seoDescEn")}</Label>
                         <Textarea id="seoDescriptionEn" className="min-h-[70px]" {...register("seoDescriptionEn")} />
                       </div>
                     </div>
@@ -237,13 +237,13 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                       />
                     </div>
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">تهيئة محركات البحث SEO (بالعربية)</h4>
+                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingAr")}</h4>
                       <div className="space-y-2">
-                        <Label htmlFor="seoTitleAr">عنوان SEO (بالعربية)</Label>
+                        <Label htmlFor="seoTitleAr">{tForm("seoTitleAr")}</Label>
                         <Input id="seoTitleAr" dir="rtl" {...register("seoTitleAr")} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionAr">وصف SEO (بالعربية)</Label>
+                        <Label htmlFor="seoDescriptionAr">{tForm("seoDescAr")}</Label>
                         <Textarea id="seoDescriptionAr" dir="rtl" className="min-h-[70px]" {...register("seoDescriptionAr")} />
                       </div>
                     </div>
@@ -269,13 +269,13 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                       />
                     </div>
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">ڕێکخستنەکانی SEO (بە کوردی)</h4>
+                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingKu")}</h4>
                       <div className="space-y-2">
-                        <Label htmlFor="seoTitleKu">نیشانی SEO (بە کوردی)</Label>
+                        <Label htmlFor="seoTitleKu">{tForm("seoTitleKu")}</Label>
                         <Input id="seoTitleKu" dir="rtl" {...register("seoTitleKu")} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionKu">وەسفی SEO (بە کوردی)</Label>
+                        <Label htmlFor="seoDescriptionKu">{tForm("seoDescKu")}</Label>
                         <Textarea id="seoDescriptionKu" dir="rtl" className="min-h-[70px]" {...register("seoDescriptionKu")} />
                       </div>
                     </div>

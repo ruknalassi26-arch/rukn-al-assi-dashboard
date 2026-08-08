@@ -264,13 +264,13 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
                     {/* SEO English Sub-section */}
                     <div className="border p-4 rounded-lg bg-muted/10 space-y-3">
-                      <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">SEO Meta (English)</h4>
+                      <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingEn")}</h4>
                       <div className="space-y-1.5">
-                        <Label htmlFor="seoTitleEn">Meta Title (English)</Label>
+                        <Label htmlFor="seoTitleEn">{tForm("seoTitleEn")}</Label>
                         <Input id="seoTitleEn" {...register("seoTitleEn")} />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="seoDescriptionEn">Meta Description (English)</Label>
+                        <Label htmlFor="seoDescriptionEn">{tForm("seoDescEn")}</Label>
                         <Textarea id="seoDescriptionEn" rows={2} {...register("seoDescriptionEn")} />
                       </div>
                     </div>
@@ -296,13 +296,13 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
                     {/* SEO Arabic Sub-section */}
                     <div className="border p-4 rounded-lg bg-muted/10 space-y-3">
-                      <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">تهيئة محركات البحث SEO (بالعربية)</h4>
+                      <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingAr")}</h4>
                       <div className="space-y-1.5">
-                        <Label htmlFor="seoTitleAr">عنوان SEO (بالعربية)</Label>
+                        <Label htmlFor="seoTitleAr">{tForm("seoTitleAr")}</Label>
                         <Input id="seoTitleAr" dir="rtl" {...register("seoTitleAr")} />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="seoDescriptionAr">وصف SEO (بالعربية)</Label>
+                        <Label htmlFor="seoDescriptionAr">{tForm("seoDescAr")}</Label>
                         <Textarea id="seoDescriptionAr" dir="rtl" rows={2} {...register("seoDescriptionAr")} />
                       </div>
                     </div>
@@ -327,13 +327,13 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
                     {/* SEO Kurdish Sub-section */}
                     <div className="border p-4 rounded-lg bg-muted/10 space-y-3">
-                      <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">SEO Meta (Kurdish)</h4>
+                      <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingKu")}</h4>
                       <div className="space-y-1.5">
-                        <Label htmlFor="seoTitleKu">Meta Title (Kurdish)</Label>
+                        <Label htmlFor="seoTitleKu">{tForm("seoTitleKu")}</Label>
                         <Input id="seoTitleKu" dir="rtl" {...register("seoTitleKu")} />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="seoDescriptionKu">Meta Description (Kurdish)</Label>
+                        <Label htmlFor="seoDescriptionKu">{tForm("seoDescKu")}</Label>
                         <Textarea id="seoDescriptionKu" dir="rtl" rows={2} {...register("seoDescriptionKu")} />
                       </div>
                     </div>
@@ -426,7 +426,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
               {/* SEO Banner Image */}
               <ImageUploader
-                label="Social Share Open Graph Image (SEO Image)"
+                label={tForm("ogImage")}
                 value={seoImageValue ?? null}
                 onChange={(url) => setValue("seoImage", url)}
                 folder="seo"

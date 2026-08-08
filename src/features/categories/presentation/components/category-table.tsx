@@ -180,7 +180,7 @@ export function CategoryTable() {
                   <TableHead className="w-16">{t("table.image")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("name_en")}>
                     <div className="flex items-center gap-1">
-                      <span>{t("table.categoryName")}</span>
+                      <span>{t("table.englishName")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>

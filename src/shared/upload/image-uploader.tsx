@@ -27,7 +27,7 @@ export function ImageUploader({
   onChange,
   bucket = "general",
   folder = "uploads",
-  label = "Upload Image",
+  label,
   className = "",
 }: ImageUploaderProps) {
   const t = useTranslations("common.dialogs");

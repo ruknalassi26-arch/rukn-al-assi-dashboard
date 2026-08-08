@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2, Save, ArrowLeft, Sparkles, Wrench } from "lucide-react";
 import {
   Card,
@@ -63,56 +64,79 @@ interface ServiceFormProps {
 }
 
 export function ServiceForm({ initialData }: ServiceFormProps) {
+  const tForm = useTranslations("serviceForm");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const isEditing = !!initialData;
 
   const createServiceMutation = useCreateService();
   const updateServiceMutation = useUpdateService();
-  const isSubmitting = createServiceMutation.isPending || updateServiceMutation.isPending;
 
-  const form = useForm<ServiceFormValues>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
-      slug: initialData?.slug ?? "",
-      titleEn: initialData?.titleEn ?? "",
-      titleAr: initialData?.titleAr ?? "",
-      titleKu: initialData?.titleKu ?? "",
-      shortDescriptionEn: initialData?.shortDescriptionEn ?? "",
-      shortDescriptionAr: initialData?.shortDescriptionAr ?? "",
-      shortDescriptionKu: initialData?.shortDescriptionKu ?? "",
-      descriptionEn: initialData?.descriptionEn ?? "",
-      descriptionAr: initialData?.descriptionAr ?? "",
-      descriptionKu: initialData?.descriptionKu ?? "",
-      icon: initialData?.icon ?? "",
-      image: initialData?.image ?? "",
-      seoTitleEn: initialData?.seoTitleEn ?? "",
-      seoTitleAr: initialData?.seoTitleAr ?? "",
-      seoTitleKu: initialData?.seoTitleKu ?? "",
-      seoDescriptionEn: initialData?.seoDescriptionEn ?? "",
-      seoDescriptionAr: initialData?.seoDescriptionAr ?? "",
-      seoDescriptionKu: initialData?.seoDescriptionKu ?? "",
-      seoImage: initialData?.seoImage ?? "",
-      status: initialData?.status ?? "active",
-      isFeatured: initialData?.isFeatured ?? false,
-      sortOrder: initialData?.sortOrder ?? 0,
+      slug: "",
+      titleEn: "",
+      titleAr: "",
+      titleKu: "",
+      shortDescriptionEn: "",
+      shortDescriptionAr: "",
+      shortDescriptionKu: "",
+      descriptionEn: "",
+      descriptionAr: "",
+      descriptionKu: "",
+      icon: "Wrench",
+      image: null,
+      seoTitleEn: "",
+      seoTitleAr: "",
+      seoTitleKu: "",
+      seoDescriptionEn: "",
+      seoDescriptionAr: "",
+      seoDescriptionKu: "",
+      seoImage: null,
+      status: "active",
+      isFeatured: false,
+      sortOrder: 0,
     },
   });
 
-  const { watch, setValue, register, handleSubmit, formState: { errors } } = form;
   const titleEn = watch("titleEn");
-  const slug = watch("slug");
 
-  // Auto slug generator from English Title if not manually overridden
   useEffect(() => {
-    if (!isEditing && titleEn && !slug) {
-      const generatedSlug = titleEn
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-");
-      setValue("slug", generatedSlug, { shouldValidate: true });
+    if (initialData) {
+      reset({
+        slug: initialData.slug,
+        titleEn: initialData.titleEn,
+        titleAr: initialData.titleAr,
+        titleKu: initialData.titleKu ?? "",
+        shortDescriptionEn: initialData.shortDescriptionEn ?? "",
+        shortDescriptionAr: initialData.shortDescriptionAr ?? "",
+        shortDescriptionKu: initialData.shortDescriptionKu ?? "",
+        descriptionEn: initialData.descriptionEn ?? "",
+        descriptionAr: initialData.descriptionAr ?? "",
+        descriptionKu: initialData.descriptionKu ?? "",
+        icon: initialData.icon ?? "Wrench",
+        image: initialData.image ?? null,
+        seoTitleEn: initialData.seoTitleEn ?? "",
+        seoTitleAr: initialData.seoTitleAr ?? "",
+        seoTitleKu: initialData.seoTitleKu ?? "",
+        seoDescriptionEn: initialData.seoDescriptionEn ?? "",
+        seoDescriptionAr: initialData.seoDescriptionAr ?? "",
+        seoDescriptionKu: initialData.seoDescriptionKu ?? "",
+        seoImage: initialData.seoImage ?? null,
+        status: initialData.status,
+        isFeatured: initialData.isFeatured,
+        sortOrder: initialData.sortOrder,
+      });
     }
-  }, [titleEn, slug, isEditing, setValue]);
+  }, [initialData, reset]);
 
   const onSubmit = async (values: ServiceFormValues) => {
     try {
@@ -145,10 +169,10 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {isEditing ? `Edit Service: ${initialData.titleEn}` : "Create New Service"}
+              {isEditing ? `${tForm("editTitle")}: ${initialData.titleEn}` : tForm("createTitle")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Manage service details, multilingual content, featured flags, and SEO settings.
+              {isEditing ? tForm("editSubtitle") : tForm("createSubtitle")}
             </p>
           </div>
         </div>
@@ -160,16 +184,16 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
             onClick={() => router.push("/admin/services")}
             disabled={isSubmitting}
           >
-            Cancel
+            {tForm("cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="gap-2 min-w-[140px]">
             {isSubmitting ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+                <Loader2 className="h-4 w-4 animate-spin" /> {tForm("saving")}
               </>
             ) : (
               <>
-                <Save className="h-4 w-4" /> {isEditing ? "Update Service" : "Save Service"}
+                <Save className="h-4 w-4" /> {isEditing ? tForm("updateBtn") : tForm("saveBtn")}
               </>
             )}
           </Button>
@@ -183,10 +207,10 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Wrench className="h-5 w-5 text-primary" />
-                Service Content
+                {tForm("contentTitle")}
               </CardTitle>
               <CardDescription>
-                Provide service titles and descriptions across languages using language tabs.
+                {tForm("contentSubtitle")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -194,43 +218,29 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
                 englishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="titleEn">Service Title (English) *</Label>
-                      <Input
-                        id="titleEn"
-                        placeholder="e.g. Hydraulic Cylinder Repair"
-                        {...register("titleEn")}
-                      />
+                      <Label htmlFor="titleEn">{tForm("titleEn")} *</Label>
+                      <Input id="titleEn" {...register("titleEn")} />
                       {errors.titleEn && (
                         <p className="text-xs font-semibold text-destructive">{errors.titleEn.message}</p>
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="shortDescriptionEn">Short Description (English)</Label>
-                      <Textarea
-                        id="shortDescriptionEn"
-                        placeholder="Brief summary for service cards..."
-                        className="min-h-[70px]"
-                        {...register("shortDescriptionEn")}
-                      />
+                      <Label htmlFor="shortDescriptionEn">{tForm("shortEn")}</Label>
+                      <Textarea id="shortDescriptionEn" className="min-h-[70px]" {...register("shortDescriptionEn")} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="descriptionEn">Full Description (English)</Label>
-                      <Textarea
-                        id="descriptionEn"
-                        placeholder="Detailed service capabilities and process..."
-                        className="min-h-[140px]"
-                        {...register("descriptionEn")}
-                      />
+                      <Label htmlFor="descriptionEn">{tForm("fullEn")}</Label>
+                      <Textarea id="descriptionEn" className="min-h-[140px]" {...register("descriptionEn")} />
                     </div>
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">SEO Meta Settings (English)</h4>
+                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingEn")}</h4>
                       <div className="space-y-2">
-                        <Label htmlFor="seoTitleEn">Meta Title (English)</Label>
-                        <Input id="seoTitleEn" placeholder="SEO Title for search engines" {...register("seoTitleEn")} />
+                        <Label htmlFor="seoTitleEn">{tForm("seoTitleEn")}</Label>
+                        <Input id="seoTitleEn" {...register("seoTitleEn")} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionEn">Meta Description (English)</Label>
-                        <Textarea id="seoDescriptionEn" placeholder="SEO Description summary" className="min-h-[70px]" {...register("seoDescriptionEn")} />
+                        <Label htmlFor="seoDescriptionEn">{tForm("seoDescEn")}</Label>
+                        <Textarea id="seoDescriptionEn" className="min-h-[70px]" {...register("seoDescriptionEn")} />
                       </div>
                     </div>
                   </div>
@@ -238,43 +248,29 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
                 arabicFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="titleAr">عنوان الخدمة (بالعربية) *</Label>
-                      <Input
-                        id="titleAr"
-                        placeholder="مثال: إصلاح الاسطوانات الهيدروليكية"
-                        {...register("titleAr")}
-                      />
+                      <Label htmlFor="titleAr">{tForm("titleAr")} *</Label>
+                      <Input id="titleAr" dir="rtl" {...register("titleAr")} />
                       {errors.titleAr && (
                         <p className="text-xs font-semibold text-destructive">{errors.titleAr.message}</p>
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="shortDescriptionAr">الوصف المختصر (بالعربية)</Label>
-                      <Textarea
-                        id="shortDescriptionAr"
-                        placeholder="ملخص قصير للخدمة..."
-                        className="min-h-[70px]"
-                        {...register("shortDescriptionAr")}
-                      />
+                      <Label htmlFor="shortDescriptionAr">{tForm("shortAr")}</Label>
+                      <Textarea id="shortDescriptionAr" dir="rtl" className="min-h-[70px]" {...register("shortDescriptionAr")} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="descriptionAr">الوصف الكامل (بالعربية)</Label>
-                      <Textarea
-                        id="descriptionAr"
-                        placeholder="تفاصيل الخدمة ومراحل التنفيذ..."
-                        className="min-h-[140px]"
-                        {...register("descriptionAr")}
-                      />
+                      <Label htmlFor="descriptionAr">{tForm("fullAr")}</Label>
+                      <Textarea id="descriptionAr" dir="rtl" className="min-h-[140px]" {...register("descriptionAr")} />
                     </div>
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">إعدادات SEO (بالعربية)</h4>
+                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingAr")}</h4>
                       <div className="space-y-2">
-                        <Label htmlFor="seoTitleAr">عنوان SEO (بالعربية)</Label>
-                        <Input id="seoTitleAr" placeholder="عنوان الصفحات في محركات البحث" {...register("seoTitleAr")} />
+                        <Label htmlFor="seoTitleAr">{tForm("seoTitleAr")}</Label>
+                        <Input id="seoTitleAr" dir="rtl" {...register("seoTitleAr")} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionAr">وصف SEO (بالعربية)</Label>
-                        <Textarea id="seoDescriptionAr" placeholder="ملخص المحتوى لمحركات البحث" className="min-h-[70px]" {...register("seoDescriptionAr")} />
+                        <Label htmlFor="seoDescriptionAr">{tForm("seoDescAr")}</Label>
+                        <Textarea id="seoDescriptionAr" dir="rtl" className="min-h-[70px]" {...register("seoDescriptionAr")} />
                       </div>
                     </div>
                   </div>
@@ -282,40 +278,26 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
                 kurdishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="titleKu">سەرناوی خزمەتگوزاری (بە کوردی)</Label>
-                      <Input
-                        id="titleKu"
-                        placeholder="نموونە: چاککردنەوەی سلندری هایدرۆلیکی"
-                        {...register("titleKu")}
-                      />
+                      <Label htmlFor="titleKu">{tForm("titleKu")}</Label>
+                      <Input id="titleKu" dir="rtl" {...register("titleKu")} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="shortDescriptionKu">پوختەی کورتی خزمەتگوزاری (بە کوردی)</Label>
-                      <Textarea
-                        id="shortDescriptionKu"
-                        placeholder="کورتەیەک لەبارەی خزمەتگوزارییەکەوە..."
-                        className="min-h-[70px]"
-                        {...register("shortDescriptionKu")}
-                      />
+                      <Label htmlFor="shortDescriptionKu">{tForm("shortKu")}</Label>
+                      <Textarea id="shortDescriptionKu" dir="rtl" className="min-h-[70px]" {...register("shortDescriptionKu")} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="descriptionKu">وەسفی تەواوی خزمەتگوزاری (بە کوردی)</Label>
-                      <Textarea
-                        id="descriptionKu"
-                        placeholder="ووردەکاری و قۆناغەکانی جێبەجێکردنی خزمەتگوزارییەکە..."
-                        className="min-h-[140px]"
-                        {...register("descriptionKu")}
-                      />
+                      <Label htmlFor="descriptionKu">{tForm("fullKu")}</Label>
+                      <Textarea id="descriptionKu" dir="rtl" className="min-h-[140px]" {...register("descriptionKu")} />
                     </div>
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">ڕێکخستنەکانی SEO (بە کوردی)</h4>
+                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingKu")}</h4>
                       <div className="space-y-2">
-                        <Label htmlFor="seoTitleKu">نیشانی SEO (بە کوردی)</Label>
-                        <Input id="seoTitleKu" placeholder="نیشانی پەڕە بۆ بزوێنەرەکانی گەڕان" {...register("seoTitleKu")} />
+                        <Label htmlFor="seoTitleKu">{tForm("seoTitleKu")}</Label>
+                        <Input id="seoTitleKu" dir="rtl" {...register("seoTitleKu")} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionKu">وەسفی SEO (بە کوردی)</Label>
-                        <Textarea id="seoDescriptionKu" placeholder="پوختەی ناوەڕۆک بۆ بزوێنەرەکانی گەڕان" className="min-h-[70px]" {...register("seoDescriptionKu")} />
+                        <Label htmlFor="seoDescriptionKu">{tForm("seoDescKu")}</Label>
+                        <Textarea id="seoDescriptionKu" dir="rtl" className="min-h-[70px]" {...register("seoDescriptionKu")} />
                       </div>
                     </div>
                   </div>
@@ -329,12 +311,12 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Settings & Options</CardTitle>
+              <CardTitle>{tForm("publishingTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="slug">URL Slug *</Label>
+                  <Label htmlFor="slug">{tForm("slug")} *</Label>
                   <Button
                     type="button"
                     variant="ghost"
@@ -351,35 +333,35 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
                       }
                     }}
                   >
-                    <Sparkles className="h-3 w-3" /> Auto Slug
+                    <Sparkles className="h-3 w-3" /> {tForm("autoSlug")}
                   </Button>
                 </div>
-                <Input id="slug" placeholder="e.g. hydraulic-cylinder-repair" {...register("slug")} />
+                <Input id="slug" {...register("slug")} />
                 {errors.slug && (
                   <p className="text-xs font-semibold text-destructive">{errors.slug.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Publishing Status</Label>
+                <Label htmlFor="status">{tForm("status")}</Label>
                 <Select
                   value={watch("status")}
                   onValueChange={(val) => setValue("status", val as "active" | "draft")}
                 >
                   <SelectTrigger id="status">
-                    <SelectValue placeholder="Select Status" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active (Published)</SelectItem>
-                    <SelectItem value="draft">Draft (Hidden)</SelectItem>
+                    <SelectItem value="active">{tCommon("active")}</SelectItem>
+                    <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex items-center justify-between rounded-lg border p-3">
                 <div className="space-y-0.5">
-                  <Label htmlFor="isFeatured" className="text-sm font-semibold">Featured Service</Label>
-                  <p className="text-xs text-muted-foreground">Highlight on home & service section</p>
+                  <Label htmlFor="isFeatured" className="text-sm font-semibold">{tForm("featured")}</Label>
+                  <p className="text-xs text-muted-foreground">{tForm("featuredDesc")}</p>
                 </div>
                 <Switch
                   id="isFeatured"
@@ -389,7 +371,7 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sortOrder">Display Order (Sort Order)</Label>
+                <Label htmlFor="sortOrder">{tForm("sortOrder")}</Label>
                 <Input
                   id="sortOrder"
                   type="number"
@@ -399,8 +381,8 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="icon">Lucide Icon Name (Optional)</Label>
-                <Input id="icon" placeholder="e.g. Wrench, Shield, Settings" {...register("icon")} />
+                <Label htmlFor="icon">{tForm("icon")}</Label>
+                <Input id="icon" {...register("icon")} />
               </div>
             </CardContent>
           </Card>
