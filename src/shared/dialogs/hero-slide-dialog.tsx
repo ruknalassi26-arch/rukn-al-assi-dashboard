@@ -4,6 +4,7 @@
 // Dialog form for creating/editing a Homepage Hero Slide with Bilingual Tabs
 // ==============================================================================
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -66,6 +67,9 @@ export function HeroSlideDialog({
   initialData,
   isLoading = false,
 }: HeroSlideDialogProps) {
+  const t = useTranslations("homepageAdmin");
+  const tCommon = useTranslations("common.dialogs");
+
   const {
     register,
     handleSubmit,
@@ -156,13 +160,13 @@ export function HeroSlideDialog({
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Hero Slide" : "Add Hero Slide"}
+            {initialData ? t("editHeroSlide") : t("addHeroSlide")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
           <ImageUploader
-            label="Background Image"
+            label={t("bgImage")}
             value={backgroundImage ?? null}
             onChange={(url) => setValue("backgroundImage", url)}
             folder="hero"

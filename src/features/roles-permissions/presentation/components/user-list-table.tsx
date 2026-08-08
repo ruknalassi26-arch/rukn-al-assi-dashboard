@@ -185,7 +185,7 @@ export function UserListTable() {
                   <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-8 ms-auto" /></TableCell>
                 </TableRow>
               ))
             ) : isError ? (
@@ -199,8 +199,8 @@ export function UserListTable() {
                 <TableCell colSpan={8} className="text-center py-12">
                   <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                     <UserPlus className="h-10 w-10 text-muted-foreground/50" />
-                    <p className="font-medium text-base">No admin users found</p>
-                    <p className="text-xs">Create your first administrative account using the button above.</p>
+                    <p className="font-medium text-base">{t("emptyTitle")}</p>
+                    <p className="text-xs">{t("emptyDescription")}</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -264,7 +264,7 @@ export function UserListTable() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleEdit(user)}>
-                            <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
+                            <Edit className="me-2 h-4 w-4" /> {tCommon("edit")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleToggleStatus(user)}

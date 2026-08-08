@@ -3,6 +3,7 @@
 // features/profile/presentation/pages/profile-page.tsx
 // Main My Profile Admin Page
 // ==============================================================================
+import { useTranslations } from "next-intl";
 import { User, KeyRound, Edit3, AlertCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger, Skeleton, Card, CardContent } from "@shared/ui";
 import { useProfileQuery } from "@shared/hooks/profile/use-profile-hooks";
@@ -13,6 +14,7 @@ import { EditProfileForm } from "../components/edit-profile-form";
 import { ChangePasswordForm } from "../components/change-password-form";
 
 export function ProfilePage() {
+  const t = useTranslations("profile");
   const { data: user, isLoading, isError, error } = useProfileQuery();
   const { activeTab, setActiveTab } = useProfileStore();
 
@@ -54,10 +56,10 @@ export function ProfilePage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <User className="h-6 w-6 text-primary" />
-            My Profile
+            {t("title")}
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            Manage your admin profile details, security credentials, and avatar image.
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -70,15 +72,15 @@ export function ProfilePage() {
         <TabsList className="grid grid-cols-3 w-full max-w-md h-auto p-1 bg-muted/60 rounded-xl">
           <TabsTrigger value="details" className="gap-2 text-xs py-2.5 rounded-lg">
             <User className="h-4 w-4" />
-            Profile Details
+            {t("tabs.details")}
           </TabsTrigger>
           <TabsTrigger value="edit" className="gap-2 text-xs py-2.5 rounded-lg">
             <Edit3 className="h-4 w-4" />
-            Edit Profile
+            {t("tabs.edit")}
           </TabsTrigger>
           <TabsTrigger value="password" className="gap-2 text-xs py-2.5 rounded-lg">
             <KeyRound className="h-4 w-4" />
-            Change Password
+            {t("tabs.password")}
           </TabsTrigger>
         </TabsList>
 

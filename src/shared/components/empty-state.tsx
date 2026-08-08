@@ -1,9 +1,7 @@
-// ==============================================================================
-// shared/components/empty-state.tsx
-// Generic empty state component
-// ==============================================================================
+"use client";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { useRTL } from "@core/hooks/use-rtl";
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -13,9 +11,6 @@ interface EmptyStateProps {
   className?: string;
 }
 
-/**
- * Displays a centered empty state with optional icon, title, description, and CTA.
- */
 export function EmptyState({
   icon: Icon,
   title,
@@ -23,8 +18,11 @@ export function EmptyState({
   action,
   className = "",
 }: EmptyStateProps) {
+  const isRtl = useRTL();
+
   return (
     <div
+      dir={isRtl ? "rtl" : "ltr"}
       className={`flex min-h-[300px] flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-8 text-center ${className}`}
     >
       {Icon && (

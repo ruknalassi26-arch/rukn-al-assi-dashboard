@@ -40,7 +40,7 @@ export function MultilingualTabs({
         )}
       </TabsList>
 
-      <TabsContent value="en" className="space-y-4 focus-visible:outline-none">
+      <TabsContent value="en" className="space-y-4 focus-visible:outline-none" dir="ltr">
         {englishFields}
       </TabsContent>
 

@@ -1,8 +1,5 @@
 "use client";
-// ==============================================================================
-// features/profile/presentation/components/profile-details-card.tsx
-// Displays Profile Details (Name, Email, Phone, Role, Last Login, Created Date)
-// ==============================================================================
+import { useTranslations, useLocale } from "next-intl";
 import { User, Mail, Phone, ShieldCheck, Clock, Calendar, CheckCircle2, XCircle } from "lucide-react";
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@shared/ui";
 import type { UserProfileEntity } from "@features/authentication/domain/entities/user-profile.entity";
@@ -12,9 +9,12 @@ interface ProfileDetailsCardProps {
 }
 
 export function ProfileDetailsCard({ user }: ProfileDetailsCardProps) {
+  const t = useTranslations("profile");
+  const locale = useLocale();
+
   const formatDate = (date: Date | null | undefined) => {
     if (!date) return "N/A";
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(locale === "ar" ? "ar" : locale === "ckb" ? "ckb" : "en-US", {
       dateStyle: "medium",
       timeStyle: "short",
     }).format(date);
@@ -25,10 +25,10 @@ export function ProfileDetailsCard({ user }: ProfileDetailsCardProps) {
       <CardHeader>
         <CardTitle className="text-lg font-bold flex items-center gap-2">
           <User className="h-5 w-5 text-primary" />
-          Profile Information
+          {t("infoTitle")}
         </CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
-          Detailed overview of your administrator profile and credentials.
+          {t("infoSubtitle")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -37,7 +37,7 @@ export function ProfileDetailsCard({ user }: ProfileDetailsCardProps) {
           <div className="flex items-start gap-3 p-3.5 rounded-lg border bg-muted/30">
             <User className="h-5 w-5 text-muted-foreground mt-0.5" />
             <div className="space-y-0.5">
-              <span className="text-xs text-muted-foreground font-medium">Full Name</span>
+              <span className="text-xs text-muted-foreground font-medium">{t("fullName")}</span>
               <p className="text-sm font-semibold text-foreground">{user.fullName}</p>
             </div>
           </div>
@@ -46,7 +46,7 @@ export function ProfileDetailsCard({ user }: ProfileDetailsCardProps) {
           <div className="flex items-start gap-3 p-3.5 rounded-lg border bg-muted/30">
             <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
             <div className="space-y-0.5">
-              <span className="text-xs text-muted-foreground font-medium">Email Address</span>
+              <span className="text-xs text-muted-foreground font-medium">{t("emailAddress")}</span>
               <p className="text-sm font-semibold text-foreground">{user.email}</p>
             </div>
           </div>

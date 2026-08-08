@@ -4,6 +4,7 @@
 // Public Website Pages SEO Metadata Form Component
 // ==============================================================================
 import React, { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -60,6 +61,7 @@ const seoSchema = z.object({
 export type SeoFormValues = z.infer<typeof seoSchema>;
 
 export function SeoForm() {
+  const t = useTranslations("seo");
   const { selectedPageKey, setSelectedPageKey } = useSeoStore();
   const { data: seoData, isLoading, error, refetch } = useSeoSetting(selectedPageKey);
   const updateSeoMutation = useUpdateSeoSetting();
@@ -116,9 +118,9 @@ export function SeoForm() {
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Public Website SEO Settings</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Manage search engine titles, meta descriptions, keywords, Open Graph social images, and indexing per public page.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -149,7 +151,7 @@ export function SeoForm() {
               </>
             ) : (
               <>
-                <Save className="h-4 w-4" /> Save SEO
+                <Save className="h-4 w-4" /> {t("save")}
               </>
             )}
           </Button>
@@ -171,10 +173,10 @@ export function SeoForm() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="h-5 w-5 text-primary" />
-                Multilingual Search Meta Tags
+                {t("metaCardTitle")}
               </CardTitle>
               <CardDescription>
-                Configure page titles, meta descriptions, and search keywords for English, Arabic, and Kurdish Sorani.
+                {t("metaCardSubtitle")}
               </CardDescription>
             </CardHeader>
             <CardContent>
