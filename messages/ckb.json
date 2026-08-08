@@ -152,13 +152,13 @@
   },
   "auth": {
     "login": {
-      "title": "چوونەژوورەوە بۆ بەڕێوەبەرایەتی",
+      "title": "چوونەژوورەوە ",
       "subtitle": "زانیارییەکانت بنووسە بۆ چوونەژوورەوە بۆ پۆڕتاڵی ڕوکن العاصي",
       "emailLabel": "ناونیشانی ئیمەیڵ",
       "emailPlaceholder": "admin@ruknalassi.com",
       "passwordLabel": "وشەی نهێنی",
       "passwordPlaceholder": "••••••••",
-      "rememberMe": "مندا هەڵبگرە بۆ ۳۰ ڕۆژ",
+      "rememberMe": "من لەبیر بهێڵەرەوە",
       "forgotPassword": "وشەی نهێنیت لەبیرچووە؟",
       "submit": "چوونەژوورەوە",
       "signingIn": "لە چوونەژوورەوەدایە..."

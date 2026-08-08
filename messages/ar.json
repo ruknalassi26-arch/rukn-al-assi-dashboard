@@ -152,13 +152,13 @@
   },
   "auth": {
     "login": {
-      "title": "تسجيل الدخول إلى لوحة التحكم",
+      "title": "تسجيل الدخول",
       "subtitle": "أدخل بيانات الاعتماد الخاصة بك للوصول إلى بوابة ركن العاصي",
       "emailLabel": "البريد الإلكتروني",
       "emailPlaceholder": "admin@ruknalassi.com",
       "passwordLabel": "كلمة المرور",
       "passwordPlaceholder": "••••••••",
-      "rememberMe": "تذكرني لمدة 30 يوماً",
+      "rememberMe": "تذكرني",
       "forgotPassword": "هل نسيت كلمة المرور؟",
       "submit": "تسجيل الدخول",
       "signingIn": "جاري تسجيل الدخول..."

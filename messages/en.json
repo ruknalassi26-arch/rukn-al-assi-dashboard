@@ -158,7 +158,7 @@
       "emailPlaceholder": "admin@ruknalassi.com",
       "passwordLabel": "Password",
       "passwordPlaceholder": "••••••••",
-      "rememberMe": "Remember me for 30 days",
+      "rememberMe": "Remember me",
       "forgotPassword": "Forgot Password?",
       "submit": "Sign In",
       "signingIn": "Signing in..."
