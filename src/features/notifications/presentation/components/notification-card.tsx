@@ -4,7 +4,7 @@
 // Notification item card component with Mark Read & Delete controls
 // ==============================================================================
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { FileText, Mail, ShieldAlert, AlertTriangle, UserCheck, Check, Trash2, ExternalLink } from "lucide-react";
 import { Card, CardContent, Badge, Button } from "@shared/ui";
 import type { NotificationEntity, NotificationType } from "../../domain/entities/notification.entity";
@@ -19,6 +19,8 @@ interface NotificationCardProps {
 
 export function NotificationCard({ notification }: NotificationCardProps) {
   const locale = useLocale();
+  const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
   const markAsRead = useMarkNotificationAsReadMutation();
   const deleteMutation = useDeleteNotificationMutation();
 
@@ -38,6 +40,9 @@ export function NotificationCard({ notification }: NotificationCardProps) {
     }
   };
 
+  const titleText = t.has(`titles.${notification.type}`) ? t(`titles.${notification.type}`) : notification.title;
+  const typeLabelText = t.has(`typeLabels.${notification.type}`) ? t(`typeLabels.${notification.type}`) : notification.typeLabel;
+
   return (
     <Card
       className={`border transition-all hover:shadow-xs relative overflow-hidden ${
@@ -53,14 +58,14 @@ export function NotificationCard({ notification }: NotificationCardProps) {
           <div className="space-y-1.5 flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className={`text-sm font-bold truncate ${notification.isRead ? "text-foreground" : "text-primary"}`}>
-                {notification.title}
+                {titleText}
               </span>
               <Badge variant={notification.badgeVariant} className="text-[10px] font-medium">
-                {notification.typeLabel}
+                {typeLabelText}
               </Badge>
               {!notification.isRead && (
                 <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20">
-                  New
+                  {t("new")}
                 </Badge>
               )}
             </div>
@@ -74,7 +79,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
                   href={`/${locale}${notification.link}`}
                   className="text-primary font-semibold hover:underline flex items-center gap-1"
                 >
-                  <span>View Related Item</span>
+                  <span>{t("viewRelated")}</span>
                   <ExternalLink className="h-3 w-3" />
                 </Link>
               )}
@@ -91,10 +96,10 @@ export function NotificationCard({ notification }: NotificationCardProps) {
               onClick={() => markAsRead.mutate(notification.id)}
               disabled={markAsRead.isPending}
               className="gap-1.5 text-xs h-8"
-              title="Mark as Read"
+              title={t("read")}
             >
               <Check className="h-3.5 w-3.5" />
-              <span>Read</span>
+              <span>{t("read")}</span>
             </Button>
           )}
 
@@ -104,7 +109,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
             onClick={() => deleteMutation.mutate(notification.id)}
             disabled={deleteMutation.isPending}
             className="h-8 w-8 text-muted-foreground hover:text-destructive"
-            title="Delete Notification"
+            title={tCommon("delete")}
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>

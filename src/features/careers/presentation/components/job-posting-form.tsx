@@ -193,10 +193,10 @@ export function JobPostingForm({ initialData }: JobPostingFormProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-emerald-600" />
-                Multilingual Position Details
+                {t("detailsTitle")}
               </CardTitle>
               <CardDescription>
-                Provide position titles, job descriptions, and qualification requirements across English, Arabic, and Kurdish Sorani.
+                {t("detailsSubtitle")}
               </CardDescription>
             </CardHeader>
 
@@ -313,8 +313,8 @@ export function JobPostingForm({ initialData }: JobPostingFormProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Posting Settings & Rules</CardTitle>
-              <CardDescription>Configure department, location, employment type, and publishing rules.</CardDescription>
+              <CardTitle>{t("rulesTitle")}</CardTitle>
+              <CardDescription>{t("rulesSubtitle")}</CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">

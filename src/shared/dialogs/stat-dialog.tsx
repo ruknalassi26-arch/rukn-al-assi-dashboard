@@ -4,6 +4,7 @@
 // Dialog form for creating/editing a Company Statistic with Bilingual Tabs
 // ==============================================================================
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -53,6 +54,9 @@ export function StatDialog({
   initialData,
   isLoading = false,
 }: StatDialogProps) {
+  const t = useTranslations("homepageAdmin");
+  const tCommon = useTranslations("common");
+
   const {
     register,
     handleSubmit,
@@ -110,13 +114,13 @@ export function StatDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Statistic Badge" : "Add Statistic Badge"}
+            {initialData ? t("editStat") : t("addStatTitle")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label htmlFor="value">Stat Display Value *</Label>
+            <Label htmlFor="value">{t("statValue")} *</Label>
             <Input id="value" {...register("value")} placeholder="e.g. 500+ or 15 Yrs" />
             {errors.value && <span className="text-xs text-destructive">{errors.value.message}</span>}
           </div>
@@ -124,28 +128,28 @@ export function StatDialog({
           <MultilingualTabs
             englishFields={
               <div className="space-y-1.5">
-                <Label htmlFor="titleEn">Title (English) *</Label>
+                <Label htmlFor="titleEn">{t("statTitleEn")} *</Label>
                 <Input id="titleEn" {...register("titleEn")} placeholder="Completed Projects" />
                 {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
               </div>
             }
             arabicFields={
               <div className="space-y-1.5">
-                <Label htmlFor="titleAr">العنوان (بالعربية) *</Label>
+                <Label htmlFor="titleAr">{t("statTitleAr")} *</Label>
                 <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="مشروع مكتمل" />
                 {errors.titleAr && <span className="text-xs text-destructive">{errors.titleAr.message}</span>}
               </div>
             }
             kurdishFields={
               <div className="space-y-1.5">
-                <Label htmlFor="titleKu">Title (Kurdish)</Label>
+                <Label htmlFor="titleKu">{t("statTitleKu")}</Label>
                 <Input id="titleKu" dir="rtl" {...register("titleKu")} />
               </div>
             }
           />
 
           <div className="space-y-1.5 pt-2 border-t">
-            <Label>Icon</Label>
+            <Label>{t("statIcon")}</Label>
             <Select value={icon ?? "Building"} onValueChange={(val) => setValue("icon", val)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -161,26 +165,26 @@ export function StatDialog({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label>{tCommon("status")}</Label>
               <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Label htmlFor="sortOrder">{tCommon("sortOrder")}</Label>
               <Input id="sortOrder" type="number" {...register("sortOrder", { valueAsNumber: true })} />
             </div>
           </div>
 
           <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>{tCommon("cancel")}</Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? "Save Changes" : "Add Statistic"}
+              {initialData ? tCommon("saveChanges") : t("addStat")}
             </Button>
           </DialogFooter>
         </form>

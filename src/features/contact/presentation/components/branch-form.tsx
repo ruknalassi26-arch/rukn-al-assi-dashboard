@@ -1,13 +1,10 @@
 "use client";
-// ==============================================================================
-// features/contact/presentation/components/branch-form.tsx
-// Branch Creation / Editing Form with RHF + Zod + MultilingualTabs
-// ==============================================================================
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2, Save, ArrowLeft, Building2 } from "lucide-react";
 import {
   Card,
@@ -60,40 +57,73 @@ interface BranchFormProps {
 }
 
 export function BranchForm({ initialData }: BranchFormProps) {
+  const tForm = useTranslations("branchForm");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const isEditing = !!initialData;
 
   const createBranchMutation = useCreateBranch();
   const updateBranchMutation = useUpdateBranch();
-  const isSubmitting = createBranchMutation.isPending || updateBranchMutation.isPending;
 
-  const form = useForm<BranchFormValues>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<BranchFormValues>({
     resolver: zodResolver(branchSchema),
     defaultValues: {
-      nameEn: initialData?.nameEn ?? "",
-      nameAr: initialData?.nameAr ?? "",
-      nameKu: initialData?.nameKu ?? "",
-      addressEn: initialData?.addressEn ?? "",
-      addressAr: initialData?.addressAr ?? "",
-      addressKu: initialData?.addressKu ?? "",
-      cityEn: initialData?.cityEn ?? "",
-      cityAr: initialData?.cityAr ?? "",
-      cityKu: initialData?.cityKu ?? "",
-      email: initialData?.email ?? "",
-      phone: initialData?.phone ?? "",
-      googleMapsUrl: initialData?.googleMapsUrl ?? "",
-      latitude: initialData?.latitude ?? 0,
-      longitude: initialData?.longitude ?? 0,
-      workingHoursEn: initialData?.workingHoursEn ?? "",
-      workingHoursAr: initialData?.workingHoursAr ?? "",
-      workingHoursKu: initialData?.workingHoursKu ?? "",
-      isHeadquarters: initialData?.isHeadquarters ?? false,
-      status: initialData?.status ?? "active",
-      sortOrder: initialData?.sortOrder ?? 0,
+      nameEn: "",
+      nameAr: "",
+      nameKu: "",
+      addressEn: "",
+      addressAr: "",
+      addressKu: "",
+      cityEn: "",
+      cityAr: "",
+      cityKu: "",
+      email: "",
+      phone: "",
+      googleMapsUrl: "",
+      latitude: 0,
+      longitude: 0,
+      workingHoursEn: "",
+      workingHoursAr: "",
+      workingHoursKu: "",
+      isHeadquarters: false,
+      status: "active",
+      sortOrder: 0,
     },
   });
 
-  const { watch, setValue, register, handleSubmit, formState: { errors } } = form;
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        nameEn: initialData.nameEn,
+        nameAr: initialData.nameAr,
+        nameKu: initialData.nameKu ?? "",
+        addressEn: initialData.addressEn ?? "",
+        addressAr: initialData.addressAr ?? "",
+        addressKu: initialData.addressKu ?? "",
+        cityEn: initialData.cityEn ?? "",
+        cityAr: initialData.cityAr ?? "",
+        cityKu: initialData.cityKu ?? "",
+        email: initialData.email ?? "",
+        phone: initialData.phone ?? "",
+        googleMapsUrl: initialData.googleMapsUrl ?? "",
+        latitude: initialData.latitude ?? 0,
+        longitude: initialData.longitude ?? 0,
+        workingHoursEn: initialData.workingHoursEn ?? "",
+        workingHoursAr: initialData.workingHoursAr ?? "",
+        workingHoursKu: initialData.workingHoursKu ?? "",
+        isHeadquarters: initialData.isHeadquarters,
+        status: initialData.status,
+        sortOrder: initialData.sortOrder,
+      });
+    }
+  }, [initialData, reset]);
 
   const onSubmit = async (values: BranchFormValues) => {
     try {
@@ -126,10 +156,10 @@ export function BranchForm({ initialData }: BranchFormProps) {
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {isEditing ? `Edit Branch: ${initialData.nameEn}` : "Add New Branch"}
+              {isEditing ? `${tForm("editTitle")}: ${initialData.nameEn}` : tForm("createTitle")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Manage regional office locations, branch phone numbers, and addresses.
+              {isEditing ? tForm("editSubtitle") : tForm("createSubtitle")}
             </p>
           </div>
         </div>
@@ -141,16 +171,16 @@ export function BranchForm({ initialData }: BranchFormProps) {
             onClick={() => router.push("/admin/contact")}
             disabled={isSubmitting}
           >
-            Cancel
+            {tForm("cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="gap-2 min-w-[140px]">
             {isSubmitting ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+                <Loader2 className="h-4 w-4 animate-spin" /> {tForm("saving")}
               </>
             ) : (
               <>
-                <Save className="h-4 w-4" /> {isEditing ? "Update Branch" : "Save Branch"}
+                <Save className="h-4 w-4" /> {isEditing ? tForm("updateBtn") : tForm("saveBtn")}
               </>
             )}
           </Button>
@@ -164,10 +194,10 @@ export function BranchForm({ initialData }: BranchFormProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-primary" />
-                Multilingual Branch Details
+                {tForm("detailsTitle")}
               </CardTitle>
               <CardDescription>
-                Provide branch name, city, full address, and working hours in English, Arabic, and Kurdish Sorani.
+                {tForm("detailsSubtitle")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -175,10 +205,9 @@ export function BranchForm({ initialData }: BranchFormProps) {
                 englishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="nameEn">Branch Name (English) *</Label>
+                      <Label htmlFor="nameEn">{tForm("nameEn")} *</Label>
                       <Input
                         id="nameEn"
-                        placeholder="e.g. Erbil Main Showroom"
                         {...register("nameEn")}
                       />
                       {errors.nameEn && (
@@ -186,27 +215,24 @@ export function BranchForm({ initialData }: BranchFormProps) {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cityEn">City / Region (English)</Label>
+                      <Label htmlFor="cityEn">{tForm("cityEn")}</Label>
                       <Input
                         id="cityEn"
-                        placeholder="e.g. Erbil / Baghdad"
                         {...register("cityEn")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="addressEn">Street Address (English)</Label>
+                      <Label htmlFor="addressEn">{tForm("addressEn")}</Label>
                       <Textarea
                         id="addressEn"
-                        placeholder="Full street address..."
                         className="min-h-[80px]"
                         {...register("addressEn")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="workingHoursEn">Working Hours (English)</Label>
+                      <Label htmlFor="workingHoursEn">{tForm("hoursEn")}</Label>
                       <Input
                         id="workingHoursEn"
-                        placeholder="e.g. 8:00 AM - 5:00 PM"
                         {...register("workingHoursEn")}
                       />
                     </div>
@@ -215,10 +241,10 @@ export function BranchForm({ initialData }: BranchFormProps) {
                 arabicFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="nameAr">اسم الفرع (بالعربية) *</Label>
+                      <Label htmlFor="nameAr">{tForm("nameAr")} *</Label>
                       <Input
                         id="nameAr"
-                        placeholder="مثال: معرض أربيل الرئيسي"
+                        dir="rtl"
                         {...register("nameAr")}
                       />
                       {errors.nameAr && (
@@ -226,27 +252,27 @@ export function BranchForm({ initialData }: BranchFormProps) {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cityAr">المدينة / المنطقة (بالعربية)</Label>
+                      <Label htmlFor="cityAr">{tForm("cityAr")}</Label>
                       <Input
                         id="cityAr"
-                        placeholder="مثال: أربيل / بغداد"
+                        dir="rtl"
                         {...register("cityAr")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="addressAr">العنوان التفصيلي (بالعربية)</Label>
+                      <Label htmlFor="addressAr">{tForm("addressAr")}</Label>
                       <Textarea
                         id="addressAr"
-                        placeholder="عنوان الشارع والمقر بالتفصيل..."
+                        dir="rtl"
                         className="min-h-[80px]"
                         {...register("addressAr")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="workingHoursAr">أوقات العمل (بالعربية)</Label>
+                      <Label htmlFor="workingHoursAr">{tForm("hoursAr")}</Label>
                       <Input
                         id="workingHoursAr"
-                        placeholder="مثال: 8:00 صباحاً - 5:00 مساءً"
+                        dir="rtl"
                         {...register("workingHoursAr")}
                       />
                     </div>
@@ -255,35 +281,35 @@ export function BranchForm({ initialData }: BranchFormProps) {
                 kurdishFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="nameKu">ناوی لقی کار (بە کوردی)</Label>
+                      <Label htmlFor="nameKu">{tForm("nameKu")}</Label>
                       <Input
                         id="nameKu"
-                        placeholder="نموونە: پیشانگەى سەرەکى هەولێر"
+                        dir="rtl"
                         {...register("nameKu")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cityKu">شار / ناوچە (بە کوردی)</Label>
+                      <Label htmlFor="cityKu">{tForm("cityKu")}</Label>
                       <Input
                         id="cityKu"
-                        placeholder="نموونە: هەولێر / بەغدا"
+                        dir="rtl"
                         {...register("cityKu")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="addressKu">ناونیشانی شەقام (بە کوردی)</Label>
+                      <Label htmlFor="addressKu">{tForm("addressKu")}</Label>
                       <Textarea
                         id="addressKu"
-                        placeholder="ناونیشانی تەواوی لقی کار..."
+                        dir="rtl"
                         className="min-h-[80px]"
                         {...register("addressKu")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="workingHoursKu">کاتەکانی کارکردن (بە کوردی)</Label>
+                      <Label htmlFor="workingHoursKu">{tForm("hoursKu")}</Label>
                       <Input
                         id="workingHoursKu"
-                        placeholder="نموونە: ٨:٠٠ی بەیانی - ٥:٠٠ی ئێوارە"
+                        dir="rtl"
                         {...register("workingHoursKu")}
                       />
                     </div>
@@ -296,11 +322,11 @@ export function BranchForm({ initialData }: BranchFormProps) {
           {/* Location Coordinates & Maps */}
           <Card>
             <CardHeader>
-              <CardTitle>Map Location & Coordinates</CardTitle>
+              <CardTitle>{tForm("mapTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="googleMapsUrl">Google Maps URL</Label>
+                <Label htmlFor="googleMapsUrl">{tForm("googleMapsUrl")}</Label>
                 <Input
                   id="googleMapsUrl"
                   placeholder="https://maps.google.com/..."
@@ -310,7 +336,7 @@ export function BranchForm({ initialData }: BranchFormProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="latitude">Latitude</Label>
+                  <Label htmlFor="latitude">{tForm("latitude")}</Label>
                   <Input
                     id="latitude"
                     type="number"
@@ -319,7 +345,7 @@ export function BranchForm({ initialData }: BranchFormProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="longitude">Longitude</Label>
+                  <Label htmlFor="longitude">{tForm("longitude")}</Label>
                   <Input
                     id="longitude"
                     type="number"
@@ -336,21 +362,21 @@ export function BranchForm({ initialData }: BranchFormProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Branch Status & Settings</CardTitle>
+              <CardTitle>{tForm("statusTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="status">Publishing Status</Label>
+                <Label htmlFor="status">{tForm("status")}</Label>
                 <Select
                   value={watch("status")}
                   onValueChange={(val) => setValue("status", val as "active" | "draft")}
                 >
                   <SelectTrigger id="status">
-                    <SelectValue placeholder="Select Status" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active (Visible)</SelectItem>
-                    <SelectItem value="draft">Draft (Hidden)</SelectItem>
+                    <SelectItem value="active">{tCommon("active")}</SelectItem>
+                    <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -362,12 +388,12 @@ export function BranchForm({ initialData }: BranchFormProps) {
                   onCheckedChange={(checked) => setValue("isHeadquarters", !!checked)}
                 />
                 <Label htmlFor="isHeadquarters" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Mark as Main Headquarters
+                  {tForm("mainHq")}
                 </Label>
               </div>
 
               <div className="space-y-2 pt-2">
-                <Label htmlFor="sortOrder">Display Order (Sort Order)</Label>
+                <Label htmlFor="sortOrder">{tForm("sortOrder")}</Label>
                 <Input
                   id="sortOrder"
                   type="number"
@@ -381,11 +407,11 @@ export function BranchForm({ initialData }: BranchFormProps) {
           {/* Branch Contact Details */}
           <Card>
             <CardHeader>
-              <CardTitle>Direct Branch Contact</CardTitle>
+              <CardTitle>{tForm("contactTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Branch Email</Label>
+                <Label htmlFor="email">{tForm("email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -398,7 +424,7 @@ export function BranchForm({ initialData }: BranchFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Branch Phone Number</Label>
+                <Label htmlFor="phone">{tForm("phone")}</Label>
                 <Input
                   id="phone"
                   placeholder="+964 7XX XXX XXXX"

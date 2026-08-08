@@ -289,7 +289,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
               {activeTab === "en" && (
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Project Title (English) *</Label>
+                    <Label className="text-xs font-semibold">{t("form.titleEn")} *</Label>
                     <Input
                       placeholder="e.g. Al Assi Refinery Pipeline Expansion"
                       value={titleEnValue}
@@ -300,7 +300,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Short Summary (English)</Label>
+                    <Label className="text-xs font-semibold">{t("form.shortEn")}</Label>
                     <Input
                       placeholder="Brief overview of the project scope and key results"
                       {...register("shortDescriptionEn")}
@@ -309,7 +309,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Full Description (English)</Label>
+                    <Label className="text-xs font-semibold">{t("form.fullEn")}</Label>
                     <Textarea
                       rows={6}
                       placeholder="Comprehensive project details, specifications, and client achievements..."
@@ -324,7 +324,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
               {activeTab === "ar" && (
                 <div className="space-y-4" dir="rtl">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">عنوان المشروع (بالعربية) *</Label>
+                    <Label className="text-xs font-semibold">{t("form.titleAr")} *</Label>
                     <Input
                       placeholder="مثال: مشروع توسعة خطوط أنابيب العاصي"
                       {...register("titleAr")}
@@ -334,7 +334,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">ملخص قصير (بالعربية)</Label>
+                    <Label className="text-xs font-semibold">{t("form.shortAr")}</Label>
                     <Input
                       placeholder="ملخص موجز لنطاق العمل والنتائج"
                       {...register("shortDescriptionAr")}
@@ -343,7 +343,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">الوصف الكامل (بالعربية)</Label>
+                    <Label className="text-xs font-semibold">{t("form.fullAr")}</Label>
                     <Textarea
                       rows={6}
                       placeholder="تفاصيل المشروع الكاملة والمواصفات الفنية..."
@@ -358,7 +358,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
               {activeTab === "ckb" && (
                 <div className="space-y-4" dir="rtl">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">ناونیشانی پڕۆژە (کوردی)</Label>
+                    <Label className="text-xs font-semibold">{t("form.titleKu")}</Label>
                     <Input
                       placeholder="نموونە: پڕۆژەی فراوانکردنی هێڵی بۆری العاصي"
                       {...register("titleKu")}
@@ -367,7 +367,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">پوختەی کورت (کوردی)</Label>
+                    <Label className="text-xs font-semibold">{t("form.shortKu")}</Label>
                     <Input
                       placeholder="پوختەیەک دەربارەی پڕۆژەکە"
                       {...register("shortDescriptionKu")}
@@ -376,7 +376,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">داڕشتنی تەواو (کوردی)</Label>
+                    <Label className="text-xs font-semibold">{t("form.fullKu")}</Label>
                     <Textarea
                       rows={6}
                       placeholder="وردەکارییە تەواوەکانی پڕۆژەکە..."

@@ -4,6 +4,7 @@
 // Dialog form for creating/editing a Client Partner with Bilingual Tabs
 // ==============================================================================
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -54,6 +55,9 @@ export function ClientDialog({
   initialData,
   isLoading = false,
 }: ClientDialogProps) {
+  const t = useTranslations("homepageAdmin");
+  const tCommon = useTranslations("common");
+
   const {
     register,
     handleSubmit,
@@ -111,13 +115,13 @@ export function ClientDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Client Partner" : "Add Client Partner"}
+            {initialData ? t("editClient") : t("addClient")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
           <ImageUploader
-            label="Client Logo"
+            label={t("clientLogo")}
             value={logoUrl ?? null}
             onChange={(url) => setValue("logoUrl", url)}
             folder="clients"
@@ -126,53 +130,53 @@ export function ClientDialog({
           <MultilingualTabs
             englishFields={
               <div className="space-y-1.5">
-                <Label htmlFor="nameEn">Client Name (English) *</Label>
+                <Label htmlFor="nameEn">{t("clientNameEn")} *</Label>
                 <Input id="nameEn" {...register("nameEn")} placeholder="Saudi Aramco" />
                 {errors.nameEn && <span className="text-xs text-destructive">{errors.nameEn.message}</span>}
               </div>
             }
             arabicFields={
               <div className="space-y-1.5">
-                <Label htmlFor="nameAr">اسم العميل (بالعربية) *</Label>
+                <Label htmlFor="nameAr">{t("clientNameAr")} *</Label>
                 <Input id="nameAr" dir="rtl" {...register("nameAr")} placeholder="أرامكو السعودية" />
                 {errors.nameAr && <span className="text-xs text-destructive">{errors.nameAr.message}</span>}
               </div>
             }
             kurdishFields={
               <div className="space-y-1.5">
-                <Label htmlFor="nameKu">Client Name (Kurdish)</Label>
+                <Label htmlFor="nameKu">{t("clientNameKu")}</Label>
                 <Input id="nameKu" dir="rtl" {...register("nameKu")} />
               </div>
             }
           />
 
           <div className="space-y-1.5 pt-2 border-t">
-            <Label htmlFor="websiteUrl">Website URL</Label>
+            <Label htmlFor="websiteUrl">{t("websiteUrl")}</Label>
             <Input id="websiteUrl" {...register("websiteUrl")} placeholder="https://..." />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label>{tCommon("status")}</Label>
               <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Label htmlFor="sortOrder">{tCommon("sortOrder")}</Label>
               <Input id="sortOrder" type="number" {...register("sortOrder", { valueAsNumber: true })} />
             </div>
           </div>
 
           <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>{tCommon("cancel")}</Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? "Save Changes" : "Add Client"}
+              {initialData ? tCommon("saveChanges") : t("addClient")}
             </Button>
           </DialogFooter>
         </form>

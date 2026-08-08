@@ -121,7 +121,7 @@ export function NotificationBell() {
                   <div className="flex-1 space-y-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
                       <p className={`font-semibold truncate ${item.isRead ? "text-foreground" : "text-primary"}`}>
-                        {item.title}
+                        {t.has(`titles.${item.type}`) ? t(`titles.${item.type}`) : item.title}
                       </p>
                       <span className="text-[10px] text-muted-foreground shrink-0">{item.timeAgo}</span>
                     </div>

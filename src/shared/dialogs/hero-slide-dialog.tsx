@@ -176,21 +176,21 @@ export function HeroSlideDialog({
             englishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleEn">Title (English) *</Label>
+                  <Label htmlFor="titleEn">{t("statTitleEn")} *</Label>
                   <Input id="titleEn" {...register("titleEn")} placeholder="Engineering Excellence" />
                   {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="subtitleEn">Subtitle (English)</Label>
+                  <Label htmlFor="subtitleEn">{t("buttonTextEn")}</Label>
                   <Textarea id="subtitleEn" rows={2} {...register("subtitleEn")} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border p-3 rounded-lg bg-muted/20">
                   <div>
-                    <Label className="text-xs">Primary Btn (EN)</Label>
+                    <Label className="text-xs">{t("primaryBtnEn")}</Label>
                     <Input {...register("primaryButtonTextEn")} placeholder="Our Products" />
                   </div>
                   <div>
-                    <Label className="text-xs">Secondary Btn (EN)</Label>
+                    <Label className="text-xs">{t("secondaryBtnEn")}</Label>
                     <Input {...register("secondaryButtonTextEn")} placeholder="Contact Us" />
                   </div>
                 </div>
@@ -199,12 +199,12 @@ export function HeroSlideDialog({
             arabicFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleAr">العنوان (بالعربية) *</Label>
+                  <Label htmlFor="titleAr">{t("statTitleAr")} *</Label>
                   <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="التميز الهندسي" />
                   {errors.titleAr && <span className="text-xs text-destructive">{errors.titleAr.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="subtitleAr">العنوان الفرعي (بالعربية)</Label>
+                  <Label htmlFor="subtitleAr">{t("buttonTextAr")}</Label>
                   <Textarea id="subtitleAr" rows={2} dir="rtl" {...register("subtitleAr")} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border p-3 rounded-lg bg-muted/20">
@@ -222,11 +222,11 @@ export function HeroSlideDialog({
             kurdishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleKu">ناونیشان (بە کوردی) *</Label>
+                  <Label htmlFor="titleKu">{t("statTitleKu")} *</Label>
                   <Input id="titleKu" dir="rtl" {...register("titleKu")} placeholder="کوالێتی بەرز لە بەرهەمەکاندا" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="subtitleKu">ژێرناونیشان (بە کوردی)</Label>
+                  <Label htmlFor="subtitleKu">{t("buttonTextKu")}</Label>
                   <Textarea id="subtitleKu" rows={2} dir="rtl" {...register("subtitleKu")} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border p-3 rounded-lg bg-muted/20">
@@ -246,35 +246,35 @@ export function HeroSlideDialog({
           {/* Button URLs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border p-3 rounded-lg bg-muted/20">
             <div>
-              <Label className="text-xs">Primary Button URL</Label>
+              <Label className="text-xs">{t("primaryBtnUrl")}</Label>
               <Input {...register("primaryButtonUrl")} placeholder="/products" />
             </div>
             <div>
-              <Label className="text-xs">Secondary Button URL</Label>
+              <Label className="text-xs">{t("secondaryBtnUrl")}</Label>
               <Input {...register("secondaryButtonUrl")} placeholder="/contact" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label>Overlay Opacity (%)</Label>
+              <Label>{t("overlayOpacity")}</Label>
               <Input
                 type="number"
                 {...register("overlayOpacity", { valueAsNumber: true })}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label>{tCommon("status")}</Label>
               <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Sort Order</Label>
+              <Label>{tCommon("sortOrder")}</Label>
               <Input
                 type="number"
                 {...register("sortOrder", { valueAsNumber: true })}
@@ -284,11 +284,11 @@ export function HeroSlideDialog({
 
           <DialogFooter className="mt-6">
             <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-              Cancel
+              {tCommon("cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? "Save Changes" : "Add Hero Slide"}
+              {initialData ? tCommon("saveChanges") : t("addHeroSlide")}
             </Button>
           </DialogFooter>
         </form>

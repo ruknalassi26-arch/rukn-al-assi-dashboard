@@ -354,7 +354,7 @@ export function TeamMemberTable() {
                         {/* Status */}
                         <TableCell>
                           <Badge variant={member.isActive ? "default" : "secondary"}>
-                            {member.status}
+                            {member.status === "active" ? tCommon("active") : tCommon("draft")}
                           </Badge>
                         </TableCell>
 
@@ -366,29 +366,34 @@ export function TeamMemberTable() {
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openDrawer(member.id)}>
-                                <Eye className="mr-2 h-4 w-4 text-blue-500" /> View Details
+                            <DropdownMenuContent align="end" className="w-40">
+                              <DropdownMenuItem onClick={() => openDrawer(member.id)} className="gap-2 text-xs">
+                                <Eye className="h-3.5 w-3.5" />
+                                <span>{tCommon("viewAll")}</span>
                               </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link href={`/admin/team/edit/${member.id}`}>
-                                  <Edit className="mr-2 h-4 w-4 text-emerald-500" /> Edit Profile
-                                </Link>
-                              </DropdownMenuItem>
+
+                              <Link href={`/admin/team/${member.id}/edit`}>
+                                <DropdownMenuItem className="gap-2 text-xs">
+                                  <Edit className="h-3.5 w-3.5" />
+                                  <span>{tCommon("edit")}</span>
+                                </DropdownMenuItem>
+                              </Link>
+
                               <DropdownMenuSeparator />
+
                               <DropdownMenuItem
-                                className="text-destructive focus:text-destructive"
                                 onClick={() => setDeleteId(member.id)}
+                                className="gap-2 text-xs text-destructive focus:text-destructive"
                               >
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                <Trash2 className="h-3.5 w-3.5" />
+                                <span>{tCommon("delete")}</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     );
-                  })
-                )}
+                  }))}
               </TableBody>
             </Table>
           </div>
@@ -398,8 +403,8 @@ export function TeamMemberTable() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-2">
             <p className="text-xs text-muted-foreground">
-              Showing page <span className="font-semibold">{page}</span> of{" "}
-              <span className="font-semibold">{totalPages}</span> ({total} total team members)
+              {tCommon("pagination.showingPage")} <span className="font-semibold">{page}</span> {tCommon("pagination.of")}{" "}
+              <span className="font-semibold">{totalPages}</span> ({total} {tCommon("pagination.total")})
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -408,7 +413,7 @@ export function TeamMemberTable() {
                 onClick={() => setPage(page - 1)}
                 disabled={page <= 1}
               >
-                Previous
+                {tCommon("pagination.previous")}
               </Button>
               <Button
                 variant="outline"
@@ -416,7 +421,7 @@ export function TeamMemberTable() {
                 onClick={() => setPage(page + 1)}
                 disabled={page >= totalPages}
               >
-                Next
+                {tCommon("pagination.next")}
               </Button>
             </div>
           </div>
@@ -427,9 +432,9 @@ export function TeamMemberTable() {
       <ConfirmDialog
         isOpen={!!deleteId}
         onClose={() => setDeleteId(null)}
-        title="Delete Team Member?"
-        description="Are you sure you want to delete this team member? This action cannot be undone."
-        confirmText="Delete Member"
+        title={tCommon("delete")}
+        description={tCommon("deleteDesc")}
+        confirmText={tCommon("delete")}
         variant="destructive"
         isLoading={deleteTeamMemberMutation.isPending}
         onConfirm={handleDeleteConfirm}
@@ -439,9 +444,9 @@ export function TeamMemberTable() {
       <ConfirmDialog
         isOpen={isBulkDeleteOpen}
         onClose={() => setIsBulkDeleteOpen(false)}
-        title={`Delete ${selectedIds.length} Selected Team Members?`}
-        description="Are you sure you want to delete all selected team members? This action cannot be undone."
-        confirmText="Delete Members"
+        title={tCommon("delete")}
+        description={tCommon("deleteDesc")}
+        confirmText={tCommon("delete")}
         variant="destructive"
         isLoading={bulkDeleteMutation.isPending}
         onConfirm={handleBulkDeleteConfirm}

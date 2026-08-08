@@ -209,8 +209,8 @@ export function JobPostingsTable() {
                 <TableCell colSpan={8} className="text-center py-12">
                   <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                     <Briefcase className="h-10 w-10 text-muted-foreground/50" />
-                    <p className="font-medium text-base">No job postings found</p>
-                    <p className="text-xs">Create your first job vacancy posting using the button above.</p>
+                    <p className="font-medium text-base">{t("emptyPostingsTitle")}</p>
+                    <p className="text-xs">{t("emptyPostingsDescription")}</p>
                   </div>
                 </TableCell>
               </TableRow>
