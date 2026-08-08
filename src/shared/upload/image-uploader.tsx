@@ -11,6 +11,8 @@ import { UploadService, type UploadBucket } from "@core/services/upload.service"
 import { Button } from "@shared/ui";
 import { toast } from "@core/utils/toast";
 
+import { useTranslations } from "next-intl";
+
 interface ImageUploaderProps {
   value: string | null;
   onChange: (url: string | null) => void;
@@ -28,6 +30,7 @@ export function ImageUploader({
   label = "Upload Image",
   className = "",
 }: ImageUploaderProps) {
+  const t = useTranslations("common.dialogs");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -120,10 +123,10 @@ export function ImageUploader({
           )}
           <div className="text-center">
             <p className="text-sm font-medium text-foreground">
-              {isUploading ? "Uploading image..." : "Click to upload image"}
+              {isUploading ? "Uploading image..." : t("uploadImage")}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              SVG, PNG, JPG, or WebP (max 5MB)
+              {t("imageFormats")}
             </p>
           </div>
         </div>

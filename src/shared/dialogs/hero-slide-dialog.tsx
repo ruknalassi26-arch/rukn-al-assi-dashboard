@@ -222,21 +222,21 @@ export function HeroSlideDialog({
             kurdishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleKu">Title (Kurdish)</Label>
-                  <Input id="titleKu" dir="rtl" {...register("titleKu")} />
+                  <Label htmlFor="titleKu">ناونیشان (بە کوردی) *</Label>
+                  <Input id="titleKu" dir="rtl" {...register("titleKu")} placeholder="کوالێتی بەرز لە بەرهەمەکاندا" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="subtitleKu">Subtitle (Kurdish)</Label>
+                  <Label htmlFor="subtitleKu">ژێرناونیشان (بە کوردی)</Label>
                   <Textarea id="subtitleKu" rows={2} dir="rtl" {...register("subtitleKu")} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border p-3 rounded-lg bg-muted/20">
                   <div>
-                    <Label className="text-xs">Primary Btn (KU)</Label>
-                    <Input dir="rtl" {...register("primaryButtonTextKu")} />
+                    <Label className="text-xs">دوگمەی سەرەکی (کوردی)</Label>
+                    <Input dir="rtl" {...register("primaryButtonTextKu")} placeholder="بەرهەمەکانمان" />
                   </div>
                   <div>
-                    <Label className="text-xs">Secondary Btn (KU)</Label>
-                    <Input dir="rtl" {...register("secondaryButtonTextKu")} />
+                    <Label className="text-xs">دوگمەی لاوەکی (کوردی)</Label>
+                    <Input dir="rtl" {...register("secondaryButtonTextKu")} placeholder="پەیوەندیمان پێوە بکە" />
                   </div>
                 </div>
               </div>

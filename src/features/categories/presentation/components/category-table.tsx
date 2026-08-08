@@ -138,7 +138,7 @@ export function CategoryTable() {
 
       <CardContent className="space-y-4 pt-4">
         {/* Filters Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input

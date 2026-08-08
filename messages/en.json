@@ -524,6 +524,24 @@
     "success": "Your message has been sent. We will respond shortly.",
     "error": "Failed to send message. Please try again."
   },
+  "contactAdmin": {
+    "title": "Customer Contact Messages Inbox",
+    "subtitle": "View messages submitted from the public website Contact form, reply by email, and manage statuses.",
+    "refresh": "Refresh",
+    "exportCsv": "Export CSV",
+    "searchPlaceholder": "Search sender name, email, subject, text...",
+    "allStatuses": "All Statuses",
+    "emptyTitle": "No contact messages found",
+    "emptyDescription": "There are currently no customer contact form submissions matching your criteria.",
+    "table": {
+      "customerName": "Customer Name",
+      "emailPhone": "Email & Phone",
+      "subjectPreview": "Subject & Preview",
+      "date": "Date",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
   "footer": {
     "rights": "All rights reserved.",
     "privacy": "Privacy Policy",
@@ -625,6 +643,45 @@
       "password": "Change Password"
     }
   },
+  "branchesAdmin": {
+    "title": "Company Branches",
+    "subtitle": "Manage regional office branches, showrooms, and regional contact details.",
+    "addBranch": "Add Branch",
+    "editBranch": "Edit Branch",
+    "refresh": "Refresh",
+    "searchPlaceholder": "Search branch name, city, email...",
+    "allStatuses": "All Statuses",
+    "emptyTitle": "No branches found",
+    "emptyDescription": "Try adjusting your search criteria or add your first company branch.",
+    "table": {
+      "branchName": "Branch Name",
+      "cityRegion": "City / Region",
+      "contact": "Contact",
+      "order": "Order",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "teamAdmin": {
+    "title": "Team Members Management",
+    "subtitle": "Manage executive leadership, team personnel, job titles, and contact information.",
+    "addMember": "Add Team Member",
+    "editMember": "Edit Team Member",
+    "refresh": "Refresh",
+    "searchPlaceholder": "Search by name, title or email...",
+    "allStatuses": "All Statuses",
+    "emptyTitle": "No team members found",
+    "emptyDescription": "Try adjusting your search criteria or add your first team member.",
+    "table": {
+      "photo": "Photo",
+      "fullName": "Full Name",
+      "positionDept": "Position / Dept",
+      "contactInfo": "Contact Info",
+      "order": "Order",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
   "careersAdmin": {
     "postingsTitle": "Job Postings",
     "postingsSubtitle": "Manage career opportunities, job requirements, positions, and publishing status.",
@@ -632,6 +689,8 @@
     "editPosting": "Edit Job Posting",
     "applicationsTitle": "Career Applications",
     "applicationsSubtitle": "Review candidate job applications, cover letters, CV attachments, and recruitment pipeline status.",
+    "emptyAppTitle": "No career applications found",
+    "emptyAppDesc": "Applications submitted by job seekers on the public website will appear here.",
     "table": {
       "title": "Position Title",
       "department": "Department",

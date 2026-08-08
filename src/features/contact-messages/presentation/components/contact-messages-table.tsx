@@ -56,10 +56,13 @@ import {
   useBulkDeleteContactMessages,
   useBulkUpdateMessageStatus,
 } from "@shared/hooks/contact-messages/use-contact-messages-hooks";
+import { useTranslations } from "next-intl";
 import { CONTACT_MESSAGE_STATUS_LABELS, CONTACT_MESSAGE_STATUS_VARIANTS } from "../../domain/enums/contact-messages.enums";
 import type { ContactMessageEntity, ContactMessageStatus } from "../../domain/entities/contact-message.entity";
 
 export function ContactMessagesTable() {
+  const t = useTranslations("contactAdmin");
+  const tCommon = useTranslations("common");
   const {
     search,
     status,
@@ -170,19 +173,19 @@ export function ContactMessagesTable() {
         <div>
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Mail className="h-5 w-5 text-primary" />
-            Customer Contact Messages Inbox
+            {t("title")}
           </CardTitle>
           <CardDescription>
-            View messages submitted from the public website Contact form, reply by email, and manage statuses.
+            {t("subtitle")}
           </CardDescription>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={messages.length === 0} className="gap-1.5">
-            <Download className="h-4 w-4" /> Export CSV
+            <Download className="h-4 w-4" /> {t("exportCsv")}
           </Button>
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="gap-1.5">
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> {t("refresh")}
           </Button>
         </div>
       </CardHeader>
@@ -212,14 +215,14 @@ export function ContactMessagesTable() {
         )}
 
         {/* Filters Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search sender name, email, subject, text..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9"
+              className="ps-9 h-9"
             />
           </div>
 
@@ -227,10 +230,10 @@ export function ContactMessagesTable() {
             {/* Status Filter */}
             <Select value={status} onValueChange={(val) => setStatus(val as any)}>
               <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder="All Statuses" />
+                <SelectValue placeholder={t("allStatuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="all">{t("allStatuses")}</SelectItem>
                 <SelectItem value="new">New</SelectItem>
                 <SelectItem value="read">Read</SelectItem>
                 <SelectItem value="replied">Replied</SelectItem>
@@ -260,25 +263,25 @@ export function ContactMessagesTable() {
                   </TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("name")}>
                     <div className="flex items-center gap-1">
-                      <span>Customer Name</span>
+                      <span>{t("table.customerName")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Email & Phone</TableHead>
-                  <TableHead>Subject & Preview</TableHead>
+                  <TableHead>{t("table.emailPhone")}</TableHead>
+                  <TableHead>{t("table.subjectPreview")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("created_at")}>
                     <div className="flex items-center gap-1">
-                      <span>Date</span>
+                      <span>{t("table.date")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("status")}>
                     <div className="flex items-center gap-1">
-                      <span>Status</span>
+                      <span>{t("table.status")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead className="text-end">Actions</TableHead>
+                  <TableHead className="text-end">{t("table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -299,8 +302,8 @@ export function ContactMessagesTable() {
                     <TableCell colSpan={7} className="h-64 text-center">
                       <EmptyState
                         icon={Mail}
-                        title="No contact messages found"
-                        description="There are currently no customer contact form submissions matching your criteria."
+                        title={t("emptyTitle")}
+                        description={t("emptyDescription")}
                       />
                     </TableCell>
                   </TableRow>

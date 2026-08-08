@@ -58,9 +58,13 @@ import {
   useBulkDeleteTeamMembers,
   useBulkUpdateTeamMemberStatus,
 } from "@shared/hooks/team/use-team-hooks";
+import { useTranslations } from "next-intl";
+import { TEAM_MEMBER_STATUS_LABELS, TEAM_MEMBER_STATUS_VARIANTS } from "../../domain/enums/team.enums";
 import type { TeamMemberEntity, TeamMemberStatus } from "../../domain/entities/team-member.entity";
 
 export function TeamMemberTable() {
+  const t = useTranslations("teamAdmin");
+  const tCommon = useTranslations("common");
   const {
     search,
     status,
@@ -143,20 +147,20 @@ export function TeamMemberTable() {
         <div>
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            Team Members Management
+            {t("title")}
           </CardTitle>
           <CardDescription>
-            Manage executive leadership, team personnel, job titles, and contact information.
+            {t("subtitle")}
           </CardDescription>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="gap-1.5">
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> {t("refresh")}
           </Button>
           <Link href="/admin/team/create">
             <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" /> Add Team Member
+              <Plus className="h-4 w-4" /> {t("addMember")}
             </Button>
           </Link>
         </div>
@@ -187,14 +191,14 @@ export function TeamMemberTable() {
         )}
 
         {/* Filters Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name, title or email..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9"
+              className="ps-9 h-9"
             />
           </div>
 
@@ -202,10 +206,10 @@ export function TeamMemberTable() {
             {/* Status Filter */}
             <Select value={status} onValueChange={(val: TeamMemberStatus | "all") => setStatus(val)}>
               <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder="All Statuses" />
+                <SelectValue placeholder={t("allStatuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="all">{t("allStatuses")}</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
               </SelectContent>
@@ -232,23 +236,23 @@ export function TeamMemberTable() {
                       onCheckedChange={handleSelectAllToggle}
                     />
                   </TableHead>
-                  <TableHead className="w-16">Photo</TableHead>
+                  <TableHead className="w-16">{t("table.photo")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("full_name_en")}>
                     <div className="flex items-center gap-1">
-                      <span>Full Name</span>
+                      <span>{t("table.fullName")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Position / Dept</TableHead>
-                  <TableHead>Contact Info</TableHead>
+                  <TableHead>{t("table.positionDept")}</TableHead>
+                  <TableHead>{t("table.contactInfo")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("sort_order")}>
                     <div className="flex items-center gap-1">
-                      <span>Order</span>
+                      <span>{t("table.order")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-end">Actions</TableHead>
+                  <TableHead>{t("table.status")}</TableHead>
+                  <TableHead className="text-end">{t("table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -270,11 +274,11 @@ export function TeamMemberTable() {
                     <TableCell colSpan={8} className="h-64 text-center">
                       <EmptyState
                         icon={Users}
-                        title="No team members found"
-                        description="Try adjusting your search criteria or add your first team member."
+                        title={t("emptyTitle")}
+                        description={t("emptyDescription")}
                         action={
                           <Link href="/admin/team/create">
-                            <Button size="sm"><Plus className="mr-2 h-4 w-4" />Add Team Member</Button>
+                            <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" />{t("addMember")}</Button>
                           </Link>
                         }
                       />

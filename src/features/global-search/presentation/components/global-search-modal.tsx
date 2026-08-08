@@ -129,21 +129,21 @@ export function GlobalSearchModal() {
         </DialogHeader>
 
         {/* Input Bar */}
-        <div className="relative flex items-center border-b px-4 py-3 bg-card">
-          <Search className="h-4 w-4 text-muted-foreground me-3 shrink-0" />
+        <div className="relative flex items-center border-b px-4 py-3 bg-card gap-2">
+          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
           <Input
             autoFocus
             placeholder={t("placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="border-0 focus-visible:ring-0 text-sm shadow-none p-0 h-8"
+            className="border-0 focus-visible:ring-0 text-sm shadow-none px-2 h-8 flex-1"
           />
           {query.length > 0 && (
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setQuery("")}
-              className="h-6 w-6 text-muted-foreground hover:text-foreground ms-2"
+              className="h-6 w-6 text-muted-foreground hover:text-foreground shrink-0"
             >
               <X className="h-3.5 w-3.5" />
             </Button>
