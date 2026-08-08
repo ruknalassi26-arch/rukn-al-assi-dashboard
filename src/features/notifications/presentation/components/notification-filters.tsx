@@ -25,7 +25,7 @@ export function NotificationFilters() {
   const READ_STATUSES = [
     { value: "all", label: tCommon("all") },
     { value: "unread", label: t("unreadOnly") },
-    { value: "read", label: tCommon("active") },
+    { value: "read", label: t("read") },
   ];
 
   const hasActiveFilters = search !== "" || type !== "all" || readStatus !== "all";

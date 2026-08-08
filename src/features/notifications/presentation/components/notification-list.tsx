@@ -3,6 +3,7 @@
 // features/notifications/presentation/components/notification-list.tsx
 // Paginated Notification Stream List with Skeletons, Error & Empty States
 // ==============================================================================
+import { useTranslations } from "next-intl";
 import {
   Skeleton,
   Button,
@@ -19,6 +20,8 @@ import { NotificationCard } from "./notification-card";
 import { Bell, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function NotificationList() {
+  const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
   const { search, type, readStatus, page, pageSize, setPage, setPageSize } = useNotificationStore();
 
   const { data, isLoading, error, refetch } = useNotificationsQuery({
@@ -52,9 +55,9 @@ export function NotificationList() {
       {items.length === 0 ? (
         <div className="text-center py-16 px-4 border border-dashed rounded-xl bg-card/50 space-y-3">
           <Bell className="h-10 w-10 mx-auto text-muted-foreground/40" />
-          <p className="text-sm font-semibold text-foreground">No Notifications Found</p>
+          <p className="text-sm font-semibold text-foreground">{t("emptyTitle")}</p>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            You do not have any notifications matching your selected search or filter criteria.
+            {t("emptyDesc")}
           </p>
         </div>
       ) : (
@@ -69,23 +72,22 @@ export function NotificationList() {
       {total > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border rounded-xl bg-card shadow-2xs">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Showing</span>
+            <span>{tCommon("pagination.showingPage")}</span>
             <span className="font-semibold text-foreground">
               {(page - 1) * pageSize + 1}
             </span>
-            <span>to</span>
+            <span>{tCommon("pagination.to")}</span>
             <span className="font-semibold text-foreground">
               {Math.min(page * pageSize, total)}
             </span>
-            <span>of</span>
+            <span>{tCommon("pagination.of")}</span>
             <span className="font-semibold text-foreground">{total}</span>
-            <span>notifications</span>
           </div>
 
           <div className="flex items-center gap-3">
             {/* Page Size Selector */}
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground">Rows:</span>
+              <span className="text-xs text-muted-foreground">{tCommon("pagination.rowsPerPage")}:</span>
               <Select value={String(pageSize)} onValueChange={(val) => setPageSize(Number(val))}>
                 <SelectTrigger className="h-8 w-16 text-xs">
                   <SelectValue />
