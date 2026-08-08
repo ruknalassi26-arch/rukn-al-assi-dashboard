@@ -126,7 +126,28 @@ export function NotificationBell() {
                       <span className="text-[10px] text-muted-foreground shrink-0">{item.timeAgo}</span>
                     </div>
 
-                    <p className="text-[11px] text-muted-foreground line-clamp-2">{item.message}</p>
+                    <p className="text-[11px] text-muted-foreground line-clamp-2">
+                      {(() => {
+                        const rawMsg = item.message ?? "";
+                        if (item.type === "admin_login" || rawMsg.toLowerCase().includes("logged into") || rawMsg.toLowerCase().includes("admin login")) {
+                          if (locale === "ar") return "تم تسجيل دخول المسؤول إلى لوحة التحكم بنجاح.";
+                          if (locale === "ckb") return "چوونه‌ژووره‌وه‌ی بەڕێوەبەر بۆ تابلۆی کۆنترۆڵ بەسەرکەوتوویی ئەنجامدرا.";
+                        }
+                        if (item.type === "rfq_new" || rawMsg.toLowerCase().includes("rfq") || rawMsg.toLowerCase().includes("quotation")) {
+                          if (locale === "ar") return "تم استلام طلب عرض سعر جديد عبر ماڵپەڕ.";
+                          if (locale === "ckb") return "داواکاری نرخی نوێ لەلایەن کڕیارێکەوە وەرگیرا.";
+                        }
+                        if (item.type === "contact_new" || rawMsg.toLowerCase().includes("contact") || rawMsg.toLowerCase().includes("message")) {
+                          if (locale === "ar") return "تم استلام رسالة تواصل جديدة من أحد الزوار.";
+                          if (locale === "ckb") return "پەیامی پەیوەندیکردنی نوێ لە رێگەی ماڵپەڕەوە وەرگیرا.";
+                        }
+                        if (item.type === "email_failure" || rawMsg.toLowerCase().includes("email failure") || rawMsg.toLowerCase().includes("failed")) {
+                          if (locale === "ar") return "تنبيه: تعذر تسليم البريد الإلكتروني بنجاح.";
+                          if (locale === "ckb") return "ئاگاداری: شکست لە ناردنی ئیمەیڵ.";
+                        }
+                        return rawMsg;
+                      })()}
+                    </p>
 
                     {item.link && (
                       <Link

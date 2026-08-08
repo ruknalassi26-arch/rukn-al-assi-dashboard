@@ -43,6 +43,27 @@ export function NotificationCard({ notification }: NotificationCardProps) {
   const titleText = t.has(`titles.${notification.type}`) ? t(`titles.${notification.type}`) : notification.title;
   const typeLabelText = t.has(`typeLabels.${notification.type}`) ? t(`typeLabels.${notification.type}`) : notification.typeLabel;
 
+  const getLocalizedMessage = () => {
+    const rawMsg = notification.message ?? "";
+    if (notification.type === "admin_login" || rawMsg.toLowerCase().includes("logged into") || rawMsg.toLowerCase().includes("admin login")) {
+      if (locale === "ar") return "تم تسجيل دخول المسؤول إلى لوحة التحكم بنجاح.";
+      if (locale === "ckb") return "چوونه‌ژووره‌وه‌ی بەڕێوەبەر بۆ تابلۆی کۆنترۆڵ بەسەرکەوتوویی ئەنجامدرا.";
+    }
+    if (notification.type === "rfq_new" || rawMsg.toLowerCase().includes("rfq") || rawMsg.toLowerCase().includes("quotation")) {
+      if (locale === "ar") return "تم استلام طلب عرض سعر جديد عبر ماڵپەڕ.";
+      if (locale === "ckb") return "داواکاری نرخی نوێ لەلایەن کڕیارێکەوە وەرگیرا.";
+    }
+    if (notification.type === "contact_new" || rawMsg.toLowerCase().includes("contact") || rawMsg.toLowerCase().includes("message")) {
+      if (locale === "ar") return "تم استلام رسالة تواصل جديدة من أحد الزوار.";
+      if (locale === "ckb") return "پەیامی پەیوەندیکردنی نوێ لە رێگەی ماڵپەڕەوە وەرگیرا.";
+    }
+    if (notification.type === "email_failure" || rawMsg.toLowerCase().includes("email failure") || rawMsg.toLowerCase().includes("failed")) {
+      if (locale === "ar") return "تنبيه: تعذر تسليم البريد الإلكتروني بنجاح.";
+      if (locale === "ckb") return "ئاگاداری: شکست لە ناردنی ئیمەیڵ.";
+    }
+    return rawMsg;
+  };
+
   return (
     <Card
       className={`border transition-all hover:shadow-xs relative overflow-hidden ${
@@ -70,7 +91,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
               )}
             </div>
 
-            <p className="text-xs text-muted-foreground leading-relaxed">{notification.message}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{getLocalizedMessage()}</p>
 
             <div className="flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground pt-1">
               <span>{notification.timeAgo}</span>
