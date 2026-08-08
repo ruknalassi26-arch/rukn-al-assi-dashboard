@@ -85,7 +85,7 @@ export function RecentActivity() {
             <p className="text-[11px] text-muted-foreground">{t("emptyDescription")}</p>
           </div>
         ) : (
-          <div className="space-y-4 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-muted">
+          <div className="space-y-4 relative before:absolute before:inset-0 before:start-3.5 before:w-0.5 before:bg-muted">
             {activities.map((act) => (
               <div key={act.id} className="flex items-start gap-3 relative z-10">
                 <div className="p-1.5 rounded-full bg-background border shadow-xs shrink-0">

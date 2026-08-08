@@ -102,7 +102,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
       <aside
         className={cn(
           "relative flex h-screen flex-col border-e bg-card transition-all duration-300",
-          collapsed ? "w-[68px]" : "w-[260px]",
+          collapsed ? "w-[68px]" : "w-[270px]",
           className
         )}
       >
@@ -122,13 +122,13 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
         {/* Top Logo Header */}
         <div
           className={cn(
-            "flex h-16 items-center border-b px-3 transition-all",
+            "flex h-16 items-center border-b px-4 transition-all",
             collapsed ? "justify-center" : "justify-start"
           )}
         >
           <Link
             href={`/${locale}/admin`}
-            className="flex items-center gap-2.5 overflow-hidden"
+            className="flex items-center gap-3 overflow-hidden"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -150,7 +150,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
         </div>
 
         {/* Navigation items */}
-        <ScrollArea className="flex-1 px-3 py-4">
+        <ScrollArea className="flex-1 px-3.5 py-4">
           <nav className="flex flex-col gap-1" role="navigation" aria-label="Admin navigation">
             {NAV_ITEMS.map((item) => {
               const active = isActive(item.href);
@@ -161,7 +161,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                 <Link
                   href={`/${locale}${item.href}`}
                   className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                    "group flex items-center gap-3.5 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-all duration-200",
                     active
                       ? "bg-primary/10 text-primary shadow-sm"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",

@@ -115,10 +115,10 @@ export function ActivityTimeline() {
             />
           </div>
         ) : (
-          <ScrollArea className="h-[380px] px-6">
-            <div className="relative space-y-0">
+          <ScrollArea className="h-[380px] px-4">
+            <div className="relative space-y-0 px-2">
               {/* Timeline line */}
-              <div className="absolute top-4 bottom-4 start-[15px] w-px bg-border" />
+              <div className="absolute top-4 bottom-4 start-[23px] w-px bg-border" />
 
               {activities.map((activity, index) => {
                 const config = ACTION_CONFIG[activity.action] ?? ACTION_CONFIG.updated;
@@ -129,22 +129,22 @@ export function ActivityTimeline() {
                   <div
                     key={activity.id}
                     className={cn(
-                      "relative flex items-start gap-3 py-3",
+                      "relative flex items-start gap-3.5 py-3",
                       !isLast && "border-b-0"
                     )}
                   >
                     {/* Icon circle */}
                     <div
                       className={cn(
-                        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border bg-background shadow-xs",
                         config.bg
                       )}
                     >
-                      <Icon className={cn("h-3.5 w-3.5", config.color)} />
+                      <Icon className={cn("h-4 w-4", config.color)} />
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-w-0 pt-0.5">
+                    <div className="flex-1 min-w-0 pt-0.5 text-start">
                       <p className="text-sm text-foreground leading-snug">
                         {getActivityLabel(activity)}
                       </p>
