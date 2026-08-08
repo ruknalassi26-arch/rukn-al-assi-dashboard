@@ -4,9 +4,18 @@ import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
+import { useRTL } from "@core/hooks/use-rtl"
 import { cn } from "@core/utils/cn"
 
-const Select = SelectPrimitive.Root
+const Select = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>
+>(({ dir, ...props }, ref) => {
+  const isRtl = useRTL();
+  const computedDir = dir ?? (isRtl ? "rtl" : "ltr");
+  return <SelectPrimitive.Root dir={computedDir} {...props} />;
+});
+Select.displayName = SelectPrimitive.Root.displayName;
 
 const SelectGroup = SelectPrimitive.Group
 

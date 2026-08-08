@@ -4,9 +4,18 @@ import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { Check, ChevronRight, Circle } from "lucide-react"
 
+import { useRTL } from "@core/hooks/use-rtl"
 import { cn } from "@core/utils/cn"
 
-const DropdownMenu = DropdownMenuPrimitive.Root
+const DropdownMenu = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>
+>(({ dir, ...props }, ref) => {
+  const isRtl = useRTL();
+  const computedDir = dir ?? (isRtl ? "rtl" : "ltr");
+  return <DropdownMenuPrimitive.Root dir={computedDir} {...props} />;
+});
+DropdownMenu.displayName = DropdownMenuPrimitive.Root.displayName;
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
 

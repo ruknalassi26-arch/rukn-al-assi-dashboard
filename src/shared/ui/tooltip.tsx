@@ -3,9 +3,18 @@
 import * as React from "react"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
+import { useRTL } from "@core/hooks/use-rtl"
 import { cn } from "@core/utils/cn"
 
-const TooltipProvider = TooltipPrimitive.Provider
+const TooltipProvider = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Provider>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Provider>
+>(({ dir, ...props }, ref) => {
+  const isRtl = useRTL();
+  const computedDir = dir ?? (isRtl ? "rtl" : "ltr");
+  return <TooltipPrimitive.Provider dir={computedDir} {...props} />;
+});
+TooltipProvider.displayName = TooltipPrimitive.Provider.displayName
 
 const Tooltip = TooltipPrimitive.Root
 

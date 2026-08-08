@@ -3,9 +3,18 @@
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 
+import { useRTL } from "@core/hooks/use-rtl"
 import { cn } from "@core/utils/cn"
 
-const Tabs = TabsPrimitive.Root
+const Tabs = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
+>(({ dir, ...props }, ref) => {
+  const isRtl = useRTL();
+  const computedDir = dir ?? (isRtl ? "rtl" : "ltr");
+  return <TabsPrimitive.Root ref={ref} dir={computedDir} {...props} />;
+});
+Tabs.displayName = TabsPrimitive.Root.displayName;
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,

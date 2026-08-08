@@ -2,9 +2,18 @@
 
 import * as React from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
+import { useRTL } from "@core/hooks/use-rtl";
 import { cn } from "@core/utils/cn";
 
-const Popover = PopoverPrimitive.Root;
+const Popover = React.forwardRef<
+  React.ElementRef<typeof PopoverPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Root>
+>(({ dir, ...props }, ref) => {
+  const isRtl = useRTL();
+  const computedDir = dir ?? (isRtl ? "rtl" : "ltr");
+  return <PopoverPrimitive.Root dir={computedDir} {...props} />;
+});
+Popover.displayName = PopoverPrimitive.Root.displayName;
 
 const PopoverTrigger = PopoverPrimitive.Trigger;
 
