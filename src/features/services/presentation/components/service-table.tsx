@@ -56,6 +56,7 @@ import {
   useDeleteService,
   useToggleFeatureService,
   useBulkDeleteServices,
+  useBulkUpdateServiceStatus,
 } from "@shared/hooks/services/use-service-hooks";
 import { useTranslations } from "next-intl";
 import { SERVICE_STATUS_LABELS, SERVICE_STATUS_VARIANTS } from "../../domain/enums/service.enums";
