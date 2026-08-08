@@ -12,8 +12,11 @@ import { ProjectFilters } from "../components/project-filters";
 import { ProjectTable } from "../components/project-table";
 import { DeleteProjectDialog } from "../components/delete-project-dialog";
 
+import { useTranslations } from "next-intl";
+
 export function ProjectsPage() {
   const locale = useLocale();
+  const t = useTranslations("projectsAdmin");
 
   return (
     <PermissionGuard permission="projects:view">
@@ -25,17 +28,17 @@ export function ProjectsPage() {
               <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                 <FolderKanban className="h-5 w-5" />
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Projects Portfolio</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h1>
             </div>
             <p className="text-xs text-muted-foreground">
-              Manage showcase projects, client portfolios, gallery images, and homepage featured items.
+              {t("subtitle")}
             </p>
           </div>
 
           <Can access="projects:create">
             <Button asChild size="sm" className="text-xs gap-1.5 shrink-0">
               <Link href={`/${locale}/admin/projects/create`}>
-                <Plus className="h-4 w-4" /> Add New Project
+                <Plus className="h-4 w-4" /> {t("addProject")}
               </Link>
             </Button>
           </Can>

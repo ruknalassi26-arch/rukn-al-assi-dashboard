@@ -58,9 +58,12 @@ import {
   useBulkDeleteServices,
   useBulkUpdateServiceStatus,
 } from "@shared/hooks/services/use-service-hooks";
+import { SERVICE_STATUS_LABELS, SERVICE_STATUS_VARIANTS } from "../../domain/enums/service.enums";
 import type { ServiceEntity, ServiceStatus } from "../../domain/entities/service.entity";
 
 export function ServiceTable() {
+  const t = useTranslations("servicesAdmin");
+  const tCommon = useTranslations("common");
   const {
     search,
     status,
@@ -174,23 +177,23 @@ export function ServiceTable() {
         <div>
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Wrench className="h-5 w-5 text-primary" />
-            Services Management
+            {t("title")}
           </CardTitle>
           <CardDescription>
-            Manage industrial & hydraulic services, featured items, status, and multilingual descriptions.
+            {t("subtitle")}
           </CardDescription>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={services.length === 0} className="gap-1.5">
-            <Download className="h-4 w-4" /> Export CSV
+            <Download className="h-4 w-4" /> {t("exportCsv")}
           </Button>
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="gap-1.5">
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> {t("refresh")}
           </Button>
           <Link href="/admin/services/create">
             <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" /> Add Service
+              <Plus className="h-4 w-4" /> {t("addService")}
             </Button>
           </Link>
         </div>
@@ -223,12 +226,12 @@ export function ServiceTable() {
         {/* Filters Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by title or slug..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9"
+              className="ps-9 h-9"
             />
           </div>
 
@@ -236,10 +239,10 @@ export function ServiceTable() {
             {/* Status Filter */}
             <Select value={status} onValueChange={(val: ServiceStatus | "all") => setStatus(val)}>
               <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder="All Statuses" />
+                <SelectValue placeholder={t("allStatuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="all">{t("allStatuses")}</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
               </SelectContent>
@@ -253,10 +256,10 @@ export function ServiceTable() {
               }
             >
               <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder="All Items" />
+                <SelectValue placeholder={t("allFeatured")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Items</SelectItem>
+                <SelectItem value="all">{t("allFeatured")}</SelectItem>
                 <SelectItem value="featured">Featured Only</SelectItem>
                 <SelectItem value="standard">Standard Only</SelectItem>
               </SelectContent>
@@ -283,24 +286,24 @@ export function ServiceTable() {
                       onCheckedChange={handleSelectAllToggle}
                     />
                   </TableHead>
-                  <TableHead className="w-16">Image</TableHead>
+                  <TableHead className="w-16">{t("table.image")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("title_en")}>
                     <div className="flex items-center gap-1">
-                      <span>Service Title</span>
+                      <span>{t("table.serviceTitle")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Arabic Title</TableHead>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Featured</TableHead>
+                  <TableHead>{t("table.arabicTitle")}</TableHead>
+                  <TableHead>{t("table.slug")}</TableHead>
+                  <TableHead>{t("table.featured")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("sort_order")}>
                     <div className="flex items-center gap-1">
-                      <span>Order</span>
+                      <span>{t("table.order")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-end">Actions</TableHead>
+                  <TableHead>{t("table.status")}</TableHead>
+                  <TableHead className="text-end">{t("table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -323,11 +326,11 @@ export function ServiceTable() {
                     <TableCell colSpan={9} className="h-64 text-center">
                       <EmptyState
                         icon={Wrench}
-                        title="No services found"
-                        description="Try adjusting your search criteria or add your first service."
+                        title={t("emptyTitle")}
+                        description={t("emptyDescription")}
                         action={
                           <Link href="/admin/services/create">
-                            <Button size="sm"><Plus className="mr-2 h-4 w-4" />Add Service</Button>
+                            <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" />{t("addService")}</Button>
                           </Link>
                         }
                       />

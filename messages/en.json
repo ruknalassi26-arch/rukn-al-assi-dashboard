@@ -682,6 +682,118 @@
       "actions": "Actions"
     }
   },
+  "categoriesAdmin": {
+    "title": "Product Categories",
+    "subtitle": "Organize and manage your product catalog categories, sorting orders, and translations.",
+    "addCategory": "Add Category",
+    "editCategory": "Edit Category",
+    "refresh": "Refresh",
+    "searchPlaceholder": "Search by category name or slug...",
+    "allStatuses": "All Statuses",
+    "emptyTitle": "No categories found",
+    "emptyDescription": "Try adjusting your search criteria or add your first category.",
+    "table": {
+      "image": "Image",
+      "categoryName": "Category Name",
+      "arabicName": "Arabic Name",
+      "kurdishName": "Kurdish Name",
+      "slug": "Slug",
+      "order": "Order",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "productsAdmin": {
+    "title": "Products Catalog",
+    "subtitle": "Manage your industrial products, bilingual descriptions, datasheets, and gallery assets.",
+    "addProduct": "Add Product",
+    "editProduct": "Edit Product",
+    "exportCsv": "Export CSV",
+    "refresh": "Refresh",
+    "resetFilters": "Reset Filters",
+    "allFeatured": "All Items",
+    "allStatuses": "All Statuses",
+    "allCategories": "All Categories",
+    "searchPlaceholder": "Search name, slug...",
+    "emptyTitle": "No products found",
+    "emptyDescription": "Try adjusting your search filters or click Add Product to create your first item.",
+    "table": {
+      "thumbnail": "Thumbnail",
+      "productName": "Product Name",
+      "category": "Category",
+      "status": "Status",
+      "featured": "Featured",
+      "order": "Order",
+      "created": "Created",
+      "actions": "Actions"
+    }
+  },
+  "servicesAdmin": {
+    "title": "Services Management",
+    "subtitle": "Manage industrial & hydraulic services, featured items, status, and multilingual descriptions.",
+    "addService": "Add Service",
+    "editService": "Edit Service",
+    "exportCsv": "Export CSV",
+    "refresh": "Refresh",
+    "allFeatured": "All Items",
+    "allStatuses": "All Statuses",
+    "searchPlaceholder": "Search by title or slug...",
+    "emptyTitle": "No services found",
+    "emptyDescription": "Try adjusting your search criteria or add your first service.",
+    "table": {
+      "image": "Image",
+      "serviceTitle": "Service Title",
+      "arabicTitle": "Arabic Title",
+      "slug": "Slug",
+      "featured": "Featured",
+      "order": "Order",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "certificatesAdmin": {
+    "title": "Certificates Management",
+    "subtitle": "Manage ISO, quality compliance certificates, issuing organizations, and validity dates.",
+    "addCertificate": "Add Certificate",
+    "editCertificate": "Edit Certificate",
+    "refresh": "Refresh",
+    "allStatuses": "All Statuses",
+    "searchPlaceholder": "Search by title or organization...",
+    "emptyTitle": "No certificates found",
+    "emptyDescription": "Try adjusting your search criteria or add your first certificate.",
+    "table": {
+      "preview": "Preview",
+      "title": "Title",
+      "organization": "Organization",
+      "issueDate": "Issue Date",
+      "order": "Order",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "projectsAdmin": {
+    "title": "Projects Portfolio",
+    "subtitle": "Manage showcase projects, client portfolios, gallery images, and homepage featured items.",
+    "addProject": "Add New Project",
+    "editProject": "Edit Project",
+    "exportCsv": "Export CSV",
+    "refresh": "Refresh",
+    "resetFilters": "Reset Filters",
+    "allFeatured": "All Items",
+    "allStatuses": "All Statuses",
+    "searchPlaceholder": "Search project name, client, slug...",
+    "emptyTitle": "No projects found",
+    "emptyDescription": "Try adjusting your search criteria or add your first project.",
+    "table": {
+      "thumbnail": "Thumbnail",
+      "projectName": "Project Name",
+      "client": "Client / Location",
+      "status": "Status",
+      "featured": "Featured",
+      "order": "Order",
+      "actions": "Actions"
+    }
+  },
   "careersAdmin": {
     "postingsTitle": "Job Postings",
     "postingsSubtitle": "Manage career opportunities, job requirements, positions, and publishing status.",

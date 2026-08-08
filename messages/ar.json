@@ -682,6 +682,118 @@
       "actions": "الإجراءات"
     }
   },
+  "categoriesAdmin": {
+    "title": "أنواع المنتجات",
+    "subtitle": "تنظيم وإدارة أنواع المنتجات، ترتيب العرض، والترجمات.",
+    "addCategory": "إضافة نوع جديد",
+    "editCategory": "تعديل النوع",
+    "refresh": "تحديث",
+    "searchPlaceholder": "البحث باسم النوع أو الرابط...",
+    "allStatuses": "جميع الحالات",
+    "emptyTitle": "لم يتم العثور على أنواع",
+    "emptyDescription": "جرب تعديل معايير البحث أو أضف نوع المنتجات الأول.",
+    "table": {
+      "image": "الصورة",
+      "categoryName": "اسم النوع",
+      "arabicName": "الاسم بالعربية",
+      "kurdishName": "الاسم بالكردية",
+      "slug": "الرابط اللطيف",
+      "order": "الترتيب",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    }
+  },
+  "productsAdmin": {
+    "title": "كتالوج المنتجات",
+    "subtitle": "إدارة المنتجات الصناعية، الأوصاف ثنائية اللغة، المواصفات، ومعرض الصور.",
+    "addProduct": "إضافة منتج",
+    "editProduct": "تعديل المنتج",
+    "exportCsv": "تصدير CSV",
+    "refresh": "تحديث",
+    "resetFilters": "إعادة ضبط التصفية",
+    "allFeatured": "جميع العناصر",
+    "allStatuses": "جميع الحالات",
+    "allCategories": "جميع التصنيفات",
+    "searchPlaceholder": "البحث بالاسم أو الرابط...",
+    "emptyTitle": "لم يتم العثور على منتجات",
+    "emptyDescription": "جرب تعديل معايير التصفية أو انقر على إضافة منتج لإنشاء عنصرك الأول.",
+    "table": {
+      "thumbnail": "الصورة المصغرة",
+      "productName": "اسم المنتج",
+      "category": "التصنيف",
+      "status": "الحالة",
+      "featured": "مميز",
+      "order": "الترتيب",
+      "created": "تاريخ الإنشاء",
+      "actions": "الإجراءات"
+    }
+  },
+  "servicesAdmin": {
+    "title": "إدارة الخدمات",
+    "subtitle": "إدارة الخدمات الصناعية والهيدروليكية، العناصر المميزة، الحالة، والأوصاف المتعددة اللغات.",
+    "addService": "إضافة خدمة",
+    "editService": "تعديل الخدمة",
+    "exportCsv": "تصدير CSV",
+    "refresh": "تحديث",
+    "allFeatured": "جميع العناصر",
+    "allStatuses": "جميع الحالات",
+    "searchPlaceholder": "البحث بالعنوان أو الرابط...",
+    "emptyTitle": "لم يتم العثور على خدمات",
+    "emptyDescription": "جرب تعديل معايير البحث أو أضف خدمتك الأولى.",
+    "table": {
+      "image": "الصورة",
+      "serviceTitle": "عنوان الخدمة",
+      "arabicTitle": "العنوان بالعربية",
+      "slug": "الرابط اللطيف",
+      "featured": "مميز",
+      "order": "الترتيب",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    }
+  },
+  "certificatesAdmin": {
+    "title": "إدارة الشهادات",
+    "subtitle": "إدارة شهادات ISO، معايير الجودة، الجهات المانحة، وتواريخ الصلاحية.",
+    "addCertificate": "إضافة شهادة",
+    "editCertificate": "تعديل الشهادة",
+    "refresh": "تحديث",
+    "allStatuses": "جميع الحالات",
+    "searchPlaceholder": "البحث بالعنوان أو الجهة...",
+    "emptyTitle": "لم يتم العثور على شهادات",
+    "emptyDescription": "جرب تعديل معايير البحث أو أضف شهادتك الأولى.",
+    "table": {
+      "preview": "معاينة",
+      "title": "العنوان",
+      "organization": "الجهة المانحة",
+      "issueDate": "تاريخ الإصدار",
+      "order": "الترتيب",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    }
+  },
+  "projectsAdmin": {
+    "title": "معرض المشاريع",
+    "subtitle": "إدارة المشاريع المنفذة، معرض الصور، والعناصر المميزة في الصفحة الرئيسية.",
+    "addProject": "إضافة مشروع جديد",
+    "editProject": "تعديل المشروع",
+    "exportCsv": "تصدير CSV",
+    "refresh": "تحديث",
+    "resetFilters": "إعادة ضبط التصفية",
+    "allFeatured": "جميع العناصر",
+    "allStatuses": "جميع الحالات",
+    "searchPlaceholder": "البحث باسم المشروع، العميل، الرابط...",
+    "emptyTitle": "لم يتم العثور على مشاريع",
+    "emptyDescription": "جرب تعديل معايير البحث أو أضف مشروعك الأول.",
+    "table": {
+      "thumbnail": "الصورة المصغرة",
+      "projectName": "اسم المشروع",
+      "client": "العميل / الموقع",
+      "status": "الحالة",
+      "featured": "مميز",
+      "order": "الترتيب",
+      "actions": "الإجراءات"
+    }
+  },
   "careersAdmin": {
     "postingsTitle": "الشواغر الوظيفية",
     "postingsSubtitle": "إدارة الفرص الوظيفية، المتطلبات، المسميات الفنية، وحالة النشر.",

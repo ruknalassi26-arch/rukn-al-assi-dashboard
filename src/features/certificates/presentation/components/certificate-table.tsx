@@ -57,9 +57,13 @@ import {
   useBulkDeleteCertificates,
   useBulkUpdateCertificateStatus,
 } from "@shared/hooks/certificates/use-certificate-hooks";
+import { useTranslations } from "next-intl";
+import { CERTIFICATE_STATUS_LABELS, CERTIFICATE_STATUS_VARIANTS } from "../../domain/enums/certificate.enums";
 import type { CertificateEntity, CertificateStatus } from "../../domain/entities/certificate.entity";
 
 export function CertificateTable() {
+  const t = useTranslations("certificatesAdmin");
+  const tCommon = useTranslations("common");
   const {
     search,
     status,
@@ -142,20 +146,20 @@ export function CertificateTable() {
         <div>
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            Certificates Management
+            {t("title")}
           </CardTitle>
           <CardDescription>
-            Manage ISO, quality compliance certificates, issuing organizations, and validity dates.
+            {t("subtitle")}
           </CardDescription>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="gap-1.5">
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> {t("refresh")}
           </Button>
           <Link href="/admin/certificates/create">
             <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" /> Add Certificate
+              <Plus className="h-4 w-4" /> {t("addCertificate")}
             </Button>
           </Link>
         </div>
@@ -190,7 +194,7 @@ export function CertificateTable() {
           <div className="relative w-full sm:w-80">
             <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by title or organization..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="ps-9 h-9"
@@ -201,10 +205,10 @@ export function CertificateTable() {
             {/* Status Filter */}
             <Select value={status} onValueChange={(val) => setStatus(val as any)}>
               <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder="All Statuses" />
+                <SelectValue placeholder={t("allStatuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="all">{t("allStatuses")}</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
               </SelectContent>
@@ -231,28 +235,28 @@ export function CertificateTable() {
                       onCheckedChange={handleSelectAllToggle}
                     />
                   </TableHead>
-                  <TableHead className="w-16">Preview</TableHead>
+                  <TableHead className="w-16">{t("table.preview")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("title_en")}>
                     <div className="flex items-center gap-1">
-                      <span>Title</span>
+                      <span>{t("table.title")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Organization</TableHead>
+                  <TableHead>{t("table.organization")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("issue_date")}>
                     <div className="flex items-center gap-1">
-                      <span>Issue Date</span>
+                      <span>{t("table.issueDate")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("sort_order")}>
                     <div className="flex items-center gap-1">
-                      <span>Order</span>
+                      <span>{t("table.order")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-end">Actions</TableHead>
+                  <TableHead>{t("table.status")}</TableHead>
+                  <TableHead className="text-end">{t("table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -274,10 +278,16 @@ export function CertificateTable() {
                     <TableCell colSpan={8} className="h-64 text-center">
                       <EmptyState
                         icon={Shield}
-                        title="No certificates found"
-                        description="Try adjusting your search criteria or add your first certificate."
+                        title={t("emptyTitle")}
+                        description={t("emptyDescription")}
                         action={
                           <Link href="/admin/certificates/create">
+                            <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" />{t("addCertificate")}</Button>
+                          </Link>
+                        }
+                      />
+                    </TableCell>
+                  </TableRow>
                             <Button size="sm"><Plus className="mr-2 h-4 w-4" />Add Certificate</Button>
                           </Link>
                         }

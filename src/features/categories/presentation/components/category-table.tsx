@@ -58,7 +58,7 @@ import type { CategoryEntity } from "../../domain/entities/category.entity";
 import { useTranslations } from "next-intl";
 
 export function CategoryTable() {
-  const t = useTranslations("categories");
+  const t = useTranslations("categoriesAdmin");
   const tCommon = useTranslations("common");
   const {
     search,
@@ -126,11 +126,11 @@ export function CategoryTable() {
             disabled={isFetching}
             className="gap-1.5"
           >
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> {tCommon("retry")}
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> {t("refresh")}
           </Button>
           <Link href="/admin/categories/create">
             <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" /> {t("addNew")}
+              <Plus className="h-4 w-4" /> {t("addCategory")}
             </Button>
           </Link>
         </div>
@@ -140,12 +140,12 @@ export function CategoryTable() {
         {/* Filters Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by category name or slug..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9"
+              className="ps-9 h-9"
             />
           </div>
 
@@ -153,10 +153,10 @@ export function CategoryTable() {
             {/* Status Filter */}
             <Select value={status} onValueChange={(val) => setStatus(val as any)}>
               <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder="All Statuses" />
+                <SelectValue placeholder={t("allStatuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="all">{t("allStatuses")}</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
               </SelectContent>
@@ -177,24 +177,24 @@ export function CategoryTable() {
             <Table>
               <TableHeader className="bg-muted/40">
                 <TableRow>
-                  <TableHead className="w-16">Image</TableHead>
+                  <TableHead className="w-16">{t("table.image")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("name_en")}>
                     <div className="flex items-center gap-1">
-                      <span>Category Name</span>
+                      <span>{t("table.categoryName")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Arabic Name</TableHead>
-                  <TableHead>Kurdish Name</TableHead>
-                  <TableHead>Slug</TableHead>
+                  <TableHead>{t("table.arabicName")}</TableHead>
+                  <TableHead>{t("table.kurdishName")}</TableHead>
+                  <TableHead>{t("table.slug")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("sort_order")}>
                     <div className="flex items-center gap-1">
-                      <span>Order</span>
+                      <span>{t("table.order")}</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-end">Actions</TableHead>
+                  <TableHead>{t("table.status")}</TableHead>
+                  <TableHead className="text-end">{t("table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -216,11 +216,11 @@ export function CategoryTable() {
                     <TableCell colSpan={8} className="h-64 text-center">
                       <EmptyState
                         icon={FolderKanban}
-                        title="No categories found"
-                        description="Try adjusting your search criteria or add your first category."
+                        title={t("emptyTitle")}
+                        description={t("emptyDescription")}
                         action={
                           <Link href="/admin/categories/create">
-                            <Button size="sm"><Plus className="mr-2 h-4 w-4" />Add Category</Button>
+                            <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" />{t("addCategory")}</Button>
                           </Link>
                         }
                       />

@@ -66,7 +66,11 @@ import {
 } from "@shared/hooks/products/use-product-hooks";
 import type { ProductEntity, ProductStatus } from "../../domain/entities/product.entity";
 
+import { useTranslations } from "next-intl";
+
 export function ProductTable() {
+  const t = useTranslations("productsAdmin");
+  const tCommon = useTranslations("common");
   const {
     search,
     categoryId,
@@ -161,21 +165,21 @@ export function ProductTable() {
       {/* Top Header Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Products Catalog</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Manage your industrial products, bilingual descriptions, datasheets, and gallery assets.
+            {t("subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching} className="gap-1 text-xs">
-            <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? "animate-spin" : ""}`} /> {t("refresh")}
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1 text-xs">
-            <Download className="h-3.5 w-3.5" /> Export CSV
+            <Download className="h-3.5 w-3.5" /> {t("exportCsv")}
           </Button>
           <Button asChild size="sm" className="gap-1.5 text-xs">
             <Link href="/admin/products/create">
-              <Plus className="h-4 w-4" /> Add Product
+              <Plus className="h-4 w-4" /> {t("addProduct")}
             </Link>
           </Button>
         </div>
@@ -187,20 +191,20 @@ export function ProductTable() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search name, slug..."
+                placeholder={t("searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 text-xs"
+                className="ps-9 text-xs"
               />
             </div>
 
             {/* Category Filter */}
             <Select value={categoryId} onValueChange={(val) => setCategoryId(val)}>
-              <SelectTrigger className="text-xs"><SelectValue placeholder="All Categories" /></SelectTrigger>
+              <SelectTrigger className="text-xs"><SelectValue placeholder={t("allCategories")} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">{t("allCategories")}</SelectItem>
                 {categories?.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>{cat.nameEn}</SelectItem>
                 ))}
@@ -209,9 +213,9 @@ export function ProductTable() {
 
             {/* Status Filter */}
             <Select value={status} onValueChange={(val: ProductStatus | "all") => setStatus(val)}>
-              <SelectTrigger className="text-xs"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+              <SelectTrigger className="text-xs"><SelectValue placeholder={t("allStatuses")} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="all">{t("allStatuses")}</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
                 <SelectItem value="archived">Archived</SelectItem>
@@ -220,9 +224,9 @@ export function ProductTable() {
 
             {/* Featured Filter */}
             <Select value={featured} onValueChange={(val: "all" | "featured" | "standard") => setFeatured(val)}>
-              <SelectTrigger className="text-xs"><SelectValue placeholder="All Showcase" /></SelectTrigger>
+              <SelectTrigger className="text-xs"><SelectValue placeholder={t("allFeatured")} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Items</SelectItem>
+                <SelectItem value="all">{t("allFeatured")}</SelectItem>
                 <SelectItem value="featured">Featured Only</SelectItem>
                 <SelectItem value="standard">Standard Only</SelectItem>
               </SelectContent>
@@ -230,7 +234,7 @@ export function ProductTable() {
 
             {/* Reset Filters */}
             <Button variant="ghost" size="sm" onClick={resetFilters} className="text-xs text-muted-foreground">
-              Reset Filters
+              {t("resetFilters")}
             </Button>
           </div>
 
@@ -287,26 +291,26 @@ export function ProductTable() {
                       onCheckedChange={() => toggleSelectAll(allIdsOnPage)}
                     />
                   </TableHead>
-                  <TableHead className="w-16">Thumbnail</TableHead>
+                  <TableHead className="w-16">{t("table.thumbnail")}</TableHead>
                   <TableHead className="cursor-pointer select-none" onClick={() => handleSort("name_en")}>
                     <div className="flex items-center gap-1">
-                      Product Name <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                      {t("table.productName")} <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Featured</TableHead>
+                  <TableHead>{t("table.category")}</TableHead>
+                  <TableHead>{t("table.status")}</TableHead>
+                  <TableHead>{t("table.featured")}</TableHead>
                   <TableHead className="cursor-pointer select-none" onClick={() => handleSort("sort_order")}>
                     <div className="flex items-center gap-1">
-                      Order <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                      {t("table.order")} <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
                   <TableHead className="cursor-pointer select-none" onClick={() => handleSort("created_at")}>
                     <div className="flex items-center gap-1">
-                      Created <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                      {t("table.created")} <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead className="text-end">Actions</TableHead>
+                  <TableHead className="text-end">{t("table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -330,11 +334,11 @@ export function ProductTable() {
                     <TableCell colSpan={9} className="h-64 text-center">
                       <EmptyState
                         icon={Package}
-                        title="No products found"
-                        description="Try adjusting your search filters or click Add Product to create your first item."
+                        title={t("emptyTitle")}
+                        description={t("emptyDescription")}
                         action={
                           <Link href="/admin/products/create">
-                            <Button size="sm"><Plus className="mr-2 h-4 w-4" />Add Product</Button>
+                            <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" />{t("addProduct")}</Button>
                           </Link>
                         }
                       />

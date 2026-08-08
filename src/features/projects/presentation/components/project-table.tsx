@@ -229,8 +229,8 @@ export function ProjectTable() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-[10px] text-muted-foreground font-bold">
-                          NO IMG
+                        <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                          <FolderOpen className="h-4 w-4 opacity-40" />
                         </div>
                       )}
                     </div>
