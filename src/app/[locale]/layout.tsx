@@ -87,6 +87,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     >
       <body
         className={rtl ? "font-arabic min-h-full flex flex-col" : "font-sans min-h-full flex flex-col"}
+        dir={rtl ? "rtl" : "ltr"}
         suppressHydrationWarning
       >
         <NextIntlClientProvider locale={locale} messages={messages}>

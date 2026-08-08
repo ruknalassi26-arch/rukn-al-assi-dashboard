@@ -27,7 +27,7 @@ export function AdminShell({ children }: AdminShellProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background" dir={isRtl ? "rtl" : "ltr"}>
       {/* Desktop sidebar */}
       <div className="hidden md:block">
         <AdminSidebar />
