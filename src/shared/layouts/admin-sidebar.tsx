@@ -100,6 +100,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
   return (
     <TooltipProvider delayDuration={0}>
       <aside
+        dir={isRtl ? "rtl" : "ltr"}
         className={cn(
           "relative flex h-screen flex-col border-e bg-card transition-all duration-300",
           collapsed ? "w-[68px]" : "w-[270px]",

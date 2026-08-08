@@ -86,6 +86,7 @@ export function AdminHeader({ onMenuToggle, className }: AdminHeaderProps) {
 
   return (
     <header
+      dir={isRtl ? "rtl" : "ltr"}
       className={cn(
         "flex h-16 items-center justify-between border-b bg-card px-4 md:px-6",
         className
