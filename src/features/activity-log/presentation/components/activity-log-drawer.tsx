@@ -4,6 +4,7 @@
 // Dialog Modal for Detailed Activity Log Inspection & JSON Diff
 // ==============================================================================
 import { useTranslations } from "next-intl";
+// Using tCommon for shared labels
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import { Activity, Clock, User, Globe, FileText, ArrowRight } from "lucide-react
 
 export function ActivityLogDrawer() {
   const t = useTranslations("activityLog.drawer");
+  const tCommon = useTranslations("common");
   const { selectedLogId, isDrawerOpen, closeDrawer } = useActivityLogStore();
 
   const { data: item, isLoading } = useActivityLogDetailQuery(selectedLogId);
@@ -110,7 +112,7 @@ export function ActivityLogDrawer() {
                     <div className="space-y-1.5">
                       <span className="text-[11px] font-semibold text-destructive">{t("oldValue")}</span>
                       <pre className="p-3 rounded-lg border bg-muted/40 font-mono text-[10px] overflow-x-auto max-h-60 leading-relaxed">
-                        {item.oldValue ? JSON.stringify(item.oldValue, null, 2) : "None"}
+                        {item.oldValue ? JSON.stringify(item.oldValue, null, 2) : tCommon("none")}
                       </pre>
                     </div>
 
@@ -118,7 +120,7 @@ export function ActivityLogDrawer() {
                     <div className="space-y-1.5">
                       <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">{t("newValue")}</span>
                       <pre className="p-3 rounded-lg border bg-muted/40 font-mono text-[10px] overflow-x-auto max-h-60 leading-relaxed">
-                        {item.newValue ? JSON.stringify(item.newValue, null, 2) : "None"}
+                        {item.newValue ? JSON.stringify(item.newValue, null, 2) : tCommon("none")}
                       </pre>
                     </div>
                   </div>

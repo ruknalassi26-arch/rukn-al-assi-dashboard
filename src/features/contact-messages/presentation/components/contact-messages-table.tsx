@@ -234,9 +234,9 @@ export function ContactMessagesTable() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="read">Read</SelectItem>
-                <SelectItem value="replied">Replied</SelectItem>
+                <SelectItem value="new">{tCommon("new")}</SelectItem>
+                <SelectItem value="read">{tCommon("read")}</SelectItem>
+                <SelectItem value="replied">{tCommon("replied")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -338,7 +338,7 @@ export function ContactMessagesTable() {
                         {/* Subject & Preview */}
                         <TableCell className="text-sm">
                           <div className="font-medium text-foreground truncate max-w-[200px]">
-                            {msg.subject ?? "General Inquiry"}
+                            {msg.subject ?? tCommon("generalInquiry")}
                           </div>
                           <div className="text-xs text-muted-foreground truncate max-w-[240px]">
                             {msg.message}

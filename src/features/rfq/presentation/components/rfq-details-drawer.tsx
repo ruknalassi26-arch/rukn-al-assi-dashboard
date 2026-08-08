@@ -4,6 +4,7 @@
 // RFQ Request Full Details Sheet Component
 // ==============================================================================
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   FileText,
   Mail,
@@ -40,6 +41,8 @@ import { RFQ_STATUS_LABELS, RFQ_STATUS_VARIANTS } from "../../domain/enums/rfq.e
 import type { RfqStatus } from "../../domain/entities/rfq-request.entity";
 
 export function RfqDetailsDrawer() {
+  const t = useTranslations("rfqAdmin");
+  const tCommon = useTranslations("common");
   const {
     drawerOpen,
     selectedRfqId,
@@ -64,10 +67,15 @@ export function RfqDetailsDrawer() {
     <Dialog open={drawerOpen} onOpenChange={(open) => !open && closeDrawer()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between gap-4 border-b pb-4">
+          <DialogTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
             <div className="flex items-center gap-2 text-lg font-bold">
               <FileText className="h-5 w-5 text-primary" />
-              <span>RFQ Details #{rfq?.referenceNumber}</span>
+              <span>{t("title")}</span>
+              {rfq && (
+                <span className="text-xs font-mono font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                  #{rfq.referenceNumber}
+                </span>
+              )}
             </div>
 
             {rfq && (
@@ -77,7 +85,7 @@ export function RfqDetailsDrawer() {
                   onClick={() => openEmailModal(rfq.id)}
                   className="gap-1.5"
                 >
-                  <Send className="h-4 w-4" /> Reply by Email
+                  <Send className="h-4 w-4" /> {tCommon("toEmail")}
                 </Button>
               </div>
             )}
@@ -92,23 +100,19 @@ export function RfqDetailsDrawer() {
           </div>
         ) : rfq ? (
           <div className="space-y-6 py-2">
-            {/* Status & Reference Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-muted/30 border">
+            {/* Status Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card border shadow-2xs">
               <div>
                 <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                  Reference Number
+                  Submitted Date
                 </span>
-                <h3 className="text-xl font-mono font-bold text-primary">#{rfq.referenceNumber}</h3>
-                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  Received: {rfq.createdAt.toLocaleDateString()} at {rfq.createdAt.toLocaleTimeString()}
+                <p className="text-sm font-semibold text-foreground flex items-center gap-1.5 mt-0.5">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  {rfq.createdAt.toLocaleDateString()} at {rfq.createdAt.toLocaleTimeString()}
                 </p>
               </div>
 
-              <div className="flex flex-col sm:items-end gap-2">
-                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                  Current Status
-                </span>
+              <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <Select
                     value={rfq.status}
@@ -116,13 +120,13 @@ export function RfqDetailsDrawer() {
                     disabled={updateStatusMutation.isPending}
                   >
                     <SelectTrigger className="w-[150px] h-9">
-                      <SelectValue placeholder="Update Status" />
+                      <SelectValue placeholder={tCommon("status")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="reviewed">In Review</SelectItem>
-                      <SelectItem value="quoted">Quoted</SelectItem>
-                      <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="pending">{tCommon("pending")}</SelectItem>
+                      <SelectItem value="reviewed">{tCommon("reviewed")}</SelectItem>
+                      <SelectItem value="quoted">{tCommon("quoted")}</SelectItem>
+                      <SelectItem value="closed">{tCommon("closed")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <Badge variant={RFQ_STATUS_VARIANTS[rfq.status]}>

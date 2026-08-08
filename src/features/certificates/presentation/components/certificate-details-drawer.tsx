@@ -6,6 +6,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Shield, Edit, Calendar, Building2, Layers } from "lucide-react";
 import {
   Dialog,
@@ -21,6 +22,8 @@ import { useCertificateStore } from "../stores/certificate.store";
 import { useCertificate } from "@shared/hooks/certificates/use-certificate-hooks";
 
 export function CertificateDetailsDrawer() {
+  const t = useTranslations("certificates");
+  const tCommon = useTranslations("common");
   const { drawerOpen, selectedCertificateId, closeDrawer } = useCertificateStore();
   const { data: certificate, isLoading } = useCertificate(selectedCertificateId ?? "");
 
@@ -33,12 +36,12 @@ export function CertificateDetailsDrawer() {
           <DialogTitle className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-lg font-bold">
               <Shield className="h-5 w-5 text-primary" />
-              <span>Certificate Details</span>
+              <span>{t("title")}</span>
             </div>
             {certificate && (
               <Link href={`/admin/certificates/edit/${certificate.id}`} onClick={() => closeDrawer()}>
                 <Button size="sm" variant="outline" className="gap-1.5">
-                  <Edit className="h-4 w-4" /> Edit Certificate
+                  <Edit className="h-4 w-4" /> {tCommon("edit")}
                 </Button>
               </Link>
             )}
@@ -110,7 +113,7 @@ export function CertificateDetailsDrawer() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="font-semibold">Expiry Date:</span>
                 <span className={certificate.isExpired ? "font-bold text-destructive" : ""}>
-                  {certificate.expiryDate ?? "No Expiry"}
+                  {certificate.expiryDate ?? tCommon("noExpiry")}
                 </span>
               </div>
             </div>

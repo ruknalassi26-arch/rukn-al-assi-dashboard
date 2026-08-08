@@ -6,6 +6,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Users, Edit, Mail, Phone, Globe, Briefcase, Layers } from "lucide-react";
 import {
   Dialog,
@@ -21,6 +22,8 @@ import { useTeamStore } from "../stores/team.store";
 import { useTeamMember } from "@shared/hooks/team/use-team-hooks";
 
 export function TeamMemberDetailsDrawer() {
+  const t = useTranslations("teamAdmin");
+  const tCommon = useTranslations("common");
   const { drawerOpen, selectedMemberId, closeDrawer } = useTeamStore();
   const { data: member, isLoading } = useTeamMember(selectedMemberId ?? "");
 
@@ -33,12 +36,12 @@ export function TeamMemberDetailsDrawer() {
           <DialogTitle className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-lg font-bold">
               <Users className="h-5 w-5 text-primary" />
-              <span>Team Member Details</span>
+              <span>{t("title")}</span>
             </div>
             {member && (
               <Link href={`/admin/team/edit/${member.id}`} onClick={() => closeDrawer()}>
                 <Button size="sm" variant="outline" className="gap-1.5">
-                  <Edit className="h-4 w-4" /> Edit Profile
+                  <Edit className="h-4 w-4" /> {tCommon("edit")}
                 </Button>
               </Link>
             )}

@@ -244,8 +244,8 @@ export function ServiceTable() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="active">{tCommon("active")}</SelectItem>
+                <SelectItem value="draft">{tCommon("draft")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -261,8 +261,8 @@ export function ServiceTable() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allFeatured")}</SelectItem>
-                <SelectItem value="featured">Featured Only</SelectItem>
-                <SelectItem value="standard">Standard Only</SelectItem>
+                <SelectItem value="featured">{tCommon("featuredOnly")}</SelectItem>
+                <SelectItem value="standard">{tCommon("standardOnly")}</SelectItem>
               </SelectContent>
             </Select>
           </div>

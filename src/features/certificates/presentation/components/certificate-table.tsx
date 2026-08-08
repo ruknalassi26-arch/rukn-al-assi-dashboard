@@ -209,8 +209,8 @@ export function CertificateTable() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="active">{tCommon("active")}</SelectItem>
+                <SelectItem value="draft">{tCommon("draft")}</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -216,9 +216,9 @@ export function ProductTable() {
               <SelectTrigger className="text-xs"><SelectValue placeholder={t("allStatuses")} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
+                <SelectItem value="active">{tCommon("active")}</SelectItem>
+                <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+                <SelectItem value="archived">{tCommon("archived")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -227,8 +227,8 @@ export function ProductTable() {
               <SelectTrigger className="text-xs"><SelectValue placeholder={t("allFeatured")} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allFeatured")}</SelectItem>
-                <SelectItem value="featured">Featured Only</SelectItem>
-                <SelectItem value="standard">Standard Only</SelectItem>
+                <SelectItem value="featured">{tCommon("featuredOnly")}</SelectItem>
+                <SelectItem value="standard">{tCommon("standardOnly")}</SelectItem>
               </SelectContent>
             </Select>
 

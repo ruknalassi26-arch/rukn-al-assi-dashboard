@@ -6,6 +6,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { FolderKanban, Edit, Calendar, Tag, Layers } from "lucide-react";
 import {
   Dialog,
@@ -21,6 +22,8 @@ import { useCategoryStore } from "../stores/category.store";
 import { useCategory } from "@shared/hooks/categories/use-category-hooks";
 
 export function CategoryDetailsDrawer() {
+  const t = useTranslations("categories");
+  const tCommon = useTranslations("common");
   const { drawerOpen, selectedCategoryId, closeDrawer } = useCategoryStore();
   const { data: category, isLoading } = useCategory(selectedCategoryId ?? "");
 
@@ -33,12 +36,12 @@ export function CategoryDetailsDrawer() {
           <DialogTitle className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-lg font-bold">
               <FolderKanban className="h-5 w-5 text-primary" />
-              <span>Category Details</span>
+              <span>{t("title")}</span>
             </div>
             {category && (
               <Link href={`/admin/categories/edit/${category.id}`} onClick={() => closeDrawer()}>
                 <Button size="sm" variant="outline" className="gap-1.5">
-                  <Edit className="h-4 w-4" /> Edit
+                  <Edit className="h-4 w-4" /> {tCommon("edit")}
                 </Button>
               </Link>
             )}

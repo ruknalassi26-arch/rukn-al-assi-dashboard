@@ -4,6 +4,7 @@
 // Customer Contact Message Details Sheet Component
 // ==============================================================================
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Mail,
   Phone,
@@ -36,6 +37,8 @@ import { CONTACT_MESSAGE_STATUS_LABELS, CONTACT_MESSAGE_STATUS_VARIANTS } from "
 import type { ContactMessageStatus } from "../../domain/entities/contact-message.entity";
 
 export function MessageDetailsDrawer() {
+  const t = useTranslations("contactAdmin");
+  const tCommon = useTranslations("common");
   const {
     drawerOpen,
     selectedMessageId,
@@ -62,7 +65,7 @@ export function MessageDetailsDrawer() {
           <DialogTitle className="flex items-center justify-between gap-4 border-b pb-4">
             <div className="flex items-center gap-2 text-lg font-bold">
               <Mail className="h-5 w-5 text-primary" />
-              <span>Customer Message Details</span>
+              <span>{t("drawerTitle")}</span>
             </div>
 
             {msg && (
@@ -71,7 +74,7 @@ export function MessageDetailsDrawer() {
                 onClick={() => openEmailModal(msg.id)}
                 className="gap-1.5"
               >
-                <Send className="h-4 w-4" /> Reply by Email
+                <Send className="h-4 w-4" /> {t("replyByEmail")}
               </Button>
             )}
           </DialogTitle>
@@ -88,7 +91,7 @@ export function MessageDetailsDrawer() {
             <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border">
               <div>
                 <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                  Submitted On
+                  {t("submittedOn")}
                 </span>
                 <p className="text-sm font-semibold text-foreground flex items-center gap-1 mt-0.5">
                   <Calendar className="h-4 w-4 text-primary" />
@@ -103,12 +106,12 @@ export function MessageDetailsDrawer() {
                   disabled={updateStatusMutation.isPending}
                 >
                   <SelectTrigger className="w-[140px] h-9">
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder={tCommon("status")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="new">New</SelectItem>
-                    <SelectItem value="read">Read</SelectItem>
-                    <SelectItem value="replied">Replied</SelectItem>
+                    <SelectItem value="new">{tCommon("new")}</SelectItem>
+                    <SelectItem value="read">{tCommon("read")}</SelectItem>
+                    <SelectItem value="replied">{tCommon("replied")}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Badge variant={CONTACT_MESSAGE_STATUS_VARIANTS[msg.status]}>
@@ -120,21 +123,21 @@ export function MessageDetailsDrawer() {
             {/* Customer Contact Details */}
             <div className="space-y-3">
               <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
-                <User className="h-4 w-4 text-primary" /> Sender Information
+                <User className="h-4 w-4 text-primary" /> {t("senderInfo")}
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-lg border bg-background text-sm">
                 <div>
-                  <span className="text-xs font-semibold text-muted-foreground block">Customer Name</span>
+                  <span className="text-xs font-semibold text-muted-foreground block">{t("table.customerName")}</span>
                   <span className="font-bold text-foreground">{msg.name}</span>
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-muted-foreground block">Email Address</span>
+                  <span className="text-xs font-semibold text-muted-foreground block">{t("table.emailPhone")}</span>
                   <a href={`mailto:${msg.email}`} className="text-primary underline font-medium">
                     {msg.email}
                   </a>
                 </div>
                 <div className="col-span-1 sm:col-span-2">
-                  <span className="text-xs font-semibold text-muted-foreground block">Phone Number</span>
+                  <span className="text-xs font-semibold text-muted-foreground block">{tCommon("primaryPhone")}</span>
                   <span>{msg.phone ?? "N/A"}</span>
                 </div>
               </div>
@@ -143,7 +146,7 @@ export function MessageDetailsDrawer() {
             {/* Message Subject & Body */}
             <div className="space-y-2">
               <h4 className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
-                <MessageSquare className="h-4 w-4 text-primary" /> Subject: {msg.subject ?? "General Inquiry"}
+                <MessageSquare className="h-4 w-4 text-primary" /> {t("messageSubject")}: {msg.subject ?? tCommon("generalInquiry")}
               </h4>
               <div className="p-4 rounded-lg border bg-muted/20 text-sm whitespace-pre-wrap leading-relaxed font-sans">
                 {msg.message}
@@ -172,7 +175,7 @@ export function MessageDetailsDrawer() {
             {/* Admin Internal Notes */}
             <div className="space-y-2">
               <Label htmlFor="internalNotes" className="text-xs font-semibold uppercase text-muted-foreground">
-                Internal Admin Notes
+                {t("internalNotes")}
               </Label>
               <Textarea
                 id="internalNotes"
@@ -188,7 +191,7 @@ export function MessageDetailsDrawer() {
                   onClick={() => handleStatusChange(msg.status)}
                   disabled={updateStatusMutation.isPending}
                 >
-                  Save Notes
+                  {t("saveNotes")}
                 </Button>
               </div>
             </div>

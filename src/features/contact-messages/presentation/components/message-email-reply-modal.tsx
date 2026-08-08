@@ -7,6 +7,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Mail, Send, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -30,6 +31,8 @@ const messageReplySchema = z.object({
 export type MessageReplyFormValues = z.infer<typeof messageReplySchema>;
 
 export function MessageEmailReplyModal() {
+  const t = useTranslations("contactAdmin");
+  const tCommon = useTranslations("common");
   const { emailModalOpen, selectedMessageId, closeEmailModal } = useContactMessagesStore();
   const { data: contactMsg } = useContactMessage(selectedMessageId ?? "");
   const sendEmailMutation = useSendMessageReply();
@@ -74,43 +77,43 @@ export function MessageEmailReplyModal() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5 text-primary" />
-            Send Email Reply to Customer
+            {t("replyModalTitle")}
           </DialogTitle>
           <DialogDescription>
-            Send a direct email reply to <span className="font-semibold text-foreground">{contactMsg.name}</span> ({contactMsg.email}).
+            {t("replyModalSubtitle")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label htmlFor="to">To Email</Label>
+            <Label htmlFor="to">{tCommon("toEmail")}</Label>
             <Input id="to" value={`${contactMsg.name} <${contactMsg.email}>`} disabled className="bg-muted text-xs font-mono" />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="subject">Subject *</Label>
+            <Label htmlFor="subject">{t("messageSubject")} *</Label>
             <Input id="subject" {...register("subject")} />
             {errors.subject && <p className="text-xs font-semibold text-destructive">{errors.subject.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="message">Email Message Body *</Label>
+            <Label htmlFor="message">{t("messageContent")} *</Label>
             <Textarea id="message" rows={8} {...register("message")} className="text-sm font-sans" />
             {errors.message && <p className="text-xs font-semibold text-destructive">{errors.message.message}</p>}
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={closeEmailModal} disabled={sendEmailMutation.isPending}>
-              Cancel
+              {tCommon("cancel")}
             </Button>
             <Button type="submit" disabled={sendEmailMutation.isPending} className="gap-2 min-w-[130px]">
               {sendEmailMutation.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Sending...
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t("sending")}
                 </>
               ) : (
                 <>
-                  <Send className="h-4 w-4" /> Send Email
+                  <Send className="h-4 w-4" /> {t("sendReply")}
                 </>
               )}
             </Button>

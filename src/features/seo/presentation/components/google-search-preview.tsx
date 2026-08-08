@@ -4,6 +4,7 @@
 // Interactive Real-Time Google Search Result Preview Component
 // ==============================================================================
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Search, Globe, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, Badge } from "@shared/ui";
 import { SEO_PAGE_LABELS } from "../../domain/enums/seo.enums";
@@ -22,6 +23,7 @@ export function GoogleSearchPreview({
   description,
   isIndexed,
 }: GoogleSearchPreviewProps) {
+  const tCommon = useTranslations("common");
   const pageMeta = SEO_PAGE_LABELS[pageKey] ?? { label: "Page", urlPath: "/" };
   const displayUrl = `https://www.ruknalassi.com${pageMeta.urlPath === "/" ? "" : pageMeta.urlPath}`;
 
@@ -36,7 +38,7 @@ export function GoogleSearchPreview({
         <CardTitle className="text-sm font-bold flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-blue-600" />
-            <span>Live Google Search Snippet Preview</span>
+            <span>{tCommon("liveGooglePreview")}</span>
           </div>
           <Badge variant={isIndexed ? "default" : "destructive"} className="text-[10px]">
             {isIndexed ? "Index (Searchable)" : "No Index (Hidden)"}

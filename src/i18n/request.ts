@@ -18,9 +18,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   let messages = enMessages;
   if (locale === "ar") {
-    messages = arMessages;
+    messages = (arMessages as unknown) as typeof enMessages;
   } else if (locale === "ckb" || locale === "ku") {
-    messages = ckbMessages as typeof enMessages;
+    messages = (ckbMessages as unknown) as typeof enMessages;
   }
 
   return {

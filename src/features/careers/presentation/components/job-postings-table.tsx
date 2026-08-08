@@ -226,7 +226,7 @@ export function JobPostingsTable() {
                   <TableCell>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Building className="h-3.5 w-3.5 shrink-0" />
-                      <span>{posting.department || "General"}</span>
+                      <span>{posting.department || tCommon("all")}</span>
                     </div>
                   </TableCell>
                   <TableCell>{getEmploymentTypeBadge(posting.employmentType)}</TableCell>
@@ -240,7 +240,7 @@ export function JobPostingsTable() {
                   <TableCell>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Calendar className="h-3.5 w-3.5 shrink-0" />
-                      <span>{posting.closingDate ? new Date(posting.closingDate).toLocaleDateString() : "Open"}</span>
+                      <span>{posting.closingDate ? new Date(posting.closingDate).toLocaleDateString() : tCommon("open")}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-center font-mono text-xs">{posting.sortOrder}</TableCell>

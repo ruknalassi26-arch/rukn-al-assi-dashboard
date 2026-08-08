@@ -5,6 +5,7 @@
 // ==============================================================================
 import React from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Download, FileText, ExternalLink, Paperclip } from "lucide-react";
 import {
   Dialog,
@@ -16,6 +17,7 @@ import {
 import { useRfqStore } from "../stores/rfq.store";
 
 export function AttachmentViewerDialog() {
+  const t = useTranslations("rfqAdmin");
   const { attachmentViewerOpen, currentAttachmentUrl, closeAttachmentViewer } = useRfqStore();
 
   if (!currentAttachmentUrl) return null;
@@ -30,7 +32,7 @@ export function AttachmentViewerDialog() {
           <DialogTitle className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Paperclip className="h-5 w-5 text-primary" />
-              <span>RFQ Attachment Document</span>
+              <span>{t("attachmentTitle")}</span>
             </div>
             <div className="flex items-center gap-2">
               <a href={currentAttachmentUrl} target="_blank" rel="noopener noreferrer" download>

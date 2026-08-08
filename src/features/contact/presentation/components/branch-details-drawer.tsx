@@ -5,6 +5,7 @@
 // ==============================================================================
 import React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Building2, Edit, Mail, Phone, MapPin, Clock, ExternalLink } from "lucide-react";
 import {
   Dialog,
@@ -20,6 +21,8 @@ import { useContactStore } from "../stores/contact.store";
 import { useBranch } from "@shared/hooks/contact/use-contact-hooks";
 
 export function BranchDetailsDrawer() {
+  const t = useTranslations("branchesAdmin");
+  const tCommon = useTranslations("common");
   const { drawerOpen, selectedBranchId, closeDrawer } = useContactStore();
   const { data: branch, isLoading } = useBranch(selectedBranchId ?? "");
 
@@ -32,12 +35,12 @@ export function BranchDetailsDrawer() {
           <DialogTitle className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-lg font-bold">
               <Building2 className="h-5 w-5 text-primary" />
-              <span>Branch Details</span>
+              <span>{t("title")}</span>
             </div>
             {branch && (
               <Link href={`/admin/contact/branches/edit/${branch.id}`} onClick={() => closeDrawer()}>
                 <Button size="sm" variant="outline" className="gap-1.5">
-                  <Edit className="h-4 w-4" /> Edit Branch
+                  <Edit className="h-4 w-4" /> {tCommon("edit")}
                 </Button>
               </Link>
             )}

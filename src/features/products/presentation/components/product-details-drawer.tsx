@@ -6,6 +6,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Package, FileText, Edit, Calendar, Tag, Star, ExternalLink } from "lucide-react";
 import {
   Dialog,
@@ -20,6 +21,8 @@ import { useProductStore } from "../stores/product.store";
 import { useProduct } from "@shared/hooks/products/use-product-hooks";
 
 export function ProductDetailsDrawer() {
+  const t = useTranslations("productsAdmin");
+  const tCommon = useTranslations("common");
   const { drawerOpen, selectedProductId, closeDrawer } = useProductStore();
   const { data: product, isLoading } = useProduct(selectedProductId ?? "");
 
@@ -31,13 +34,13 @@ export function ProductDetailsDrawer() {
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-xl">
-              <Package className="h-5 w-5 text-primary" /> Product Preview
+              <Package className="h-5 w-5 text-primary" /> {t("title")}
             </DialogTitle>
 
             {product && (
               <Button asChild size="sm" variant="outline" className="gap-1 text-xs">
                 <Link href={`/admin/products/edit/${product.id}`} onClick={closeDrawer}>
-                  <Edit className="h-3.5 w-3.5" /> Edit Product
+                  <Edit className="h-3.5 w-3.5" /> {tCommon("edit")}
                 </Link>
               </Button>
             )}

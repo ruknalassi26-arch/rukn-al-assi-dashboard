@@ -201,7 +201,7 @@ export function CareerApplicationsTable() {
                     </a>
                   </TableCell>
                   <TableCell className="text-xs font-medium text-foreground">
-                    {app.jobTitle || "General Application"}
+                    {app.jobTitle || tCommon("generalApplication")}
                   </TableCell>
                   <TableCell>
                     <Button asChild size="sm" variant="ghost" className="h-7 gap-1 text-xs text-emerald-600 dark:text-emerald-400">

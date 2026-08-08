@@ -6,6 +6,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Wrench, Edit, Calendar, Star, Layers, Tag } from "lucide-react";
 import {
   Dialog,
@@ -21,6 +22,8 @@ import { useServiceStore } from "../stores/service.store";
 import { useService } from "@shared/hooks/services/use-service-hooks";
 
 export function ServiceDetailsDrawer() {
+  const t = useTranslations("services");
+  const tCommon = useTranslations("common");
   const { drawerOpen, selectedServiceId, closeDrawer } = useServiceStore();
   const { data: service, isLoading } = useService(selectedServiceId ?? "");
 
@@ -33,12 +36,12 @@ export function ServiceDetailsDrawer() {
           <DialogTitle className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-lg font-bold">
               <Wrench className="h-5 w-5 text-primary" />
-              <span>Service Details</span>
+              <span>{t("title")}</span>
             </div>
             {service && (
               <Link href={`/admin/services/edit/${service.id}`} onClick={() => closeDrawer()}>
                 <Button size="sm" variant="outline" className="gap-1.5">
-                  <Edit className="h-4 w-4" /> Edit Service
+                  <Edit className="h-4 w-4" /> {tCommon("edit")}
                 </Button>
               </Link>
             )}

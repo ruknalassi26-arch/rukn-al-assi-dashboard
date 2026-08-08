@@ -62,6 +62,7 @@ import type { RfqRequestEntity, RfqStatus } from "../../domain/entities/rfq-requ
 
 export function RfqTable() {
   const t = useTranslations("rfqAdmin");
+  const tCommon = useTranslations("common");
   const {
     search,
     status,
@@ -366,7 +367,7 @@ export function RfqTable() {
                         <TableCell className="text-sm text-muted-foreground">
                           <div className="flex items-center gap-1.5 font-medium text-foreground">
                             <Package className="h-3.5 w-3.5 text-primary" />
-                            <span>{rfq.productName ?? "General Quotation"}</span>
+                            <span>{rfq.productName ?? tCommon("generalQuotation")}</span>
                           </div>
                           {rfq.quantity && (
                             <div className="text-xs text-muted-foreground">
