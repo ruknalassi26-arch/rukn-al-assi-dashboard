@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Loader2, Save, ArrowLeft, Plus, Trash2, FileText, Sparkles } from "lucide-react";
 import {
   Card,
@@ -66,6 +67,8 @@ interface ProductFormProps {
 
 export function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter();
+  const tForm = useTranslations("productForm");
+  const tCommon = useTranslations("common");
   const { data: categories } = useProductCategories();
 
   const createMutation = useCreateProduct();
@@ -209,21 +212,21 @@ export function ProductForm({ initialData }: ProductFormProps) {
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {isEditing ? `Edit Product: ${initialData?.nameEn}` : "Create New Product"}
+              {isEditing ? `${tForm("editTitle")}: ${initialData?.nameEn}` : tForm("createTitle")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Fill in bilingual details, select categories, upload gallery assets and datasheet specifications.
+              {isEditing ? tForm("editSubtitle") : tForm("createSubtitle")}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button type="button" variant="outline" onClick={() => router.back()} disabled={isPending}>
-            Cancel
+            {tForm("cancel")}
           </Button>
           <Button type="submit" disabled={isPending} className="gap-2">
             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            {isEditing ? "Save Changes" : "Create Product"}
+            {isEditing ? tForm("saveChanges") : tForm("createBtn")}
           </Button>
         </div>
       </div>
@@ -233,9 +236,9 @@ export function ProductForm({ initialData }: ProductFormProps) {
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Multilingual Product Content</CardTitle>
+              <CardTitle>{tForm("contentTitle")}</CardTitle>
               <CardDescription>
-                Switch tabs to enter English and Arabic titles, descriptions, and SEO details. Unsaved changes are preserved across tabs.
+                {tForm("contentSubtitle")}
               </CardDescription>
             </CardHeader>
 
@@ -244,19 +247,19 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 englishFields={
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="nameEn">Product Name (English) *</Label>
-                      <Input id="nameEn" {...register("nameEn")} placeholder="e.g. High Pressure Industrial Valve" />
+                      <Label htmlFor="nameEn">{tForm("nameEn")} *</Label>
+                      <Input id="nameEn" {...register("nameEn")} />
                       {errors.nameEn && <span className="text-xs text-destructive">{errors.nameEn.message}</span>}
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="shortDescriptionEn">Short Summary (English)</Label>
-                      <Textarea id="shortDescriptionEn" rows={2} {...register("shortDescriptionEn")} placeholder="Brief overview for cards & previews..." />
+                      <Label htmlFor="shortDescriptionEn">{tForm("shortEn")}</Label>
+                      <Textarea id="shortDescriptionEn" rows={2} {...register("shortDescriptionEn")} />
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="descriptionEn">Full Description & Specifications (English)</Label>
-                      <Textarea id="descriptionEn" rows={6} {...register("descriptionEn")} placeholder="Comprehensive product specifications, features, applications..." />
+                      <Label htmlFor="descriptionEn">{tForm("fullEn")}</Label>
+                      <Textarea id="descriptionEn" rows={6} {...register("descriptionEn")} />
                     </div>
 
                     {/* SEO English Sub-section */}
@@ -264,11 +267,11 @@ export function ProductForm({ initialData }: ProductFormProps) {
                       <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">SEO Meta (English)</h4>
                       <div className="space-y-1.5">
                         <Label htmlFor="seoTitleEn">Meta Title (English)</Label>
-                        <Input id="seoTitleEn" {...register("seoTitleEn")} placeholder="Custom browser title tag" />
+                        <Input id="seoTitleEn" {...register("seoTitleEn")} />
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="seoDescriptionEn">Meta Description (English)</Label>
-                        <Textarea id="seoDescriptionEn" rows={2} {...register("seoDescriptionEn")} placeholder="Search engine snippet text..." />
+                        <Textarea id="seoDescriptionEn" rows={2} {...register("seoDescriptionEn")} />
                       </div>
                     </div>
                   </div>
@@ -276,19 +279,19 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 arabicFields={
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="nameAr">اسم المنتج (بالعربية) *</Label>
-                      <Input id="nameAr" dir="rtl" {...register("nameAr")} placeholder="مثال: صمام صناعي عالي الضغط" />
+                      <Label htmlFor="nameAr">{tForm("nameAr")} *</Label>
+                      <Input id="nameAr" dir="rtl" {...register("nameAr")} />
                       {errors.nameAr && <span className="text-xs text-destructive">{errors.nameAr.message}</span>}
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="shortDescriptionAr">الملخص القصير (بالعربية)</Label>
-                      <Textarea id="shortDescriptionAr" dir="rtl" rows={2} {...register("shortDescriptionAr")} placeholder="نبذة مختصرة للعرض في القوائم..." />
+                      <Label htmlFor="shortDescriptionAr">{tForm("shortAr")}</Label>
+                      <Textarea id="shortDescriptionAr" dir="rtl" rows={2} {...register("shortDescriptionAr")} />
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="descriptionAr">الوصف الكامل والمواصفات (بالعربية)</Label>
-                      <Textarea id="descriptionAr" dir="rtl" rows={6} {...register("descriptionAr")} placeholder="شرح تفصيلي للمنتج والمواصفات الفنية..." />
+                      <Label htmlFor="descriptionAr">{tForm("fullAr")}</Label>
+                      <Textarea id="descriptionAr" dir="rtl" rows={6} {...register("descriptionAr")} />
                     </div>
 
                     {/* SEO Arabic Sub-section */}
@@ -308,17 +311,17 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 kurdishFields={
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="nameKu">Product Name (Kurdish)</Label>
+                      <Label htmlFor="nameKu">{tForm("nameKu")}</Label>
                       <Input id="nameKu" dir="rtl" {...register("nameKu")} />
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="shortDescriptionKu">Short Summary (Kurdish)</Label>
+                      <Label htmlFor="shortDescriptionKu">{tForm("shortKu")}</Label>
                       <Textarea id="shortDescriptionKu" dir="rtl" rows={2} {...register("shortDescriptionKu")} />
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="descriptionKu">Full Description & Specifications (Kurdish)</Label>
+                      <Label htmlFor="descriptionKu">{tForm("fullKu")}</Label>
                       <Textarea id="descriptionKu" dir="rtl" rows={6} {...register("descriptionKu")} />
                     </div>
 
@@ -343,15 +346,15 @@ export function ProductForm({ initialData }: ProductFormProps) {
           {/* Media & Gallery Uploads */}
           <Card>
             <CardHeader>
-              <CardTitle>Product Media & Gallery Assets</CardTitle>
+              <CardTitle>{tForm("mediaTitle")}</CardTitle>
               <CardDescription>
-                Upload high-resolution product images and technical PDF datasheets to Supabase Storage.
+                {tForm("mediaSubtitle")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Thumbnail Image */}
               <ImageUploader
-                label="Primary Product Thumbnail Image"
+                label={tForm("thumbnailLabel")}
                 value={thumbnailValue ?? null}
                 onChange={(url) => setValue("thumbnail", url)}
                 folder="product-thumbnails"
@@ -360,7 +363,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
               {/* Gallery Images List */}
               <div className="space-y-3 border p-4 rounded-lg bg-muted/10">
                 <div className="flex items-center justify-between">
-                  <Label className="font-semibold text-sm">Product Gallery Images</Label>
+                  <Label className="font-semibold text-sm">{tForm("galleryLabel")}</Label>
                   <Button
                     type="button"
                     variant="outline"
@@ -368,7 +371,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     onClick={() => appendImage({ url: "" })}
                     className="gap-1 text-xs"
                   >
-                    <Plus className="h-3 w-3" /> Add Image URL / Slot
+                    <Plus className="h-3 w-3" /> {tForm("addImage")}
                   </Button>
                 </div>
 
@@ -377,7 +380,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     <div className="flex items-center gap-2">
                       <Input
                         {...register(`images.${idx}.url`)}
-                        placeholder="Image URL or upload below..."
+                        placeholder="Image URL..."
                         className="text-xs"
                       />
                       <Button
@@ -391,7 +394,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                       </Button>
                     </div>
                     <ImageUploader
-                      label={`Gallery Image #${idx + 1}`}
+                      label={`${tForm("galleryLabel")} #${idx + 1}`}
                       value={field.url}
                       onChange={(url) => setValue(`images.${idx}.url`, url ?? "")}
                       folder="products"
@@ -403,17 +406,17 @@ export function ProductForm({ initialData }: ProductFormProps) {
               {/* Technical Datasheet Upload */}
               <div className="space-y-2 border p-4 rounded-lg bg-muted/10">
                 <Label className="font-semibold text-sm flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" /> Technical PDF Datasheet Document
+                  <FileText className="h-4 w-4 text-primary" /> {tForm("datasheetTitle")}
                 </Label>
                 <div className="flex items-center gap-3">
                   <Input
                     value={datasheetUrlValue ?? ""}
                     onChange={(e) => setValue("datasheetUrl", e.target.value)}
-                    placeholder="PDF URL or upload via storage..."
+                    placeholder="PDF URL..."
                     className="text-xs"
                   />
                   <ImageUploader
-                    label="Upload PDF / File"
+                    label={tForm("uploadPdf")}
                     value={datasheetUrlValue ?? null}
                     onChange={(url) => setValue("datasheetUrl", url)}
                     folder="product-datasheets"
@@ -436,13 +439,13 @@ export function ProductForm({ initialData }: ProductFormProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Publishing & Organization</CardTitle>
+              <CardTitle>{tForm("publishingTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Slug Generator */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="slug">URL Slug *</Label>
+                  <Label htmlFor="slug">{tForm("slug")} *</Label>
                   <Button
                     type="button"
                     variant="ghost"
@@ -450,7 +453,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     onClick={generateSlug}
                     className="h-6 text-[11px] gap-1 text-primary"
                   >
-                    <Sparkles className="h-3 w-3" /> Auto Slug
+                    <Sparkles className="h-3 w-3" /> {tForm("autoSlug")}
                   </Button>
                 </div>
                 <Input id="slug" {...register("slug")} placeholder="industrial-valve-x" />
@@ -459,12 +462,12 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
               {/* Category Select */}
               <div className="space-y-1.5">
-                <Label>Product Category</Label>
+                <Label>{tForm("category")}</Label>
                 <Select
                   value={categoryIdValue ?? ""}
                   onValueChange={(val) => setValue("categoryId", val)}
                 >
-                  <SelectTrigger><SelectValue placeholder="Select a category..." /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={tForm("selectCategory")} /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Uncategorized</SelectItem>
                     {categories?.map((cat) => (
@@ -476,15 +479,15 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
               {/* Status Select */}
               <div className="space-y-1.5">
-                <Label>Visibility Status</Label>
+                <Label>{tForm("status")}</Label>
                 <Select
                   value={statusValue}
                   onValueChange={(val: "active" | "draft" | "archived") => setValue("status", val)}
                 >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active (Visible)</SelectItem>
-                    <SelectItem value="draft">Draft (Hidden)</SelectItem>
+                    <SelectItem value="active">{tCommon("active")}</SelectItem>
+                    <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                     <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
@@ -493,8 +496,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
               {/* Featured Toggle */}
               <div className="flex items-center justify-between border p-3 rounded-lg">
                 <div>
-                  <Label className="font-semibold text-sm">Feature on Homepage</Label>
-                  <p className="text-xs text-muted-foreground">Highlight in featured products carousel.</p>
+                  <Label className="font-semibold text-sm">{tForm("featured")}</Label>
+                  <p className="text-xs text-muted-foreground">{tForm("featuredDesc")}</p>
                 </div>
                 <Switch
                   checked={isFeaturedValue}
@@ -504,7 +507,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
               {/* Display Order */}
               <div className="space-y-1.5">
-                <Label htmlFor="sortOrder">Display Sort Order</Label>
+                <Label htmlFor="sortOrder">{tForm("sortOrder")}</Label>
                 <Input
                   id="sortOrder"
                   type="number"
