@@ -59,7 +59,7 @@ import {
   useBulkUpdateTeamMemberStatus,
 } from "@shared/hooks/team/use-team-hooks";
 import { useTranslations } from "next-intl";
-import { TEAM_MEMBER_STATUS_LABELS, TEAM_MEMBER_STATUS_VARIANTS } from "../../domain/enums/team.enums";
+import { TEAM_STATUS_LABELS, TEAM_STATUS_VARIANTS } from "../../domain/enums/team.enums";
 import type { TeamMemberEntity, TeamMemberStatus } from "../../domain/entities/team-member.entity";
 
 export function TeamMemberTable() {
