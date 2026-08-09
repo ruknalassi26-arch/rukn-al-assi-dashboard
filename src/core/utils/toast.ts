@@ -192,6 +192,22 @@ const TOAST_DICTIONARY: Record<string, { ar: string; ku: string }> = {
 function translateToastMessage(msg: string): string {
   if (typeof window === "undefined") return msg;
   const lang = document.documentElement.lang || "en";
+
+  // Dynamic "Welcome back, {name}!" matching
+  if (msg.toLowerCase().startsWith("welcome back")) {
+    const name = msg.replace(/^welcome back/i, "").replace(/^,\s*/, "").replace(/!$/, "").trim();
+    if (lang === "ar") return `مرحباً بعودتك، ${name}!`;
+    if (lang === "ku" || lang === "ckb") return `بەخێربێیتەوە، ${name}!`;
+    return `Welcome back, ${name}!`;
+  }
+
+  // Dynamic "Signed out successfully" matching
+  if (msg.includes("Signed out successfully")) {
+    if (lang === "ar") return "تم تسجيل الخروج بنجاح";
+    if (lang === "ku" || lang === "ckb") return "بە سەرکەوتوویی چوویە دەرەوە";
+    return "Signed out successfully";
+  }
+
   if (lang === "ar") {
     if (TOAST_DICTIONARY[msg]?.ar) return TOAST_DICTIONARY[msg].ar;
     return translateErrorMessage(msg, "ar");
