@@ -27,7 +27,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
     try {
       const { data, error } = await (this.supabase.from("company_profile" as any) as any)
         .select("*, company_profile_translations(*)")
-        .eq("id", 1)
+        .limit(1)
         .maybeSingle();
 
       if (!error && data) {
@@ -37,19 +37,19 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
         return new CompanyInfoEntity({
           id: String(data.id || 1),
-          companyNameEn: "Rukn Al Assi",
-          companyNameAr: "ركن العاصي",
-          shortDescriptionEn: en.history || "Engineering & Hydraulic Solutions",
-          shortDescriptionAr: ar.history || "حلول الهندسة والهيدروليك",
-          fullDescriptionEn: en.history || "",
-          fullDescriptionAr: ar.history || "",
-          establishedYear: 2010,
-          headquarters: "Erbil, Iraq",
-          website: "https://ruknalassi.com",
-          phone: "+964 750 000 0000",
-          email: "info@ruknalassi.com",
-          status: "active",
-          updatedAt: new Date(),
+          companyNameEn: en.company_name || "Rukn Al Assi Co.",
+          companyNameAr: ar.company_name || "شركة ركن العاصي",
+          shortDescriptionEn: en.short_summary || "Engineering & Hydraulic Solutions",
+          shortDescriptionAr: ar.short_summary || "حلول الهندسة والهيدروليك",
+          fullDescriptionEn: en.full_story || en.short_summary || "Rukn Al Assi is a premier provider of industrial hydraulic equipment.",
+          fullDescriptionAr: ar.full_story || ar.short_summary || "شركة ركن العاصي هي مزود رائد للمعدات الهيدروليكية الصناعية.",
+          establishedYear: Number(data.established_year) || 2010,
+          headquarters: data.headquarters || "Erbil, Iraq",
+          website: data.website || "https://ruknalassi.com",
+          phone: data.phone || "+964 750 000 0000",
+          email: data.email || "info@ruknalassi.com",
+          status: data.status || "active",
+          updatedAt: new Date(data.updated_at || Date.now()),
         });
       }
     } catch {
@@ -76,20 +76,67 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
   async updateCompanyInfo(data: Partial<CompanyInfoEntity>): Promise<CompanyInfoEntity> {
     try {
-      await (this.supabase.from("company_profile_translations" as any) as any).upsert([
-        {
-          company_profile_id: 1,
+      // 1. Get or create company_profile base row
+      let profileId = 1;
+      const { data: existing } = await (this.supabase.from("company_profile" as any) as any)
+        .select("id")
+        .limit(1)
+        .maybeSingle();
+
+      if (existing?.id) {
+        profileId = existing.id;
+      }
+
+      const basePayload: Record<string, unknown> = {};
+      if (data.establishedYear !== undefined) basePayload.established_year = data.establishedYear;
+      if (data.headquarters !== undefined) basePayload.headquarters = data.headquarters;
+      if (data.phone !== undefined) basePayload.phone = data.phone;
+      if (data.email !== undefined) basePayload.email = data.email;
+      if (data.website !== undefined) basePayload.website = data.website;
+      if (data.status !== undefined) basePayload.status = data.status;
+
+      if (Object.keys(basePayload).length > 0) {
+        await (this.supabase.from("company_profile" as any) as any)
+          .upsert({ id: profileId, ...basePayload });
+      }
+
+      // 2. Upsert translations in company_profile_translations
+      const transPayloads = [];
+
+      if (
+        data.companyNameEn !== undefined ||
+        data.shortDescriptionEn !== undefined ||
+        data.fullDescriptionEn !== undefined
+      ) {
+        transPayloads.push({
+          company_profile_id: profileId,
           language_code: "en",
-          history: data.fullDescriptionEn || data.shortDescriptionEn || "",
-        },
-        {
-          company_profile_id: 1,
+          company_name: data.companyNameEn || "Rukn Al Assi Co.",
+          short_summary: data.shortDescriptionEn || "",
+          full_story: data.fullDescriptionEn || "",
+        });
+      }
+
+      if (
+        data.companyNameAr !== undefined ||
+        data.shortDescriptionAr !== undefined ||
+        data.fullDescriptionAr !== undefined
+      ) {
+        transPayloads.push({
+          company_profile_id: profileId,
           language_code: "ar",
-          history: data.fullDescriptionAr || data.shortDescriptionAr || "",
-        },
-      ]);
-    } catch {
-      // Fallback
+          company_name: data.companyNameAr || "شركة ركن العاصي",
+          short_summary: data.shortDescriptionAr || "",
+          full_story: data.fullDescriptionAr || "",
+        });
+      }
+
+      if (transPayloads.length > 0) {
+        await (this.supabase.from("company_profile_translations" as any) as any)
+          .upsert(transPayloads, { onConflict: "company_profile_id,language_code" });
+      }
+    } catch (err) {
+      console.error("[SupabaseAboutRepository] updateCompanyInfo error:", err);
     }
 
     return (await this.getCompanyInfo())!;

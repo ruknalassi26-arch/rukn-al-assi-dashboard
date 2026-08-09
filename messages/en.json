@@ -211,14 +211,6 @@
     "roleRestricted": "Role Restrict Access",
     "roleRestrictedDesc": "Your user account role does not have sufficient privileges to access this area."
   },
-  "usersAdmin": {
-    "title": "Admin Users",
-    "subtitle": "Manage administrative user accounts, roles, access permissions, and account status.",
-    "addUser": "Add Admin User",
-    "editUser": "Edit Admin User",
-    "emptyTitle": "No admin users found",
-    "emptyDescription": "Create your first administrative account using the button above."
-  },
   "auth": {
     "login": {
       "title": "Sign in to Admin",
@@ -1325,6 +1317,8 @@
     "editUser": "Edit Admin User",
     "deactivate": "Deactivate Account",
     "activate": "Activate Account",
+    "emptyTitle": "No admin users found",
+    "emptyDescription": "Create your first administrative account using the button above.",
     "table": {
       "avatar": "Avatar",
       "fullName": "Full Name",
