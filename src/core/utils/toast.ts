@@ -216,17 +216,25 @@ export const toast = {
   /** Display an error toast with user-friendly formatting */
   error(error: unknown, fallbackMessage?: string) {
     sonnerToast.dismiss();
-    const rawUserMessage = getFriendlyErrorMessage(error, "ToastNotification");
-    const translatedDescription = translateToastMessage(rawUserMessage);
+
+    let translatedMessage: string;
+    if (typeof error === "string") {
+      translatedMessage = translateToastMessage(error);
+    } else if (error instanceof Error) {
+      translatedMessage = translateToastMessage(error.message);
+    } else {
+      const rawUserMessage = getFriendlyErrorMessage(error, "ToastNotification");
+      translatedMessage = translateToastMessage(rawUserMessage);
+    }
 
     if (fallbackMessage) {
       return sonnerToast.error(translateToastMessage(fallbackMessage), {
-        description: translatedDescription,
+        description: translatedMessage,
         duration: 5000,
       });
     }
 
-    return sonnerToast.error(translatedDescription, {
+    return sonnerToast.error(translatedMessage, {
       duration: 5000,
     });
   },

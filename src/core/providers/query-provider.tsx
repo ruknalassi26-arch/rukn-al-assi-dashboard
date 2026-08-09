@@ -57,8 +57,6 @@ export function QueryProvider({ children }: { children: ReactNode }) {
         mutationCache: new MutationCache({
           onError: (error, _variables, _context, mutation) => {
             logger.error(`[MutationCache] Mutation error on key: ${JSON.stringify(mutation.options.mutationKey)}`, error);
-            // Display toast notification automatically for unhandled mutation failures
-            toast.error(error);
           },
         }),
         defaultOptions: {
