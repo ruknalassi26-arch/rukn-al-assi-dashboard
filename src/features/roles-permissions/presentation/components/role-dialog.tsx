@@ -2,6 +2,7 @@
 // ==============================================================================
 // features/roles-permissions/presentation/components/role-dialog.tsx
 // Dialog for Creating & Editing Security Roles with Predefined Templates & Matrix
+// Compact Layout without Extra Whitespace
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -134,8 +135,8 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden shadow-2xl">
+        <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-primary" />
             {isEditing ? t("editRole") : t("addRole")}
@@ -145,65 +146,67 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        {!isEditing && (
-          <div className="bg-muted/20 border rounded-lg p-3 space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-primary uppercase tracking-wider">
-              <Sparkles className="h-3.5 w-3.5" /> Apply Role Template
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {!isEditing && (
+              <div className="bg-muted/20 border rounded-lg p-3 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-primary uppercase tracking-wider">
+                  <Sparkles className="h-3.5 w-3.5" /> Apply Role Template
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {ROLE_TEMPLATES.map((tmpl) => (
+                    <Button
+                      key={tmpl.slug}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7"
+                      onClick={() => applyTemplate(tmpl.slug)}
+                    >
+                      {tmpl.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="name">{t("form.roleName")} *</Label>
+              <Input
+                id="name"
+                disabled={role?.code === "super_admin" || (role as any)?.isSystemRole || (role as any)?.is_system}
+                {...register("name")}
+                placeholder="e.g. Content Editor"
+              />
+              {errors.name && <span className="text-xs text-destructive">{errors.name.message}</span>}
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {ROLE_TEMPLATES.map((tmpl) => (
-                <Button
-                  key={tmpl.slug}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-7"
-                  onClick={() => applyTemplate(tmpl.slug)}
-                >
-                  {tmpl.name}
-                </Button>
-              ))}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="description">{t("form.description")}</Label>
+              <Textarea
+                id="description"
+                rows={2}
+                {...register("description")}
+                placeholder="Brief summary of access rights granted to this role..."
+              />
+            </div>
+
+            <div className="space-y-1.5 pt-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold">{t("form.permissionsHeader")}</Label>
+                <Badge variant="secondary" className="text-xs font-mono">
+                  {selectedPermissionIds.length} permissions granted
+                </Badge>
+              </div>
+              <PermissionCheckboxGroup
+                allPermissions={allPermissions}
+                selectedPermissionIds={selectedPermissionIds}
+                onChange={(ids) => setValue("permissionIds", ids)}
+              />
             </div>
           </div>
-        )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="name">{t("form.roleName")} *</Label>
-            <Input
-              id="name"
-              disabled={role?.code === "super_admin" || (role as any)?.isSystemRole || (role as any)?.is_system}
-              {...register("name")}
-              placeholder="e.g. Content Editor"
-            />
-            {errors.name && <span className="text-xs text-destructive">{errors.name.message}</span>}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="description">{t("form.description")}</Label>
-            <Textarea
-              id="description"
-              rows={2}
-              {...register("description")}
-              placeholder="Brief summary of access rights granted to this role..."
-            />
-          </div>
-
-          <div className="space-y-1.5 pt-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-semibold">{t("form.permissionsHeader")}</Label>
-              <Badge variant="secondary" className="text-xs font-mono">
-                {selectedPermissionIds.length} permissions granted
-              </Badge>
-            </div>
-            <PermissionCheckboxGroup
-              allPermissions={allPermissions}
-              selectedPermissionIds={selectedPermissionIds}
-              onChange={(ids) => setValue("permissionIds", ids)}
-            />
-          </div>
-
-          <DialogFooter className="pt-4">
+          <DialogFooter className="p-4 border-t bg-muted/20 mt-auto">
             <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
               {tCommon("cancel")}
             </Button>

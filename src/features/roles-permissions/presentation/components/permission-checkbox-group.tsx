@@ -76,7 +76,7 @@ export function PermissionCheckboxGroup({
   };
 
   return (
-    <div className="space-y-3 max-h-[380px] overflow-y-auto pr-2 border rounded-lg p-4 bg-card shadow-inner">
+    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 border rounded-lg p-3.5 bg-card shadow-inner">
       <div className="flex items-center justify-between border-b pb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         <span>Resource Module</span>
         <div className="flex items-center gap-8 pr-4">
