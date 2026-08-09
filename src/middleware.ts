@@ -43,17 +43,38 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = PUBLIC_AUTH_ROUTES.some((route) => pathWithoutLocale.startsWith(route));
   const isAdminRoute = pathWithoutLocale.startsWith("/admin");
 
-  // 1. Unauthenticated User attempting to access Protected Admin Routes
-  if (isAdminRoute && !isAuthRoute && !user) {
+  // 1. Check user profile active status if user exists
+  let isActive = true;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("admin_profiles")
+      .select("is_active")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile && profile.is_active === false) {
+      isActive = false;
+    }
+  }
+
+  // 2. Unauthenticated OR Inactive User attempting to access Protected Admin Routes
+  if (isAdminRoute && !isAuthRoute && (!user || !isActive)) {
+    if (user && !isActive) {
+      await supabase.auth.signOut();
+    }
     const localeMatch = pathname.match(/^\/(en|ar|ckb|ku)/);
     const locale = localeMatch ? localeMatch[1] : "en";
     const loginUrl = new URL(`/${locale}/admin/login`, request.url);
-    loginUrl.searchParams.set("redirect", pathname);
+    if (!isActive) {
+      loginUrl.searchParams.set("error", "account_deactivated");
+    } else {
+      loginUrl.searchParams.set("redirect", pathname);
+    }
     return NextResponse.redirect(loginUrl);
   }
 
-  // 2. Authenticated User attempting to access Auth Routes (/admin/login)
-  if (isAuthRoute && user && pathWithoutLocale === "/admin/login") {
+  // 3. Active Authenticated User attempting to access Auth Routes (/admin/login)
+  if (isAuthRoute && user && isActive && pathWithoutLocale === "/admin/login") {
     const localeMatch = pathname.match(/^\/(en|ar|ckb|ku)/);
     const locale = localeMatch ? localeMatch[1] : "en";
     return NextResponse.redirect(new URL(`/${locale}/admin`, request.url));

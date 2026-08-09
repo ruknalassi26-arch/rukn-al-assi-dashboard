@@ -73,9 +73,13 @@ export class SupabaseAuthRepository implements IAuthRepository {
 
         if (profileData) {
           profile = profileData as AdminProfileDTO;
+          if (profile.is_active === false) {
+            await this.supabase.auth.signOut();
+            throw new Error("Your administrative account has been deactivated. Access denied.");
+          }
         }
-      } catch {
-        // Fallback
+      } catch (err: any) {
+        if (err.message?.includes("deactivated")) throw err;
       }
 
       try {
@@ -138,6 +142,10 @@ export class SupabaseAuthRepository implements IAuthRepository {
 
         if (profileData) {
           profile = profileData as AdminProfileDTO;
+          if (profile.is_active === false) {
+            await this.supabase.auth.signOut();
+            return null;
+          }
         }
       } catch {
         // Fallback

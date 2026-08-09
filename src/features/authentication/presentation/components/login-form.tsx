@@ -9,7 +9,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocale, useTranslations } from "next-intl";
-import { Lock, Mail, Eye, EyeOff, Loader2, LogIn } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Lock, Mail, Eye, EyeOff, Loader2, LogIn, AlertCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -34,8 +35,10 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const t = useTranslations("auth.login");
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const signInMutation = useSignIn();
 
+  const isDeactivated = searchParams.get("error") === "account_deactivated";
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginFormValues>({
@@ -87,6 +90,12 @@ export function LoginForm() {
       </CardHeader>
 
       <CardContent>
+        {isDeactivated && (
+          <div className="mb-4 flex items-center gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs font-medium text-destructive">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>Your administrative account has been deactivated. Access denied.</span>
+          </div>
+        )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Email Field */}
           <div className="space-y-1.5">
