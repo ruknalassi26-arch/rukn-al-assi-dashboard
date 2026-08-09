@@ -126,18 +126,6 @@ export class SupabaseAuthRepository implements IAuthRepository {
   async getCurrentUser(): Promise<UserProfileEntity | null> {
     try {
       const { data: userData, error: userError } = await this.supabase.auth.getUser();
-
-      console.log("CURRENT USER:", userData.user?.id);
-      console.log("USER ERROR:", userError);
-
-      const { data, error } = await (this.supabase as any).rpc("has_permission", {
-        p_resource: "roles",
-        p_action: "manage",
-      });
-
-      console.log("HAS ROLES MANAGE:", data);
-      console.log("RPC ERROR:", error);
-
       if (userError || !userData.user) return null;
 
       let profile: AdminProfileDTO | null = null;
