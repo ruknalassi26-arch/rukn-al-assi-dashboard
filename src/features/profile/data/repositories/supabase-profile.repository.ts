@@ -67,14 +67,12 @@ export class SupabaseProfileRepository implements IProfileRepository {
     // 2. Update or upsert admin_profiles table if it exists
     let profileRecord: ProfileRecordDTO | null = null;
     try {
-      const { data: upsertedData, error: dbError } = await (this.supabase as any)
+      const { data: upsertedData, error: dbError } = await this.supabase
         .from("admin_profiles")
         .upsert({
           id: userData.user.id,
           full_name: input.fullName,
-          phone: input.phone ?? null,
           avatar_url: input.avatarUrl ?? null,
-          updated_at: new Date().toISOString(),
         })
         .select()
         .single();

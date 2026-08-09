@@ -211,19 +211,19 @@ export class SupabaseUserRepository implements IUserRepository {
   }
 
   async updateUser(id: string, input: UpdateUserInput): Promise<AdminUserEntity> {
-    const payload: UpdateTables<"admin_profiles"> = {
-      updated_at: new Date().toISOString(),
-    };
+    const payload: UpdateTables<"admin_profiles"> = {};
     if (input.fullName !== undefined) payload.full_name = input.fullName;
     if (input.avatarUrl !== undefined) payload.avatar_url = input.avatarUrl;
     if (input.isActive !== undefined) payload.is_active = input.isActive;
 
-    const { error: profileError } = await this.supabase
-      .from("admin_profiles")
-      .update(payload)
-      .eq("id", id);
+    if (Object.keys(payload).length > 0) {
+      const { error: profileError } = await this.supabase
+        .from("admin_profiles")
+        .update(payload)
+        .eq("id", id);
 
-    if (profileError) throw new Error(profileError.message);
+      if (profileError) throw new Error(profileError.message);
+    }
 
     if (input.roleId) {
       await this.supabase.from("admin_user_roles").delete().eq("user_id", id);

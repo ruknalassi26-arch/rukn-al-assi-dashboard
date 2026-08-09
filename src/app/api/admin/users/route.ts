@@ -109,7 +109,6 @@ export async function POST(request: Request) {
         id: userId,
         full_name: fullName,
         is_active: isActive,
-        updated_at: new Date().toISOString(),
       });
 
       // 3. Assign selected role in admin_user_roles table
@@ -137,7 +136,6 @@ export async function POST(request: Request) {
       full_name: fullName,
       is_active: isActive,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     });
 
     // 3. Assign selected role in admin_user_roles table
