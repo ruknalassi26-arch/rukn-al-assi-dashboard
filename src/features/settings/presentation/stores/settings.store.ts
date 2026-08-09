@@ -4,7 +4,7 @@
 // ==============================================================================
 import { create } from "zustand";
 
-export type SettingsTab = "general" | "company" | "contact" | "social" | "branding";
+export type SettingsTab = "general" | "languages" | "company" | "contact" | "social" | "branding";
 
 interface SettingsState {
   activeTab: SettingsTab;

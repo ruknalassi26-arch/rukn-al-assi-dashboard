@@ -38,6 +38,7 @@ import {
 import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
 import { useWebsiteSettings, useUpdateWebsiteSettings } from "@shared/hooks/settings/use-settings-hooks";
+import { LanguageListTable } from "@features/languages/presentation/components/language-list-table";
 import { ErrorState } from "@shared/components/error-state";
 import { useSettingsStore, type SettingsTab } from "../stores/settings.store";
 
@@ -174,9 +175,12 @@ export function SettingsForm() {
 
       {/* Main Tabbed Layout */}
       <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as SettingsTab)} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto p-1 bg-muted/60 border rounded-lg">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 h-auto p-1 bg-muted/60 border rounded-lg">
           <TabsTrigger value="general" className="gap-1.5 py-2 text-xs font-semibold">
             <Globe className="h-4 w-4" /> General
+          </TabsTrigger>
+          <TabsTrigger value="languages" className="gap-1.5 py-2 text-xs font-semibold">
+            <Globe className="h-4 w-4" /> Languages
           </TabsTrigger>
           <TabsTrigger value="company" className="gap-1.5 py-2 text-xs font-semibold">
             <Building2 className="h-4 w-4" /> Company
@@ -249,7 +253,16 @@ export function SettingsForm() {
           </Card>
         </TabsContent>
 
-        {/* 2. Company Information Tab */}
+        {/* 2. Languages Settings Tab */}
+        <TabsContent value="languages" className="focus-visible:outline-none space-y-6">
+          <Card>
+            <CardContent className="pt-6">
+              <LanguageListTable />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* 3. Company Information Tab */}
         <TabsContent value="company" className="focus-visible:outline-none space-y-6">
           <Card>
             <CardHeader>

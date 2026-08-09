@@ -972,6 +972,30 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["seo_meta"]["Insert"]>;
         Relationships: [];
       };
+      languages: {
+        Row: {
+          code: string;
+          name: string;
+          native_name: string;
+          is_rtl: boolean;
+          is_required: boolean;
+          is_active?: boolean | null;
+          sort_order?: number | null;
+          created_at?: string | null;
+        };
+        Insert: {
+          code: string;
+          name: string;
+          native_name: string;
+          is_rtl?: boolean;
+          is_required?: boolean;
+          is_active?: boolean | null;
+          sort_order?: number | null;
+          created_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["languages"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

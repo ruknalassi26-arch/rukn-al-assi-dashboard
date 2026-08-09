@@ -14,6 +14,7 @@ import type {
 } from "../../domain/repositories/i-user-role-management.repository";
 import { RoleEntity } from "../../domain/entities/role.entity";
 import { PermissionEntity } from "../../domain/entities/permission.entity";
+import type { RoleCode, ResourceCode } from "../../domain/entities/role.enums";
 
 interface RoleRowDTO {
   id: string;
@@ -55,9 +56,9 @@ function mapPermissionDTOToEntity(permObj: PermissionRowDTO, fallbackId: string)
 
   return new PermissionEntity({
     id: permObj.id || fallbackId,
-    code: codeStr as any,
+    code: codeStr,
     name: displayTitle,
-    module: formattedResource as any,
+    module: formattedResource as ResourceCode,
     description: permObj.description ?? `${action} access for ${resource}`,
   });
 }
@@ -109,7 +110,7 @@ export class SupabaseRoleRepository implements IRoleRepository {
     const rawRows = (data as unknown as RoleRowDTO[]) ?? [];
 
     const items = rawRows.map((row) => {
-      const roleCode = (row.code ?? row.name.toLowerCase().replace(/\s+/g, "_")) as any;
+      const roleCode = (row.code ?? row.name.toLowerCase().replace(/\s+/g, "_")) as RoleCode;
       const roleEntity = new RoleEntity({
         id: row.id,
         name: row.name,
@@ -158,7 +159,7 @@ export class SupabaseRoleRepository implements IRoleRepository {
       return mapPermissionDTOToEntity(permObj || { id: p.permission_id }, p.permission_id);
     });
 
-    const roleCode = (rawRole.code ?? rawRole.name.toLowerCase().replace(/\s+/g, "_")) as any;
+    const roleCode = (rawRole.code ?? rawRole.name.toLowerCase().replace(/\s+/g, "_")) as RoleCode;
     const roleEntity = new RoleEntity({
       id: rawRole.id,
       name: rawRole.name,
@@ -214,7 +215,7 @@ export class SupabaseRoleRepository implements IRoleRepository {
       await this.supabase.from("role_permissions").insert(inserts);
     }
 
-    const roleCode = (rawRole.code ?? code) as any;
+    const roleCode = (rawRole.code ?? code) as RoleCode;
     const entity = new RoleEntity({
       id: rawRole.id,
       name: rawRole.name,
@@ -256,7 +257,7 @@ export class SupabaseRoleRepository implements IRoleRepository {
       }
     }
 
-    const roleCode = (rawRole.code ?? rawRole.name.toLowerCase().replace(/\s+/g, "_")) as any;
+    const roleCode = (rawRole.code ?? rawRole.name.toLowerCase().replace(/\s+/g, "_")) as RoleCode;
     const entity = new RoleEntity({
       id: rawRole.id,
       name: rawRole.name,
