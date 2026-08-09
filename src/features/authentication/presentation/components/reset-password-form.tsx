@@ -54,8 +54,8 @@ export function ResetPasswordForm() {
     formState: { errors },
   } = form;
 
-  const onSubmit = async (values: ResetPasswordFormValues) => {
-    await resetPasswordMutation.mutateAsync({ newPassword: values.newPassword });
+  const onSubmit = (values: ResetPasswordFormValues) => {
+    resetPasswordMutation.mutate({ newPassword: values.newPassword });
   };
 
   return (

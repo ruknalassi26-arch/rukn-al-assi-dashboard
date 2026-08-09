@@ -60,8 +60,8 @@ export function LoginForm() {
 
   const rememberMeValue = watch("rememberMe");
 
-  const onSubmit = async (values: LoginFormValues) => {
-    await signInMutation.mutateAsync({
+  const onSubmit = (values: LoginFormValues) => {
+    signInMutation.mutate({
       email: values.email,
       password: values.password,
       rememberMe: values.rememberMe,

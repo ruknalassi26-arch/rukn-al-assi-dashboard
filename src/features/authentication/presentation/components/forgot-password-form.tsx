@@ -48,9 +48,13 @@ export function ForgotPasswordForm() {
     formState: { errors },
   } = form;
 
-  const onSubmit = async (values: ForgotPasswordFormValues) => {
-    await sendResetMutation.mutateAsync({ email: values.email });
-    setSubmittedEmail(values.email);
+  const onSubmit = (values: ForgotPasswordFormValues) => {
+    sendResetMutation.mutate(
+      { email: values.email },
+      {
+        onSuccess: () => setSubmittedEmail(values.email),
+      }
+    );
   };
 
   if (submittedEmail) {

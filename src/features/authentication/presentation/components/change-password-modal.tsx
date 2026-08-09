@@ -57,11 +57,11 @@ export function ChangePasswordModal() {
     formState: { errors },
   } = form;
 
-  const onSubmit = async (values: ChangePasswordFormValues) => {
-    await changePasswordMutation.mutateAsync({
-      newPassword: values.newPassword,
-    });
-    reset();
+  const onSubmit = (values: ChangePasswordFormValues) => {
+    changePasswordMutation.mutate(
+      { newPassword: values.newPassword },
+      { onSuccess: () => reset() }
+    );
   };
 
   return (
