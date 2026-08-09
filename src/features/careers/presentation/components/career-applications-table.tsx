@@ -292,7 +292,7 @@ export function CareerApplicationsTable() {
               This action cannot be undone. It will permanently remove this candidate application and CV record.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-3 sm:gap-3">
             <Button variant="outline" size="sm" onClick={() => setDeletingId(null)}>
               {tCommon("cancel")}
             </Button>

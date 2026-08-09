@@ -17,7 +17,6 @@ import {
   MoreHorizontal,
   ChevronLeft,
   ChevronRight,
-  Copy,
   AlertTriangle,
 } from "lucide-react";
 import {
@@ -78,18 +77,6 @@ export function RoleListTable() {
 
   const handleEdit = (role: RoleEntity) => {
     setSelectedRole(role);
-    setIsFormDialogOpen(true);
-  };
-
-  const handleDuplicate = (role: RoleEntity) => {
-    setSelectedRole(new RoleEntity({
-      id: "",
-      name: `${role.name} (Copy)`,
-      code: role.code,
-      description: role.description,
-      permissions: role.permissions,
-      isSystemRole: false,
-    }));
     setIsFormDialogOpen(true);
   };
 
@@ -221,9 +208,6 @@ export function RoleListTable() {
                               <DropdownMenuItem onClick={() => handleEdit(role)}>
                                 <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDuplicate(role)}>
-                                <Copy className="mr-2 h-4 w-4" /> Duplicate
-                              </DropdownMenuItem>
                               {!isSystem && (
                                 <DropdownMenuItem
                                   onClick={() => setRoleToDelete(role)}
@@ -308,7 +292,7 @@ export function RoleListTable() {
               )}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+          <DialogFooter className="gap-3 sm:gap-3 pt-2">
             <Button variant="outline" size="sm" onClick={() => setRoleToDelete(null)}>
               {tCommon("cancel")}
             </Button>

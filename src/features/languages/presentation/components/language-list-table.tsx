@@ -278,7 +278,7 @@ export function LanguageListTable() {
               This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+          <DialogFooter className="gap-3 sm:gap-3 pt-2">
             <Button variant="outline" size="sm" onClick={() => setDeletingCode(null)}>
               {tCommon("cancel")}
             </Button>
