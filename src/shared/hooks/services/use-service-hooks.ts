@@ -4,7 +4,7 @@
 // TanStack Query Hooks for Services Feature
 // ==============================================================================
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@core/utils/toast";
 import { queryKeys } from "@core/constants/query-keys";
 import { SupabaseServiceRepository } from "@features/services/data/repositories/supabase-service.repository";
 import {

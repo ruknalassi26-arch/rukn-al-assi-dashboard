@@ -206,6 +206,7 @@ function translateToastMessage(msg: string): string {
 export const toast = {
   /** Display a success toast message */
   success(message: string, description?: string) {
+    sonnerToast.dismiss();
     return sonnerToast.success(translateToastMessage(message), {
       description: description ? translateToastMessage(description) : undefined,
       duration: 4000,
@@ -214,6 +215,7 @@ export const toast = {
 
   /** Display an error toast with user-friendly formatting */
   error(error: unknown, fallbackMessage?: string) {
+    sonnerToast.dismiss();
     const rawUserMessage = getFriendlyErrorMessage(error, "ToastNotification");
     const translatedDescription = translateToastMessage(rawUserMessage);
 
@@ -231,6 +233,7 @@ export const toast = {
 
   /** Display an informational toast */
   info(message: string, description?: string) {
+    sonnerToast.dismiss();
     return sonnerToast.info(translateToastMessage(message), {
       description: description ? translateToastMessage(description) : undefined,
       duration: 4000,
@@ -239,6 +242,7 @@ export const toast = {
 
   /** Display a warning toast */
   warning(message: string, description?: string) {
+    sonnerToast.dismiss();
     return sonnerToast.warning(translateToastMessage(message), {
       description: description ? translateToastMessage(description) : undefined,
       duration: 4500,

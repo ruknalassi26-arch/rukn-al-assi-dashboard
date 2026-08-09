@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@core/utils/toast";
 import { queryKeys } from "@core/constants/query-keys";
 import { translateErrorMessage } from "@core/utils/error";
 import { SupabaseAuthRepository } from "@features/authentication/data/repositories/supabase-auth.repository";

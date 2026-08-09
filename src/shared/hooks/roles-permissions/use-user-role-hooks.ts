@@ -4,7 +4,7 @@
 // ==============================================================================
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@core/utils/toast";
 import { SupabaseUserRepository } from "@features/roles-permissions/data/repositories/supabase-user.repository";
 import { SupabaseRoleRepository } from "@features/roles-permissions/data/repositories/supabase-role.repository";
 import { UserManagementUseCases } from "@features/roles-permissions/domain/usecases/user-management.usecase";
