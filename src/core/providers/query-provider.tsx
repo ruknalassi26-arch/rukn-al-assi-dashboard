@@ -77,7 +77,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <Toaster position="top-right" richColors closeButton duration={4000} />
+      <Toaster position="top-right" richColors closeButton duration={4000} visibleToasts={1} expand={false} />
       {process.env.NODE_ENV === "development" && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}

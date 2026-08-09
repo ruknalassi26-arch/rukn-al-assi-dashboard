@@ -208,6 +208,7 @@ export const toast = {
   success(message: string, description?: string) {
     sonnerToast.dismiss();
     return sonnerToast.success(translateToastMessage(message), {
+      id: "single-app-toast",
       description: description ? translateToastMessage(description) : undefined,
       duration: 4000,
     });
@@ -229,12 +230,14 @@ export const toast = {
 
     if (fallbackMessage) {
       return sonnerToast.error(translateToastMessage(fallbackMessage), {
+        id: "single-app-toast",
         description: translatedMessage,
         duration: 5000,
       });
     }
 
     return sonnerToast.error(translatedMessage, {
+      id: "single-app-toast",
       duration: 5000,
     });
   },
@@ -243,6 +246,7 @@ export const toast = {
   info(message: string, description?: string) {
     sonnerToast.dismiss();
     return sonnerToast.info(translateToastMessage(message), {
+      id: "single-app-toast",
       description: description ? translateToastMessage(description) : undefined,
       duration: 4000,
     });
@@ -252,6 +256,7 @@ export const toast = {
   warning(message: string, description?: string) {
     sonnerToast.dismiss();
     return sonnerToast.warning(translateToastMessage(message), {
+      id: "single-app-toast",
       description: description ? translateToastMessage(description) : undefined,
       duration: 4500,
     });
