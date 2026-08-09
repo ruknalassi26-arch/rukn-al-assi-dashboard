@@ -233,18 +233,30 @@ export class SupabaseRoleRepository implements IRoleRepository {
       payload.name = input.name;
       payload.slug = slug;
     }
-    if (input.description !== undefined) payload.description = input.description;
+    if (input.description !== undefined) payload.description = input.description ?? null;
 
-    const { data: roleRow, error } = await this.supabase
-      .from("roles")
-      .update(payload)
-      .eq("id", id)
-      .select("*")
-      .single();
+    let rawRole: RoleRowDTO | null = null;
 
-    if (error) throw new Error(error.message);
+    if (Object.keys(payload).length > 0) {
+      const { data: roleRow, error } = await this.supabase
+        .from("roles")
+        .update(payload)
+        .eq("id", id)
+        .select("*")
+        .single();
 
-    const rawRole = roleRow as unknown as RoleRowDTO;
+      if (error) throw new Error(error.message);
+      rawRole = roleRow as unknown as RoleRowDTO;
+    } else {
+      const { data: roleRow, error } = await this.supabase
+        .from("roles")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw new Error(error.message);
+      rawRole = roleRow as unknown as RoleRowDTO;
+    }
 
     if (input.permissionIds !== undefined) {
       await this.supabase.from("role_permissions").delete().eq("role_id", id);
@@ -258,7 +270,7 @@ export class SupabaseRoleRepository implements IRoleRepository {
       }
     }
 
-    const roleCode = (rawRole.code ?? rawRole.name.toLowerCase().replace(/\s+/g, "_")) as RoleCode;
+    const roleCode = (rawRole.slug ?? rawRole.code ?? rawRole.name.toLowerCase().replace(/\s+/g, "_")) as RoleCode;
     const entity = new RoleEntity({
       id: rawRole.id,
       name: rawRole.name,
