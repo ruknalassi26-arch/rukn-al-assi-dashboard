@@ -59,6 +59,13 @@ export class SupabaseAuthRepository implements IAuthRepository {
         password: input.password,
       });
 
+      console.log("LOGIN DATA:", data);
+      console.log("LOGIN ERROR:", error);
+
+      const { data: sessionData } = await this.supabase.auth.getSession();
+      console.log("SESSION:", sessionData.session);
+      console.log("Current user:", data.user);
+
       if (error || !data.user) {
         throw new Error(error?.message || "Invalid email or password");
       }
@@ -126,6 +133,12 @@ export class SupabaseAuthRepository implements IAuthRepository {
   async getCurrentUser(): Promise<UserProfileEntity | null> {
     try {
       const { data: userData, error } = await this.supabase.auth.getUser();
+      const { data: sessionData } = await this.supabase.auth.getSession();
+      
+      console.log("GET_CURRENT_USER -> user:", userData.user);
+      console.log("GET_CURRENT_USER -> error:", error);
+      console.log("GET_CURRENT_USER -> session:", sessionData.session);
+
       if (error || !userData.user) return null;
 
       let profile: AdminProfileDTO | null = null;

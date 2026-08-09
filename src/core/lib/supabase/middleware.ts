@@ -1,18 +1,19 @@
 // ==============================================================================
 // core/lib/supabase/middleware.ts
 // Supabase client for use inside Next.js middleware
-// Includes graceful fallback values if environment variables are missing
+// Uses process.env values directly from environment configuration
 // ==============================================================================
 import { createServerClient } from "@supabase/ssr";
 import type { NextRequest, NextResponse } from "next/server";
 import type { Database } from "@core/types/database.types";
 
-const FALLBACK_URL = "https://placeholder-project.supabase.co";
-const FALLBACK_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2MDA0ODgwMDAsImV4cCI6MTkxNjA2NDAwMH0.placeholder";
-
 export function createMiddlewareClient(request: NextRequest, response: NextResponse) {
-  const url = process.env["NEXT_PUBLIC_SUPABASE_URL"] || FALLBACK_URL;
-  const key = process.env["NEXT_PUBLIC_SUPABASE_ANON_KEY"] || FALLBACK_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables");
+  }
 
   const supabase = createServerClient<Database>(url, key, {
     cookies: {
