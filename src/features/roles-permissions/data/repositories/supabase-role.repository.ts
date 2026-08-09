@@ -111,18 +111,15 @@ export class SupabaseRoleRepository implements IRoleRepository {
 
     const items = rawRows.map((row) => {
       const roleCode = (row.code ?? row.name.toLowerCase().replace(/\s+/g, "_")) as RoleCode;
-      const roleEntity = new RoleEntity({
+      const usersCount = row.admin_user_roles?.[0]?.count ?? 0;
+      const permissionsCount = row.role_permissions?.[0]?.count ?? 0;
+
+      return new RoleEntity({
         id: row.id,
         name: row.name,
         code: roleCode,
         description: row.description ?? null,
         isSystemRole: row.code === "super_admin" || row.is_system === true,
-      });
-
-      const usersCount = row.admin_user_roles?.[0]?.count ?? 0;
-      const permissionsCount = row.role_permissions?.[0]?.count ?? 0;
-
-      return Object.assign(roleEntity, {
         usersCount,
         permissionsCount,
       });

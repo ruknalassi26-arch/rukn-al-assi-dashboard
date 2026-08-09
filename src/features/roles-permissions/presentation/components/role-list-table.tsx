@@ -49,7 +49,7 @@ import {
 import { usePermission } from "../hooks/use-permission";
 import { RoleDialog } from "./role-dialog";
 import { RoleDetailsModal } from "./role-details-modal";
-import type { RoleEntity } from "../../domain/entities/role.entity";
+import { RoleEntity } from "../../domain/entities/role.entity";
 
 export function RoleListTable() {
   const t = useTranslations("rolesAdmin");
@@ -72,7 +72,7 @@ export function RoleListTable() {
   const [selectedRole, setSelectedRole] = useState<(RoleEntity & { permissionIds?: string[] }) | null>(null);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [viewingRoleId, setViewingRoleId] = useState<string | null>(null);
-  const [roleToDelete, setRoleToDelete] = useState<(RoleEntity & { usersCount?: number }) | null>(null);
+  const [roleToDelete, setRoleToDelete] = useState<RoleEntity | null>(null);
 
   const handleEdit = (role: RoleEntity) => {
     setSelectedRole(role);
@@ -80,12 +80,14 @@ export function RoleListTable() {
   };
 
   const handleDuplicate = (role: RoleEntity) => {
-    setSelectedRole({
-      ...role,
+    setSelectedRole(new RoleEntity({
       id: "",
       name: `${role.name} (Copy)`,
+      code: role.code,
+      description: role.description,
+      permissions: role.permissions,
       isSystemRole: false,
-    } as any);
+    }));
     setIsFormDialogOpen(true);
   };
 
@@ -95,7 +97,7 @@ export function RoleListTable() {
   };
 
   const handleDelete = async () => {
-    if (!roleToDelete || (roleToDelete as any).usersCount > 0) return;
+    if (!roleToDelete || roleToDelete.usersCount > 0) return;
     await deleteMutation.mutateAsync(roleToDelete.id);
     setRoleToDelete(null);
   };
@@ -168,7 +170,7 @@ export function RoleListTable() {
               </TableRow>
             ) : (
               data?.items.map((role) => {
-                const isSystem = role.isSuperAdmin || role.isSystemRole || (role as any).is_system;
+                const isSystem = role.isSuperAdmin || role.isSystemRole;
 
                 return (
                   <TableRow key={role.id} className="hover:bg-muted/30 transition-colors">
@@ -189,13 +191,13 @@ export function RoleListTable() {
                     <TableCell className="text-center">
                       <Badge variant="outline" className="gap-1 bg-muted/30">
                         <Users className="h-3 w-3 text-muted-foreground" />
-                        {(role as any).usersCount ?? 0} Users
+                        {role.usersCount} Users
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge variant="outline" className="gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">
                         <ShieldCheck className="h-3 w-3" />
-                        {role.isSuperAdmin ? "FULL" : `${(role as any).permissionsCount ?? role.permissions.length} Perms`}
+                        {role.isSuperAdmin ? "FULL" : `${role.permissionsCount} Perms`}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-end">
@@ -220,7 +222,7 @@ export function RoleListTable() {
                               </DropdownMenuItem>
                               {!isSystem && (
                                 <DropdownMenuItem
-                                  onClick={() => setRoleToDelete(role as any)}
+                                  onClick={() => setRoleToDelete(role)}
                                   className="text-destructive focus:text-destructive"
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" /> {tCommon("delete")}

@@ -25,8 +25,7 @@ export function PermissionCheckboxGroup({
     const found = allPermissions.find(
       (p) =>
         p.code === codeStr ||
-        (p.module === resource && (p.name?.toLowerCase().includes(action) || (p as any).action === action)) ||
-        (p as any).resource === resource && (p as any).action === action
+        (p.module === resource && p.name?.toLowerCase().includes(action))
     );
     return found?.id;
   };

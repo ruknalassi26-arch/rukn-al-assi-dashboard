@@ -12,6 +12,8 @@ export interface RoleProps {
   description?: string | null;
   permissions?: PermissionCode[];
   isSystemRole?: boolean;
+  usersCount?: number;
+  permissionsCount?: number;
 }
 
 export class RoleEntity {
@@ -21,6 +23,8 @@ export class RoleEntity {
   public readonly description: string | null;
   public readonly permissions: PermissionCode[];
   public readonly isSystemRole: boolean;
+  public readonly usersCount: number;
+  public readonly permissionsCount: number;
 
   constructor(props: RoleProps) {
     this.id = props.id;
@@ -28,7 +32,9 @@ export class RoleEntity {
     this.code = props.code;
     this.description = props.description ?? null;
     this.permissions = props.permissions ?? ROLE_PERMISSION_MATRIX[props.code] ?? [];
-    this.isSystemRole = props.isSystemRole ?? true;
+    this.isSystemRole = props.isSystemRole ?? (props.code === "super_admin");
+    this.usersCount = props.usersCount ?? 0;
+    this.permissionsCount = props.permissionsCount ?? this.permissions.length;
   }
 
   public get isSuperAdmin(): boolean {

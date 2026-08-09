@@ -25,6 +25,7 @@ import {
 } from "@shared/ui";
 import { PermissionCheckboxGroup } from "./permission-checkbox-group";
 import { ROLE_TEMPLATES } from "../../domain/entities/role-permission.matrix";
+import type { PermissionCode } from "../../domain/entities/role.enums";
 import {
   useCreateAdminRole,
   useUpdateAdminRole,
@@ -104,8 +105,8 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
     // Map template permission codes to IDs in database
     const templateIds: string[] = [];
     allPermissions.forEach((p) => {
-      const pCode = p.code || `${(p as any).resource}:${(p as any).action}`;
-      if (template.permissions.includes(pCode as any)) {
+      const pCode = p.code || `${p.module}:${p.name}`;
+      if (template.permissions.includes(pCode as PermissionCode)) {
         templateIds.push(p.id);
       }
     });
@@ -174,7 +175,7 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
               <Label htmlFor="name">{t("form.roleName")} *</Label>
               <Input
                 id="name"
-                disabled={role?.code === "super_admin" || (role as any)?.isSystemRole || (role as any)?.is_system}
+                disabled={role?.code === "super_admin" || role?.isSystemRole}
                 {...register("name")}
                 placeholder="e.g. Content Editor"
               />
