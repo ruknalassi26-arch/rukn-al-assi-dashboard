@@ -1,9 +1,11 @@
 "use client";
 // ==============================================================================
 // features/roles-permissions/presentation/components/permission-checkbox-group.tsx
-// Grouped Checkboxes Selector for System Permissions by Module
+// Matrix Selector for RBAC Permissions by Resource (View & Manage Checkboxes)
+// Enforces "Manage implies View" automatically.
 // ==============================================================================
 import { Checkbox, Label, Badge } from "@shared/ui";
+import { ALL_RESOURCES, type ResourceCode } from "../../domain/entities/role.enums";
 import type { PermissionEntity } from "../../domain/entities/permission.entity";
 
 interface PermissionCheckboxGroupProps {
@@ -17,75 +19,123 @@ export function PermissionCheckboxGroup({
   selectedPermissionIds,
   onChange,
 }: PermissionCheckboxGroupProps) {
-  // Group permissions by module
-  const groupedModules = allPermissions.reduce<Record<string, PermissionEntity[]>>((acc, perm) => {
-    const mod = perm.module || "General Settings";
-    if (!acc[mod]) acc[mod] = [];
-    acc[mod].push(perm);
-    return acc;
-  }, {});
-
-  const handleToggleSingle = (id: string, checked: boolean) => {
-    if (checked) {
-      onChange([...selectedPermissionIds, id]);
-    } else {
-      onChange(selectedPermissionIds.filter((pId) => pId !== id));
-    }
+  // Find permission ID by resource & action or code
+  const getPermissionId = (resource: string, action: "view" | "manage"): string | undefined => {
+    const codeStr = `${resource}:${action}`;
+    const found = allPermissions.find(
+      (p) =>
+        p.code === codeStr ||
+        (p.module === resource && (p.name?.toLowerCase().includes(action) || (p as any).action === action)) ||
+        (p as any).resource === resource && (p as any).action === action
+    );
+    return found?.id;
   };
 
-  const handleToggleModule = (modulePerms: PermissionEntity[], checked: boolean) => {
-    const moduleIds = modulePerms.map((p) => p.id);
-    if (checked) {
-      const merged = Array.from(new Set([...selectedPermissionIds, ...moduleIds]));
-      onChange(merged);
-    } else {
-      onChange(selectedPermissionIds.filter((pId) => !moduleIds.includes(pId)));
+  const handleToggleAction = (resource: ResourceCode, action: "view" | "manage", checked: boolean) => {
+    const viewId = getPermissionId(resource, "view");
+    const manageId = getPermissionId(resource, "manage");
+
+    let updated = [...selectedPermissionIds];
+
+    if (action === "manage") {
+      if (checked) {
+        // Checking manage automatically checks view
+        if (manageId && !updated.includes(manageId)) updated.push(manageId);
+        if (viewId && !updated.includes(viewId)) updated.push(viewId);
+      } else {
+        // Unchecking manage removes manage
+        if (manageId) updated = updated.filter((id) => id !== manageId);
+      }
+    } else if (action === "view") {
+      if (checked) {
+        if (viewId && !updated.includes(viewId)) updated.push(viewId);
+      } else {
+        // Unchecking view automatically unchecks manage too
+        if (viewId) updated = updated.filter((id) => id !== viewId);
+        if (manageId) updated = updated.filter((id) => id !== manageId);
+      }
     }
+
+    onChange(updated);
+  };
+
+  const handleSelectAllResource = (resource: ResourceCode, checked: boolean) => {
+    const viewId = getPermissionId(resource, "view");
+    const manageId = getPermissionId(resource, "manage");
+    let updated = [...selectedPermissionIds];
+
+    if (checked) {
+      if (viewId && !updated.includes(viewId)) updated.push(viewId);
+      if (manageId && !updated.includes(manageId)) updated.push(manageId);
+    } else {
+      if (viewId) updated = updated.filter((id) => id !== viewId);
+      if (manageId) updated = updated.filter((id) => id !== manageId);
+    }
+
+    onChange(updated);
   };
 
   return (
-    <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 border rounded-md p-4 bg-muted/10">
-      {Object.entries(groupedModules).map(([moduleName, perms]) => {
-        const moduleIds = perms.map((p) => p.id);
-        const allSelected = moduleIds.every((id) => selectedPermissionIds.includes(id));
-        const someSelected = moduleIds.some((id) => selectedPermissionIds.includes(id)) && !allSelected;
+    <div className="space-y-3 max-h-[380px] overflow-y-auto pr-2 border rounded-lg p-4 bg-card shadow-inner">
+      <div className="flex items-center justify-between border-b pb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <span>Resource Module</span>
+        <div className="flex items-center gap-8 pr-4">
+          <span>View</span>
+          <span>Manage</span>
+        </div>
+      </div>
+
+      {ALL_RESOURCES.map((resource) => {
+        const viewId = getPermissionId(resource, "view");
+        const manageId = getPermissionId(resource, "manage");
+
+        const hasView = Boolean(viewId && selectedPermissionIds.includes(viewId));
+        const hasManage = Boolean(manageId && selectedPermissionIds.includes(manageId));
+        const allChecked = hasView && hasManage;
 
         return (
-          <div key={moduleName} className="space-y-2 border-b last:border-b-0 pb-3 last:pb-0">
-            {/* Module Group Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id={`module-${moduleName}`}
-                  checked={allSelected ? true : someSelected ? "indeterminate" : false}
-                  onCheckedChange={(checked) => handleToggleModule(perms, checked === true)}
-                />
-                <Label htmlFor={`module-${moduleName}`} className="font-bold text-sm uppercase tracking-wider text-primary cursor-pointer">
-                  {moduleName}
-                </Label>
-              </div>
-              <Badge variant="outline" className="text-[10px]">
-                {perms.filter((p) => selectedPermissionIds.includes(p.id)).length} / {perms.length}
-              </Badge>
+          <div
+            key={resource}
+            className="flex items-center justify-between py-2 border-b last:border-b-0 hover:bg-muted/30 px-2 rounded-md transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id={`resource-all-${resource}`}
+                checked={allChecked}
+                onCheckedChange={(checked) => handleSelectAllResource(resource, checked === true)}
+              />
+              <Label
+                htmlFor={`resource-all-${resource}`}
+                className="font-semibold text-sm capitalize cursor-pointer text-foreground"
+              >
+                {resource.replace("_", " ")}
+              </Label>
             </div>
 
-            {/* Individual Permissions Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-6 pt-1">
-              {perms.map((perm) => {
-                const isChecked = selectedPermissionIds.includes(perm.id);
-                return (
-                  <div key={perm.id} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`perm-${perm.id}`}
-                      checked={isChecked}
-                      onCheckedChange={(checked) => handleToggleSingle(perm.id, checked === true)}
-                    />
-                    <Label htmlFor={`perm-${perm.id}`} className="text-xs text-foreground cursor-pointer font-normal">
-                      {perm.name || perm.code}
-                    </Label>
-                  </div>
-                );
-              })}
+            <div className="flex items-center gap-12 pr-4">
+              {/* View Checkbox */}
+              <div className="flex items-center gap-1.5">
+                <Checkbox
+                  id={`perm-view-${resource}`}
+                  checked={hasView}
+                  onCheckedChange={(checked) => handleToggleAction(resource, "view", checked === true)}
+                />
+                <Label htmlFor={`perm-view-${resource}`} className="text-xs cursor-pointer text-muted-foreground">
+                  View
+                </Label>
+              </div>
+
+              {/* Manage Checkbox */}
+              <div className="flex items-center gap-1.5">
+                <Checkbox
+                  id={`perm-manage-${resource}`}
+                  checked={hasManage}
+                  onCheckedChange={(checked) => handleToggleAction(resource, "manage", checked === true)}
+                />
+                <Label htmlFor={`perm-manage-${resource}`} className="text-xs cursor-pointer font-medium text-primary">
+                  Manage
+                </Label>
+              </div>
             </div>
           </div>
         );

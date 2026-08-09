@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // features/roles-permissions/presentation/components/role-list-table.tsx
-// Data Table for Security Roles & Permission Matrices Management
+// Data Table for Security Roles & Permission Matrices Management with Protection Rules
 // ==============================================================================
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -17,6 +17,8 @@ import {
   MoreHorizontal,
   ChevronLeft,
   ChevronRight,
+  Copy,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Table,
@@ -44,6 +46,7 @@ import {
   useAdminRoles,
   useDeleteAdminRole,
 } from "@shared/hooks/roles-permissions/use-user-role-hooks";
+import { usePermission } from "../hooks/use-permission";
 import { RoleDialog } from "./role-dialog";
 import { RoleDetailsModal } from "./role-details-modal";
 import type { RoleEntity } from "../../domain/entities/role.entity";
@@ -51,6 +54,8 @@ import type { RoleEntity } from "../../domain/entities/role.entity";
 export function RoleListTable() {
   const t = useTranslations("rolesAdmin");
   const tCommon = useTranslations("common");
+  const { hasPermission } = usePermission();
+  const canManageRoles = hasPermission("roles", "manage");
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -67,10 +72,20 @@ export function RoleListTable() {
   const [selectedRole, setSelectedRole] = useState<(RoleEntity & { permissionIds?: string[] }) | null>(null);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [viewingRoleId, setViewingRoleId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [roleToDelete, setRoleToDelete] = useState<(RoleEntity & { usersCount?: number }) | null>(null);
 
   const handleEdit = (role: RoleEntity) => {
     setSelectedRole(role);
+    setIsFormDialogOpen(true);
+  };
+
+  const handleDuplicate = (role: RoleEntity) => {
+    setSelectedRole({
+      ...role,
+      id: "",
+      name: `${role.name} (Copy)`,
+      isSystemRole: false,
+    } as any);
     setIsFormDialogOpen(true);
   };
 
@@ -80,9 +95,9 @@ export function RoleListTable() {
   };
 
   const handleDelete = async () => {
-    if (!deletingId) return;
-    await deleteMutation.mutateAsync(deletingId);
-    setDeletingId(null);
+    if (!roleToDelete || (roleToDelete as any).usersCount > 0) return;
+    await deleteMutation.mutateAsync(roleToDelete.id);
+    setRoleToDelete(null);
   };
 
   const totalPages = data?.totalPages ?? 1;
@@ -104,14 +119,16 @@ export function RoleListTable() {
           />
         </div>
 
-        <Button onClick={handleCreate} className="w-full sm:w-auto gap-2">
-          <ShieldPlus className="h-4 w-4" />
-          {t("addRole")}
-        </Button>
+        {canManageRoles && (
+          <Button onClick={handleCreate} className="w-full sm:w-auto gap-2">
+            <ShieldPlus className="h-4 w-4" />
+            {t("addRole")}
+          </Button>
+        )}
       </div>
 
       {/* Main Roles Table */}
-      <div className="rounded-md border bg-card overflow-hidden">
+      <div className="rounded-md border bg-card overflow-hidden shadow-sm">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
@@ -150,59 +167,73 @@ export function RoleListTable() {
                 </TableCell>
               </TableRow>
             ) : (
-              data?.items.map((role) => (
-                <TableRow key={role.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-semibold text-foreground">
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-primary shrink-0" />
-                      <span>{role.name}</span>
-                      {role.isSuperAdmin && (
-                        <Badge className="bg-primary/10 text-primary text-[10px]">System</Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground max-w-md">
-                    {role.description || "Custom security access role"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant="outline" className="gap-1 bg-muted/30">
-                      <Users className="h-3 w-3 text-muted-foreground" />
-                      {role.usersCount} Users
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant="outline" className="gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">
-                      <ShieldCheck className="h-3 w-3" />
-                      {role.isSuperAdmin ? "FULL" : `${role.permissionsCount} Perms`}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-end">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setViewingRoleId(role.id)}>
-                          <Eye className="mr-2 h-4 w-4" /> {t("viewDetails")}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(role)}>
-                          <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
-                        </DropdownMenuItem>
-                        {!role.isSuperAdmin && (
-                          <DropdownMenuItem
-                            onClick={() => setDeletingId(role.id)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" /> {tCommon("delete")}
-                          </DropdownMenuItem>
+              data?.items.map((role) => {
+                const isSystem = role.isSuperAdmin || role.isSystemRole || (role as any).is_system;
+
+                return (
+                  <TableRow key={role.id} className="hover:bg-muted/30 transition-colors">
+                    <TableCell className="font-semibold text-foreground">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-primary shrink-0" />
+                        <span>{role.name}</span>
+                        {isSystem ? (
+                          <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">System</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px]">Custom</Badge>
                         )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground max-w-md">
+                      {role.description || "Custom security access role"}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="gap-1 bg-muted/30">
+                        <Users className="h-3 w-3 text-muted-foreground" />
+                        {(role as any).usersCount ?? 0} Users
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">
+                        <ShieldCheck className="h-3 w-3" />
+                        {role.isSuperAdmin ? "FULL" : `${(role as any).permissionsCount ?? role.permissions.length} Perms`}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-end">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setViewingRoleId(role.id)}>
+                            <Eye className="mr-2 h-4 w-4" /> {t("viewDetails")}
+                          </DropdownMenuItem>
+
+                          {canManageRoles && (
+                            <>
+                              <DropdownMenuItem onClick={() => handleEdit(role)}>
+                                <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDuplicate(role)}>
+                                <Copy className="mr-2 h-4 w-4" /> Duplicate
+                              </DropdownMenuItem>
+                              {!isSystem && (
+                                <DropdownMenuItem
+                                  onClick={() => setRoleToDelete(role as any)}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" /> {tCommon("delete")}
+                                </DropdownMenuItem>
+                              )}
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
@@ -253,23 +284,33 @@ export function RoleListTable() {
       />
 
       {/* Confirm Delete Dialog */}
-      <Dialog open={!!deletingId} onOpenChange={(open: boolean) => !open && setDeletingId(null)}>
+      <Dialog open={!!roleToDelete} onOpenChange={(open: boolean) => !open && setRoleToDelete(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Are you sure?</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" /> Delete Security Role
+            </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. It will permanently remove this security role and its permission bindings.
+              {roleToDelete && (roleToDelete.usersCount ?? 0) > 0 ? (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-900 dark:text-amber-300 text-xs font-medium space-y-1 mt-2">
+                  <p>
+                    This role is currently assigned to <strong>{roleToDelete.usersCount} users</strong>. Reassign those users before deleting the role.
+                  </p>
+                </div>
+              ) : (
+                `Are you sure you want to delete the role "${roleToDelete?.name}"? This action cannot be undone.`
+              )}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" size="sm" onClick={() => setDeletingId(null)}>
+          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+            <Button variant="outline" size="sm" onClick={() => setRoleToDelete(null)}>
               {tCommon("cancel")}
             </Button>
             <Button
               variant="destructive"
               size="sm"
               onClick={handleDelete}
-              disabled={deleteMutation.isPending}
+              disabled={deleteMutation.isPending || (roleToDelete?.usersCount ?? 0) > 0}
             >
               {tCommon("delete")}
             </Button>

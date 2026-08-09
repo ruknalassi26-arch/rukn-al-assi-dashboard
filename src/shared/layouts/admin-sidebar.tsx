@@ -43,35 +43,39 @@ import {
   TooltipTrigger,
 } from "@shared/ui";
 
+import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
+import type { ResourceCode } from "@features/roles-permissions/domain/entities/role.enums";
+
 interface NavItem {
   href: string;
   labelKey: string;
   icon: React.ElementType;
+  resource?: ResourceCode;
   badge?: number;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/admin", labelKey: "dashboard", icon: LayoutDashboard },
-  { href: "/admin/about", labelKey: "about", icon: Info },
-  { href: "/admin/products", labelKey: "products", icon: Package },
-  { href: "/admin/categories", labelKey: "categories", icon: Layers },
-  { href: "/admin/services", labelKey: "services", icon: Wrench },
-  { href: "/admin/certificates", labelKey: "certificates", icon: Shield },
-  { href: "/admin/team", labelKey: "team", icon: Users },
-  { href: "/admin/projects", labelKey: "projects", icon: FolderKanban },
-  { href: "/admin/careers/postings", labelKey: "jobPostings", icon: Briefcase },
-  { href: "/admin/careers/applications", labelKey: "careerApplications", icon: FileCheck },
-  { href: "/admin/rfq", labelKey: "rfq", icon: FileQuestion },
-  { href: "/admin/branches", labelKey: "branches", icon: Building2 },
-  { href: "/admin/contact-messages", labelKey: "contactMessages", icon: Mail },
-  { href: "/admin/homepage", labelKey: "homepage", icon: Home },
-  { href: "/admin/seo", labelKey: "seo", icon: Search },
-  { href: "/admin/users", labelKey: "users", icon: UserCheck },
-  { href: "/admin/roles", labelKey: "roles", icon: Shield },
+  { href: "/admin", labelKey: "dashboard", icon: LayoutDashboard, resource: "dashboard" },
+  { href: "/admin/about", labelKey: "about", icon: Info, resource: "about" },
+  { href: "/admin/products", labelKey: "products", icon: Package, resource: "products" },
+  { href: "/admin/categories", labelKey: "categories", icon: Layers, resource: "products" },
+  { href: "/admin/services", labelKey: "services", icon: Wrench, resource: "services" },
+  { href: "/admin/certificates", labelKey: "certificates", icon: Shield, resource: "about" },
+  { href: "/admin/team", labelKey: "team", icon: Users, resource: "about" },
+  { href: "/admin/projects", labelKey: "projects", icon: FolderKanban, resource: "projects" },
+  { href: "/admin/careers/postings", labelKey: "jobPostings", icon: Briefcase, resource: "careers" },
+  { href: "/admin/careers/applications", labelKey: "careerApplications", icon: FileCheck, resource: "careers" },
+  { href: "/admin/rfq", labelKey: "rfq", icon: FileQuestion, resource: "rfq" },
+  { href: "/admin/branches", labelKey: "branches", icon: Building2, resource: "branches" },
+  { href: "/admin/contact-messages", labelKey: "contactMessages", icon: Mail, resource: "messages" },
+  { href: "/admin/homepage", labelKey: "homepage", icon: Home, resource: "homepage" },
+  { href: "/admin/seo", labelKey: "seo", icon: Search, resource: "seo" },
+  { href: "/admin/users", labelKey: "users", icon: UserCheck, resource: "users" },
+  { href: "/admin/roles", labelKey: "roles", icon: Shield, resource: "roles" },
   { href: "/admin/profile", labelKey: "profile", icon: User },
-  { href: "/admin/activity-log", labelKey: "activityLog", icon: Activity },
-  { href: "/admin/notifications", labelKey: "notifications", icon: Bell },
-  { href: "/admin/settings", labelKey: "settings", icon: Settings },
+  { href: "/admin/activity-log", labelKey: "activityLog", icon: Activity, resource: "activity_log" },
+  { href: "/admin/notifications", labelKey: "notifications", icon: Bell, resource: "notifications" },
+  { href: "/admin/settings", labelKey: "settings", icon: Settings, resource: "settings" },
 ];
 
 interface AdminSidebarProps {
@@ -84,6 +88,11 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
   const locale = useLocale();
   const t = useTranslations("sidebar");
   const isRtl = useRTL();
+  const { hasPermission } = usePermission();
+
+  const filteredNavItems = NAV_ITEMS.filter(
+    (item) => !item.resource || hasPermission(item.resource, "view")
+  );
 
   const isActive = (href: string) => {
     const localizedHref = `/${locale}${href}`;
@@ -153,7 +162,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
         {/* Navigation items */}
         <ScrollArea className="flex-1 px-3.5 py-4">
           <nav className="flex flex-col gap-1" role="navigation" aria-label="Admin navigation">
-            {NAV_ITEMS.map((item) => {
+            {filteredNavItems.map((item) => {
               const active = isActive(item.href);
               const Icon = item.icon;
               const label = t(item.labelKey);

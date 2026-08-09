@@ -1,14 +1,14 @@
 "use client";
 // ==============================================================================
 // features/roles-permissions/presentation/components/role-dialog.tsx
-// Dialog for Creating & Editing Security Roles & Assigning Grouped Permissions
+// Dialog for Creating & Editing Security Roles with Predefined Templates & Matrix
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
-import { Loader2, ShieldCheck, Save } from "lucide-react";
+import { Loader2, ShieldCheck, Save, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,8 +20,10 @@ import {
   Input,
   Label,
   Textarea,
+  Badge,
 } from "@shared/ui";
 import { PermissionCheckboxGroup } from "./permission-checkbox-group";
+import { ROLE_TEMPLATES } from "../../domain/entities/role-permission.matrix";
 import {
   useCreateAdminRole,
   useUpdateAdminRole,
@@ -89,6 +91,27 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
   const selectedPermissionIds = watch("permissionIds");
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  const applyTemplate = (templateSlug: string) => {
+    const template = ROLE_TEMPLATES.find((t) => t.slug === templateSlug);
+    if (!template) return;
+
+    if (!watch("name")) {
+      setValue("name", template.name);
+    }
+    setValue("description", template.description);
+
+    // Map template permission codes to IDs in database
+    const templateIds: string[] = [];
+    allPermissions.forEach((p) => {
+      const pCode = p.code || `${(p as any).resource}:${(p as any).action}`;
+      if (template.permissions.includes(pCode as any)) {
+        templateIds.push(p.id);
+      }
+    });
+
+    setValue("permissionIds", templateIds);
+  };
+
   const onSubmit = async (values: RoleFormValues) => {
     if (isEditing && role) {
       await updateMutation.mutateAsync({
@@ -111,23 +134,45 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
-      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-primary" />
             {isEditing ? t("editRole") : t("addRole")}
           </DialogTitle>
           <DialogDescription>
-            Configure role scope and check module permissions granted to members assigned to this role.
+            Configure role scope, apply predefined templates, and select module permissions.
           </DialogDescription>
         </DialogHeader>
 
+        {!isEditing && (
+          <div className="bg-muted/20 border rounded-lg p-3 space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-primary uppercase tracking-wider">
+              <Sparkles className="h-3.5 w-3.5" /> Apply Role Template
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ROLE_TEMPLATES.map((tmpl) => (
+                <Button
+                  key={tmpl.slug}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() => applyTemplate(tmpl.slug)}
+                >
+                  {tmpl.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label htmlFor="name">{t("form.roleName")}</Label>
+            <Label htmlFor="name">{t("form.roleName")} *</Label>
             <Input
               id="name"
-              disabled={role?.code === "super_admin"}
+              disabled={role?.code === "super_admin" || (role as any)?.isSystemRole || (role as any)?.is_system}
               {...register("name")}
               placeholder="e.g. Content Editor"
             />
@@ -145,7 +190,12 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
           </div>
 
           <div className="space-y-1.5 pt-2">
-            <Label className="text-sm font-semibold">{t("form.permissionsHeader")}</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-semibold">{t("form.permissionsHeader")}</Label>
+              <Badge variant="secondary" className="text-xs font-mono">
+                {selectedPermissionIds.length} permissions granted
+              </Badge>
+            </div>
             <PermissionCheckboxGroup
               allPermissions={allPermissions}
               selectedPermissionIds={selectedPermissionIds}
