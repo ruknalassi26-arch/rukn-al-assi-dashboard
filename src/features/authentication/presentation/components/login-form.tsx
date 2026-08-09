@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // features/authentication/presentation/components/login-form.tsx
-// Admin Login Form Component with Zod + RHF + Sonner Toasts
+// Admin Login Form Component with Zod + RHF + Sonner Toasts + i18n
 // ==============================================================================
 import React, { useState } from "react";
 import Link from "next/link";
@@ -24,14 +24,6 @@ import {
 } from "@shared/ui";
 import { useSignIn } from "@shared/hooks/auth/use-auth-hooks";
 
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  rememberMe: z.boolean(),
-});
-
-export type LoginFormValues = z.infer<typeof loginSchema>;
-
 export function LoginForm() {
   const t = useTranslations("auth.login");
   const locale = useLocale();
@@ -40,6 +32,14 @@ export function LoginForm() {
 
   const isDeactivated = searchParams.get("error") === "account_deactivated";
   const [showPassword, setShowPassword] = useState(false);
+
+  const loginSchema = z.object({
+    email: z.string().email(t("invalidEmail")),
+    password: z.string().min(6, t("passwordMinLength")),
+    rememberMe: z.boolean(),
+  });
+
+  type LoginFormValues = z.infer<typeof loginSchema>;
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -93,7 +93,7 @@ export function LoginForm() {
         {isDeactivated && (
           <div className="mb-4 flex items-center gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs font-medium text-destructive">
             <AlertCircle className="h-4 w-4 shrink-0" />
-            <span>Your administrative account has been deactivated. Access denied.</span>
+            <span>{t("accountDeactivated")}</span>
           </div>
         )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

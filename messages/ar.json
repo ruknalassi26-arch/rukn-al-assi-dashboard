@@ -230,7 +230,10 @@
       "rememberMe": "تذكرني",
       "forgotPassword": "هل نسيت كلمة المرور؟",
       "submit": "تسجيل الدخول",
-      "signingIn": "جاري تسجيل الدخول..."
+      "signingIn": "جاري تسجيل الدخول...",
+      "accountDeactivated": "تم تعطيل حسابك الإداري. الوصول غير مسموح به.",
+      "invalidEmail": "بريد إلكتروني غير صالح",
+      "passwordMinLength": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل"
     },
     "forgotPassword": {
       "title": "إعادة ضبط كلمة المرور",

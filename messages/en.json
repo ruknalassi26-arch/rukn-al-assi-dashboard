@@ -230,7 +230,10 @@
       "rememberMe": "Remember me",
       "forgotPassword": "Forgot Password?",
       "submit": "Sign In",
-      "signingIn": "Signing in..."
+      "signingIn": "Signing in...",
+      "accountDeactivated": "Your administrative account has been deactivated. Access denied.",
+      "invalidEmail": "Invalid email address",
+      "passwordMinLength": "Password must be at least 6 characters"
     },
     "forgotPassword": {
       "title": "Reset Your Password",
