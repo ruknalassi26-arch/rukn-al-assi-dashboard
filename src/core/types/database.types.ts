@@ -832,6 +832,7 @@ export interface Database {
         Row: {
           id: string;
           name: string;
+          slug?: string | null;
           code?: string | null;
           description: string | null;
           is_system?: boolean | null;
@@ -841,6 +842,7 @@ export interface Database {
         Insert: {
           id?: string;
           name: string;
+          slug?: string | null;
           code?: string | null;
           description?: string | null;
           is_system?: boolean | null;
@@ -982,7 +984,7 @@ export interface Database {
         Insert: {
           code: string;
           name: string;
-          native_name: string;
+          native_name?: string;
           is_rtl?: boolean;
           is_required?: boolean;
           is_active?: boolean | null;

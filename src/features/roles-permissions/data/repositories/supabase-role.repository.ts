@@ -190,11 +190,14 @@ export class SupabaseRoleRepository implements IRoleRepository {
 
   async createRole(input: CreateRoleInput): Promise<RoleEntity> {
     const code = input.code || input.name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+    const slug = code;
 
     const { data: roleRow, error } = await this.supabase
       .from("roles")
       .insert({
         name: input.name,
+        slug: slug,
+        code: code,
         description: input.description ?? null,
       })
       .select("*")
@@ -228,7 +231,12 @@ export class SupabaseRoleRepository implements IRoleRepository {
     const payload: UpdateTables<"roles"> = {
       updated_at: new Date().toISOString(),
     };
-    if (input.name !== undefined) payload.name = input.name;
+    if (input.name !== undefined) {
+      const code = input.name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+      payload.name = input.name;
+      payload.slug = code;
+      payload.code = code;
+    }
     if (input.description !== undefined) payload.description = input.description;
 
     const { data: roleRow, error } = await this.supabase
