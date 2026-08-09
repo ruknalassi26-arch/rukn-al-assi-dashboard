@@ -269,9 +269,15 @@ export function CategoryTable() {
 
                       {/* Status */}
                       <TableCell>
-                        <Badge variant={cat.isActive ? "default" : "secondary"}>
-                          {cat.status}
-                        </Badge>
+                        {cat.isActive ? (
+                          <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold">
+                            {cat.status}
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-semibold">
+                            {cat.status}
+                          </Badge>
+                        )}
                       </TableCell>
 
                       {/* Actions */}

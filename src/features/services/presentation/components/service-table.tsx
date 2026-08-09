@@ -397,11 +397,15 @@ export function ServiceTable() {
                         <TableCell className="text-sm font-mono">{service.sortOrder}</TableCell>
 
                         {/* Status */}
-                        <TableCell>
-                          <Badge variant={service.isActive ? "default" : "secondary"}>
-                            {service.status}
-                          </Badge>
-                        </TableCell>
+                          {service.isActive ? (
+                            <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold">
+                              {service.status}
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-semibold">
+                              {service.status}
+                            </Badge>
+                          )}
 
                         {/* Actions */}
                         <TableCell className="text-end">

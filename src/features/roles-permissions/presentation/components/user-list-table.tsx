@@ -241,7 +241,7 @@ export function UserListTable() {
                           Active
                         </Badge>
                       ) : (
-                        <Badge variant="secondary" className="text-muted-foreground">
+                        <Badge className="bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-semibold">
                           Inactive
                         </Badge>
                       )}

@@ -353,9 +353,15 @@ export function TeamMemberTable() {
 
                         {/* Status */}
                         <TableCell>
-                          <Badge variant={member.isActive ? "default" : "secondary"}>
-                            {member.status === "active" ? tCommon("active") : tCommon("draft")}
-                          </Badge>
+                          {member.isActive ? (
+                            <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold">
+                              {tCommon("active")}
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-semibold">
+                              {tCommon("draft")}
+                            </Badge>
+                          )}
                         </TableCell>
 
                         {/* Actions */}

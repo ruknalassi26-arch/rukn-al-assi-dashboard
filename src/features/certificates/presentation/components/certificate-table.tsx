@@ -342,9 +342,15 @@ export function CertificateTable() {
 
                         {/* Status */}
                         <TableCell>
-                          <Badge variant={cert.isActive ? "default" : "secondary"}>
-                            {cert.status}
-                          </Badge>
+                          {cert.isActive ? (
+                            <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold">
+                              {cert.status}
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-semibold">
+                              {cert.status}
+                            </Badge>
+                          )}
                         </TableCell>
 
                         {/* Actions */}
