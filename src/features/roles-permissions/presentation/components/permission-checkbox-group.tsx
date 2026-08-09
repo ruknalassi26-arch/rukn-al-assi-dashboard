@@ -2,7 +2,7 @@
 // ==============================================================================
 // features/roles-permissions/presentation/components/permission-checkbox-group.tsx
 // Matrix Selector for RBAC Permissions by Resource (View & Manage Checkboxes)
-// Enforces "Manage implies View" automatically.
+// Enforces "Manage implies View" automatically & supports Resource Name selection.
 // ==============================================================================
 import { Checkbox, Label, Badge } from "@shared/ui";
 import { ALL_RESOURCES, type ResourceCode } from "../../domain/entities/role.enums";
@@ -58,12 +58,18 @@ export function PermissionCheckboxGroup({
     onChange(updated);
   };
 
-  const handleSelectAllResource = (resource: ResourceCode, checked: boolean) => {
+  const handleSelectAllResource = (resource: ResourceCode, toggleState?: boolean) => {
     const viewId = getPermissionId(resource, "view");
     const manageId = getPermissionId(resource, "manage");
     let updated = [...selectedPermissionIds];
 
-    if (checked) {
+    const hasView = Boolean(viewId && updated.includes(viewId));
+    const hasManage = Boolean(manageId && updated.includes(manageId));
+    const isAnySelected = hasView || hasManage;
+
+    const shouldSelect = toggleState !== undefined ? toggleState : !isAnySelected;
+
+    if (shouldSelect) {
       if (viewId && !updated.includes(viewId)) updated.push(viewId);
       if (manageId && !updated.includes(manageId)) updated.push(manageId);
     } else {
@@ -91,26 +97,31 @@ export function PermissionCheckboxGroup({
         const hasView = Boolean(viewId && selectedPermissionIds.includes(viewId));
         const hasManage = Boolean(manageId && selectedPermissionIds.includes(manageId));
         const allChecked = hasView && hasManage;
+        const someChecked = (hasView || hasManage) && !allChecked;
 
         return (
           <div
             key={resource}
             className="flex items-center justify-between py-2 border-b last:border-b-0 hover:bg-muted/30 px-2 rounded-md transition-colors"
           >
+            {/* Resource Select All Checkbox & Label */}
             <div className="flex items-center gap-3">
               <Checkbox
                 id={`resource-all-${resource}`}
-                checked={allChecked}
-                onCheckedChange={(checked) => handleSelectAllResource(resource, checked === true)}
+                checked={allChecked ? true : someChecked ? "indeterminate" : false}
+                onCheckedChange={(checked) =>
+                  handleSelectAllResource(resource, checked === "indeterminate" ? true : checked === true)
+                }
               />
               <Label
                 htmlFor={`resource-all-${resource}`}
-                className="font-semibold text-sm capitalize cursor-pointer text-foreground"
+                className="font-semibold text-sm capitalize cursor-pointer text-foreground select-none"
               >
                 {resource.replace("_", " ")}
               </Label>
             </div>
 
+            {/* View & Manage Actions */}
             <div className="flex items-center gap-12 pr-4">
               {/* View Checkbox */}
               <div className="flex items-center gap-1.5">
@@ -119,7 +130,7 @@ export function PermissionCheckboxGroup({
                   checked={hasView}
                   onCheckedChange={(checked) => handleToggleAction(resource, "view", checked === true)}
                 />
-                <Label htmlFor={`perm-view-${resource}`} className="text-xs cursor-pointer text-muted-foreground">
+                <Label htmlFor={`perm-view-${resource}`} className="text-xs cursor-pointer text-muted-foreground select-none">
                   View
                 </Label>
               </div>
@@ -131,7 +142,7 @@ export function PermissionCheckboxGroup({
                   checked={hasManage}
                   onCheckedChange={(checked) => handleToggleAction(resource, "manage", checked === true)}
                 />
-                <Label htmlFor={`perm-manage-${resource}`} className="text-xs cursor-pointer font-medium text-primary">
+                <Label htmlFor={`perm-manage-${resource}`} className="text-xs cursor-pointer font-medium text-primary select-none">
                   Manage
                 </Label>
               </div>
