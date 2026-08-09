@@ -1,14 +1,14 @@
 "use client";
 // ==============================================================================
 // features/roles-permissions/presentation/components/user-dialog.tsx
-// Dialog for Creating & Editing Administrative User Credentials & Roles
+// Dialog for Creating & Editing Administrative User Credentials, Password & Roles
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
-import { Loader2, UserPlus, Save } from "lucide-react";
+import { Loader2, UserPlus, Save, KeyRound } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +36,7 @@ import type { AdminUserEntity } from "../../domain/entities/admin-user.entity";
 const userSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
   email: z.string().email("Valid email address is required"),
+  password: z.string().optional(),
   roleId: z.string().min(1, "Role selection is required"),
   isActive: z.boolean(),
 });
@@ -71,6 +72,7 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
     defaultValues: {
       fullName: "",
       email: "",
+      password: "",
       roleId: "",
       isActive: true,
     },
@@ -81,6 +83,7 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
       reset({
         fullName: user.fullName,
         email: user.email,
+        password: "",
         roleId: user.roleId ?? "",
         isActive: user.isActive,
       });
@@ -88,6 +91,7 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
       reset({
         fullName: "",
         email: "",
+        password: "",
         roleId: roles[0]?.id ?? "",
         isActive: true,
       });
@@ -105,12 +109,19 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
         id: user.id,
         input: {
           fullName: values.fullName,
+          password: values.password || undefined,
           roleId: values.roleId,
           isActive: values.isActive,
         },
       });
     } else {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync({
+        fullName: values.fullName,
+        email: values.email,
+        password: values.password,
+        roleId: values.roleId,
+        isActive: values.isActive,
+      });
     }
     onClose();
   };
@@ -125,8 +136,8 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Modify user display name, assigned security role, or active status."
-              : "Provision a new administrative account. Password setup email will be automatically sent."}
+              ? "Modify user display name, reset password, assigned security role, or active status."
+              : "Provision a new administrative account credentials for admin panel login."}
           </DialogDescription>
         </DialogHeader>
 
@@ -148,6 +159,20 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
             />
             {errors.email && <span className="text-xs text-destructive">{errors.email.message}</span>}
             {isEditing && <p className="text-[11px] text-muted-foreground">Email address cannot be changed directly.</p>}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="password" className="flex items-center gap-1.5">
+              <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
+              {isEditing ? "Reset Password (Optional)" : "Account Password *"}
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              {...register("password")}
+              placeholder={isEditing ? "Leave blank to keep current password" : "Enter login password (min 6 characters)"}
+            />
+            {errors.password && <span className="text-xs text-destructive">{errors.password.message}</span>}
           </div>
 
           <div className="space-y-1.5">

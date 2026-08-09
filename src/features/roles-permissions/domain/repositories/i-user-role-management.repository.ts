@@ -26,12 +26,14 @@ export interface PaginatedUsers {
 export interface CreateUserInput {
   fullName: string;
   email: string;
+  password?: string;
   roleId: string;
   isActive?: boolean;
 }
 
 export interface UpdateUserInput {
   fullName?: string;
+  password?: string;
   avatarUrl?: string | null;
   roleId?: string;
   isActive?: boolean;

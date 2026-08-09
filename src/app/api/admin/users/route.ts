@@ -54,7 +54,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { fullName, email, roleId, isActive = true } = body;
+    const { fullName, email, password, roleId, isActive = true } = body;
 
     if (!email || !fullName || !roleId) {
       return NextResponse.json(
@@ -80,13 +80,15 @@ export async function POST(request: Request) {
       },
     });
 
-    // Generate random secure temporary password
-    const tempPassword = `P@ss_${Math.random().toString(36).substring(2, 10)}!${Date.now()}`;
+    // Use custom password if provided (min 6 chars), else generate temporary password
+    const finalPassword = password && password.trim().length >= 6
+      ? password.trim()
+      : `P@ss_${Math.random().toString(36).substring(2, 10)}!${Date.now()}`;
 
     // 1. Create Auth User using Supabase Auth Admin API
     const { data: authUser, error: authError } = await adminSupabase.auth.admin.createUser({
       email,
-      password: tempPassword,
+      password: finalPassword,
       email_confirm: true,
       user_metadata: {
         full_name: fullName,
@@ -94,7 +96,7 @@ export async function POST(request: Request) {
     });
 
     if (authError || !authUser.user) {
-      // If user already exists in auth, find existing auth user
+      // If user already exists in auth, find existing auth user and update password if provided
       const { data: listData } = await adminSupabase.auth.admin.listUsers();
       const existingUser = listData.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
 
@@ -103,6 +105,10 @@ export async function POST(request: Request) {
       }
 
       const userId = existingUser.id;
+
+      if (password && password.trim().length >= 6) {
+        await adminSupabase.auth.admin.updateUserById(userId, { password: password.trim() });
+      }
 
       // 2. Create or Update admin_profiles record
       await adminSupabase.from("admin_profiles").upsert({

@@ -230,6 +230,22 @@ export class SupabaseUserRepository implements IUserRepository {
       await this.supabase.from("admin_user_roles").insert({ user_id: id, role_id: input.roleId });
     }
 
+    if (input.password && input.password.trim() !== "") {
+      const current = await this.getUserById(id);
+      if (current?.email) {
+        await fetch("/api/admin/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: current.email,
+            fullName: input.fullName || current.fullName,
+            password: input.password,
+            roleId: input.roleId || current.roleId,
+          }),
+        });
+      }
+    }
+
     const updated = await this.getUserById(id);
     await this.logActivity("updated", id, `Updated User Profile: ${input.fullName ?? id}`);
     return updated!;
