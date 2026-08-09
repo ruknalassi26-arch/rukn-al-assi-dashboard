@@ -233,3 +233,53 @@ export function getFriendlyErrorMessage(error: unknown, context?: string): strin
 
   return appError.userMessage;
 }
+
+/**
+ * Translates raw API & Supabase error messages to the current locale
+ */
+export function translateErrorMessage(rawMessage: string | null | undefined, locale: string = "en"): string {
+  if (!rawMessage) {
+    if (locale === "ar") return "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.";
+    if (locale === "ckb" || locale === "ku") return "هەڵەیەکی نەزانراو ڕوویدا. تکایە دووبارە هەوڵبدەرەوە.";
+    return "An unexpected error occurred. Please try again.";
+  }
+
+  const msg = rawMessage.toLowerCase();
+
+  // Rate limit
+  if (msg.includes("rate limit") || msg.includes("rate_limit") || msg.includes("too many requests")) {
+    if (locale === "ar") return "تم تجاوز الحد الأقصى لإرسال البريد الإلكتروني. يرجى الانتظار بضع دقائق قبل المحاولة مرة أخرى.";
+    if (locale === "ckb" || locale === "ku") return "سنووری ناردنی ئیمەیڵ تێپەڕێنرا. تکایە چەند خولەکێک بوەستە پێش ئەوەی دووبارە هەوڵبدەیتەوە.";
+    return "Email rate limit exceeded. Please wait a few minutes before trying again.";
+  }
+
+  // Deactivated
+  if (msg.includes("deactivated") || msg.includes("inactive") || msg.includes("account_deactivated")) {
+    if (locale === "ar") return "تم تعطيل حسابك الإداري. الوصول غير مسموح به.";
+    if (locale === "ckb" || locale === "ku") return "هەژماری بەڕێوەبەرایەتیت ناچالاککراوە. دەستگەیشتن ڕەتکرایەوە.";
+    return "Your administrative account has been deactivated. Access denied.";
+  }
+
+  // Invalid Credentials
+  if (msg.includes("invalid login credentials") || msg.includes("invalid email or password") || msg.includes("invalid_credentials")) {
+    if (locale === "ar") return "البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التحقق من البيانات.";
+    if (locale === "ckb" || locale === "ku") return "ئیمەیڵ یان وشەی نهێنی هەڵەیە. تکایە زانیارییەکانت بپشکنەوە.";
+    return "Invalid email address or password. Please check your credentials.";
+  }
+
+  // User exists
+  if (msg.includes("already registered") || msg.includes("already exists")) {
+    if (locale === "ar") return "يوجد مستخدم بهذا البريد الإلكتروني بالفعل.";
+    if (locale === "ckb" || locale === "ku") return "بەکارهێنەرێک بەم ئیمەیڵەوە پێشتر تۆمارکراوە.";
+    return "A user with this email address already exists.";
+  }
+
+  // Unexpected / network
+  if (msg.includes("unexpected") || msg.includes("fetch") || msg.includes("network")) {
+    if (locale === "ar") return "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.";
+    if (locale === "ckb" || locale === "ku") return "هەڵەیەکی نەزانراو ڕوویدا. تکایە دووبارە هەوڵبدەرەوە.";
+    return "An unexpected error occurred. Please try again.";
+  }
+
+  return rawMessage;
+}

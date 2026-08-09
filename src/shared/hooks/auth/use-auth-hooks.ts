@@ -9,6 +9,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
 import { toast } from "sonner";
 import { queryKeys } from "@core/constants/query-keys";
+import { translateErrorMessage } from "@core/utils/error";
 import { SupabaseAuthRepository } from "@features/authentication/data/repositories/supabase-auth.repository";
 import {
   SignInUseCase,
@@ -75,7 +76,7 @@ export function useSignIn() {
       router.push(`/${locale}/admin`);
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to sign in. Please check your credentials.");
+      toast.error(translateErrorMessage(error.message, locale));
     },
   });
 }
@@ -94,7 +95,7 @@ export function useSignOut() {
       toast.success("Signed out successfully");
       router.push(`/${locale}/admin/login`);
     },
-    onError: (error: Error) => {
+    onError: () => {
       clearUser();
       queryClient.clear();
       router.push(`/${locale}/admin/login`);
@@ -103,13 +104,15 @@ export function useSignOut() {
 }
 
 export function useSendPasswordReset() {
+  const locale = useLocale();
+
   return useMutation({
     mutationFn: (input: SendPasswordResetInput) => sendPasswordResetUseCase.execute(input),
     onSuccess: (_, input) => {
       toast.success(`Password reset instructions have been sent to ${input.email}`);
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to send password reset email");
+      toast.error(translateErrorMessage(error.message, locale));
     },
   });
 }
@@ -125,12 +128,13 @@ export function useResetPassword() {
       router.push(`/${locale}/admin/login`);
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to reset password");
+      toast.error(translateErrorMessage(error.message, locale));
     },
   });
 }
 
 export function useChangePassword() {
+  const locale = useLocale();
   const { closeChangePasswordModal } = useAuthStore();
 
   return useMutation({
@@ -140,7 +144,7 @@ export function useChangePassword() {
       closeChangePasswordModal();
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to change password");
+      toast.error(translateErrorMessage(error.message, locale));
     },
   });
 }

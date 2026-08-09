@@ -22,7 +22,8 @@ export class SupabaseAuthRepository implements IAuthRepository {
   private async getValidAdminId(userId: string | null | undefined): Promise<string | null> {
     if (!userId) return null;
     try {
-      const { data } = await (this.supabase.from("admin_profiles" as any) as any)
+      const { data } = await this.supabase
+        .from("admin_profiles")
         .select("id")
         .eq("id", userId)
         .maybeSingle();
@@ -40,7 +41,7 @@ export class SupabaseAuthRepository implements IAuthRepository {
   ) {
     try {
       const validAdminId = await this.getValidAdminId(userId);
-      await (this.supabase.from("activity_log" as any) as any).insert({
+      await this.supabase.from("activity_log").insert({
         action,
         entity_type: "auth",
         entity_id: userId || null,
@@ -65,25 +66,25 @@ export class SupabaseAuthRepository implements IAuthRepository {
 
       let profile: AdminProfileDTO | null = null;
       try {
-        const { data: profileData } = await (this.supabase as any)
+        const { data: profileData } = await this.supabase
           .from("admin_profiles")
           .select("*")
           .eq("id", data.user.id)
           .maybeSingle();
 
         if (profileData) {
-          profile = profileData as AdminProfileDTO;
+          profile = profileData as unknown as AdminProfileDTO;
           if (profile.is_active === false) {
             await this.supabase.auth.signOut();
             throw new Error("Your administrative account has been deactivated. Access denied.");
           }
         }
-      } catch (err: any) {
-        if (err.message?.includes("deactivated")) throw err;
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message.includes("deactivated")) throw err;
       }
 
       try {
-        await (this.supabase as any)
+        await this.supabase
           .from("admin_profiles")
           .update({ last_login_at: new Date().toISOString() })
           .eq("id", data.user.id);
@@ -101,11 +102,12 @@ export class SupabaseAuthRepository implements IAuthRepository {
       });
 
       return userEntity;
-    } catch (err: any) {
-      if (err.name === "TypeError" || err.message === "Failed to fetch" || err.message?.includes("fetch")) {
+    } catch (err: unknown) {
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      if (errorObj.name === "TypeError" || errorObj.message === "Failed to fetch" || errorObj.message.includes("fetch")) {
         throw new Error("Unable to reach authentication server. Please check your internet connection or Supabase configuration.");
       }
-      throw err;
+      throw errorObj;
     }
   }
 
@@ -119,11 +121,12 @@ export class SupabaseAuthRepository implements IAuthRepository {
       if (error) {
         throw new Error(error.message);
       }
-    } catch (err: any) {
-      if (err.name === "TypeError" || err.message === "Failed to fetch") {
+    } catch (err: unknown) {
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      if (errorObj.name === "TypeError" || errorObj.message === "Failed to fetch") {
         return;
       }
-      throw err;
+      throw errorObj;
     }
   }
 
@@ -134,14 +137,14 @@ export class SupabaseAuthRepository implements IAuthRepository {
 
       let profile: AdminProfileDTO | null = null;
       try {
-        const { data: profileData } = await (this.supabase as any)
+        const { data: profileData } = await this.supabase
           .from("admin_profiles")
           .select("*")
           .eq("id", userData.user.id)
           .maybeSingle();
 
         if (profileData) {
-          profile = profileData as AdminProfileDTO;
+          profile = profileData as unknown as AdminProfileDTO;
           if (profile.is_active === false) {
             await this.supabase.auth.signOut();
             return null;
