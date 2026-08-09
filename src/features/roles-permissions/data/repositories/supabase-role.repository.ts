@@ -19,6 +19,7 @@ import type { RoleCode, ResourceCode } from "../../domain/entities/role.enums";
 interface RoleRowDTO {
   id: string;
   name: string;
+  slug?: string | null;
   code?: string | null;
   description: string | null;
   is_system?: boolean | null;
@@ -189,15 +190,13 @@ export class SupabaseRoleRepository implements IRoleRepository {
   }
 
   async createRole(input: CreateRoleInput): Promise<RoleEntity> {
-    const code = input.code || input.name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
-    const slug = code;
+    const slug = input.code || input.name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
 
     const { data: roleRow, error } = await this.supabase
       .from("roles")
       .insert({
         name: input.name,
         slug: slug,
-        code: code,
         description: input.description ?? null,
       })
       .select("*")
@@ -215,7 +214,7 @@ export class SupabaseRoleRepository implements IRoleRepository {
       await this.supabase.from("role_permissions").insert(inserts);
     }
 
-    const roleCode = (rawRole.code ?? code) as RoleCode;
+    const roleCode = (rawRole.slug ?? rawRole.code ?? slug) as RoleCode;
     const entity = new RoleEntity({
       id: rawRole.id,
       name: rawRole.name,
@@ -232,10 +231,9 @@ export class SupabaseRoleRepository implements IRoleRepository {
       updated_at: new Date().toISOString(),
     };
     if (input.name !== undefined) {
-      const code = input.name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+      const slug = input.name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
       payload.name = input.name;
-      payload.slug = code;
-      payload.code = code;
+      payload.slug = slug;
     }
     if (input.description !== undefined) payload.description = input.description;
 
