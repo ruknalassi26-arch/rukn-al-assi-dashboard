@@ -87,18 +87,13 @@ export class SupabaseAboutRepository implements IAboutRepository {
         profileId = existing.id;
       }
 
-      const basePayload: Record<string, unknown> = {};
+      const basePayload: Record<string, unknown> = { id: profileId };
       if (data.establishedYear !== undefined) basePayload.established_year = data.establishedYear;
       if (data.headquarters !== undefined) basePayload.headquarters = data.headquarters;
-      if (data.phone !== undefined) basePayload.phone = data.phone;
-      if (data.email !== undefined) basePayload.email = data.email;
-      if (data.website !== undefined) basePayload.website = data.website;
       if (data.status !== undefined) basePayload.status = data.status;
 
-      if (Object.keys(basePayload).length > 0) {
-        await (this.supabase.from("company_profile" as any) as any)
-          .upsert({ id: profileId, ...basePayload });
-      }
+      await (this.supabase.from("company_profile" as any) as any)
+        .upsert(basePayload);
 
       // 2. Upsert translations in company_profile_translations
       const transPayloads = [];
