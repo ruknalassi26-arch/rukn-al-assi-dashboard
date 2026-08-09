@@ -29,6 +29,7 @@ import type { PermissionCode } from "../../domain/entities/role.enums";
 import {
   useCreateAdminRole,
   useUpdateAdminRole,
+  useAdminRoleById,
   useAllPermissions,
 } from "@shared/hooks/roles-permissions/use-user-role-hooks";
 import type { RoleEntity } from "../../domain/entities/role.entity";
@@ -55,6 +56,7 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
   const createMutation = useCreateAdminRole();
   const updateMutation = useUpdateAdminRole();
   const { data: permissionsData } = useAllPermissions();
+  const { data: roleDetail, isLoading: isLoadingDetail } = useAdminRoleById(role?.id ?? "");
 
   const allPermissions = permissionsData ?? [];
 
@@ -76,10 +78,11 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
 
   useEffect(() => {
     if (role) {
+      const activeRole = roleDetail || role;
       reset({
-        name: role.name,
-        description: role.description ?? "",
-        permissionIds: role.permissionIds ?? [],
+        name: activeRole.name,
+        description: activeRole.description ?? "",
+        permissionIds: (activeRole as { permissionIds?: string[] }).permissionIds ?? role.permissionIds ?? [],
       });
     } else {
       reset({
@@ -88,7 +91,7 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
         permissionIds: [],
       });
     }
-  }, [role, reset]);
+  }, [role, roleDetail, reset]);
 
   const selectedPermissionIds = watch("permissionIds");
   const isPending = createMutation.isPending || updateMutation.isPending;
