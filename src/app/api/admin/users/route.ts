@@ -119,7 +119,7 @@ export async function POST(request: Request) {
 
       // 3. Assign selected role in admin_user_roles table
       await adminSupabase.from("admin_user_roles").upsert({
-        user_id: userId,
+        admin_user_id: userId,
         role_id: roleId,
       });
 
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
 
     // 3. Assign selected role in admin_user_roles table
     await adminSupabase.from("admin_user_roles").insert({
-      user_id: userId,
+      admin_user_id: userId,
       role_id: roleId,
     });
 

@@ -182,7 +182,7 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
               <SelectContent>
                 {roles.map((r) => (
                   <SelectItem key={r.id} value={r.id}>
-                    {r.name} {r.isSuperAdmin && "(Super Admin)"}
+                    {r.name}
                   </SelectItem>
                 ))}
               </SelectContent>

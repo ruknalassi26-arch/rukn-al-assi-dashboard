@@ -884,11 +884,11 @@ export interface Database {
       };
       admin_user_roles: {
         Row: {
-          user_id: string;
+          admin_user_id: string;
           role_id: string;
         };
         Insert: {
-          user_id: string;
+          admin_user_id: string;
           role_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["admin_user_roles"]["Insert"]>;

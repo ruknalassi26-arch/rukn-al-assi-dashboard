@@ -226,8 +226,8 @@ export class SupabaseUserRepository implements IUserRepository {
     }
 
     if (input.roleId) {
-      await this.supabase.from("admin_user_roles").delete().eq("user_id", id);
-      await this.supabase.from("admin_user_roles").insert({ user_id: id, role_id: input.roleId });
+      await this.supabase.from("admin_user_roles").delete().eq("admin_user_id", id);
+      await this.supabase.from("admin_user_roles").insert({ admin_user_id: id, role_id: input.roleId });
     }
 
     if (input.password && input.password.trim() !== "") {
