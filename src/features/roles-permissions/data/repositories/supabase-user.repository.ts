@@ -89,19 +89,48 @@ export class SupabaseUserRepository implements IUserRepository {
   async getUsers(params?: GetUsersFilterParams): Promise<PaginatedUsers> {
     const page = Math.max(1, params?.page ?? 1);
     const pageSize = Math.max(1, Math.min(100, params?.pageSize ?? 10));
-    const offset = (page - 1) * pageSize;
 
+    try {
+      const res = await fetch("/api/admin/users");
+      if (res.ok) {
+        const result = await res.json();
+        if (Array.isArray(result.users)) {
+          const rawRows = result.users as AdminProfileJoinDTO[];
+          let items = rawRows.map(mapProfileDTOToEntity);
+
+          if (params?.isActive !== undefined && params.isActive !== "all") {
+            items = items.filter((u) => u.isActive === params.isActive);
+          }
+
+          if (params?.search && params.search.trim() !== "") {
+            const search = params.search.trim().toLowerCase();
+            items = items.filter(
+              (u) => u.fullName.toLowerCase().includes(search) || u.email.toLowerCase().includes(search)
+            );
+          }
+
+          if (params?.roleId) {
+            items = items.filter((u) => u.roleId === params.roleId);
+          }
+
+          const total = items.length;
+          const totalPages = Math.ceil(total / pageSize);
+          const paginatedItems = items.slice((page - 1) * pageSize, page * pageSize);
+
+          return { items: paginatedItems, total, page, pageSize, totalPages };
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    const offset = (page - 1) * pageSize;
     let query = this.supabase
       .from("admin_profiles")
       .select("*, admin_user_roles(role_id, roles(id, name, description))", { count: "exact" });
 
     if (params?.isActive !== undefined && params.isActive !== "all") {
       query = query.eq("is_active", params.isActive);
-    }
-
-    if (params?.search && params.search.trim() !== "") {
-      const search = params.search.trim();
-      query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
     }
 
     query = query.order("created_at", { ascending: false }).range(offset, offset + pageSize - 1);
@@ -123,6 +152,19 @@ export class SupabaseUserRepository implements IUserRepository {
   }
 
   async getUserById(id: string): Promise<AdminUserEntity | null> {
+    try {
+      const res = await fetch("/api/admin/users");
+      if (res.ok) {
+        const result = await res.json();
+        if (Array.isArray(result.users)) {
+          const rawRow = result.users.find((u: any) => u.id === id);
+          if (rawRow) return mapProfileDTOToEntity(rawRow);
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
     const { data, error } = await this.supabase
       .from("admin_profiles")
       .select("*, admin_user_roles(role_id, roles(id, name, description))")

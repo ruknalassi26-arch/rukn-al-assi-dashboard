@@ -144,7 +144,7 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
               type="email"
               disabled={isEditing}
               {...register("email")}
-              placeholder="sarah@ruknalassi.com"
+              placeholder="user@ruknalassi.com"
             />
             {errors.email && <span className="text-xs text-destructive">{errors.email.message}</span>}
             {isEditing && <p className="text-[11px] text-muted-foreground">Email address cannot be changed directly.</p>}

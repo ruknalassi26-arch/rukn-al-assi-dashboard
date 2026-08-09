@@ -1,10 +1,55 @@
 // ==============================================================================
 // app/api/admin/users/route.ts
-// Secure Server-side API Route for Creating Admin Users via Supabase Auth Admin API
-// Never exposes Service Role Key to the client browser.
+// Secure Server-side API Route for Administrative Users (GET & POST)
+// Queries auth.users emails securely via Supabase Auth Admin API
 // ==============================================================================
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+
+export async function GET() {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      return NextResponse.json({ error: "Missing Supabase configuration." }, { status: 500 });
+    }
+
+    const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    // 1. Fetch auth users securely using service role admin client
+    const { data: authData, error: authError } = await adminSupabase.auth.admin.listUsers();
+    if (authError) {
+      return NextResponse.json({ error: authError.message }, { status: 400 });
+    }
+
+    const emailMap = new Map<string, string>();
+    authData.users.forEach((u) => {
+      if (u.id && u.email) emailMap.set(u.id, u.email);
+    });
+
+    // 2. Fetch profiles with roles
+    const { data: profileData, error: profileError } = await adminSupabase
+      .from("admin_profiles")
+      .select("*, admin_user_roles(role_id, roles(id, name, description))");
+
+    if (profileError) {
+      return NextResponse.json({ error: profileError.message }, { status: 400 });
+    }
+
+    // 3. Merge real auth.users email into profiles
+    const mergedProfiles = (profileData ?? []).map((prof: any) => ({
+      ...prof,
+      email: emailMap.get(prof.id) || prof.email || "",
+    }));
+
+    return NextResponse.json({ users: mergedProfiles });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Failed to fetch users." }, { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -63,7 +108,6 @@ export async function POST(request: Request) {
       await adminSupabase.from("admin_profiles").upsert({
         id: userId,
         full_name: fullName,
-        email,
         is_active: isActive,
         updated_at: new Date().toISOString(),
       });
@@ -88,28 +132,19 @@ export async function POST(request: Request) {
     const userId = authUser.user.id;
 
     // 2. Create admin_profiles record
-    const { error: profileError } = await adminSupabase.from("admin_profiles").insert({
+    await adminSupabase.from("admin_profiles").insert({
       id: userId,
       full_name: fullName,
-      email,
       is_active: isActive,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
 
-    if (profileError) {
-      // Profile handled
-    }
-
     // 3. Assign selected role in admin_user_roles table
-    const { error: roleAssignmentError } = await adminSupabase.from("admin_user_roles").insert({
+    await adminSupabase.from("admin_user_roles").insert({
       user_id: userId,
       role_id: roleId,
     });
-
-    if (roleAssignmentError) {
-      // Role assignment handled
-    }
 
     // 4. Send password setup email
     try {
