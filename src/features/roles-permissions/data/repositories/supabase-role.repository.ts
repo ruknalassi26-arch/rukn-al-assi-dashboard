@@ -31,6 +31,8 @@ interface PermissionRowDTO {
   code?: string | null;
   name?: string | null;
   module?: string | null;
+  resource?: string | null;
+  action?: string | null;
   description?: string | null;
 }
 
@@ -40,22 +42,23 @@ interface RolePermissionJoinDTO {
 }
 
 function mapPermissionDTOToEntity(permObj: PermissionRowDTO, fallbackId: string): PermissionEntity {
-  const codeStr = permObj.code || permObj.name || permObj.id || "";
-  const displayTitle = permObj.name || permObj.code || permObj.id || "";
-  const derivedModule = permObj.module
-    ? permObj.module
-    : codeStr.includes(":")
-    ? codeStr.split(":")[0]
-    : codeStr.includes("_")
-    ? codeStr.split("_")[0]
-    : "General";
+  const resource = permObj.resource || permObj.module || (permObj.code?.includes(":") ? permObj.code.split(":")[0] : "general");
+  const action = permObj.action || (permObj.code?.includes(":") ? permObj.code.split(":")[1] : "access");
+
+  const formattedResource = resource.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  const formattedAction = action.toUpperCase();
+
+  const codeStr = permObj.code || `${resource}:${action}`;
+  const displayTitle = permObj.name && !permObj.name.includes("-") && permObj.name.length < 40
+    ? permObj.name
+    : `${formattedResource} (${formattedAction})`;
 
   return new PermissionEntity({
     id: permObj.id || fallbackId,
     code: codeStr as any,
     name: displayTitle,
-    module: derivedModule as any,
-    description: permObj.description ?? null,
+    module: formattedResource as any,
+    description: permObj.description ?? `${action} access for ${resource}`,
   });
 }
 

@@ -99,7 +99,7 @@ export function RoleDetailsModal({ isOpen, onClose, roleId }: RoleDetailsModalPr
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            {tCommon("close")}
+            Close
           </Button>
         </DialogFooter>
       </DialogContent>
