@@ -16,13 +16,16 @@ export function toUserProfileEntity(dto: AuthUserDTO): UserProfileEntity {
     user.email?.split("@")[0] ||
     "Admin User";
 
+  const role = dto.role ?? "super_admin";
+  const isSuper = role === "super_admin" || role === "Super Admin";
+
   return new UserProfileEntity({
     id: user.id,
     email: user.email ?? "",
     fullName,
     avatarUrl: profile?.avatar_url ?? user.user_metadata?.avatar_url ?? null,
-    role: dto.role ?? "super_admin",
-    permissions: dto.permissions ?? ["*"],
+    role,
+    permissions: dto.permissions ?? (isSuper ? ["*"] : []),
     isActive: profile?.is_active ?? true,
     lastLoginAt: profile?.last_login_at ? new Date(profile.last_login_at) : null,
     createdAt: new Date(user.created_at),

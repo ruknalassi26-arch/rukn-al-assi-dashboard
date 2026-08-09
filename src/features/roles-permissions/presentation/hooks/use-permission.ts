@@ -8,15 +8,19 @@ import { ALL_PERMISSIONS, ROLE_PERMISSION_MATRIX } from "../../domain/entities/r
 import type { PermissionAction, PermissionCode, ResourceCode } from "../../domain/entities/role.enums";
 
 export function usePermission() {
-  const { user } = useAuthStore();
+  const { user, isLoading } = useAuthStore();
 
   const userRole = (user?.role?.toLowerCase().replace(/\s+/g, "_") ?? "viewer");
-  const isSuperAdmin = userRole === "super_admin" || user?.isSuperAdmin === true;
+  const isSuperAdmin = userRole === "super_admin" || userRole === "super_admin_role" || user?.isSuperAdmin === true;
+
+  const userPermissions = (user?.permissions as PermissionCode[]) ?? [];
 
   // Effective permissions across all user roles
   const effectivePermissions: PermissionCode[] = isSuperAdmin
     ? ALL_PERMISSIONS
-    : (user?.permissions as PermissionCode[]) ?? ROLE_PERMISSION_MATRIX[userRole] ?? ROLE_PERMISSION_MATRIX.viewer ?? [];
+    : userPermissions.length > 0
+      ? userPermissions
+      : ROLE_PERMISSION_MATRIX[userRole] ?? ROLE_PERMISSION_MATRIX.viewer ?? [];
 
   /**
    * Checks if user has specific resource & action permission.
@@ -69,6 +73,7 @@ export function usePermission() {
     role: userRole,
     effectivePermissions,
     isSuperAdmin,
+    isLoading,
     hasPermission,
     hasRole,
   };

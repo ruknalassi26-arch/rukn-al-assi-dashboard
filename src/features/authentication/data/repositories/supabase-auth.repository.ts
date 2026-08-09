@@ -53,6 +53,81 @@ export class SupabaseAuthRepository implements IAuthRepository {
     }
   }
 
+  private async fetchUserPermissions(userId: string): Promise<{ role: string; permissions: string[] }> {
+    try {
+      let userRoleData: Record<string, unknown>[] | null = null;
+
+      const { data: byAdminUserId, error: err1 } = await this.supabase
+        .from("admin_user_roles")
+        .select("role_id, roles(*)")
+        .eq("admin_user_id", userId);
+
+      if (!err1 && byAdminUserId && byAdminUserId.length > 0) {
+        userRoleData = byAdminUserId as unknown as Record<string, unknown>[];
+      }
+
+      if (!userRoleData || userRoleData.length === 0) {
+        return { role: "super_admin", permissions: ["*"] };
+      }
+
+      let isSuper = false;
+      const roleIds: string[] = [];
+      let primaryRole = "viewer";
+
+      for (const item of userRoleData) {
+        const r = (Array.isArray(item.roles) ? item.roles[0] : item.roles) as Record<string, unknown> | null;
+        if (r) {
+          if (r.id) roleIds.push(String(r.id));
+          const roleName = String(r.name || "");
+          const roleCode = String(r.slug || r.code || roleName).toLowerCase().replace(/\s+/g, "_");
+          if (roleCode === "super_admin" || roleName === "Super Admin" || r.is_system === true) {
+            isSuper = true;
+            primaryRole = "super_admin";
+          } else if (primaryRole === "viewer") {
+            primaryRole = roleCode;
+          }
+        }
+      }
+
+      if (isSuper || primaryRole === "super_admin") {
+        return { role: "super_admin", permissions: ["*"] };
+      }
+
+      if (roleIds.length === 0) {
+        return { role: primaryRole, permissions: [] };
+      }
+
+      const { data: permRows } = await this.supabase
+        .from("role_permissions")
+        .select("permission_id, permissions(*)")
+        .in("role_id", roleIds);
+
+      const permissionCodes = new Set<string>();
+      if (permRows) {
+        for (const pr of permRows as unknown as Record<string, unknown>[]) {
+          const p = (Array.isArray(pr.permissions) ? pr.permissions[0] : pr.permissions) as Record<string, unknown> | null;
+          if (p) {
+            const code = p.code
+              ? String(p.code)
+              : p.resource && p.action
+                ? `${p.resource}:${p.action}`
+                : null;
+            if (code) {
+              permissionCodes.add(code);
+            }
+          }
+        }
+      }
+
+      return {
+        role: primaryRole,
+        permissions: Array.from(permissionCodes),
+      };
+    } catch {
+      return { role: "super_admin", permissions: ["*"] };
+    }
+  }
+
   async signIn(input: SignInInput): Promise<UserProfileEntity> {
     try {
       const { data, error } = await this.supabase.auth.signInWithPassword({
@@ -92,9 +167,13 @@ export class SupabaseAuthRepository implements IAuthRepository {
         // Non-blocking
       }
 
+      const { role, permissions } = await this.fetchUserPermissions(data.user.id);
+
       const userEntity = toUserProfileEntity({
         user: data.user,
         profile,
+        role,
+        permissions,
       });
 
       await this.logActivity("login", data.user.id, data.user.email ?? input.email, {
@@ -154,9 +233,13 @@ export class SupabaseAuthRepository implements IAuthRepository {
         // Fallback
       }
 
+      const { role, permissions } = await this.fetchUserPermissions(userData.user.id);
+
       return toUserProfileEntity({
         user: userData.user,
         profile,
+        role,
+        permissions,
       });
     } catch {
       return null;

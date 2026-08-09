@@ -54,18 +54,20 @@ import { RoleEntity } from "../../domain/entities/role.entity";
 export function RoleListTable() {
   const t = useTranslations("rolesAdmin");
   const tCommon = useTranslations("common");
-  const { hasPermission } = usePermission();
+  const { hasPermission, isLoading: isAuthLoading } = usePermission();
   const canManageRoles = hasPermission("roles", "manage");
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const { data, isLoading, isError, refetch } = useAdminRoles({
+  const { data, isLoading: isRolesLoading, isError, refetch } = useAdminRoles({
     search,
     page,
     pageSize,
   });
+
+  const isLoading = isAuthLoading || isRolesLoading;
 
   const deleteMutation = useDeleteAdminRole();
 
@@ -121,12 +123,14 @@ export function RoleListTable() {
           />
         </div>
 
-        {canManageRoles && (
+        {isAuthLoading ? (
+          <Skeleton className="h-10 w-36 ml-auto" />
+        ) : canManageRoles ? (
           <Button onClick={handleCreate} className="w-full sm:w-auto gap-2">
             <ShieldPlus className="h-4 w-4" />
             {t("addRole")}
           </Button>
-        )}
+        ) : null}
       </div>
 
       {/* Main Roles Table */}
