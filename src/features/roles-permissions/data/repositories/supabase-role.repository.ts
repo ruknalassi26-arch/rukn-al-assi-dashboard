@@ -227,9 +227,7 @@ export class SupabaseRoleRepository implements IRoleRepository {
   }
 
   async updateRole(id: string, input: UpdateRoleInput): Promise<RoleEntity> {
-    const payload: UpdateTables<"roles"> = {
-      updated_at: new Date().toISOString(),
-    };
+    const payload: UpdateTables<"roles"> = {};
     if (input.name !== undefined) {
       const slug = input.name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
       payload.name = input.name;

@@ -836,7 +836,6 @@ export interface Database {
           description: string | null;
           is_system?: boolean | null;
           created_at: string;
-          updated_at?: string | null;
         };
         Insert: {
           id?: string;
@@ -845,7 +844,6 @@ export interface Database {
           description?: string | null;
           is_system?: boolean | null;
           created_at?: string;
-          updated_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["roles"]["Insert"]>;
         Relationships: [];
