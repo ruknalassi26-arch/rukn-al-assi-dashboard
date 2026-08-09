@@ -57,10 +57,10 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
         this.supabase.from("rfq_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
         this.supabase.from("contact_messages").select("*", { count: "exact", head: true }),
         this.supabase.from("contact_messages").select("*", { count: "exact", head: true }).eq("status", "new"),
-        this.supabase.from("certifications" as any).select("*", { count: "exact", head: true }),
+        this.supabase.from("certifications").select("*", { count: "exact", head: true }),
         this.supabase.from("team_members").select("*", { count: "exact", head: true }),
         this.supabase.from("clients").select("*", { count: "exact", head: true }),
-        this.supabase.from("company_profile" as any).select("*", { count: "exact", head: true }),
+        this.supabase.from("company_profile").select("*", { count: "exact", head: true }),
       ]);
 
       return new DashboardStatsEntity({
@@ -183,14 +183,15 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
 
   async getLatestRfqs(limit: number = 5): Promise<LatestRfqEntity[]> {
     try {
-      const { data, error } = await (this.supabase.from("rfq_requests") as any)
+      const { data, error } = await this.supabase
+        .from("rfq_requests")
         .select("id, full_name, company_name, status, created_at")
         .order("created_at", { ascending: false })
         .limit(limit);
 
       if (error || !data) return [];
       return data.map(
-        (item: any) =>
+        (item) =>
           new LatestRfqEntity({
             id: item.id,
             fullName: item.full_name || "Customer",

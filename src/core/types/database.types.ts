@@ -181,7 +181,8 @@ export interface Database {
           id: string;
           reference_number: string;
           company_name: string;
-          contact_name: string;
+          contact_name?: string;
+          full_name?: string;
           email: string;
           phone: string | null;
           country: string | null;
@@ -264,6 +265,38 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
+        Relationships: [];
+      };
+      certifications: {
+        Row: {
+          id: string;
+          status: "active" | "draft";
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          status?: "active" | "draft";
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["certifications"]["Insert"]>;
+        Relationships: [];
+      };
+      company_profile: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_profile"]["Insert"]>;
         Relationships: [];
       };
       certificates: {

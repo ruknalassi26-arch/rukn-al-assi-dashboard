@@ -10,7 +10,7 @@ export function toRfqRequestEntity(dto: RfqDTO): RfqRequestEntity {
     id: dto.id,
     referenceNumber: dto.reference_number,
     companyName: dto.company_name,
-    contactName: dto.contact_name,
+    contactName: dto.contact_name || dto.full_name || "Customer",
     email: dto.email,
     phone: dto.phone,
     country: dto.country,
