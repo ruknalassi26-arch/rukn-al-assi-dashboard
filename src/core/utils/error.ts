@@ -274,11 +274,39 @@ export function translateErrorMessage(rawMessage: string | null | undefined, loc
     return "A user with this email address already exists.";
   }
 
+  // Generic AppError default message
+  if (msg.includes("unexpected error") || msg.includes("try again or contact support")) {
+    if (locale === "ar") return "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.";
+    if (locale === "ckb" || locale === "ku") return "هەڵەیەکی نەزانراو ڕوویدا. تکایە دووبارە هەوڵبدەرەوە یان پەیوەندی بە پاشکۆوە بکە.";
+    return "An unexpected error occurred. Please try again or contact support.";
+  }
+
+  // Request processing
+  if (msg.includes("could not be processed") || msg.includes("check your data")) {
+    if (locale === "ar") return "تعذر معالجة الطلب. يرجى التحقق من البيانات.";
+    if (locale === "ckb" || locale === "ku") return "داواکارییەکە جێبەجێ نەکرا. تکایە زانیارییەکانت بپشکنەوە.";
+    return "The request could not be processed. Please check your data.";
+  }
+
+  // Session expired
+  if (msg.includes("session has expired") || msg.includes("not logged in")) {
+    if (locale === "ar") return "انتهت صلاحية الجلسة أو لم تقم بتسجيل الدخول. يرجى تسجيل الدخول للمتابعة.";
+    if (locale === "ckb" || locale === "ku") return "ماوەی دانیشتنەکەت بەسەرچووە یان چوونه‌ژووره‌وه‌ت نەکردووە. تکایە بچۆ ژوورەوە.";
+    return "Your session has expired or you are not logged in. Please log in to continue.";
+  }
+
+  // Permission error
+  if (msg.includes("do not have permission") || msg.includes("access this resource")) {
+    if (locale === "ar") return "ليس لديك الإذن لإجراء هذا الإجراء أو الوصول إلى هذا المورد.";
+    if (locale === "ckb" || locale === "ku") return "مۆڵەتی پێویستت نییە بۆ ئەنجامدانی ئەم کردارە.";
+    return "You do not have permission to perform this action or access this resource.";
+  }
+
   // Unexpected / network
-  if (msg.includes("unexpected") || msg.includes("fetch") || msg.includes("network")) {
-    if (locale === "ar") return "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.";
-    if (locale === "ckb" || locale === "ku") return "هەڵەیەکی نەزانراو ڕوویدا. تکایە دووبارە هەوڵبدەرەوە.";
-    return "An unexpected error occurred. Please try again.";
+  if (msg.includes("fetch") || msg.includes("network")) {
+    if (locale === "ar") return "انقطع الاتصال بالشبكة. يرجى التحقق من اتصال الإنترنت.";
+    if (locale === "ckb" || locale === "ku") return "پەیوەندی هێڵ پچڕا. تکایە هێڵەکەت بپشکنە.";
+    return "Network connection lost. Please check your internet connection.";
   }
 
   return rawMessage;

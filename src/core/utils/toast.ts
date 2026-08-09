@@ -4,7 +4,7 @@
 // Encapsulates toast rendering and automatic error formatting
 // ==============================================================================
 import { toast as sonnerToast } from "sonner";
-import { getFriendlyErrorMessage } from "./error";
+import { getFriendlyErrorMessage, translateErrorMessage } from "./error";
 
 const TOAST_DICTIONARY: Record<string, { ar: string; ku: string }> = {
   "Company information updated successfully": {
@@ -193,12 +193,14 @@ function translateToastMessage(msg: string): string {
   if (typeof window === "undefined") return msg;
   const lang = document.documentElement.lang || "en";
   if (lang === "ar") {
-    return TOAST_DICTIONARY[msg]?.ar ?? msg;
+    if (TOAST_DICTIONARY[msg]?.ar) return TOAST_DICTIONARY[msg].ar;
+    return translateErrorMessage(msg, "ar");
   }
   if (lang === "ku" || lang === "ckb") {
-    return TOAST_DICTIONARY[msg]?.ku ?? msg;
+    if (TOAST_DICTIONARY[msg]?.ku) return TOAST_DICTIONARY[msg].ku;
+    return translateErrorMessage(msg, "ckb");
   }
-  return msg;
+  return translateErrorMessage(msg, "en");
 }
 
 export const toast = {
@@ -212,10 +214,17 @@ export const toast = {
 
   /** Display an error toast with user-friendly formatting */
   error(error: unknown, fallbackMessage?: string) {
-    const userMessage = getFriendlyErrorMessage(error, "ToastNotification");
-    const fallback = fallbackMessage ? translateToastMessage(fallbackMessage) : translateToastMessage("Operation Failed");
-    return sonnerToast.error(fallback, {
-      description: userMessage,
+    const rawUserMessage = getFriendlyErrorMessage(error, "ToastNotification");
+    const translatedDescription = translateToastMessage(rawUserMessage);
+
+    if (fallbackMessage) {
+      return sonnerToast.error(translateToastMessage(fallbackMessage), {
+        description: translatedDescription,
+        duration: 5000,
+      });
+    }
+
+    return sonnerToast.error(translatedDescription, {
       duration: 5000,
     });
   },
