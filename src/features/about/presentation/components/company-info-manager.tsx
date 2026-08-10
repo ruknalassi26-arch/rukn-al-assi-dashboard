@@ -332,19 +332,6 @@ export function CompanyInfoManager() {
             </div>
           )}
 
-          {/* Bottom Actions */}
-          {canManage && (
-            <div className="flex justify-end pt-2 border-t">
-              <Button type="submit" disabled={isSaving || updateMutation.isPending} className="gap-2">
-                {isSaving || updateMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                Save Information
-              </Button>
-            </div>
-          )}
         </form>
       </CardContent>
     </Card>
