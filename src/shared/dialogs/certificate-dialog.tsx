@@ -109,7 +109,7 @@ export function CertificateDialog({
           expiryDate: "",
           organization: initialData.issuedBy ?? "",
           sortOrder: initialData.sortOrder,
-          status: initialData.status,
+          status: initialData.status === "published" ? "active" : (initialData.status as any),
         });
       } else {
         reset({

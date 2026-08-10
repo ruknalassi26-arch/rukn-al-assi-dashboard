@@ -40,7 +40,7 @@ const teamMemberSchema = z.object({
   bioAr: z.string().optional().nullable(),
   bioKu: z.string().optional().nullable(),
   sortOrder: z.number().min(0),
-  status: z.enum(["active", "draft"]),
+  status: z.enum(["published", "draft", "archived"]),
 });
 
 export type TeamMemberFormValues = z.infer<typeof teamMemberSchema>;
@@ -81,7 +81,7 @@ export function TeamMemberDialog({
       bioAr: "",
       bioKu: "",
       sortOrder: 1,
-      status: "active",
+      status: "published",
     },
   });
 
@@ -117,7 +117,7 @@ export function TeamMemberDialog({
         bioAr: "",
         bioKu: "",
         sortOrder: 1,
-        status: "active",
+        status: "published",
       });
     }
   }, [initialData, reset, isOpen]);
@@ -211,11 +211,12 @@ export function TeamMemberDialog({
             </div>
             <div className="space-y-1">
               <Label>Status</Label>
-              <Select value={status} onValueChange={(val) => setValue("status", val as "active" | "draft")}>
+              <Select value={status} onValueChange={(val) => setValue("status", val as "published" | "draft" | "archived")}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
             </div>

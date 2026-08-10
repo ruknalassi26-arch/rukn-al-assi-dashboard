@@ -141,7 +141,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
             id: String(item.id),
             icon: item.icon ?? null,
             sortOrder: item.sort_order ?? 0,
-            status: item.status ?? "active",
+            status: item.status ?? "published",
             translations,
             createdAt: new Date(item.created_at || Date.now()),
             updatedAt: new Date(item.updated_at || Date.now()),
@@ -160,7 +160,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
       .insert({
         icon: input.icon ?? null,
         sort_order: input.sortOrder ?? 0,
-        status: input.status ?? "active",
+        status: input.status ?? "published",
       })
       .select()
       .single();
@@ -188,7 +188,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
       .update({
         icon: input.icon ?? null,
         sort_order: input.sortOrder ?? 0,
-        status: input.status ?? "active",
+        status: input.status ?? "published",
       })
       .eq("id", id);
 
@@ -214,7 +214,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
   async deleteCoreValue(id: string): Promise<void> {
     const { error } = await (this.supabase.from("core_values" as any) as any)
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: new Date().toISOString(), status: "archived" })
       .eq("id", id);
     if (error) throw new Error(error.message || "Failed to delete core value");
   }
@@ -230,7 +230,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
   async bulkDeleteCoreValues(ids: string[]): Promise<void> {
     const { error } = await (this.supabase.from("core_values" as any) as any)
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: new Date().toISOString(), status: "archived" })
       .in("id", ids);
     if (error) throw new Error(error.message || "Failed to bulk delete core values");
   }
@@ -271,7 +271,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
             id: String(item.id),
             eventYear: String(item.event_year ?? ""),
             sortOrder: item.sort_order ?? 0,
-            status: item.status ?? "active",
+            status: item.status ?? "published",
             translations,
             createdAt: new Date(item.created_at || Date.now()),
             updatedAt: new Date(item.updated_at || Date.now()),
@@ -291,7 +291,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
       .insert({
         event_year: parsedYear,
         sort_order: input.sortOrder ?? 0,
-        status: input.status ?? "active",
+        status: input.status ?? "published",
       })
       .select()
       .single();
@@ -320,7 +320,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
       .update({
         event_year: parsedYear,
         sort_order: input.sortOrder ?? 0,
-        status: input.status ?? "active",
+        status: input.status ?? "published",
       })
       .eq("id", id);
 
@@ -346,7 +346,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
   async deleteTimeline(id: string): Promise<void> {
     const { error } = await (this.supabase.from("timeline_events" as any) as any)
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: new Date().toISOString(), status: "archived" })
       .eq("id", id);
     if (error) throw new Error(error.message || "Failed to delete timeline event");
   }
@@ -362,7 +362,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
   async bulkDeleteTimeline(ids: string[]): Promise<void> {
     const { error } = await (this.supabase.from("timeline_events" as any) as any)
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: new Date().toISOString(), status: "archived" })
       .in("id", ids);
     if (error) throw new Error(error.message || "Failed to bulk delete timeline events");
   }
@@ -404,7 +404,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
             id: String(item.id),
             photoUrl: item.photo_url ?? null,
             sortOrder: item.sort_order ?? 0,
-            status: item.status ?? "active",
+            status: item.status ?? "published",
             translations,
             createdAt: new Date(item.created_at || Date.now()),
             updatedAt: new Date(item.updated_at || Date.now()),
@@ -423,7 +423,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
       .insert({
         photo_url: input.photoUrl ?? null,
         sort_order: input.sortOrder ?? 0,
-        status: input.status ?? "active",
+        status: input.status ?? "published",
       })
       .select()
       .single();
@@ -452,7 +452,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
       .update({
         photo_url: input.photoUrl ?? null,
         sort_order: input.sortOrder ?? 0,
-        status: input.status ?? "active",
+        status: input.status ?? "published",
       })
       .eq("id", id);
 
@@ -479,7 +479,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
   async deleteTeamMember(id: string): Promise<void> {
     const { error } = await (this.supabase.from("team_members" as any) as any)
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: new Date().toISOString(), status: "archived" })
       .eq("id", id);
     if (error) throw new Error(error.message || "Failed to delete team member");
   }
@@ -495,7 +495,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
   async bulkDeleteTeamMembers(ids: string[]): Promise<void> {
     const { error } = await (this.supabase.from("team_members" as any) as any)
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: new Date().toISOString(), status: "archived" })
       .in("id", ids);
     if (error) throw new Error(error.message || "Failed to bulk delete team members");
   }
@@ -538,7 +538,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
             issuedBy: item.issued_by ?? null,
             issuedDate: item.issued_date ?? null,
             sortOrder: item.sort_order ?? 0,
-            status: item.status ?? "active",
+            status: item.status ?? "published",
             translations,
             createdAt: new Date(item.created_at || Date.now()),
             updatedAt: new Date(item.updated_at || Date.now()),
@@ -559,7 +559,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
         issued_by: input.issuedBy ?? null,
         issued_date: input.issuedDate ?? null,
         sort_order: input.sortOrder ?? 0,
-        status: input.status ?? "active",
+        status: input.status ?? "published",
       })
       .select()
       .single();
@@ -589,7 +589,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
         issued_by: input.issuedBy ?? null,
         issued_date: input.issuedDate ?? null,
         sort_order: input.sortOrder ?? 0,
-        status: input.status ?? "active",
+        status: input.status ?? "published",
       })
       .eq("id", id);
 
@@ -615,7 +615,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
   async deleteCertificate(id: string): Promise<void> {
     const { error } = await (this.supabase.from("certifications" as any) as any)
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: new Date().toISOString(), status: "archived" })
       .eq("id", id);
     if (error) throw new Error(error.message || "Failed to delete certificate");
   }
@@ -631,7 +631,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
   async bulkDeleteCertificates(ids: string[]): Promise<void> {
     const { error } = await (this.supabase.from("certifications" as any) as any)
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: new Date().toISOString(), status: "archived" })
       .in("id", ids);
     if (error) throw new Error(error.message || "Failed to bulk delete certificates");
   }

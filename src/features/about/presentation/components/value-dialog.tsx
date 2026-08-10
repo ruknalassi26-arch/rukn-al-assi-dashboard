@@ -35,7 +35,7 @@ const valueSchema = z.object({
   descriptionKu: z.string().optional().nullable(),
   icon: z.string().optional().nullable(),
   sortOrder: z.number().min(0),
-  status: z.enum(["active", "draft"]),
+  status: z.enum(["published", "draft", "archived"]),
 });
 
 export type ValueFormValues = z.infer<typeof valueSchema>;
@@ -73,7 +73,7 @@ export function ValueDialog({
       descriptionKu: "",
       icon: "ShieldCheck",
       sortOrder: 1,
-      status: "active",
+      status: "published",
     },
   });
 
@@ -103,13 +103,15 @@ export function ValueDialog({
         descriptionKu: "",
         icon: "ShieldCheck",
         sortOrder: 1,
-        status: "active",
+        status: "published",
       });
     }
   }, [initialData, reset, isOpen]);
 
-  const icon = watch("icon");
   const status = watch("status");
+  const icon = watch("icon");
+
+  const handleFormSubmit = (data: any) => onSubmit(data as ValueFormValues);
 
   const onFormSubmit = async (values: ValueFormValues) => {
     await onSubmit(values);
@@ -188,11 +190,12 @@ export function ValueDialog({
 
             <div className="space-y-1">
               <Label>Status</Label>
-              <Select value={status} onValueChange={(val) => setValue("status", val as "active" | "draft")}>
+              <Select value={status} onValueChange={(val) => setValue("status", val as "published" | "draft" | "archived")}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
             </div>

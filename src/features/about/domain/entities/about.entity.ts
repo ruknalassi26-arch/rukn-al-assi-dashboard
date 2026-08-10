@@ -4,7 +4,7 @@
 // Strictly matching Supabase DB Schema
 // ==============================================================================
 
-export type SectionStatus = "active" | "draft";
+export type SectionStatus = "published" | "draft" | "archived";
 
 // 1. Company Profile & Translations (company_profile & company_profile_translations)
 export interface CompanyInfoProps {

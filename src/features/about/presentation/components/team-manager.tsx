@@ -41,7 +41,7 @@ import { ConfirmDialog } from "@shared/dialogs/confirm-dialog";
 import { EmptyState } from "@shared/components/empty-state";
 import { ErrorState } from "@shared/components/error-state";
 import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
-import type { TeamMemberEntity } from "../../domain/entities/about.entity";
+import type { TeamMemberEntity, SectionStatus } from "../../domain/entities/about.entity";
 
 export function TeamManager() {
   const t = useTranslations("aboutAdmin.team");
@@ -140,7 +140,7 @@ export function TeamManager() {
     setIsBulkDeleting(false);
   };
 
-  const handleBulkStatus = async (status: "active" | "draft") => {
+  const handleBulkStatus = async (status: SectionStatus) => {
     if (selectedIds.length > 0) {
       await bulkStatusMutation.mutateAsync({ ids: selectedIds, status });
       setSelectedIds([]);
@@ -218,8 +218,9 @@ export function TeamManager() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -230,18 +231,21 @@ export function TeamManager() {
                 <span className="text-xs font-semibold px-2">
                   {selectedIds.length} Selected
                 </span>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")}>
-                  Activate
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("published")}>
+                  Publish
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")}>
                   Draft
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("archived")}>
+                  Archive
                 </Button>
                 <Button
                   variant="destructive"
                   size="sm"
                   onClick={() => setIsBulkDeleting(true)}
                 >
-                  Delete Selected
+                  Delete
                 </Button>
               </div>
             )}
@@ -256,7 +260,7 @@ export function TeamManager() {
                 canManage ? (
                   <Button onClick={handleOpenCreate} className="gap-2">
                     <Plus className="h-4 w-4" />
-                    Add Team Member
+                    + Add Team Member
                   </Button>
                 ) : undefined
               }
@@ -314,14 +318,16 @@ export function TeamManager() {
 
                     <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
                       <Badge
-                        variant={item.status === "active" ? "default" : "secondary"}
+                        variant="secondary"
                         className={
-                          item.status === "active"
+                          item.status === "published"
                             ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
-                            : "bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30"
+                            : item.status === "draft"
+                              ? "bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30"
+                              : "bg-slate-500/15 text-slate-700 dark:text-slate-400 border border-slate-500/30"
                         }
                       >
-                        {item.status === "active" ? "Active" : "Draft"}
+                        {item.status === "published" ? "Published" : item.status === "draft" ? "Draft" : "Archived"}
                       </Badge>
 
                       {canManage && (

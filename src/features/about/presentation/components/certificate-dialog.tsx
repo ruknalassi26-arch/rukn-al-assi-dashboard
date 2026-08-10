@@ -39,7 +39,7 @@ const certificateSchema = z.object({
   descriptionAr: z.string().optional().nullable(),
   descriptionKu: z.string().optional().nullable(),
   sortOrder: z.number().min(0),
-  status: z.enum(["active", "draft"]),
+  status: z.enum(["published", "draft", "archived"]),
 });
 
 export type CertificateFormValues = z.infer<typeof certificateSchema>;
@@ -79,7 +79,7 @@ export function CertificateDialog({
       descriptionAr: "",
       descriptionKu: "",
       sortOrder: 1,
-      status: "active",
+      status: "published",
     },
   });
 
@@ -113,7 +113,7 @@ export function CertificateDialog({
         descriptionAr: "",
         descriptionKu: "",
         sortOrder: 1,
-        status: "active",
+        status: "published",
       });
     }
   }, [initialData, reset, isOpen]);
@@ -203,11 +203,12 @@ export function CertificateDialog({
             </div>
             <div className="space-y-1">
               <Label>Status</Label>
-              <Select value={status} onValueChange={(val) => setValue("status", val as "active" | "draft")}>
+              <Select value={status} onValueChange={(val) => setValue("status", val as "published" | "draft" | "archived")}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
             </div>
