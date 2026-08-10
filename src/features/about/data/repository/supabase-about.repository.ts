@@ -77,35 +77,36 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async updateCompanyInfoTranslation(input: UpdateCompanyInfoTranslationInput): Promise<CompanyInfoEntity> {
-    try {
-      let profileId = 1;
-      const { data: existing } = await (this.supabase.from("company_profile" as any) as any)
+    let profileId = 1;
+    const { data: existing } = await (this.supabase.from("company_profile" as any) as any)
+      .select("id")
+      .limit(1)
+      .maybeSingle();
+
+    if (existing?.id) {
+      profileId = existing.id;
+    } else {
+      const { data: created, error: createErr } = await (this.supabase.from("company_profile" as any) as any)
+        .insert({ id: 1 })
         .select("id")
-        .limit(1)
         .maybeSingle();
+      if (createErr) throw new Error(createErr.message || "Failed to initialize company profile row");
+      if (created?.id) profileId = created.id;
+    }
 
-      if (existing?.id) {
-        profileId = existing.id;
-      } else {
-        const { data: created } = await (this.supabase.from("company_profile" as any) as any)
-          .insert({ id: 1 })
-          .select("id")
-          .maybeSingle();
-        if (created?.id) profileId = created.id;
-      }
+    const { error: upsertErr } = await (this.supabase.from("company_profile_translations" as any) as any).upsert(
+      {
+        company_profile_id: profileId,
+        language_code: input.language_code,
+        history: input.history || "",
+        mission: input.mission || "",
+        vision: input.vision || "",
+      },
+      { onConflict: "company_profile_id,language_code" }
+    );
 
-      await (this.supabase.from("company_profile_translations" as any) as any).upsert(
-        {
-          company_profile_id: profileId,
-          language_code: input.language_code,
-          history: input.history || "",
-          mission: input.mission || "",
-          vision: input.vision || "",
-        },
-        { onConflict: "company_profile_id,language_code" }
-      );
-    } catch (err) {
-      console.error("[SupabaseAboutRepository] updateCompanyInfoTranslation error:", err);
+    if (upsertErr) {
+      throw new Error(upsertErr.message || "Failed to update company profile information in database.");
     }
 
     return (await this.getCompanyInfo())!;
@@ -174,7 +175,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
     }));
 
     if (transPayloads.length > 0) {
-      await (this.supabase.from("core_value_translations" as any) as any).insert(transPayloads);
+      const { error: transErr } = await (this.supabase.from("core_value_translations" as any) as any).insert(transPayloads);
+      if (transErr) throw new Error(transErr.message || "Failed to create core value translations");
     }
 
     const list = await this.getCoreValues();
@@ -182,13 +184,15 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async updateCoreValue(id: string, input: SaveCoreValueInput): Promise<CoreValueEntity> {
-    await (this.supabase.from("core_values" as any) as any)
+    const { error: baseErr } = await (this.supabase.from("core_values" as any) as any)
       .update({
         icon: input.icon ?? null,
         sort_order: input.sortOrder ?? 0,
         status: input.status ?? "active",
       })
       .eq("id", id);
+
+    if (baseErr) throw new Error(baseErr.message || "Failed to update core value");
 
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       core_value_id: id,
@@ -198,9 +202,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
     }));
 
     for (const payload of transPayloads) {
-      await (this.supabase.from("core_value_translations" as any) as any).upsert(payload, {
+      const { error: transErr } = await (this.supabase.from("core_value_translations" as any) as any).upsert(payload, {
         onConflict: "core_value_id,language_code",
       });
+      if (transErr) throw new Error(transErr.message || "Failed to update core value translations");
     }
 
     const list = await this.getCoreValues();
@@ -208,28 +213,33 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async deleteCoreValue(id: string): Promise<void> {
-    await (this.supabase.from("core_values" as any) as any)
+    const { error } = await (this.supabase.from("core_values" as any) as any)
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", id);
+    if (error) throw new Error(error.message || "Failed to delete core value");
   }
 
   async reorderCoreValues(orderedIds: string[]): Promise<void> {
     const updates = orderedIds.map((id, index) =>
       (this.supabase.from("core_values" as any) as any).update({ sort_order: index + 1 }).eq("id", id)
     );
-    await Promise.all(updates);
+    const results = await Promise.all(updates);
+    const failed = results.find((r) => r.error);
+    if (failed?.error) throw new Error(failed.error.message || "Failed to reorder core values");
   }
 
   async bulkDeleteCoreValues(ids: string[]): Promise<void> {
-    await (this.supabase.from("core_values" as any) as any)
+    const { error } = await (this.supabase.from("core_values" as any) as any)
       .update({ deleted_at: new Date().toISOString() })
       .in("id", ids);
+    if (error) throw new Error(error.message || "Failed to bulk delete core values");
   }
 
   async bulkUpdateCoreValuesStatus(ids: string[], status: SectionStatus): Promise<void> {
-    await (this.supabase.from("core_values" as any) as any)
+    const { error } = await (this.supabase.from("core_values" as any) as any)
       .update({ status })
       .in("id", ids);
+    if (error) throw new Error(error.message || "Failed to bulk update status for core values");
   }
 
   // ============================================================================
@@ -295,7 +305,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
     }));
 
     if (transPayloads.length > 0) {
-      await (this.supabase.from("timeline_event_translations" as any) as any).insert(transPayloads);
+      const { error: transErr } = await (this.supabase.from("timeline_event_translations" as any) as any).insert(transPayloads);
+      if (transErr) throw new Error(transErr.message || "Failed to create timeline event translations");
     }
 
     const list = await this.getTimeline();
@@ -303,13 +314,15 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async updateTimeline(id: string, input: SaveTimelineInput): Promise<TimelineEntity> {
-    await (this.supabase.from("timeline_events" as any) as any)
+    const { error: baseErr } = await (this.supabase.from("timeline_events" as any) as any)
       .update({
         event_year: input.eventYear,
         sort_order: input.sortOrder ?? 0,
         status: input.status ?? "active",
       })
       .eq("id", id);
+
+    if (baseErr) throw new Error(baseErr.message || "Failed to update timeline event");
 
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       timeline_event_id: id,
@@ -319,9 +332,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
     }));
 
     for (const payload of transPayloads) {
-      await (this.supabase.from("timeline_event_translations" as any) as any).upsert(payload, {
+      const { error: transErr } = await (this.supabase.from("timeline_event_translations" as any) as any).upsert(payload, {
         onConflict: "timeline_event_id,language_code",
       });
+      if (transErr) throw new Error(transErr.message || "Failed to update timeline event translations");
     }
 
     const list = await this.getTimeline();
@@ -329,28 +343,33 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async deleteTimeline(id: string): Promise<void> {
-    await (this.supabase.from("timeline_events" as any) as any)
+    const { error } = await (this.supabase.from("timeline_events" as any) as any)
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", id);
+    if (error) throw new Error(error.message || "Failed to delete timeline event");
   }
 
   async reorderTimeline(orderedIds: string[]): Promise<void> {
     const updates = orderedIds.map((id, index) =>
       (this.supabase.from("timeline_events" as any) as any).update({ sort_order: index + 1 }).eq("id", id)
     );
-    await Promise.all(updates);
+    const results = await Promise.all(updates);
+    const failed = results.find((r) => r.error);
+    if (failed?.error) throw new Error(failed.error.message || "Failed to reorder timeline events");
   }
 
   async bulkDeleteTimeline(ids: string[]): Promise<void> {
-    await (this.supabase.from("timeline_events" as any) as any)
+    const { error } = await (this.supabase.from("timeline_events" as any) as any)
       .update({ deleted_at: new Date().toISOString() })
       .in("id", ids);
+    if (error) throw new Error(error.message || "Failed to bulk delete timeline events");
   }
 
   async bulkUpdateTimelineStatus(ids: string[], status: SectionStatus): Promise<void> {
-    await (this.supabase.from("timeline_events" as any) as any)
+    const { error } = await (this.supabase.from("timeline_events" as any) as any)
       .update({ status })
       .in("id", ids);
+    if (error) throw new Error(error.message || "Failed to bulk update status for timeline events");
   }
 
   // ============================================================================
@@ -418,7 +437,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
     }));
 
     if (transPayloads.length > 0) {
-      await (this.supabase.from("team_member_translations" as any) as any).insert(transPayloads);
+      const { error: transErr } = await (this.supabase.from("team_member_translations" as any) as any).insert(transPayloads);
+      if (transErr) throw new Error(transErr.message || "Failed to create team member translations");
     }
 
     const list = await this.getTeamMembers();
@@ -426,13 +446,15 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async updateTeamMember(id: string, input: SaveTeamMemberInput): Promise<TeamMemberEntity> {
-    await (this.supabase.from("team_members" as any) as any)
+    const { error: baseErr } = await (this.supabase.from("team_members" as any) as any)
       .update({
         photo_url: input.photoUrl ?? null,
         sort_order: input.sortOrder ?? 0,
         status: input.status ?? "active",
       })
       .eq("id", id);
+
+    if (baseErr) throw new Error(baseErr.message || "Failed to update team member");
 
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       team_member_id: id,
@@ -443,9 +465,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
     }));
 
     for (const payload of transPayloads) {
-      await (this.supabase.from("team_member_translations" as any) as any).upsert(payload, {
+      const { error: transErr } = await (this.supabase.from("team_member_translations" as any) as any).upsert(payload, {
         onConflict: "team_member_id,language_code",
       });
+      if (transErr) throw new Error(transErr.message || "Failed to update team member translations");
     }
 
     const list = await this.getTeamMembers();
@@ -453,28 +476,33 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async deleteTeamMember(id: string): Promise<void> {
-    await (this.supabase.from("team_members" as any) as any)
+    const { error } = await (this.supabase.from("team_members" as any) as any)
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", id);
+    if (error) throw new Error(error.message || "Failed to delete team member");
   }
 
   async reorderTeamMembers(orderedIds: string[]): Promise<void> {
     const updates = orderedIds.map((id, index) =>
       (this.supabase.from("team_members" as any) as any).update({ sort_order: index + 1 }).eq("id", id)
     );
-    await Promise.all(updates);
+    const results = await Promise.all(updates);
+    const failed = results.find((r) => r.error);
+    if (failed?.error) throw new Error(failed.error.message || "Failed to reorder team members");
   }
 
   async bulkDeleteTeamMembers(ids: string[]): Promise<void> {
-    await (this.supabase.from("team_members" as any) as any)
+    const { error } = await (this.supabase.from("team_members" as any) as any)
       .update({ deleted_at: new Date().toISOString() })
       .in("id", ids);
+    if (error) throw new Error(error.message || "Failed to bulk delete team members");
   }
 
   async bulkUpdateTeamMembersStatus(ids: string[], status: SectionStatus): Promise<void> {
-    await (this.supabase.from("team_members" as any) as any)
+    const { error } = await (this.supabase.from("team_members" as any) as any)
       .update({ status })
       .in("id", ids);
+    if (error) throw new Error(error.message || "Failed to bulk update status for team members");
   }
 
   // ============================================================================
@@ -544,7 +572,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
     }));
 
     if (transPayloads.length > 0) {
-      await (this.supabase.from("certification_translations" as any) as any).insert(transPayloads);
+      const { error: transErr } = await (this.supabase.from("certification_translations" as any) as any).insert(transPayloads);
+      if (transErr) throw new Error(transErr.message || "Failed to create certificate translations");
     }
 
     const list = await this.getCertificates();
@@ -552,7 +581,7 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async updateCertificate(id: string, input: SaveCertificateInput): Promise<AboutCertificateEntity> {
-    await (this.supabase.from("certifications" as any) as any)
+    const { error: baseErr } = await (this.supabase.from("certifications" as any) as any)
       .update({
         image_url: input.imageUrl ?? null,
         issued_by: input.issuedBy ?? null,
@@ -562,6 +591,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
       })
       .eq("id", id);
 
+    if (baseErr) throw new Error(baseErr.message || "Failed to update certificate");
+
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       certification_id: id,
       language_code: lang,
@@ -570,9 +601,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
     }));
 
     for (const payload of transPayloads) {
-      await (this.supabase.from("certification_translations" as any) as any).upsert(payload, {
+      const { error: transErr } = await (this.supabase.from("certification_translations" as any) as any).upsert(payload, {
         onConflict: "certification_id,language_code",
       });
+      if (transErr) throw new Error(transErr.message || "Failed to update certificate translations");
     }
 
     const list = await this.getCertificates();
@@ -580,28 +612,33 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async deleteCertificate(id: string): Promise<void> {
-    await (this.supabase.from("certifications" as any) as any)
+    const { error } = await (this.supabase.from("certifications" as any) as any)
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", id);
+    if (error) throw new Error(error.message || "Failed to delete certificate");
   }
 
   async reorderCertificates(orderedIds: string[]): Promise<void> {
     const updates = orderedIds.map((id, index) =>
       (this.supabase.from("certifications" as any) as any).update({ sort_order: index + 1 }).eq("id", id)
     );
-    await Promise.all(updates);
+    const results = await Promise.all(updates);
+    const failed = results.find((r) => r.error);
+    if (failed?.error) throw new Error(failed.error.message || "Failed to reorder certificates");
   }
 
   async bulkDeleteCertificates(ids: string[]): Promise<void> {
-    await (this.supabase.from("certifications" as any) as any)
+    const { error } = await (this.supabase.from("certifications" as any) as any)
       .update({ deleted_at: new Date().toISOString() })
       .in("id", ids);
+    if (error) throw new Error(error.message || "Failed to bulk delete certificates");
   }
 
   async bulkUpdateCertificatesStatus(ids: string[], status: SectionStatus): Promise<void> {
-    await (this.supabase.from("certifications" as any) as any)
+    const { error } = await (this.supabase.from("certifications" as any) as any)
       .update({ status })
       .in("id", ids);
+    if (error) throw new Error(error.message || "Failed to bulk update status for certificates");
   }
 
   // ============================================================================
