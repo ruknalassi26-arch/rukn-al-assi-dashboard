@@ -3,10 +3,11 @@
 // features/about/presentation/components/company-info-manager.tsx
 // Management form for Company Information (History, Mission, Vision)
 // Strictly matching company_profile & company_profile_translations DB schema
+// With Top Header Save Button and Language Tabs
 // ==============================================================================
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, Save, Globe, History as HistoryIcon, Target, Eye } from "lucide-react";
+import { Loader2, Save, History as HistoryIcon, Target, Eye } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -16,11 +17,9 @@ import {
   Button,
   Label,
   Textarea,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Tabs,
+  TabsList,
+  TabsTrigger,
   Skeleton,
 } from "@shared/ui";
 import { useCompanyInfo, useUpdateCompanyInfoTranslation } from "@shared/hooks/about/use-about-hooks";
@@ -60,8 +59,8 @@ export function CompanyInfoManager() {
     }
   }, [companyData, selectedLang]);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!canManage) return;
 
     await updateMutation.mutateAsync({
@@ -95,8 +94,8 @@ export function CompanyInfoManager() {
 
   return (
     <Card className="shadow-sm">
-      <CardHeader className="border-b bg-muted/20">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <CardHeader className="border-b bg-muted/20 pb-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <CardTitle className="text-xl font-bold flex items-center gap-2">
               Company Profile & Narrative
@@ -106,21 +105,38 @@ export function CompanyInfoManager() {
             </CardDescription>
           </div>
 
-          {/* Language Selector */}
-          <div className="flex items-center gap-2">
-            <Globe className="h-4 w-4 text-primary shrink-0" />
-            <Select value={selectedLang} onValueChange={setSelectedLang}>
-              <SelectTrigger className="w-[180px] h-9 text-xs">
-                <SelectValue placeholder="Select Language" />
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code} className="text-xs">
-                    {lang.name} ({lang.code.toUpperCase()})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Language Tabs */}
+            <Tabs value={selectedLang} onValueChange={setSelectedLang}>
+              <TabsList className="grid grid-cols-3 w-[260px] h-9 p-1 bg-muted/60 border rounded-lg shadow-xs">
+                <TabsTrigger value="en" className="gap-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
+                  <span className="text-sm leading-none">🇺🇸</span> English
+                </TabsTrigger>
+                <TabsTrigger value="ar" className="gap-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
+                  <span className="text-sm leading-none">🇮🇶</span> العربية
+                </TabsTrigger>
+                <TabsTrigger value="ckb" className="gap-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
+                  <span className="text-sm leading-none">☀️</span> کوردی
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            {/* TOP HEADER SAVE BUTTON */}
+            {canManage && (
+              <Button
+                type="button"
+                onClick={() => handleSave()}
+                disabled={updateMutation.isPending}
+                className="gap-2 shrink-0 h-9"
+              >
+                {updateMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                Save Information ({selectedLang.toUpperCase()})
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -175,7 +191,7 @@ export function CompanyInfoManager() {
             />
           </div>
 
-          {/* Actions */}
+          {/* Bottom Actions */}
           {canManage && (
             <div className="flex justify-end pt-2 border-t">
               <Button type="submit" disabled={updateMutation.isPending} className="gap-2">
