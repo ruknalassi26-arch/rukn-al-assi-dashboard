@@ -94,10 +94,37 @@ export class SupabaseAboutRepository implements IAboutRepository {
       if (created?.id) profileId = created.id;
     }
 
+    // Determine the exact language_code existing in public.languages table
+    let targetLangCode = input.language_code;
+
+    const { data: validLangs } = await (this.supabase.from("languages" as any) as any)
+      .select("code");
+
+    if (validLangs && validLangs.length > 0) {
+      const dbCodes: string[] = validLangs.map((l: any) => l.code);
+      if (!dbCodes.includes(targetLangCode)) {
+        if (targetLangCode === "ckb" && dbCodes.includes("ku")) {
+          targetLangCode = "ku";
+        } else if (targetLangCode === "ku" && dbCodes.includes("ckb")) {
+          targetLangCode = "ckb";
+        } else if (targetLangCode === "en" && dbCodes.includes("en-US")) {
+          targetLangCode = "en-US";
+        } else if (targetLangCode === "ar" && dbCodes.includes("ar-IQ")) {
+          targetLangCode = "ar-IQ";
+        } else {
+          const basePrefix = targetLangCode.split("-")[0];
+          const matched = dbCodes.find((c) => c === basePrefix || c.startsWith(basePrefix + "-"));
+          if (matched) {
+            targetLangCode = matched;
+          }
+        }
+      }
+    }
+
     const { error: upsertErr } = await (this.supabase.from("company_profile_translations" as any) as any).upsert(
       {
         company_profile_id: profileId,
-        language_code: input.language_code,
+        language_code: targetLangCode,
         history: input.history || "",
         mission: input.mission || "",
         vision: input.vision || "",

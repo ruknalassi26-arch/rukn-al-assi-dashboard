@@ -3,7 +3,7 @@
 // features/about/presentation/components/company-info-manager.tsx
 // Management form for Company Information (History, Mission, Vision)
 // Strictly matching company_profile & company_profile_translations DB schema
-// With Single "Save Information" button for ALL languages simultaneously
+// Uses exact language codes from public.languages table to prevent FK errors
 // ==============================================================================
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -23,9 +23,9 @@ import {
   Skeleton,
 } from "@shared/ui";
 import { useCompanyInfo, useUpdateCompanyInfoTranslation } from "@shared/hooks/about/use-about-hooks";
+import { useLanguages } from "@shared/hooks/settings/use-language-hooks";
 import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
 import { ErrorState } from "@shared/components/error-state";
-import { toast } from "@core/utils/toast";
 
 export function CompanyInfoManager() {
   const t = useTranslations("aboutAdmin.overview");
@@ -34,83 +34,92 @@ export function CompanyInfoManager() {
   const { hasPermission } = usePermission();
   const canManage = hasPermission("about", "manage");
 
-  const [activeLang, setActiveLang] = useState<"en" | "ar" | "ckb">("en");
+  const { data: languagesData, isLoading: isLangsLoading } = useLanguages();
+
+  // Dynamically resolve active languages from DB
+  const activeLanguages = (languagesData && languagesData.length > 0)
+    ? languagesData.map((l) => ({
+        code: l.code,
+        name: l.name || l.code.toUpperCase(),
+        flag: l.code.startsWith("ar") ? "🇮🇶" : l.code.startsWith("ku") || l.code === "ckb" ? "☀️" : "🇺🇸",
+        dir: l.isRtl ? "rtl" : "ltr",
+      }))
+    : [
+        { code: "en", name: "English", flag: "🇺🇸", dir: "ltr" },
+        { code: "ar", name: "العربية", flag: "🇮🇶", dir: "rtl" },
+        { code: "ku", name: "کوردی", flag: "☀️", dir: "rtl" },
+      ];
+
+  const [activeLang, setActiveLang] = useState<string>("en");
+
+  // Keep activeLang in sync with available language codes
+  useEffect(() => {
+    if (activeLanguages.length > 0 && !activeLanguages.some((l) => l.code === activeLang)) {
+      setActiveLang(activeLanguages[0].code);
+    }
+  }, [activeLanguages, activeLang]);
 
   const { data: companyData, isLoading: isDataLoading, error, refetch } = useCompanyInfo();
   const updateMutation = useUpdateCompanyInfoTranslation();
 
-  // State for all 3 languages
-  const [historyEn, setHistoryEn] = useState("");
-  const [missionEn, setMissionEn] = useState("");
-  const [visionEn, setVisionEn] = useState("");
-
-  const [historyAr, setHistoryAr] = useState("");
-  const [missionAr, setMissionAr] = useState("");
-  const [visionAr, setVisionAr] = useState("");
-
-  const [historyKu, setHistoryKu] = useState("");
-  const [missionKu, setMissionKu] = useState("");
-  const [visionKu, setVisionKu] = useState("");
+  // Dictionary state for all translations by language code
+  const [translationsState, setTranslationsState] = useState<
+    Record<string, { history: string; mission: string; vision: string }>
+  >({});
 
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (companyData) {
-      const en = companyData.getTranslation("en");
-      setHistoryEn(en.history || "");
-      setMissionEn(en.mission || "");
-      setVisionEn(en.vision || "");
+      const initial: Record<string, { history: string; mission: string; vision: string }> = {};
 
-      const ar = companyData.getTranslation("ar");
-      setHistoryAr(ar.history || "");
-      setMissionAr(ar.mission || "");
-      setVisionAr(ar.vision || "");
+      activeLanguages.forEach((lang) => {
+        const trans = companyData.getTranslation(lang.code);
+        initial[lang.code] = {
+          history: trans.history || "",
+          mission: trans.mission || "",
+          vision: trans.vision || "",
+        };
+      });
 
-      const ku = companyData.getTranslation("ckb");
-      setHistoryKu(ku.history || "");
-      setMissionKu(ku.mission || "");
-      setVisionKu(ku.vision || "");
+      setTranslationsState(initial);
     }
-  }, [companyData]);
+  }, [companyData, languagesData]);
 
-  // Saves ALL languages in one operation
+  const handleFieldChange = (langCode: string, field: "history" | "mission" | "vision", value: string) => {
+    setTranslationsState((prev) => ({
+      ...prev,
+      [langCode]: {
+        ...(prev[langCode] || { history: "", mission: "", vision: "" }),
+        [field]: value,
+      },
+    }));
+  };
+
+  // Saves ALL languages using exact language codes from public.languages
   const handleSaveAll = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!canManage) return;
 
     setIsSaving(true);
     try {
-      // Save English
-      await updateMutation.mutateAsync({
-        language_code: "en",
-        history: historyEn,
-        mission: missionEn,
-        vision: visionEn,
-      });
-
-      // Save Arabic
-      await updateMutation.mutateAsync({
-        language_code: "ar",
-        history: historyAr,
-        mission: missionAr,
-        vision: visionAr,
-      });
-
-      // Save Kurdish
-      await updateMutation.mutateAsync({
-        language_code: "ckb",
-        history: historyKu,
-        mission: missionKu,
-        vision: visionKu,
-      });
+      for (const lang of activeLanguages) {
+        const fields = translationsState[lang.code] || { history: "", mission: "", vision: "" };
+        await updateMutation.mutateAsync({
+          language_code: lang.code,
+          history: fields.history,
+          mission: fields.mission,
+          vision: fields.vision,
+        });
+      }
     } catch {
-      // Handled by mutation onError
+      // Error handled by mutation toast
     } finally {
       setIsSaving(false);
     }
   };
 
-  if (isDataLoading) {
+  if (isDataLoading || isLangsLoading) {
     return (
       <Card>
         <CardHeader>
@@ -131,6 +140,9 @@ export function CompanyInfoManager() {
     return <ErrorState error={error as Error} onRetry={() => refetch()} />;
   }
 
+  const currentLangObj = activeLanguages.find((l) => l.code === activeLang) || activeLanguages[0];
+  const currentFields = translationsState[currentLangObj.code] || { history: "", mission: "", vision: "" };
+
   return (
     <Card className="shadow-sm">
       <CardHeader className="border-b bg-muted/20 pb-4">
@@ -145,22 +157,22 @@ export function CompanyInfoManager() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Language Tabs */}
-            <Tabs value={activeLang} onValueChange={(val) => setActiveLang(val as "en" | "ar" | "ckb")}>
-              <TabsList className="grid grid-cols-3 w-[260px] h-9 p-1 bg-muted/60 border rounded-lg shadow-xs">
-                <TabsTrigger value="en" className="gap-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
-                  <span className="text-sm leading-none">🇺🇸</span> English
-                </TabsTrigger>
-                <TabsTrigger value="ar" className="gap-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
-                  <span className="text-sm leading-none">🇮🇶</span> العربية
-                </TabsTrigger>
-                <TabsTrigger value="ckb" className="gap-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
-                  <span className="text-sm leading-none">☀️</span> کوردی
-                </TabsTrigger>
+            {/* Language Tabs dynamically loaded from DB */}
+            <Tabs value={activeLang} onValueChange={setActiveLang}>
+              <TabsList className="flex h-9 p-1 bg-muted/60 border rounded-lg shadow-xs">
+                {activeLanguages.map((lang) => (
+                  <TabsTrigger
+                    key={lang.code}
+                    value={lang.code}
+                    className="gap-1.5 px-3 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs"
+                  >
+                    <span className="text-sm leading-none">{lang.flag}</span> {lang.name}
+                  </TabsTrigger>
+                ))}
               </TabsList>
             </Tabs>
 
-            {/* SINGLE SAVE BUTTON FOR ALL LANGUAGES */}
+            {/* TOP HEADER SAVE BUTTON */}
             {canManage && (
               <Button
                 type="button"
@@ -181,157 +193,54 @@ export function CompanyInfoManager() {
       </CardHeader>
 
       <CardContent className="pt-6">
-        <form onSubmit={handleSaveAll} className="space-y-6">
-          {/* ENGLISH FORM */}
-          {activeLang === "en" && (
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <HistoryIcon className="h-4 w-4 text-blue-600" />
-                  Company History (English)
-                </Label>
-                <Textarea
-                  value={historyEn}
-                  onChange={(e) => setHistoryEn(e.target.value)}
-                  placeholder="Enter comprehensive company background, founding story, and milestone journey in English..."
-                  rows={5}
-                  disabled={!canManage}
-                  className="resize-y"
-                />
-              </div>
+        <form onSubmit={handleSaveAll} className="space-y-6" dir={currentLangObj.dir}>
+          {/* History */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <HistoryIcon className="h-4 w-4 text-blue-600" />
+              Company History ({currentLangObj.name})
+            </Label>
+            <Textarea
+              value={currentFields.history}
+              onChange={(e) => handleFieldChange(currentLangObj.code, "history", e.target.value)}
+              placeholder={`Enter company history and founding story in ${currentLangObj.name}...`}
+              rows={5}
+              disabled={!canManage}
+              className="resize-y"
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <Target className="h-4 w-4 text-emerald-600" />
-                  Company Mission (English)
-                </Label>
-                <Textarea
-                  value={missionEn}
-                  onChange={(e) => setMissionEn(e.target.value)}
-                  placeholder="Enter the core company mission statement in English..."
-                  rows={4}
-                  disabled={!canManage}
-                  className="resize-y"
-                />
-              </div>
+          {/* Mission */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <Target className="h-4 w-4 text-emerald-600" />
+              Company Mission ({currentLangObj.name})
+            </Label>
+            <Textarea
+              value={currentFields.mission}
+              onChange={(e) => handleFieldChange(currentLangObj.code, "mission", e.target.value)}
+              placeholder={`Enter core mission statement in ${currentLangObj.name}...`}
+              rows={4}
+              disabled={!canManage}
+              className="resize-y"
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <Eye className="h-4 w-4 text-violet-600" />
-                  Company Vision (English)
-                </Label>
-                <Textarea
-                  value={visionEn}
-                  onChange={(e) => setVisionEn(e.target.value)}
-                  placeholder="Enter long-term strategic vision statement in English..."
-                  rows={4}
-                  disabled={!canManage}
-                  className="resize-y"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* ARABIC FORM */}
-          {activeLang === "ar" && (
-            <div className="space-y-6" dir="rtl">
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <HistoryIcon className="h-4 w-4 text-blue-600" />
-                  تاريخ الشركة (العربية)
-                </Label>
-                <Textarea
-                  value={historyAr}
-                  onChange={(e) => setHistoryAr(e.target.value)}
-                  placeholder="أدخل خلفية الشركة وقصة التأسيس باللغة العربية..."
-                  rows={5}
-                  disabled={!canManage}
-                  className="resize-y"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <Target className="h-4 w-4 text-emerald-600" />
-                  رسالة الشركة (العربية)
-                </Label>
-                <Textarea
-                  value={missionAr}
-                  onChange={(e) => setMissionAr(e.target.value)}
-                  placeholder="أدخل بيان رسالة الشركة باللغة العربية..."
-                  rows={4}
-                  disabled={!canManage}
-                  className="resize-y"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <Eye className="h-4 w-4 text-violet-600" />
-                  رؤية الشركة (العربية)
-                </Label>
-                <Textarea
-                  value={visionAr}
-                  onChange={(e) => setVisionAr(e.target.value)}
-                  placeholder="أدخل الرؤية الاستراتيجية باللغة العربية..."
-                  rows={4}
-                  disabled={!canManage}
-                  className="resize-y"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* KURDISH FORM */}
-          {activeLang === "ckb" && (
-            <div className="space-y-6" dir="rtl">
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <HistoryIcon className="h-4 w-4 text-blue-600" />
-                  مێژووی کۆمپانیا (کوردی)
-                </Label>
-                <Textarea
-                  value={historyKu}
-                  onChange={(e) => setHistoryKu(e.target.value)}
-                  placeholder="مێژووی کۆمپانیا و چیرۆکی دامەزراندن بە زمانی کوردی بنووسە..."
-                  rows={5}
-                  disabled={!canManage}
-                  className="resize-y"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <Target className="h-4 w-4 text-emerald-600" />
-                  ئامانجی کۆمپانیا (کوردی)
-                </Label>
-                <Textarea
-                  value={missionKu}
-                  onChange={(e) => setMissionKu(e.target.value)}
-                  placeholder="پەیامی سەرەکی کۆمپانیا بە زمانی کوردی بنووسە..."
-                  rows={4}
-                  disabled={!canManage}
-                  className="resize-y"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <Eye className="h-4 w-4 text-violet-600" />
-                  دیدگای کۆمپانیا (کوردی)
-                </Label>
-                <Textarea
-                  value={visionKu}
-                  onChange={(e) => setVisionKu(e.target.value)}
-                  placeholder="دیدگای درێژخایەنی کۆمپانیا بە زمانی کوردی بنووسە..."
-                  rows={4}
-                  disabled={!canManage}
-                  className="resize-y"
-                />
-              </div>
-            </div>
-          )}
-
+          {/* Vision */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <Eye className="h-4 w-4 text-violet-600" />
+              Company Vision ({currentLangObj.name})
+            </Label>
+            <Textarea
+              value={currentFields.vision}
+              onChange={(e) => handleFieldChange(currentLangObj.code, "vision", e.target.value)}
+              placeholder={`Enter long-term vision statement in ${currentLangObj.name}...`}
+              rows={4}
+              disabled={!canManage}
+              className="resize-y"
+            />
+          </div>
         </form>
       </CardContent>
     </Card>
