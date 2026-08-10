@@ -257,7 +257,7 @@ export function TimelineManager() {
                 canManage ? (
                   <Button onClick={handleOpenCreate} className="gap-2">
                     <Plus className="h-4 w-4" />
-                    + Add Timeline Event
+                    Add Timeline Event
                   </Button>
                 ) : undefined
               }

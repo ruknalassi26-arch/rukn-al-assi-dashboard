@@ -260,7 +260,7 @@ export function TeamManager() {
                 canManage ? (
                   <Button onClick={handleOpenCreate} className="gap-2">
                     <Plus className="h-4 w-4" />
-                    + Add Team Member
+                    Add Team Member
                   </Button>
                 ) : undefined
               }

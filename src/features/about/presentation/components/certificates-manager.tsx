@@ -259,7 +259,7 @@ export function CertificatesManager() {
                 canManage ? (
                   <Button onClick={handleOpenCreate} className="gap-2">
                     <Plus className="h-4 w-4" />
-                    + Add Certificate
+                    Add Certificate
                   </Button>
                 ) : undefined
               }
