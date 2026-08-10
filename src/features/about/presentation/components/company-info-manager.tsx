@@ -1,14 +1,12 @@
 "use client";
 // ==============================================================================
 // features/about/presentation/components/company-info-manager.tsx
-// Management form for Company Information with Bilingual Tabs
+// Management form for Company Information (History, Mission, Vision)
+// Strictly matching company_profile & company_profile_translations DB schema
 // ==============================================================================
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, Save, Building } from "lucide-react";
+import { Loader2, Save, Globe, History as HistoryIcon, Target, Eye } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -16,7 +14,6 @@ import {
   CardTitle,
   CardDescription,
   Button,
-  Input,
   Label,
   Textarea,
   Select,
@@ -26,93 +23,56 @@ import {
   SelectValue,
   Skeleton,
 } from "@shared/ui";
-import { MultilingualTabs } from "@shared/components/multilingual-tabs";
-import { useCompanyInfo, useUpdateCompanyInfo } from "@shared/hooks/about/use-about-hooks";
+import { useCompanyInfo, useUpdateCompanyInfoTranslation } from "@shared/hooks/about/use-about-hooks";
+import { useLanguages } from "@shared/hooks/settings/use-language-hooks";
+import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
 import { ErrorState } from "@shared/components/error-state";
-
-const companyInfoSchema = z.object({
-  companyNameEn: z.string().min(2, "English company name is required"),
-  companyNameAr: z.string().min(2, "Arabic company name is required"),
-  companyNameKu: z.string().optional().nullable(),
-  shortDescriptionEn: z.string().optional().nullable(),
-  shortDescriptionAr: z.string().optional().nullable(),
-  shortDescriptionKu: z.string().optional().nullable(),
-  fullDescriptionEn: z.string().optional().nullable(),
-  fullDescriptionAr: z.string().optional().nullable(),
-  fullDescriptionKu: z.string().optional().nullable(),
-  establishedYear: z.number().nullable().optional(),
-  headquarters: z.string().optional().nullable(),
-  website: z.string().optional().nullable(),
-  phone: z.string().optional().nullable(),
-  email: z.string().optional().nullable(),
-  status: z.enum(["active", "draft"]),
-});
-
-type CompanyInfoFormValues = z.infer<typeof companyInfoSchema>;
 
 export function CompanyInfoManager() {
   const t = useTranslations("aboutAdmin.overview");
   const tCommon = useTranslations("common");
-  const { data: companyData, isLoading, error, refetch } = useCompanyInfo();
-  const updateMutation = useUpdateCompanyInfo();
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    reset,
-    formState: { errors },
-  } = useForm<CompanyInfoFormValues>({
-    resolver: zodResolver(companyInfoSchema),
-    defaultValues: {
-      companyNameEn: "Rukn Al Assi",
-      companyNameAr: "ركن العاصي",
-      companyNameKu: "",
-      shortDescriptionEn: "",
-      shortDescriptionAr: "",
-      shortDescriptionKu: "",
-      fullDescriptionEn: "",
-      fullDescriptionAr: "",
-      fullDescriptionKu: "",
-      establishedYear: 2010,
-      headquarters: "Riyadh, Saudi Arabia",
-      website: "https://ruknalassi.com",
-      phone: "+966 11 000 0000",
-      email: "info@ruknalassi.com",
-      status: "active",
-    },
-  });
+  const { hasPermission } = usePermission();
+  const canManage = hasPermission("about", "manage");
+
+  const { data: languagesData, isLoading: isLangsLoading } = useLanguages();
+  const languages = languagesData ?? [
+    { code: "en", name: "English" },
+    { code: "ar", name: "العربية" },
+    { code: "ckb", name: "کوردی" },
+  ];
+
+  const [selectedLang, setSelectedLang] = useState<string>("en");
+
+  const { data: companyData, isLoading: isDataLoading, error, refetch } = useCompanyInfo();
+  const updateMutation = useUpdateCompanyInfoTranslation();
+
+  const [history, setHistory] = useState("");
+  const [mission, setMission] = useState("");
+  const [vision, setVision] = useState("");
 
   useEffect(() => {
     if (companyData) {
-      reset({
-        companyNameEn: companyData.companyNameEn,
-        companyNameAr: companyData.companyNameAr,
-        companyNameKu: (companyData as any).companyNameKu ?? "",
-        shortDescriptionEn: companyData.shortDescriptionEn ?? "",
-        shortDescriptionAr: companyData.shortDescriptionAr ?? "",
-        shortDescriptionKu: (companyData as any).shortDescriptionKu ?? "",
-        fullDescriptionEn: companyData.fullDescriptionEn ?? "",
-        fullDescriptionAr: companyData.fullDescriptionAr ?? "",
-        fullDescriptionKu: (companyData as any).fullDescriptionKu ?? "",
-        establishedYear: companyData.establishedYear,
-        headquarters: companyData.headquarters ?? "",
-        website: companyData.website ?? "",
-        phone: companyData.phone ?? "",
-        email: companyData.email ?? "",
-        status: companyData.status,
-      });
+      const trans = companyData.getTranslation(selectedLang);
+      setHistory(trans.history || "");
+      setMission(trans.mission || "");
+      setVision(trans.vision || "");
     }
-  }, [companyData, reset]);
+  }, [companyData, selectedLang]);
 
-  const status = watch("status");
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canManage) return;
 
-  const onSubmit = async (values: CompanyInfoFormValues) => {
-    await updateMutation.mutateAsync(values as any);
+    await updateMutation.mutateAsync({
+      language_code: selectedLang,
+      history,
+      mission,
+      vision,
+    });
   };
 
-  if (isLoading) {
+  if (isDataLoading || isLangsLoading) {
     return (
       <Card>
         <CardHeader>
@@ -120,153 +80,116 @@ export function CompanyInfoManager() {
           <Skeleton className="h-4 w-72" />
         </CardHeader>
         <CardContent className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
         </CardContent>
       </Card>
     );
   }
 
   if (error) {
-    return (
-      <ErrorState
-        title={tCommon("error")}
-        error={error}
-        onRetry={() => refetch()}
-      />
-    );
+    return <ErrorState error={error as Error} onRetry={() => refetch()} />;
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="shadow-sm">
+      <CardHeader className="border-b bg-muted/20">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <Building className="h-5 w-5 text-primary" />
-              <CardTitle>{t("title")}</CardTitle>
-            </div>
-            <CardDescription>
-              {t("subtitle")}
+            <CardTitle className="text-xl font-bold flex items-center gap-2">
+              Company Profile & Narrative
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Manage Company History, Mission, and Vision across all system languages.
             </CardDescription>
           </div>
-          <Button type="submit" disabled={updateMutation.isPending} className="gap-2">
-            {updateMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            {t("saveBtn")}
-          </Button>
-        </CardHeader>
 
-        <CardContent className="space-y-6">
-          <MultilingualTabs
-            englishFields={
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="companyNameEn">{t("nameEn")} *</Label>
-                  <Input id="companyNameEn" {...register("companyNameEn")} />
-                  {errors.companyNameEn && (
-                    <span className="text-xs text-destructive">{errors.companyNameEn.message}</span>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="shortDescriptionEn">{t("shortEn")}</Label>
-                  <Textarea id="shortDescriptionEn" rows={2} {...register("shortDescriptionEn")} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="fullDescriptionEn">{t("fullEn")}</Label>
-                  <Textarea id="fullDescriptionEn" rows={5} {...register("fullDescriptionEn")} />
-                </div>
-              </div>
-            }
-            arabicFields={
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="companyNameAr">{t("nameAr")} *</Label>
-                  <Input id="companyNameAr" dir="rtl" {...register("companyNameAr")} />
-                  {errors.companyNameAr && (
-                    <span className="text-xs text-destructive">{errors.companyNameAr.message}</span>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="shortDescriptionAr">{t("shortAr")}</Label>
-                  <Textarea id="shortDescriptionAr" dir="rtl" rows={2} {...register("shortDescriptionAr")} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="fullDescriptionAr">{t("fullAr")}</Label>
-                  <Textarea id="fullDescriptionAr" dir="rtl" rows={5} {...register("fullDescriptionAr")} />
-                </div>
-              </div>
-            }
-            kurdishFields={
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="companyNameKu">{t("nameKu")}</Label>
-                  <Input id="companyNameKu" dir="rtl" {...register("companyNameKu")} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="shortDescriptionKu">{t("shortKu")}</Label>
-                  <Textarea id="shortDescriptionKu" dir="rtl" rows={2} {...register("shortDescriptionKu")} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="fullDescriptionKu">{t("fullKu")}</Label>
-                  <Textarea id="fullDescriptionKu" dir="rtl" rows={5} {...register("fullDescriptionKu")} />
-                </div>
-              </div>
-            }
-          />
+          {/* Language Selector */}
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-primary shrink-0" />
+            <Select value={selectedLang} onValueChange={setSelectedLang}>
+              <SelectTrigger className="w-[180px] h-9 text-xs">
+                <SelectValue placeholder="Select Language" />
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code} className="text-xs">
+                    {lang.name} ({lang.code.toUpperCase()})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </CardHeader>
 
-          {/* Meta & Global Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 border p-4 rounded-lg bg-muted/10">
-            <div className="space-y-1.5">
-              <Label htmlFor="establishedYear">{t("estYear")}</Label>
-              <Input
-                id="establishedYear"
-                type="number"
-                {...register("establishedYear", { valueAsNumber: true })}
-                placeholder="2010"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="headquarters">{t("headquarters")}</Label>
-              <Input id="headquarters" {...register("headquarters")} placeholder="Riyadh, KSA" />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="phone">{t("phone")}</Label>
-              <Input id="phone" {...register("phone")} placeholder="+966 ..." />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="email">{t("email")}</Label>
-              <Input id="email" type="email" {...register("email")} placeholder="info@..." />
-            </div>
+      <CardContent className="pt-6">
+        <form onSubmit={handleSave} className="space-y-6">
+          {/* History */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <HistoryIcon className="h-4 w-4 text-blue-600" />
+              Company History ({selectedLang.toUpperCase()})
+            </Label>
+            <Textarea
+              value={history}
+              onChange={(e) => setHistory(e.target.value)}
+              placeholder="Enter comprehensive company background, founding story, and milestone journey..."
+              rows={5}
+              disabled={!canManage}
+              className="resize-y"
+            />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="website">{t("website")}</Label>
-              <Input id="website" type="url" {...register("website")} placeholder="https://..." />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="status">{tCommon("status")}</Label>
-              <Select value={status} onValueChange={(val) => setValue("status", val as "active" | "draft")}>
-                <SelectTrigger id="status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">{tCommon("active")}</SelectItem>
-                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Mission */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <Target className="h-4 w-4 text-emerald-600" />
+              Company Mission ({selectedLang.toUpperCase()})
+            </Label>
+            <Textarea
+              value={mission}
+              onChange={(e) => setMission(e.target.value)}
+              placeholder="Enter the core company mission statement..."
+              rows={4}
+              disabled={!canManage}
+              className="resize-y"
+            />
           </div>
-        </CardContent>
-      </Card>
-    </form>
+
+          {/* Vision */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <Eye className="h-4 w-4 text-violet-600" />
+              Company Vision ({selectedLang.toUpperCase()})
+            </Label>
+            <Textarea
+              value={vision}
+              onChange={(e) => setVision(e.target.value)}
+              placeholder="Enter long-term strategic vision statement..."
+              rows={4}
+              disabled={!canManage}
+              className="resize-y"
+            />
+          </div>
+
+          {/* Actions */}
+          {canManage && (
+            <div className="flex justify-end pt-2 border-t">
+              <Button type="submit" disabled={updateMutation.isPending} className="gap-2">
+                {updateMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                Save Information ({selectedLang.toUpperCase()})
+              </Button>
+            </div>
+          )}
+        </form>
+      </CardContent>
+    </Card>
   );
 }

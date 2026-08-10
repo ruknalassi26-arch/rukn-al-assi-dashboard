@@ -1,11 +1,12 @@
 "use client";
 // ==============================================================================
 // features/about/presentation/components/team-manager.tsx
-// Management Team section manager component with Search, Filter, Bulk Actions & Reordering
+// Management Team Manager (team_members & team_member_translations)
+// Strictly matching DB schema & permissions
 // ==============================================================================
 import { useState, useMemo } from "react";
-import Image from "next/image";
-import { Plus, Pencil, Trash2, Search, ArrowUp, ArrowDown, Users, User, Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Plus, Pencil, Trash2, Search, ArrowUp, ArrowDown, User } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -22,6 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
   Skeleton,
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
 } from "@shared/ui";
 import {
   useTeamMembers,
@@ -32,18 +36,21 @@ import {
   useBulkDeleteTeamMembers,
   useBulkUpdateTeamMembersStatus,
 } from "@shared/hooks/about/use-about-hooks";
-import { TeamMemberDialog } from "@shared/dialogs/team-member-dialog";
+import { TeamMemberDialog, type TeamMemberFormValues } from "./team-member-dialog";
 import { ConfirmDialog } from "@shared/dialogs/confirm-dialog";
 import { EmptyState } from "@shared/components/empty-state";
 import { ErrorState } from "@shared/components/error-state";
+import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
 import type { TeamMemberEntity } from "../../domain/entities/about.entity";
-
-import { useTranslations } from "next-intl";
 
 export function TeamManager() {
   const t = useTranslations("aboutAdmin.team");
   const tCommon = useTranslations("common");
-  const { data: team, isLoading, error, refetch } = useTeamMembers();
+
+  const { hasPermission } = usePermission();
+  const canManage = hasPermission("about", "manage");
+
+  const { data: members, isLoading, error, refetch } = useTeamMembers();
   const createMutation = useCreateTeamMember();
   const updateMutation = useUpdateTeamMember();
   const deleteMutation = useDeleteTeamMember();
@@ -60,23 +67,25 @@ export function TeamManager() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
-  const filteredTeam = useMemo(() => {
-    if (!team) return [];
-    return team.filter((item) => {
+  const filteredMembers = useMemo(() => {
+    if (!members) return [];
+    return members.filter((item) => {
+      const en = item.getTranslation("en");
+      const ar = item.getTranslation("ar");
       const matchesSearch =
-        item.fullNameEn.toLowerCase().includes(search.toLowerCase()) ||
-        item.fullNameAr.includes(search) ||
-        (item.positionEn && item.positionEn.toLowerCase().includes(search.toLowerCase()));
+        en.name.toLowerCase().includes(search.toLowerCase()) ||
+        en.position.toLowerCase().includes(search.toLowerCase()) ||
+        ar.name.includes(search);
       const matchesStatus = statusFilter === "all" || item.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [team, search, statusFilter]);
+  }, [members, search, statusFilter]);
 
   const handleToggleSelectAll = () => {
-    if (selectedIds.length === filteredTeam.length) {
+    if (selectedIds.length === filteredMembers.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredTeam.map((v) => v.id));
+      setSelectedIds(filteredMembers.map((v) => v.id));
     }
   };
 
@@ -96,14 +105,24 @@ export function TeamManager() {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = async (values: Record<string, unknown>) => {
+  const handleFormSubmit = async (formValues: TeamMemberFormValues) => {
+    const translations = {
+      en: { name: formValues.nameEn, position: formValues.positionEn || "", bio: formValues.bioEn || "" },
+      ...(formValues.nameAr ? { ar: { name: formValues.nameAr, position: formValues.positionAr || "", bio: formValues.bioAr || "" } } : {}),
+      ...(formValues.nameKu ? { ckb: { name: formValues.nameKu, position: formValues.positionKu || "", bio: formValues.bioKu || "" } } : {}),
+    };
+
+    const payload = {
+      photoUrl: formValues.photoUrl,
+      sortOrder: formValues.sortOrder,
+      status: formValues.status,
+      translations,
+    };
+
     if (editingMember) {
-      await updateMutation.mutateAsync({
-        id: editingMember.id,
-        member: values as Partial<TeamMemberEntity>,
-      });
+      await updateMutation.mutateAsync({ id: editingMember.id, input: payload });
     } else {
-      await createMutation.mutateAsync(values as Omit<TeamMemberEntity, "id" | "createdAt" | "updatedAt">);
+      await createMutation.mutateAsync(payload);
     }
   };
 
@@ -122,158 +141,224 @@ export function TeamManager() {
   };
 
   const handleBulkStatus = async (status: "active" | "draft") => {
-    if (selectedIds.length === 0) return;
-    await bulkStatusMutation.mutateAsync({ ids: selectedIds, status });
-    setSelectedIds([]);
+    if (selectedIds.length > 0) {
+      await bulkStatusMutation.mutateAsync({ ids: selectedIds, status });
+      setSelectedIds([]);
+    }
   };
 
   const handleMove = async (index: number, direction: "up" | "down") => {
-    if (!team) return;
-    const newTeam = [...team];
+    if (!members) return;
+    const newMembers = [...members];
     const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= newTeam.length) return;
+    if (targetIndex < 0 || targetIndex >= newMembers.length) return;
 
-    const [moved] = newTeam.splice(index, 1);
-    newTeam.splice(targetIndex, 0, moved);
+    const [moved] = newMembers.splice(index, 1);
+    newMembers.splice(targetIndex, 0, moved);
 
-    await reorderMutation.mutateAsync(newTeam.map((t) => t.id));
+    await reorderMutation.mutateAsync(newMembers.map((v) => v.id));
   };
 
   if (isLoading) {
     return (
       <Card>
-        <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
-        <CardContent className="space-y-4"><Skeleton className="h-48 w-full" /></CardContent>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </CardContent>
       </Card>
     );
   }
 
   if (error) {
-    return (
-      <ErrorState title={tCommon("error")} error={error} onRetry={() => refetch()} />
-    );
+    return <ErrorState error={error as Error} onRetry={() => refetch()} />;
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <CardTitle>{t("title")}</CardTitle>
-            <CardDescription>{t("subtitle")}</CardDescription>
+    <div className="space-y-4">
+      <Card className="shadow-sm">
+        <CardHeader className="border-b bg-muted/20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                Management Team
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Manage leadership executive profiles, titles, photos, and bios.
+              </CardDescription>
+            </div>
+            {canManage && (
+              <Button onClick={handleOpenCreate} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Team Member
+              </Button>
+            )}
           </div>
-          <Button onClick={handleOpenCreate} className="gap-2 shrink-0">
-            <Plus className="h-4 w-4" /> {t("addBtn")}
-          </Button>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 rounded-lg border bg-muted/20">
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <CardContent className="pt-4 space-y-4">
+          {/* Controls Bar */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 w-full sm:w-auto flex-1">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder={t("searchPlaceholder")}
+                  placeholder="Search team members..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 text-xs"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32 text-xs"><SelectValue placeholder={tCommon("status")} /></SelectTrigger>
+                <SelectTrigger className="w-[130px] text-xs">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{tCommon("all")}</SelectItem>
-                  <SelectItem value="active">{tCommon("active")}</SelectItem>
-                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {selectedIds.length > 0 && (
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span className="text-xs text-muted-foreground font-medium me-1">{selectedIds.length} {tCommon("items")}</span>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")} className="text-xs">{tCommon("active")}</Button>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")} className="text-xs">{tCommon("draft")}</Button>
-                <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleting(true)} className="text-xs">{tCommon("delete")}</Button>
+            {/* Bulk Actions */}
+            {canManage && selectedIds.length > 0 && (
+              <div className="flex items-center gap-2 w-full sm:w-auto bg-muted/50 p-1.5 rounded-lg border">
+                <span className="text-xs font-semibold px-2">
+                  {selectedIds.length} Selected
+                </span>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")}>
+                  Activate
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")}>
+                  Draft
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setIsBulkDeleting(true)}
+                >
+                  Delete Selected
+                </Button>
               </div>
             )}
           </div>
 
-          {filteredTeam.length === 0 ? (
+          {/* Team Members List */}
+          {filteredMembers.length === 0 ? (
             <EmptyState
-              icon={Users}
-              title={t("emptyTitle")}
-              description={t("emptyDesc")}
-              action={<Button onClick={handleOpenCreate} size="sm" className="gap-2"><Plus className="h-4 w-4" /> {t("addBtn")}</Button>}
+              title="No Team Members Found"
+              description="Add leadership executive members."
+              action={
+                canManage ? (
+                  <Button onClick={handleOpenCreate} className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Team Member
+                  </Button>
+                ) : undefined
+              }
             />
           ) : (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between px-2 text-xs font-semibold text-muted-foreground">
+            <div className="border rounded-lg overflow-hidden divide-y">
+              <div className="bg-muted/40 p-3 flex items-center justify-between text-xs font-semibold text-muted-foreground">
                 <div className="flex items-center gap-3">
-                  <Checkbox
-                    checked={selectedIds.length === filteredTeam.length && filteredTeam.length > 0}
-                    onCheckedChange={handleToggleSelectAll}
-                  />
-                  <span>Team Leader</span>
+                  {canManage && (
+                    <Checkbox
+                      checked={selectedIds.length === filteredMembers.length}
+                      onCheckedChange={handleToggleSelectAll}
+                    />
+                  )}
+                  <span>Member Details</span>
                 </div>
-                <span>Actions</span>
+                <span>Status & Actions</span>
               </div>
 
-              {filteredTeam.map((member, index) => {
-                const isSelected = selectedIds.includes(member.id);
+              {filteredMembers.map((item, index) => {
+                const en = item.getTranslation("en");
 
                 return (
                   <div
-                    key={member.id}
-                    className={`flex items-center justify-between p-4 rounded-lg border transition-all gap-4 ${
-                      isSelected ? "border-primary/50 bg-primary/5" : "bg-card hover:border-muted-foreground/30"
-                    }`}
+                    key={item.id}
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/20 transition-colors"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Checkbox checked={isSelected} onCheckedChange={() => handleToggleSelect(member.id)} />
-                      <div className="relative h-12 w-12 rounded-full overflow-hidden bg-muted shrink-0 border flex items-center justify-center">
-                        {member.photo ? (
-                          <Image src={member.photo} alt={member.fullNameEn} fill className="object-cover" />
-                        ) : (
-                          <User className="h-5 w-5 text-muted-foreground" />
+                    <div className="flex items-center gap-3">
+                      {canManage && (
+                        <Checkbox
+                          checked={selectedIds.includes(item.id)}
+                          onCheckedChange={() => handleToggleSelect(item.id)}
+                        />
+                      )}
+                      <Avatar className="h-10 w-10 border shrink-0">
+                        <AvatarImage src={item.photoUrl ?? undefined} alt={en.name} />
+                        <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                          <User className="h-5 w-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h4 className="font-semibold text-sm text-foreground">
+                          {en.name || "Untitled Member"}
+                        </h4>
+                        <p className="text-xs text-primary font-medium">
+                          {en.position || "No position specified"}
+                        </p>
+                        {en.bio && (
+                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                            {en.bio}
+                          </p>
                         )}
-                      </div>
-                      <div className="min-w-0 space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm text-foreground truncate">{member.fullNameEn}</span>
-                          <Badge variant={member.status === "active" ? "default" : "secondary"}>{member.status}</Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          {member.positionEn && <span>{member.positionEn}</span>}
-                          {member.positionEn && member.positionAr && <span>•</span>}
-                          {member.positionAr && <span dir="rtl">{member.positionAr}</span>}
-                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex items-center border rounded-md">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          disabled={index === 0 || reorderMutation.isPending}
-                          onClick={() => handleMove(index, "up")}
-                        >
-                          <ArrowUp className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          disabled={index === filteredTeam.length - 1 || reorderMutation.isPending}
-                          onClick={() => handleMove(index, "down")}
-                        >
-                          <ArrowDown className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                      <Button variant="outline" size="sm" onClick={() => handleOpenEdit(member)} className="gap-1.5"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
-                      <Button variant="destructive" size="sm" onClick={() => setDeletingId(member.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                      <Badge
+                        variant={item.status === "active" ? "default" : "secondary"}
+                        className={
+                          item.status === "active"
+                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
+                            : "bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30"
+                        }
+                      >
+                        {item.status === "active" ? "Active" : "Draft"}
+                      </Badge>
+
+                      {canManage && (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={index === 0}
+                            onClick={() => handleMove(index, "up")}
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={index === filteredMembers.length - 1}
+                            onClick={() => handleMove(index, "down")}
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenEdit(item)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDeletingId(item.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -283,6 +368,7 @@ export function TeamManager() {
         </CardContent>
       </Card>
 
+      {/* Team Form Dialog */}
       <TeamMemberDialog
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -291,23 +377,27 @@ export function TeamManager() {
         isLoading={createMutation.isPending || updateMutation.isPending}
       />
 
+      {/* Delete Single Dialog */}
       <ConfirmDialog
         isOpen={!!deletingId}
         onClose={() => setDeletingId(null)}
         onConfirm={handleConfirmDelete}
         title="Delete Team Member"
-        description="Are you sure you want to delete this team member?"
+        description="Are you sure you want to delete this team member? This action cannot be undone."
         confirmText="Delete"
+        variant="destructive"
         isLoading={deleteMutation.isPending}
       />
 
+      {/* Bulk Delete Dialog */}
       <ConfirmDialog
         isOpen={isBulkDeleting}
         onClose={() => setIsBulkDeleting(false)}
         onConfirm={handleConfirmBulkDelete}
-        title={`Delete ${selectedIds.length} Team Members`}
-        description={`Are you sure you want to delete ${selectedIds.length} selected team members?`}
-        confirmText="Delete All Selected"
+        title="Delete Selected Team Members"
+        description={`Are you sure you want to delete ${selectedIds.length} team members?`}
+        confirmText="Delete All"
+        variant="destructive"
         isLoading={bulkDeleteMutation.isPending}
       />
     </div>

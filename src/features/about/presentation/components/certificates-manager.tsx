@@ -1,10 +1,11 @@
 "use client";
 // ==============================================================================
 // features/about/presentation/components/certificates-manager.tsx
-// About Module Certificates manager component with Search, Filter, Bulk Actions & Reordering
+// Certificates Manager (certifications & certification_translations)
+// Strictly matching DB schema & permissions
 // ==============================================================================
 import { useState, useMemo } from "react";
-import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Plus, Pencil, Trash2, Search, ArrowUp, ArrowDown, Award, Calendar, Building2 } from "lucide-react";
 import {
   Card,
@@ -24,31 +25,35 @@ import {
   Skeleton,
 } from "@shared/ui";
 import {
-  useAboutCertificates,
-  useCreateAboutCertificate,
-  useUpdateAboutCertificate,
-  useDeleteAboutCertificate,
-  useReorderAboutCertificates,
-  useBulkDeleteAboutCertificates,
-  useBulkUpdateAboutCertificatesStatus,
+  useCertificates,
+  useCreateCertificate,
+  useUpdateCertificate,
+  useDeleteCertificate,
+  useReorderCertificates,
+  useBulkDeleteCertificates,
+  useBulkUpdateCertificatesStatus,
 } from "@shared/hooks/about/use-about-hooks";
-import { CertificateDialog } from "@shared/dialogs/certificate-dialog";
+import { CertificateDialog, type CertificateFormValues } from "./certificate-dialog";
 import { ConfirmDialog } from "@shared/dialogs/confirm-dialog";
 import { EmptyState } from "@shared/components/empty-state";
 import { ErrorState } from "@shared/components/error-state";
+import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
 import type { AboutCertificateEntity } from "../../domain/entities/about.entity";
-import { useTranslations } from "next-intl";
 
 export function CertificatesManager() {
   const t = useTranslations("aboutAdmin.certificates");
   const tCommon = useTranslations("common");
-  const { data: certs, isLoading, error, refetch } = useAboutCertificates();
-  const createMutation = useCreateAboutCertificate();
-  const updateMutation = useUpdateAboutCertificate();
-  const deleteMutation = useDeleteAboutCertificate();
-  const reorderMutation = useReorderAboutCertificates();
-  const bulkDeleteMutation = useBulkDeleteAboutCertificates();
-  const bulkStatusMutation = useBulkUpdateAboutCertificatesStatus();
+
+  const { hasPermission } = usePermission();
+  const canManage = hasPermission("about", "manage");
+
+  const { data: certificates, isLoading, error, refetch } = useCertificates();
+  const createMutation = useCreateCertificate();
+  const updateMutation = useUpdateCertificate();
+  const deleteMutation = useDeleteCertificate();
+  const reorderMutation = useReorderCertificates();
+  const bulkDeleteMutation = useBulkDeleteCertificates();
+  const bulkStatusMutation = useBulkUpdateCertificatesStatus();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -60,22 +65,24 @@ export function CertificatesManager() {
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const filteredCerts = useMemo(() => {
-    if (!certs) return [];
-    return certs.filter((item) => {
+    if (!certificates) return [];
+    return certificates.filter((item) => {
+      const en = item.getTranslation("en");
+      const ar = item.getTranslation("ar");
       const matchesSearch =
-        item.titleEn.toLowerCase().includes(search.toLowerCase()) ||
-        item.titleAr.includes(search) ||
-        (item.organization && item.organization.toLowerCase().includes(search.toLowerCase()));
+        en.title.toLowerCase().includes(search.toLowerCase()) ||
+        (item.issuedBy && item.issuedBy.toLowerCase().includes(search.toLowerCase())) ||
+        ar.title.includes(search);
       const matchesStatus = statusFilter === "all" || item.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [certs, search, statusFilter]);
+  }, [certificates, search, statusFilter]);
 
   const handleToggleSelectAll = () => {
     if (selectedIds.length === filteredCerts.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredCerts.map((c) => c.id));
+      setSelectedIds(filteredCerts.map((v) => v.id));
     }
   };
 
@@ -90,19 +97,31 @@ export function CertificatesManager() {
     setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (cert: AboutCertificateEntity) => {
-    setEditingCert(cert);
+  const handleOpenEdit = (item: AboutCertificateEntity) => {
+    setEditingCert(item);
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = async (values: Record<string, unknown>) => {
+  const handleFormSubmit = async (formValues: CertificateFormValues) => {
+    const translations = {
+      en: { title: formValues.titleEn, description: formValues.descriptionEn || "" },
+      ...(formValues.titleAr ? { ar: { title: formValues.titleAr, description: formValues.descriptionAr || "" } } : {}),
+      ...(formValues.titleKu ? { ckb: { title: formValues.titleKu, description: formValues.descriptionKu || "" } } : {}),
+    };
+
+    const payload = {
+      imageUrl: formValues.imageUrl,
+      issuedBy: formValues.issuedBy,
+      issuedDate: formValues.issuedDate,
+      sortOrder: formValues.sortOrder,
+      status: formValues.status,
+      translations,
+    };
+
     if (editingCert) {
-      await updateMutation.mutateAsync({
-        id: editingCert.id,
-        cert: values as Partial<AboutCertificateEntity>,
-      });
+      await updateMutation.mutateAsync({ id: editingCert.id, input: payload });
     } else {
-      await createMutation.mutateAsync(values as Omit<AboutCertificateEntity, "id" | "createdAt" | "updatedAt">);
+      await createMutation.mutateAsync(payload);
     }
   };
 
@@ -121,168 +140,226 @@ export function CertificatesManager() {
   };
 
   const handleBulkStatus = async (status: "active" | "draft") => {
-    if (selectedIds.length === 0) return;
-    await bulkStatusMutation.mutateAsync({ ids: selectedIds, status });
-    setSelectedIds([]);
+    if (selectedIds.length > 0) {
+      await bulkStatusMutation.mutateAsync({ ids: selectedIds, status });
+      setSelectedIds([]);
+    }
   };
 
   const handleMove = async (index: number, direction: "up" | "down") => {
-    if (!certs) return;
-    const newCerts = [...certs];
+    if (!certificates) return;
+    const newCerts = [...certificates];
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= newCerts.length) return;
 
     const [moved] = newCerts.splice(index, 1);
     newCerts.splice(targetIndex, 0, moved);
 
-    await reorderMutation.mutateAsync(newCerts.map((c) => c.id));
+    await reorderMutation.mutateAsync(newCerts.map((v) => v.id));
   };
 
   if (isLoading) {
     return (
       <Card>
-        <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
-        <CardContent className="space-y-4"><Skeleton className="h-48 w-full" /></CardContent>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </CardContent>
       </Card>
     );
   }
 
   if (error) {
-    return (
-      <ErrorState title={tCommon("error")} error={error} onRetry={() => refetch()} />
-    );
+    return <ErrorState error={error as Error} onRetry={() => refetch()} />;
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <CardTitle>{t("title")}</CardTitle>
-            <CardDescription>{t("subtitle")}</CardDescription>
+    <div className="space-y-4">
+      <Card className="shadow-sm">
+        <CardHeader className="border-b bg-muted/20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                Certificates & Accreditations
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Manage ISO quality certifications, industry accreditations, and issuing bodies.
+              </CardDescription>
+            </div>
+            {canManage && (
+              <Button onClick={handleOpenCreate} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Certificate
+              </Button>
+            )}
           </div>
-          <Button onClick={handleOpenCreate} className="gap-2 shrink-0">
-            <Plus className="h-4 w-4" /> {t("addBtn")}
-          </Button>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 rounded-lg border bg-muted/20">
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <CardContent className="pt-4 space-y-4">
+          {/* Controls Bar */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 w-full sm:w-auto flex-1">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder={t("searchPlaceholder")}
+                  placeholder="Search certificates..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 text-xs"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32 text-xs"><SelectValue placeholder={tCommon("status")} /></SelectTrigger>
+                <SelectTrigger className="w-[130px] text-xs">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{tCommon("all")}</SelectItem>
-                  <SelectItem value="active">{tCommon("active")}</SelectItem>
-                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {selectedIds.length > 0 && (
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span className="text-xs text-muted-foreground font-medium me-1">{selectedIds.length} {tCommon("items")}</span>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")} className="text-xs">{tCommon("active")}</Button>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")} className="text-xs">{tCommon("draft")}</Button>
-                <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleting(true)} className="text-xs">{tCommon("delete")}</Button>
+            {/* Bulk Actions */}
+            {canManage && selectedIds.length > 0 && (
+              <div className="flex items-center gap-2 w-full sm:w-auto bg-muted/50 p-1.5 rounded-lg border">
+                <span className="text-xs font-semibold px-2">
+                  {selectedIds.length} Selected
+                </span>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")}>
+                  Activate
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")}>
+                  Draft
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setIsBulkDeleting(true)}
+                >
+                  Delete Selected
+                </Button>
               </div>
             )}
           </div>
 
+          {/* Certificates List */}
           {filteredCerts.length === 0 ? (
             <EmptyState
-              icon={Award}
-              title={t("emptyTitle")}
-              description={t("emptyDesc")}
-              action={<Button onClick={handleOpenCreate} size="sm" className="gap-2"><Plus className="h-4 w-4" /> {t("addBtn")}</Button>}
+              title="No Certificates Found"
+              description="Add quality certificates and official industry accreditations."
+              action={
+                canManage ? (
+                  <Button onClick={handleOpenCreate} className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Certificate
+                  </Button>
+                ) : undefined
+              }
             />
           ) : (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between px-2 text-xs font-semibold text-muted-foreground">
+            <div className="border rounded-lg overflow-hidden divide-y">
+              <div className="bg-muted/40 p-3 flex items-center justify-between text-xs font-semibold text-muted-foreground">
                 <div className="flex items-center gap-3">
-                  <Checkbox
-                    checked={selectedIds.length === filteredCerts.length && filteredCerts.length > 0}
-                    onCheckedChange={handleToggleSelectAll}
-                  />
-                  <span>Certificate Title</span>
+                  {canManage && (
+                    <Checkbox
+                      checked={selectedIds.length === filteredCerts.length}
+                      onCheckedChange={handleToggleSelectAll}
+                    />
+                  )}
+                  <span>Certificate Details</span>
                 </div>
-                <span>Actions</span>
+                <span>Status & Actions</span>
               </div>
 
-              {filteredCerts.map((cert, index) => {
-                const isSelected = selectedIds.includes(cert.id);
+              {filteredCerts.map((item, index) => {
+                const en = item.getTranslation("en");
 
                 return (
                   <div
-                    key={cert.id}
-                    className={`flex items-center justify-between p-4 rounded-lg border transition-all gap-4 ${
-                      isSelected ? "border-primary/50 bg-primary/5" : "bg-card hover:border-muted-foreground/30"
-                    }`}
+                    key={item.id}
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/20 transition-colors"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Checkbox checked={isSelected} onCheckedChange={() => handleToggleSelect(cert.id)} />
-                      <div className="relative h-12 w-16 rounded-md overflow-hidden bg-muted shrink-0 border flex items-center justify-center">
-                        {cert.image ? (
-                          <Image src={cert.image} alt={cert.titleEn} fill className="object-contain p-1" />
-                        ) : (
-                          <Award className="h-5 w-5 text-muted-foreground" />
-                        )}
+                    <div className="flex items-start gap-3">
+                      {canManage && (
+                        <Checkbox
+                          checked={selectedIds.includes(item.id)}
+                          onCheckedChange={() => handleToggleSelect(item.id)}
+                          className="mt-1"
+                        />
+                      )}
+                      <div className="p-2.5 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 shrink-0">
+                        <Award className="h-5 w-5" />
                       </div>
-                      <div className="min-w-0 space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm text-foreground truncate">{cert.titleEn}</span>
-                          <Badge variant={cert.status === "active" ? "default" : "secondary"}>{cert.status}</Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          {cert.organization && (
+                      <div>
+                        <h4 className="font-semibold text-sm text-foreground">
+                          {en.title || "Untitled Certificate"}
+                        </h4>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                          {item.issuedBy && (
                             <span className="flex items-center gap-1">
-                              <Building2 className="h-3 w-3" /> {cert.organization}
+                              <Building2 className="h-3 w-3" /> {item.issuedBy}
                             </span>
                           )}
-                          {cert.issueDate && (
-                            <>
-                              <span>•</span>
-                              <span className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" /> {cert.issueDate}
-                              </span>
-                            </>
+                          {item.issuedDate && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" /> {item.issuedDate}
+                            </span>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex items-center border rounded-md">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          disabled={index === 0 || reorderMutation.isPending}
-                          onClick={() => handleMove(index, "up")}
-                        >
-                          <ArrowUp className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          disabled={index === filteredCerts.length - 1 || reorderMutation.isPending}
-                          onClick={() => handleMove(index, "down")}
-                        >
-                          <ArrowDown className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                      <Button variant="outline" size="sm" onClick={() => handleOpenEdit(cert)} className="gap-1.5"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
-                      <Button variant="destructive" size="sm" onClick={() => setDeletingId(cert.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                      <Badge
+                        variant={item.status === "active" ? "default" : "secondary"}
+                        className={
+                          item.status === "active"
+                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
+                            : "bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30"
+                        }
+                      >
+                        {item.status === "active" ? "Active" : "Draft"}
+                      </Badge>
+
+                      {canManage && (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={index === 0}
+                            onClick={() => handleMove(index, "up")}
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={index === filteredCerts.length - 1}
+                            onClick={() => handleMove(index, "down")}
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenEdit(item)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDeletingId(item.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -292,6 +369,7 @@ export function CertificatesManager() {
         </CardContent>
       </Card>
 
+      {/* Certificate Form Dialog */}
       <CertificateDialog
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -300,23 +378,27 @@ export function CertificatesManager() {
         isLoading={createMutation.isPending || updateMutation.isPending}
       />
 
+      {/* Delete Single Dialog */}
       <ConfirmDialog
         isOpen={!!deletingId}
         onClose={() => setDeletingId(null)}
         onConfirm={handleConfirmDelete}
         title="Delete Certificate"
-        description="Are you sure you want to delete this certificate?"
+        description="Are you sure you want to delete this certificate? This action cannot be undone."
         confirmText="Delete"
+        variant="destructive"
         isLoading={deleteMutation.isPending}
       />
 
+      {/* Bulk Delete Dialog */}
       <ConfirmDialog
         isOpen={isBulkDeleting}
         onClose={() => setIsBulkDeleting(false)}
         onConfirm={handleConfirmBulkDelete}
-        title={`Delete ${selectedIds.length} Certificates`}
-        description={`Are you sure you want to delete ${selectedIds.length} selected certificates?`}
-        confirmText="Delete All Selected"
+        title="Delete Selected Certificates"
+        description={`Are you sure you want to delete ${selectedIds.length} certificates?`}
+        confirmText="Delete All"
+        variant="destructive"
         isLoading={bulkDeleteMutation.isPending}
       />
     </div>

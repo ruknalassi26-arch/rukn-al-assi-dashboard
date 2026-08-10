@@ -6,7 +6,6 @@ import { create } from "zustand";
 
 export type AboutTab =
   | "company_info"
-  | "mission_vision"
   | "core_values"
   | "timeline"
   | "team"
@@ -46,6 +45,6 @@ export const useAboutStore = create<AboutStore>((set) => ({
         ? state.selectedIds.filter((item) => item !== id)
         : [...state.selectedIds, id],
     })),
-  selectAllIds: (ids) => set({ selectedIds: ids }),
+  selectAllIds: (selectedIds) => set({ selectedIds }),
   clearSelection: () => set({ selectedIds: [] }),
 }));

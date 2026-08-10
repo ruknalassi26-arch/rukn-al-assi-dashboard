@@ -1,11 +1,12 @@
 "use client";
 // ==============================================================================
 // features/about/presentation/components/timeline-manager.tsx
-// Company Timeline manager component with Search, Filter, Bulk Actions & Reordering
+// Timeline Event Manager (timeline_events & timeline_event_translations)
+// Strictly matching DB schema & permissions
 // ==============================================================================
 import { useState, useMemo } from "react";
-import Image from "next/image";
-import { Plus, Pencil, Trash2, Search, ArrowUp, ArrowDown, Calendar, History } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Plus, Pencil, Trash2, Search, ArrowUp, ArrowDown, Calendar } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -32,17 +33,21 @@ import {
   useBulkDeleteTimeline,
   useBulkUpdateTimelineStatus,
 } from "@shared/hooks/about/use-about-hooks";
-import { TimelineDialog } from "@shared/dialogs/timeline-dialog";
+import { TimelineDialog, type TimelineFormValues } from "./timeline-dialog";
 import { ConfirmDialog } from "@shared/dialogs/confirm-dialog";
 import { EmptyState } from "@shared/components/empty-state";
 import { ErrorState } from "@shared/components/error-state";
+import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
 import type { TimelineEntity } from "../../domain/entities/about.entity";
-import { useTranslations } from "next-intl";
 
 export function TimelineManager() {
   const t = useTranslations("aboutAdmin.timeline");
   const tCommon = useTranslations("common");
-  const { data: timeline, isLoading, error, refetch } = useTimeline();
+
+  const { hasPermission } = usePermission();
+  const canManage = hasPermission("about", "manage");
+
+  const { data: timelineEvents, isLoading, error, refetch } = useTimeline();
   const createMutation = useCreateTimeline();
   const updateMutation = useUpdateTimeline();
   const deleteMutation = useDeleteTimeline();
@@ -59,23 +64,25 @@ export function TimelineManager() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
-  const filteredTimeline = useMemo(() => {
-    if (!timeline) return [];
-    return timeline.filter((item) => {
+  const filteredEvents = useMemo(() => {
+    if (!timelineEvents) return [];
+    return timelineEvents.filter((item) => {
+      const en = item.getTranslation("en");
+      const ar = item.getTranslation("ar");
       const matchesSearch =
-        item.titleEn.toLowerCase().includes(search.toLowerCase()) ||
-        item.titleAr.includes(search) ||
-        item.year.toString().includes(search);
+        en.title.toLowerCase().includes(search.toLowerCase()) ||
+        ar.title.includes(search) ||
+        item.eventYear.includes(search);
       const matchesStatus = statusFilter === "all" || item.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [timeline, search, statusFilter]);
+  }, [timelineEvents, search, statusFilter]);
 
   const handleToggleSelectAll = () => {
-    if (selectedIds.length === filteredTimeline.length) {
+    if (selectedIds.length === filteredEvents.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredTimeline.map((v) => v.id));
+      setSelectedIds(filteredEvents.map((v) => v.id));
     }
   };
 
@@ -95,14 +102,24 @@ export function TimelineManager() {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = async (values: Record<string, unknown>) => {
+  const handleFormSubmit = async (formValues: TimelineFormValues) => {
+    const translations = {
+      en: { title: formValues.titleEn, description: formValues.descriptionEn || "" },
+      ...(formValues.titleAr ? { ar: { title: formValues.titleAr, description: formValues.descriptionAr || "" } } : {}),
+      ...(formValues.titleKu ? { ckb: { title: formValues.titleKu, description: formValues.descriptionKu || "" } } : {}),
+    };
+
+    const payload = {
+      eventYear: formValues.eventYear,
+      sortOrder: formValues.sortOrder,
+      status: formValues.status,
+      translations,
+    };
+
     if (editingItem) {
-      await updateMutation.mutateAsync({
-        id: editingItem.id,
-        item: values as Partial<TimelineEntity>,
-      });
+      await updateMutation.mutateAsync({ id: editingItem.id, input: payload });
     } else {
-      await createMutation.mutateAsync(values as Omit<TimelineEntity, "id" | "createdAt" | "updatedAt">);
+      await createMutation.mutateAsync(payload);
     }
   };
 
@@ -128,149 +145,211 @@ export function TimelineManager() {
   };
 
   const handleMove = async (index: number, direction: "up" | "down") => {
-    if (!timeline) return;
-    const newTimeline = [...timeline];
+    if (!timelineEvents) return;
+    const newEvents = [...timelineEvents];
     const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= newTimeline.length) return;
+    if (targetIndex < 0 || targetIndex >= newEvents.length) return;
 
-    const [moved] = newTimeline.splice(index, 1);
-    newTimeline.splice(targetIndex, 0, moved);
+    const [moved] = newEvents.splice(index, 1);
+    newEvents.splice(targetIndex, 0, moved);
 
-    await reorderMutation.mutateAsync(newTimeline.map((v) => v.id));
+    await reorderMutation.mutateAsync(newEvents.map((v) => v.id));
   };
 
   if (isLoading) {
     return (
       <Card>
-        <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
-        <CardContent className="space-y-4"><Skeleton className="h-48 w-full" /></CardContent>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </CardContent>
       </Card>
     );
   }
 
   if (error) {
-    return (
-      <ErrorState title={tCommon("error")} error={error} onRetry={() => refetch()} />
-    );
+    return <ErrorState error={error as Error} onRetry={() => refetch()} />;
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <CardTitle>{t("title")}</CardTitle>
-            <CardDescription>{t("subtitle")}</CardDescription>
+    <div className="space-y-4">
+      <Card className="shadow-sm">
+        <CardHeader className="border-b bg-muted/20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                Company Timeline Events
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Manage company milestones, event years, descriptions, and ordering.
+              </CardDescription>
+            </div>
+            {canManage && (
+              <Button onClick={handleOpenCreate} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Timeline Event
+              </Button>
+            )}
           </div>
-          <Button onClick={handleOpenCreate} className="gap-2 shrink-0">
-            <Plus className="h-4 w-4" /> {t("addBtn")}
-          </Button>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 rounded-lg border bg-muted/20">
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <CardContent className="pt-4 space-y-4">
+          {/* Controls Bar */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 w-full sm:w-auto flex-1">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder={t("searchPlaceholder")}
+                  placeholder="Search timeline events..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 text-xs"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32 text-xs"><SelectValue placeholder={tCommon("status")} /></SelectTrigger>
+                <SelectTrigger className="w-[130px] text-xs">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{tCommon("all")}</SelectItem>
-                  <SelectItem value="active">{tCommon("active")}</SelectItem>
-                  <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {selectedIds.length > 0 && (
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span className="text-xs text-muted-foreground font-medium me-1">{selectedIds.length} {tCommon("items")}</span>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")} className="text-xs">{tCommon("active")}</Button>
-                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")} className="text-xs">{tCommon("draft")}</Button>
-                <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleting(true)} className="text-xs">{tCommon("delete")}</Button>
+            {/* Bulk Actions */}
+            {canManage && selectedIds.length > 0 && (
+              <div className="flex items-center gap-2 w-full sm:w-auto bg-muted/50 p-1.5 rounded-lg border">
+                <span className="text-xs font-semibold px-2">
+                  {selectedIds.length} Selected
+                </span>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("active")}>
+                  Activate
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleBulkStatus("draft")}>
+                  Draft
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setIsBulkDeleting(true)}
+                >
+                  Delete Selected
+                </Button>
               </div>
             )}
           </div>
 
-          {filteredTimeline.length === 0 ? (
+          {/* Timeline List */}
+          {filteredEvents.length === 0 ? (
             <EmptyState
-              icon={History}
-              title={t("emptyTitle")}
-              description={t("emptyDesc")}
-              action={<Button onClick={handleOpenCreate} size="sm" className="gap-2"><Plus className="h-4 w-4" /> {t("addBtn")}</Button>}
+              title="No Timeline Events Found"
+              description="Add key company milestones and achievements."
+              action={
+                canManage ? (
+                  <Button onClick={handleOpenCreate} className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Timeline Event
+                  </Button>
+                ) : undefined
+              }
             />
           ) : (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between px-2 text-xs font-semibold text-muted-foreground">
+            <div className="border rounded-lg overflow-hidden divide-y">
+              <div className="bg-muted/40 p-3 flex items-center justify-between text-xs font-semibold text-muted-foreground">
                 <div className="flex items-center gap-3">
-                  <Checkbox
-                    checked={selectedIds.length === filteredTimeline.length && filteredTimeline.length > 0}
-                    onCheckedChange={handleToggleSelectAll}
-                  />
-                  <span>Timeline Milestone</span>
+                  {canManage && (
+                    <Checkbox
+                      checked={selectedIds.length === filteredEvents.length}
+                      onCheckedChange={handleToggleSelectAll}
+                    />
+                  )}
+                  <span>Year & Milestone</span>
                 </div>
-                <span>Actions</span>
+                <span>Status & Actions</span>
               </div>
 
-              {filteredTimeline.map((item, index) => {
-                const isSelected = selectedIds.includes(item.id);
+              {filteredEvents.map((item, index) => {
+                const en = item.getTranslation("en");
 
                 return (
                   <div
                     key={item.id}
-                    className={`flex items-center justify-between p-4 rounded-lg border transition-all gap-4 ${
-                      isSelected ? "border-primary/50 bg-primary/5" : "bg-card hover:border-muted-foreground/30"
-                    }`}
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/20 transition-colors"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Checkbox checked={isSelected} onCheckedChange={() => handleToggleSelect(item.id)} />
-                      <div className="relative h-12 w-16 rounded-md overflow-hidden bg-muted shrink-0 border flex items-center justify-center">
-                        {item.image ? (
-                          <Image src={item.image} alt={item.titleEn} fill className="object-cover" />
-                        ) : (
-                          <Calendar className="h-5 w-5 text-muted-foreground" />
-                        )}
+                    <div className="flex items-start gap-3">
+                      {canManage && (
+                        <Checkbox
+                          checked={selectedIds.includes(item.id)}
+                          onCheckedChange={() => handleToggleSelect(item.id)}
+                          className="mt-1"
+                        />
+                      )}
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-500/20 font-bold text-xs shrink-0">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {item.eventYear}
                       </div>
-                      <div className="min-w-0 space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-bold text-primary">{item.year}</Badge>
-                          <span className="font-semibold text-sm text-foreground truncate">{item.titleEn}</span>
-                          <Badge variant={item.status === "active" ? "default" : "secondary"}>{item.status}</Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate" dir="rtl">{item.titleAr}</p>
+                      <div>
+                        <h4 className="font-semibold text-sm text-foreground">
+                          {en.title || "Untitled Milestone"}
+                        </h4>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                          {en.description || "No description provided."}
+                        </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex items-center border rounded-md">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          disabled={index === 0 || reorderMutation.isPending}
-                          onClick={() => handleMove(index, "up")}
-                        >
-                          <ArrowUp className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          disabled={index === filteredTimeline.length - 1 || reorderMutation.isPending}
-                          onClick={() => handleMove(index, "down")}
-                        >
-                          <ArrowDown className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                      <Button variant="outline" size="sm" onClick={() => handleOpenEdit(item)} className="gap-1.5"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
-                      <Button variant="destructive" size="sm" onClick={() => setDeletingId(item.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                      <Badge
+                        variant={item.status === "active" ? "default" : "secondary"}
+                        className={
+                          item.status === "active"
+                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
+                            : "bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30"
+                        }
+                      >
+                        {item.status === "active" ? "Active" : "Draft"}
+                      </Badge>
+
+                      {canManage && (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={index === 0}
+                            onClick={() => handleMove(index, "up")}
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={index === filteredEvents.length - 1}
+                            onClick={() => handleMove(index, "down")}
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenEdit(item)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDeletingId(item.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -280,6 +359,7 @@ export function TimelineManager() {
         </CardContent>
       </Card>
 
+      {/* Timeline Form Dialog */}
       <TimelineDialog
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -288,23 +368,27 @@ export function TimelineManager() {
         isLoading={createMutation.isPending || updateMutation.isPending}
       />
 
+      {/* Delete Single Dialog */}
       <ConfirmDialog
         isOpen={!!deletingId}
         onClose={() => setDeletingId(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Milestone"
-        description="Are you sure you want to delete this milestone?"
+        title="Delete Timeline Event"
+        description="Are you sure you want to delete this event? This action cannot be undone."
         confirmText="Delete"
+        variant="destructive"
         isLoading={deleteMutation.isPending}
       />
 
+      {/* Bulk Delete Dialog */}
       <ConfirmDialog
         isOpen={isBulkDeleting}
         onClose={() => setIsBulkDeleting(false)}
         onConfirm={handleConfirmBulkDelete}
-        title={`Delete ${selectedIds.length} Milestones`}
-        description={`Are you sure you want to delete ${selectedIds.length} selected timeline milestones?`}
-        confirmText="Delete All Selected"
+        title="Delete Selected Timeline Events"
+        description={`Are you sure you want to delete ${selectedIds.length} timeline events?`}
+        confirmText="Delete All"
+        variant="destructive"
         isLoading={bulkDeleteMutation.isPending}
       />
     </div>

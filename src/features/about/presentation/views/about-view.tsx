@@ -2,22 +2,23 @@
 // ==============================================================================
 // features/about/presentation/views/about-view.tsx
 // Master view for About Us Management with section tab navigation
+// Strictly matching Supabase DB Schema
 // ==============================================================================
 import { useTranslations } from "next-intl";
 import {
   Building,
-  Target,
   ShieldCheck,
   History,
   Users,
   Award,
+  Lock,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shared/ui";
 import { ErrorBoundary } from "@shared/components/error-boundary";
 import { useAboutStore, type AboutTab } from "../stores/about.store";
+import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
 import {
   CompanyInfoManager,
-  MissionVisionManager,
   CoreValuesManager,
   TimelineManager,
   TeamManager,
@@ -27,6 +28,21 @@ import {
 export function AboutView() {
   const t = useTranslations("aboutAdmin");
   const { activeTab, setActiveTab } = useAboutStore();
+  const { hasPermission } = usePermission();
+
+  const canView = hasPermission("about", "view");
+
+  if (!canView) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center border rounded-xl bg-card">
+        <Lock className="h-12 w-12 text-muted-foreground/50 mb-3" />
+        <h3 className="text-lg font-bold text-foreground">Access Denied</h3>
+        <p className="text-sm text-muted-foreground max-w-md mt-1">
+          You do not have permission to view About Us Management content. Contact your administrator for access.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -48,10 +64,6 @@ export function AboutView() {
           <TabsTrigger value="company_info" className="gap-2 py-2 px-3 text-xs">
             <Building className="h-4 w-4 text-blue-600" />
             {t("tabs.companyInfo")}
-          </TabsTrigger>
-          <TabsTrigger value="mission_vision" className="gap-2 py-2 px-3 text-xs">
-            <Target className="h-4 w-4 text-emerald-600" />
-            {t("tabs.missionVision")}
           </TabsTrigger>
           <TabsTrigger value="core_values" className="gap-2 py-2 px-3 text-xs">
             <ShieldCheck className="h-4 w-4 text-amber-600" />
@@ -75,12 +87,6 @@ export function AboutView() {
         <TabsContent value="company_info">
           <ErrorBoundary>
             <CompanyInfoManager />
-          </ErrorBoundary>
-        </TabsContent>
-
-        <TabsContent value="mission_vision">
-          <ErrorBoundary>
-            <MissionVisionManager />
           </ErrorBoundary>
         </TabsContent>
 

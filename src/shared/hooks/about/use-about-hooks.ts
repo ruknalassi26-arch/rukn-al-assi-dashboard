@@ -2,56 +2,20 @@
 // ==============================================================================
 // shared/hooks/about/use-about-hooks.ts
 // Centralized React Query hooks for About Us Management
+// Strictly matching Supabase DB Schema & Permissions
 // ==============================================================================
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@core/constants/query-keys";
 import { createClient } from "@core/lib/supabase/client";
 import { SupabaseAboutRepository } from "@features/about/data/repository/supabase-about.repository";
-import {
-  GetCompanyInfoUseCase,
-  UpdateCompanyInfoUseCase,
-  GetMissionUseCase,
-  UpdateMissionUseCase,
-  GetVisionUseCase,
-  UpdateVisionUseCase,
-  GetCoreValuesUseCase,
-  CreateCoreValueUseCase,
-  UpdateCoreValueUseCase,
-  DeleteCoreValueUseCase,
-  ReorderCoreValuesUseCase,
-  BulkDeleteCoreValuesUseCase,
-  BulkUpdateCoreValuesStatusUseCase,
-  GetTimelineUseCase,
-  CreateTimelineUseCase,
-  UpdateTimelineUseCase,
-  DeleteTimelineUseCase,
-  ReorderTimelineUseCase,
-  BulkDeleteTimelineUseCase,
-  BulkUpdateTimelineStatusUseCase,
-  GetTeamMembersUseCase,
-  CreateTeamMemberUseCase,
-  UpdateTeamMemberUseCase,
-  DeleteTeamMemberUseCase,
-  ReorderTeamMembersUseCase,
-  BulkDeleteTeamMembersUseCase,
-  BulkUpdateTeamMembersStatusUseCase,
-  GetAboutCertificatesUseCase,
-  CreateAboutCertificateUseCase,
-  UpdateAboutCertificateUseCase,
-  DeleteAboutCertificateUseCase,
-  ReorderAboutCertificatesUseCase,
-  BulkDeleteAboutCertificatesUseCase,
-  BulkUpdateAboutCertificatesStatusUseCase,
-} from "@features/about/domain/usecases";
 import type {
-  CompanyInfoEntity,
-  MissionEntity,
-  VisionEntity,
-  CoreValueEntity,
-  TimelineEntity,
-  TeamMemberEntity,
-  AboutCertificateEntity,
-} from "@features/about/domain/entities/about.entity";
+  UpdateCompanyInfoTranslationInput,
+  SaveCoreValueInput,
+  SaveTimelineInput,
+  SaveTeamMemberInput,
+  SaveCertificateInput,
+} from "@features/about/domain/repositories/i-about.repository";
+import type { SectionStatus } from "@features/about/domain/entities/about.entity";
 import { toast } from "@core/utils/toast";
 
 function getRepo() {
@@ -59,70 +23,35 @@ function getRepo() {
   return new SupabaseAboutRepository(supabase);
 }
 
-// ---------- Company Info ----------
+// ---------- 1. Company Info ----------
 export function useCompanyInfo() {
   return useQuery({
     queryKey: queryKeys.about.companyInfo(),
-    queryFn: () => new GetCompanyInfoUseCase(getRepo()).execute(),
+    queryFn: () => getRepo().getCompanyInfo(),
     staleTime: 30 * 1000,
   });
 }
 
-export function useUpdateCompanyInfo() {
+export function useUpdateCompanyInfoTranslation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<CompanyInfoEntity>) => new UpdateCompanyInfoUseCase(getRepo()).execute(data),
+    mutationFn: (input: UpdateCompanyInfoTranslationInput) =>
+      getRepo().updateCompanyInfoTranslation(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.companyInfo() });
-      toast.success("Company information updated successfully");
+      toast.success("Company profile information updated successfully.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to update company profile information.");
     },
   });
 }
 
-// ---------- Mission & Vision ----------
-export function useMission() {
-  return useQuery({
-    queryKey: queryKeys.about.mission(),
-    queryFn: () => new GetMissionUseCase(getRepo()).execute(),
-    staleTime: 30 * 1000,
-  });
-}
-
-export function useUpdateMission() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: Partial<MissionEntity>) => new UpdateMissionUseCase(getRepo()).execute(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.about.mission() });
-      toast.success("Company mission updated successfully");
-    },
-  });
-}
-
-export function useVision() {
-  return useQuery({
-    queryKey: queryKeys.about.vision(),
-    queryFn: () => new GetVisionUseCase(getRepo()).execute(),
-    staleTime: 30 * 1000,
-  });
-}
-
-export function useUpdateVision() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: Partial<VisionEntity>) => new UpdateVisionUseCase(getRepo()).execute(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.about.vision() });
-      toast.success("Company vision updated successfully");
-    },
-  });
-}
-
-// ---------- Core Values ----------
+// ---------- 2. Core Values ----------
 export function useCoreValues() {
   return useQuery({
     queryKey: queryKeys.about.coreValues(),
-    queryFn: () => new GetCoreValuesUseCase(getRepo()).execute(),
+    queryFn: () => getRepo().getCoreValues(),
     staleTime: 30 * 1000,
   });
 }
@@ -130,11 +59,13 @@ export function useCoreValues() {
 export function useCreateCoreValue() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (value: Omit<CoreValueEntity, "id" | "createdAt" | "updatedAt">) =>
-      new CreateCoreValueUseCase(getRepo()).execute(value),
+    mutationFn: (input: SaveCoreValueInput) => getRepo().createCoreValue(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.coreValues() });
-      toast.success("Core value created successfully");
+      toast.success("Core value created successfully.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to create core value.");
     },
   });
 }
@@ -142,11 +73,14 @@ export function useCreateCoreValue() {
 export function useUpdateCoreValue() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, value }: { id: string; value: Partial<CoreValueEntity> }) =>
-      new UpdateCoreValueUseCase(getRepo()).execute(id, value),
+    mutationFn: ({ id, input }: { id: string; input: SaveCoreValueInput }) =>
+      getRepo().updateCoreValue(id, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.coreValues() });
-      toast.success("Core value updated successfully");
+      toast.success("Core value updated successfully.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to update core value.");
     },
   });
 }
@@ -154,10 +88,13 @@ export function useUpdateCoreValue() {
 export function useDeleteCoreValue() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => new DeleteCoreValueUseCase(getRepo()).execute(id),
+    mutationFn: (id: string) => getRepo().deleteCoreValue(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.coreValues() });
-      toast.success("Core value deleted successfully");
+      toast.success("Core value deleted.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to delete core value.");
     },
   });
 }
@@ -165,10 +102,9 @@ export function useDeleteCoreValue() {
 export function useReorderCoreValues() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (orderedIds: string[]) => new ReorderCoreValuesUseCase(getRepo()).execute(orderedIds),
+    mutationFn: (orderedIds: string[]) => getRepo().reorderCoreValues(orderedIds),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.coreValues() });
-      toast.success("Core values reordered successfully");
     },
   });
 }
@@ -176,10 +112,10 @@ export function useReorderCoreValues() {
 export function useBulkDeleteCoreValues() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (ids: string[]) => new BulkDeleteCoreValuesUseCase(getRepo()).execute(ids),
+    mutationFn: (ids: string[]) => getRepo().bulkDeleteCoreValues(ids),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.coreValues() });
-      toast.success("Selected core values deleted");
+      toast.success("Selected core values deleted.");
     },
   });
 }
@@ -187,20 +123,20 @@ export function useBulkDeleteCoreValues() {
 export function useBulkUpdateCoreValuesStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ ids, status }: { ids: string[]; status: "active" | "draft" }) =>
-      new BulkUpdateCoreValuesStatusUseCase(getRepo()).execute(ids, status),
+    mutationFn: ({ ids, status }: { ids: string[]; status: SectionStatus }) =>
+      getRepo().bulkUpdateCoreValuesStatus(ids, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.coreValues() });
-      toast.success("Selected core values status updated");
+      toast.success("Status updated for selected core values.");
     },
   });
 }
 
-// ---------- Timeline ----------
+// ---------- 3. Timeline ----------
 export function useTimeline() {
   return useQuery({
     queryKey: queryKeys.about.timeline(),
-    queryFn: () => new GetTimelineUseCase(getRepo()).execute(),
+    queryFn: () => getRepo().getTimeline(),
     staleTime: 30 * 1000,
   });
 }
@@ -208,11 +144,13 @@ export function useTimeline() {
 export function useCreateTimeline() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (item: Omit<TimelineEntity, "id" | "createdAt" | "updatedAt">) =>
-      new CreateTimelineUseCase(getRepo()).execute(item),
+    mutationFn: (input: SaveTimelineInput) => getRepo().createTimeline(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.timeline() });
-      toast.success("Timeline milestone created successfully");
+      toast.success("Timeline event created successfully.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to create timeline event.");
     },
   });
 }
@@ -220,11 +158,14 @@ export function useCreateTimeline() {
 export function useUpdateTimeline() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, item }: { id: string; item: Partial<TimelineEntity> }) =>
-      new UpdateTimelineUseCase(getRepo()).execute(id, item),
+    mutationFn: ({ id, input }: { id: string; input: SaveTimelineInput }) =>
+      getRepo().updateTimeline(id, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.timeline() });
-      toast.success("Timeline milestone updated successfully");
+      toast.success("Timeline event updated successfully.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to update timeline event.");
     },
   });
 }
@@ -232,10 +173,13 @@ export function useUpdateTimeline() {
 export function useDeleteTimeline() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => new DeleteTimelineUseCase(getRepo()).execute(id),
+    mutationFn: (id: string) => getRepo().deleteTimeline(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.timeline() });
-      toast.success("Timeline milestone deleted successfully");
+      toast.success("Timeline event deleted.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to delete timeline event.");
     },
   });
 }
@@ -243,10 +187,9 @@ export function useDeleteTimeline() {
 export function useReorderTimeline() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (orderedIds: string[]) => new ReorderTimelineUseCase(getRepo()).execute(orderedIds),
+    mutationFn: (orderedIds: string[]) => getRepo().reorderTimeline(orderedIds),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.timeline() });
-      toast.success("Timeline milestones reordered successfully");
     },
   });
 }
@@ -254,10 +197,10 @@ export function useReorderTimeline() {
 export function useBulkDeleteTimeline() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (ids: string[]) => new BulkDeleteTimelineUseCase(getRepo()).execute(ids),
+    mutationFn: (ids: string[]) => getRepo().bulkDeleteTimeline(ids),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.timeline() });
-      toast.success("Selected timeline milestones deleted");
+      toast.success("Selected timeline events deleted.");
     },
   });
 }
@@ -265,20 +208,20 @@ export function useBulkDeleteTimeline() {
 export function useBulkUpdateTimelineStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ ids, status }: { ids: string[]; status: "active" | "draft" }) =>
-      new BulkUpdateTimelineStatusUseCase(getRepo()).execute(ids, status),
+    mutationFn: ({ ids, status }: { ids: string[]; status: SectionStatus }) =>
+      getRepo().bulkUpdateTimelineStatus(ids, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.timeline() });
-      toast.success("Selected timeline status updated");
+      toast.success("Status updated for selected timeline events.");
     },
   });
 }
 
-// ---------- Management Team ----------
+// ---------- 4. Management Team ----------
 export function useTeamMembers() {
   return useQuery({
     queryKey: queryKeys.about.team(),
-    queryFn: () => new GetTeamMembersUseCase(getRepo()).execute(),
+    queryFn: () => getRepo().getTeamMembers(),
     staleTime: 30 * 1000,
   });
 }
@@ -286,11 +229,13 @@ export function useTeamMembers() {
 export function useCreateTeamMember() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (member: Omit<TeamMemberEntity, "id" | "createdAt" | "updatedAt">) =>
-      new CreateTeamMemberUseCase(getRepo()).execute(member),
+    mutationFn: (input: SaveTeamMemberInput) => getRepo().createTeamMember(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.team() });
-      toast.success("Team member added successfully");
+      toast.success("Team member created successfully.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to create team member.");
     },
   });
 }
@@ -298,11 +243,14 @@ export function useCreateTeamMember() {
 export function useUpdateTeamMember() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, member }: { id: string; member: Partial<TeamMemberEntity> }) =>
-      new UpdateTeamMemberUseCase(getRepo()).execute(id, member),
+    mutationFn: ({ id, input }: { id: string; input: SaveTeamMemberInput }) =>
+      getRepo().updateTeamMember(id, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.team() });
-      toast.success("Team member updated successfully");
+      toast.success("Team member updated successfully.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to update team member.");
     },
   });
 }
@@ -310,10 +258,13 @@ export function useUpdateTeamMember() {
 export function useDeleteTeamMember() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => new DeleteTeamMemberUseCase(getRepo()).execute(id),
+    mutationFn: (id: string) => getRepo().deleteTeamMember(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.team() });
-      toast.success("Team member deleted successfully");
+      toast.success("Team member deleted.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to delete team member.");
     },
   });
 }
@@ -321,10 +272,9 @@ export function useDeleteTeamMember() {
 export function useReorderTeamMembers() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (orderedIds: string[]) => new ReorderTeamMembersUseCase(getRepo()).execute(orderedIds),
+    mutationFn: (orderedIds: string[]) => getRepo().reorderTeamMembers(orderedIds),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.team() });
-      toast.success("Team members reordered successfully");
     },
   });
 }
@@ -332,10 +282,10 @@ export function useReorderTeamMembers() {
 export function useBulkDeleteTeamMembers() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (ids: string[]) => new BulkDeleteTeamMembersUseCase(getRepo()).execute(ids),
+    mutationFn: (ids: string[]) => getRepo().bulkDeleteTeamMembers(ids),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.team() });
-      toast.success("Selected team members deleted");
+      toast.success("Selected team members deleted.");
     },
   });
 }
@@ -343,89 +293,96 @@ export function useBulkDeleteTeamMembers() {
 export function useBulkUpdateTeamMembersStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ ids, status }: { ids: string[]; status: "active" | "draft" }) =>
-      new BulkUpdateTeamMembersStatusUseCase(getRepo()).execute(ids, status),
+    mutationFn: ({ ids, status }: { ids: string[]; status: SectionStatus }) =>
+      getRepo().bulkUpdateTeamMembersStatus(ids, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.team() });
-      toast.success("Selected team members status updated");
+      toast.success("Status updated for selected team members.");
     },
   });
 }
 
-// ---------- About Certificates ----------
-export function useAboutCertificates() {
+// ---------- 5. Certificates ----------
+export function useCertificates() {
   return useQuery({
     queryKey: queryKeys.about.certificates(),
-    queryFn: () => new GetAboutCertificatesUseCase(getRepo()).execute(),
+    queryFn: () => getRepo().getCertificates(),
     staleTime: 30 * 1000,
   });
 }
 
-export function useCreateAboutCertificate() {
+export function useCreateCertificate() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (cert: Omit<AboutCertificateEntity, "id" | "createdAt" | "updatedAt">) =>
-      new CreateAboutCertificateUseCase(getRepo()).execute(cert),
+    mutationFn: (input: SaveCertificateInput) => getRepo().createCertificate(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.certificates() });
-      toast.success("Certificate created successfully");
+      toast.success("Certificate created successfully.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to create certificate.");
     },
   });
 }
 
-export function useUpdateAboutCertificate() {
+export function useUpdateCertificate() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, cert }: { id: string; cert: Partial<AboutCertificateEntity> }) =>
-      new UpdateAboutCertificateUseCase(getRepo()).execute(id, cert),
+    mutationFn: ({ id, input }: { id: string; input: SaveCertificateInput }) =>
+      getRepo().updateCertificate(id, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.certificates() });
-      toast.success("Certificate updated successfully");
+      toast.success("Certificate updated successfully.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to update certificate.");
     },
   });
 }
 
-export function useDeleteAboutCertificate() {
+export function useDeleteCertificate() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => new DeleteAboutCertificateUseCase(getRepo()).execute(id),
+    mutationFn: (id: string) => getRepo().deleteCertificate(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.certificates() });
-      toast.success("Certificate deleted successfully");
+      toast.success("Certificate deleted.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to delete certificate.");
     },
   });
 }
 
-export function useReorderAboutCertificates() {
+export function useReorderCertificates() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (orderedIds: string[]) => new ReorderAboutCertificatesUseCase(getRepo()).execute(orderedIds),
+    mutationFn: (orderedIds: string[]) => getRepo().reorderCertificates(orderedIds),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.certificates() });
-      toast.success("Certificates reordered successfully");
     },
   });
 }
 
-export function useBulkDeleteAboutCertificates() {
+export function useBulkDeleteCertificates() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (ids: string[]) => new BulkDeleteAboutCertificatesUseCase(getRepo()).execute(ids),
+    mutationFn: (ids: string[]) => getRepo().bulkDeleteCertificates(ids),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.certificates() });
-      toast.success("Selected certificates deleted");
+      toast.success("Selected certificates deleted.");
     },
   });
 }
 
-export function useBulkUpdateAboutCertificatesStatus() {
+export function useBulkUpdateCertificatesStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ ids, status }: { ids: string[]; status: "active" | "draft" }) =>
-      new BulkUpdateAboutCertificatesStatusUseCase(getRepo()).execute(ids, status),
+    mutationFn: ({ ids, status }: { ids: string[]; status: SectionStatus }) =>
+      getRepo().bulkUpdateCertificatesStatus(ids, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.about.certificates() });
-      toast.success("Selected certificates status updated");
+      toast.success("Status updated for selected certificates.");
     },
   });
 }

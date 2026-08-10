@@ -93,20 +93,40 @@ export function CertificateDialog({
 
   useEffect(() => {
     if (initialData) {
-      reset({
-        titleEn: initialData.titleEn,
-        titleAr: initialData.titleAr,
-        titleKu: ((initialData as unknown as Record<string, unknown>).titleKu as string) ?? "",
-        descriptionEn: "descriptionEn" in initialData ? (initialData.descriptionEn ?? "") : "",
-        descriptionAr: "descriptionAr" in initialData ? (initialData.descriptionAr ?? "") : "",
-        descriptionKu: ((initialData as unknown as Record<string, unknown>).descriptionKu as string) ?? "",
-        image: initialData.image,
-        issueDate: initialData.issueDate ?? "",
-        expiryDate: "expiryDate" in initialData ? (initialData.expiryDate ?? "") : "",
-        organization: "organization" in initialData ? (initialData.organization ?? "") : "",
-        sortOrder: initialData.sortOrder,
-        status: initialData.status,
-      });
+      if ("getTranslation" in initialData) {
+        const en = initialData.getTranslation("en");
+        const ar = initialData.getTranslation("ar");
+        const ku = initialData.getTranslation("ckb");
+        reset({
+          titleEn: en.title || "",
+          titleAr: ar.title || "",
+          titleKu: ku.title || "",
+          descriptionEn: en.description || "",
+          descriptionAr: ar.description || "",
+          descriptionKu: ku.description || "",
+          image: initialData.imageUrl,
+          issueDate: initialData.issuedDate ?? "",
+          expiryDate: "",
+          organization: initialData.issuedBy ?? "",
+          sortOrder: initialData.sortOrder,
+          status: initialData.status,
+        });
+      } else {
+        reset({
+          titleEn: (initialData as any).titleEn ?? "",
+          titleAr: (initialData as any).titleAr ?? "",
+          titleKu: ((initialData as unknown as Record<string, unknown>).titleKu as string) ?? "",
+          descriptionEn: (initialData as any).descriptionEn ?? "",
+          descriptionAr: (initialData as any).descriptionAr ?? "",
+          descriptionKu: ((initialData as unknown as Record<string, unknown>).descriptionKu as string) ?? "",
+          image: initialData.image,
+          issueDate: (initialData as any).issueDate ?? "",
+          expiryDate: (initialData as any).expiryDate ?? "",
+          organization: (initialData as any).organization ?? "",
+          sortOrder: initialData.sortOrder,
+          status: initialData.status,
+        });
+      }
     } else {
       reset({
         titleEn: "",

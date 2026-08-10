@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // features/about/presentation/components/timeline-dialog.tsx
-// Dialog form for creating/editing a Timeline Milestone
+// Dialog form for creating/editing a Timeline Event (timeline_events & timeline_event_translations)
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -24,21 +24,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui";
-import { ImageUploader } from "@features/homepage/presentation/components/image-uploader";
 import type { TimelineEntity } from "../../domain/entities/about.entity";
 
 const timelineSchema = z.object({
-  year: z.string().min(1, "Year/Date is required"),
-  titleEn: z.string().min(2, "English title is required"),
-  titleAr: z.string().min(2, "Arabic title is required"),
+  eventYear: z.string().min(1, "Event year is required"),
+  titleEn: z.string().min(1, "English title is required"),
+  titleAr: z.string().optional().nullable(),
+  titleKu: z.string().optional().nullable(),
   descriptionEn: z.string().optional().nullable(),
   descriptionAr: z.string().optional().nullable(),
-  image: z.string().optional().nullable(),
+  descriptionKu: z.string().optional().nullable(),
   sortOrder: z.number().min(0),
   status: z.enum(["active", "draft"]),
 });
 
-type TimelineFormValues = z.infer<typeof timelineSchema>;
+export type TimelineFormValues = z.infer<typeof timelineSchema>;
 
 interface TimelineDialogProps {
   isOpen: boolean;
@@ -65,12 +65,13 @@ export function TimelineDialog({
   } = useForm<TimelineFormValues>({
     resolver: zodResolver(timelineSchema),
     defaultValues: {
-      year: new Date().getFullYear().toString(),
+      eventYear: String(new Date().getFullYear()),
       titleEn: "",
       titleAr: "",
+      titleKu: "",
       descriptionEn: "",
       descriptionAr: "",
-      image: null,
+      descriptionKu: "",
       sortOrder: 1,
       status: "active",
     },
@@ -78,31 +79,35 @@ export function TimelineDialog({
 
   useEffect(() => {
     if (initialData) {
+      const en = initialData.getTranslation("en");
+      const ar = initialData.getTranslation("ar");
+      const ku = initialData.getTranslation("ckb");
       reset({
-        year: initialData.year,
-        titleEn: initialData.titleEn,
-        titleAr: initialData.titleAr,
-        descriptionEn: initialData.descriptionEn ?? "",
-        descriptionAr: initialData.descriptionAr ?? "",
-        image: initialData.image,
+        eventYear: String(initialData.eventYear ?? ""),
+        titleEn: en.title || "",
+        titleAr: ar.title || "",
+        titleKu: ku.title || "",
+        descriptionEn: en.description || "",
+        descriptionAr: ar.description || "",
+        descriptionKu: ku.description || "",
         sortOrder: initialData.sortOrder,
         status: initialData.status,
       });
     } else {
       reset({
-        year: new Date().getFullYear().toString(),
+        eventYear: String(new Date().getFullYear()),
         titleEn: "",
         titleAr: "",
+        titleKu: "",
         descriptionEn: "",
         descriptionAr: "",
-        image: null,
+        descriptionKu: "",
         sortOrder: 1,
         status: "active",
       });
     }
   }, [initialData, reset, isOpen]);
 
-  const image = watch("image");
   const status = watch("status");
 
   const onFormSubmit = async (values: TimelineFormValues) => {
@@ -112,55 +117,32 @@ export function TimelineDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Timeline Milestone" : "Add Timeline Milestone"}
+            {initialData ? "Edit Timeline Event" : "Add Timeline Event"}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="year">Year / Timeframe *</Label>
-            <Input id="year" {...register("year")} placeholder="e.g. 2015 or Q1 2020" />
-            {errors.year && <span className="text-xs text-destructive">{errors.year.message}</span>}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="titleEn">Title (English) *</Label>
-              <Input id="titleEn" {...register("titleEn")} placeholder="Expanded Factory Operations" />
-              {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
+          {/* Year & Meta */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <Label htmlFor="eventYear">Event Year *</Label>
+              <Input id="eventYear" {...register("eventYear")} placeholder="e.g. 2024" />
+              {errors.eventYear && <span className="text-xs text-destructive">{errors.eventYear.message}</span>}
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="titleAr">Title (Arabic) *</Label>
-              <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="توسعة عمليات المصنع" />
-              {errors.titleAr && <span className="text-xs text-destructive">{errors.titleAr.message}</span>}
+            <div className="space-y-1">
+              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Input
+                id="sortOrder"
+                type="number"
+                {...register("sortOrder", { valueAsNumber: true })}
+              />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="descriptionEn">Description (English)</Label>
-              <Textarea id="descriptionEn" rows={3} {...register("descriptionEn")} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="descriptionAr">Description (Arabic)</Label>
-              <Textarea id="descriptionAr" rows={3} dir="rtl" {...register("descriptionAr")} />
-            </div>
-          </div>
-
-          <ImageUploader
-            label="Milestone Image"
-            value={image ?? null}
-            onChange={(url) => setValue("image", url)}
-            folder="timeline"
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <Label>Status</Label>
-              <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
+              <Select value={status} onValueChange={(val) => setValue("status", val as "active" | "draft")}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="active">Active</SelectItem>
@@ -168,17 +150,48 @@ export function TimelineDialog({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="sortOrder">Sort Order</Label>
-              <Input id="sortOrder" type="number" {...register("sortOrder", { valueAsNumber: true })} />
+          </div>
+
+          {/* Titles */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <Label htmlFor="titleEn">Title (EN) *</Label>
+              <Input id="titleEn" {...register("titleEn")} placeholder="Milestone Launched" />
+              {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="titleAr">Title (AR)</Label>
+              <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="إطلاق الإنجاز" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="titleKu">Title (KU)</Label>
+              <Input id="titleKu" dir="rtl" {...register("titleKu")} placeholder="دەستپێکردنی قۆناغ" />
             </div>
           </div>
 
-          <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
+          {/* Descriptions */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <Label htmlFor="descriptionEn">Description (EN)</Label>
+              <Textarea id="descriptionEn" rows={3} {...register("descriptionEn")} />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="descriptionAr">Description (AR)</Label>
+              <Textarea id="descriptionAr" rows={3} dir="rtl" {...register("descriptionAr")} />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="descriptionKu">Description (KU)</Label>
+              <Textarea id="descriptionKu" rows={3} dir="rtl" {...register("descriptionKu")} />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? "Save Changes" : "Add Milestone"}
+              {initialData ? "Save Changes" : "Create Timeline Event"}
             </Button>
           </DialogFooter>
         </form>
