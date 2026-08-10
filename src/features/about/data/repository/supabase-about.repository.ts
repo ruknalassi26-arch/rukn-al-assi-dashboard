@@ -286,9 +286,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async createTimeline(input: SaveTimelineInput): Promise<TimelineEntity> {
+    const parsedYear = parseInt(String(input.eventYear), 10) || new Date().getFullYear();
     const { data, error } = await (this.supabase.from("timeline_events" as any) as any)
       .insert({
-        event_year: input.eventYear,
+        event_year: parsedYear,
         sort_order: input.sortOrder ?? 0,
         status: input.status ?? "active",
       })
@@ -314,9 +315,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async updateTimeline(id: string, input: SaveTimelineInput): Promise<TimelineEntity> {
+    const parsedYear = parseInt(String(input.eventYear), 10) || new Date().getFullYear();
     const { error: baseErr } = await (this.supabase.from("timeline_events" as any) as any)
       .update({
-        event_year: input.eventYear,
+        event_year: parsedYear,
         sort_order: input.sortOrder ?? 0,
         status: input.status ?? "active",
       })

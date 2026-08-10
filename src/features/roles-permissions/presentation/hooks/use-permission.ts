@@ -11,16 +11,20 @@ export function usePermission() {
   const { user, isLoading } = useAuthStore();
 
   const userRole = (user?.role?.toLowerCase().replace(/\s+/g, "_") ?? "viewer");
-  const isSuperAdmin = userRole === "super_admin" || userRole === "super_admin_role" || user?.isSuperAdmin === true;
+  const userPermissions = (user?.permissions as string[]) ?? [];
 
-  const userPermissions = (user?.permissions as PermissionCode[]) ?? [];
+  const isSuperAdmin =
+    userRole === "super_admin" ||
+    userRole === "super_admin_role" ||
+    user?.isSuperAdmin === true ||
+    userPermissions.includes("*");
 
   // Effective permissions across all user roles
-  const effectivePermissions: PermissionCode[] = isSuperAdmin
-    ? ALL_PERMISSIONS
+  const effectivePermissions: string[] = isSuperAdmin
+    ? (ALL_PERMISSIONS as string[])
     : userPermissions.length > 0
       ? userPermissions
-      : ROLE_PERMISSION_MATRIX[userRole] ?? ROLE_PERMISSION_MATRIX.viewer ?? [];
+      : (ROLE_PERMISSION_MATRIX[userRole] ?? ROLE_PERMISSION_MATRIX.viewer ?? []);
 
   /**
    * Checks if user has specific resource & action permission.
@@ -30,7 +34,9 @@ export function usePermission() {
     resourceOrCode: ResourceCode | PermissionCode | string,
     action?: PermissionAction
   ): boolean => {
-    if (isSuperAdmin) return true;
+    if (isSuperAdmin || effectivePermissions.includes("*") || effectivePermissions.includes("*:*")) {
+      return true;
+    }
 
     let resource: string;
     let act: string;
@@ -50,12 +56,12 @@ export function usePermission() {
     const exactCode = `${resource}:${act}`;
     const manageCode = `${resource}:manage`;
 
-    if (effectivePermissions.includes(exactCode as PermissionCode)) {
+    if (effectivePermissions.includes(exactCode)) {
       return true;
     }
 
     // "manage" implies "view"
-    if (act === "view" && effectivePermissions.includes(manageCode as PermissionCode)) {
+    if (act === "view" && effectivePermissions.includes(manageCode)) {
       return true;
     }
 
