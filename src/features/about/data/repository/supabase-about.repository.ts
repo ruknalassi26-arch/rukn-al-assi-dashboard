@@ -182,6 +182,30 @@ export class SupabaseAboutRepository implements IAboutRepository {
     return [];
   }
 
+  private async getValidLanguageCodes(): Promise<string[]> {
+    try {
+      const { data } = await (this.supabase.from("languages" as any) as any).select("code");
+      if (data && data.length > 0) {
+        return data.map((l: any) => l.code);
+      }
+    } catch {}
+    return ["en", "ar", "ku"];
+  }
+
+  private resolveLangCode(lang: string, dbCodes: string[]): string {
+    if (dbCodes.includes(lang)) return lang;
+    if (lang === "ckb" && dbCodes.includes("ku")) return "ku";
+    if (lang === "ku" && dbCodes.includes("ckb")) return "ckb";
+    if (lang === "en" && dbCodes.includes("en-US")) return "en-US";
+    if (lang === "ar" && dbCodes.includes("ar-IQ")) return "ar-IQ";
+
+    const basePrefix = lang.split("-")[0];
+    const matched = dbCodes.find((c) => c === basePrefix || c.startsWith(basePrefix + "-"));
+    if (matched) return matched;
+
+    return dbCodes[0] || lang;
+  }
+
   async createCoreValue(input: SaveCoreValueInput): Promise<CoreValueEntity> {
     const { data, error } = await (this.supabase.from("core_values" as any) as any)
       .insert({
@@ -194,9 +218,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create core value");
 
+    const dbCodes = await this.getValidLanguageCodes();
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       core_value_id: data.id,
-      language_code: lang,
+      language_code: this.resolveLangCode(lang, dbCodes),
       title: val.title || "",
       description: val.description || "",
     }));
@@ -221,9 +246,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
     if (baseErr) throw new Error(baseErr.message || "Failed to update core value");
 
+    const dbCodes = await this.getValidLanguageCodes();
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       core_value_id: id,
-      language_code: lang,
+      language_code: this.resolveLangCode(lang, dbCodes),
       title: val.title || "",
       description: val.description || "",
     }));
@@ -325,9 +351,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create timeline event");
 
+    const dbCodes = await this.getValidLanguageCodes();
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       timeline_event_id: data.id,
-      language_code: lang,
+      language_code: this.resolveLangCode(lang, dbCodes),
       title: val.title || "",
       description: val.description || "",
     }));
@@ -353,9 +380,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
     if (baseErr) throw new Error(baseErr.message || "Failed to update timeline event");
 
+    const dbCodes = await this.getValidLanguageCodes();
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       timeline_event_id: id,
-      language_code: lang,
+      language_code: this.resolveLangCode(lang, dbCodes),
       title: val.title || "",
       description: val.description || "",
     }));
@@ -457,9 +485,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create team member");
 
+    const dbCodes = await this.getValidLanguageCodes();
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       team_member_id: data.id,
-      language_code: lang,
+      language_code: this.resolveLangCode(lang, dbCodes),
       name: val.name || "",
       position: val.position || "",
       bio: val.bio || "",
@@ -485,9 +514,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
     if (baseErr) throw new Error(baseErr.message || "Failed to update team member");
 
+    const dbCodes = await this.getValidLanguageCodes();
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       team_member_id: id,
-      language_code: lang,
+      language_code: this.resolveLangCode(lang, dbCodes),
       name: val.name || "",
       position: val.position || "",
       bio: val.bio || "",
@@ -593,9 +623,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create certificate");
 
+    const dbCodes = await this.getValidLanguageCodes();
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       certification_id: data.id,
-      language_code: lang,
+      language_code: this.resolveLangCode(lang, dbCodes),
       title: val.title || "",
       description: val.description || "",
     }));
@@ -622,9 +653,10 @@ export class SupabaseAboutRepository implements IAboutRepository {
 
     if (baseErr) throw new Error(baseErr.message || "Failed to update certificate");
 
+    const dbCodes = await this.getValidLanguageCodes();
     const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
       certification_id: id,
-      language_code: lang,
+      language_code: this.resolveLangCode(lang, dbCodes),
       title: val.title || "",
       description: val.description || "",
     }));

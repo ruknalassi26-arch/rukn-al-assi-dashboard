@@ -109,7 +109,7 @@ export function TeamManager() {
     const translations = {
       en: { name: formValues.nameEn, position: formValues.positionEn || "", bio: formValues.bioEn || "" },
       ...(formValues.nameAr ? { ar: { name: formValues.nameAr, position: formValues.positionAr || "", bio: formValues.bioAr || "" } } : {}),
-      ...(formValues.nameKu ? { ckb: { name: formValues.nameKu, position: formValues.positionKu || "", bio: formValues.bioKu || "" } } : {}),
+      ...(formValues.nameKu ? { ku: { name: formValues.nameKu, position: formValues.positionKu || "", bio: formValues.bioKu || "" } } : {}),
     };
 
     const payload = {

@@ -25,7 +25,12 @@ export class CompanyInfoEntity {
   }
 
   public getTranslation(lang: string): { history: string; mission: string; vision: string } {
-    return this.translations[lang] ?? this.translations["en"] ?? { history: "", mission: "", vision: "" };
+    const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
+    return (
+      this.translations[lang] ??
+      this.translations[altLang] ??
+      this.translations["en"] ?? { history: "", mission: "", vision: "" }
+    );
   }
 }
 
@@ -60,7 +65,12 @@ export class CoreValueEntity {
   }
 
   public getTranslation(lang: string): { title: string; description: string } {
-    return this.translations[lang] ?? this.translations["en"] ?? { title: "", description: "" };
+    const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
+    return (
+      this.translations[lang] ??
+      this.translations[altLang] ??
+      this.translations["en"] ?? { title: "", description: "" }
+    );
   }
 }
 
@@ -95,7 +105,12 @@ export class TimelineEntity {
   }
 
   public getTranslation(lang: string): { title: string; description: string } {
-    return this.translations[lang] ?? this.translations["en"] ?? { title: "", description: "" };
+    const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
+    return (
+      this.translations[lang] ??
+      this.translations[altLang] ??
+      this.translations["en"] ?? { title: "", description: "" }
+    );
   }
 }
 
@@ -130,7 +145,12 @@ export class TeamMemberEntity {
   }
 
   public getTranslation(lang: string): { name: string; position: string; bio: string } {
-    return this.translations[lang] ?? this.translations["en"] ?? { name: "", position: "", bio: "" };
+    const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
+    return (
+      this.translations[lang] ??
+      this.translations[altLang] ??
+      this.translations["en"] ?? { name: "", position: "", bio: "" }
+    );
   }
 }
 
@@ -171,6 +191,11 @@ export class AboutCertificateEntity {
   }
 
   public getTranslation(lang: string): { title: string; description: string } {
-    return this.translations[lang] ?? this.translations["en"] ?? { title: "", description: "" };
+    const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
+    return (
+      this.translations[lang] ??
+      this.translations[altLang] ??
+      this.translations["en"] ?? { title: "", description: "" }
+    );
   }
 }

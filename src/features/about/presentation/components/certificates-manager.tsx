@@ -106,7 +106,7 @@ export function CertificatesManager() {
     const translations = {
       en: { title: formValues.titleEn, description: formValues.descriptionEn || "" },
       ...(formValues.titleAr ? { ar: { title: formValues.titleAr, description: formValues.descriptionAr || "" } } : {}),
-      ...(formValues.titleKu ? { ckb: { title: formValues.titleKu, description: formValues.descriptionKu || "" } } : {}),
+      ...(formValues.titleKu ? { ku: { title: formValues.titleKu, description: formValues.descriptionKu || "" } } : {}),
     };
 
     const payload = {
