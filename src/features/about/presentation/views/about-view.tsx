@@ -73,14 +73,6 @@ export function AboutView() {
             <History className="h-4 w-4 text-violet-600" />
             {t("tabs.timeline")}
           </TabsTrigger>
-          <TabsTrigger value="team" className="gap-2 py-2 px-3 text-xs">
-            <Users className="h-4 w-4 text-rose-600" />
-            {t("tabs.team")}
-          </TabsTrigger>
-          <TabsTrigger value="certificates" className="gap-2 py-2 px-3 text-xs">
-            <Award className="h-4 w-4 text-teal-600" />
-            {t("tabs.certificates")}
-          </TabsTrigger>
         </TabsList>
 
         {/* Tab Contents */}

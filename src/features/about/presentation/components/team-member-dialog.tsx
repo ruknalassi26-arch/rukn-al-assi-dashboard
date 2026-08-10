@@ -1,8 +1,7 @@
 "use client";
 // ==============================================================================
 // features/about/presentation/components/team-member-dialog.tsx
-// Dialog form for creating/editing a Team Member (team_members & team_member_translations)
-// Strictly matching DB Schema
+// Dialog form for creating/editing a Team Member with Multilingual Language Tabs
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -26,6 +25,7 @@ import {
   SelectValue,
 } from "@shared/ui";
 import { ImageUploader } from "@shared/upload/image-uploader";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import type { TeamMemberEntity } from "../../domain/entities/about.entity";
 
 const teamMemberSchema = z.object({
@@ -58,7 +58,7 @@ export function TeamMemberDialog({
   onClose,
   onSubmit,
   initialData,
-  isLoading = false,
+  isLoading,
 }: TeamMemberDialogProps) {
   const {
     register,
@@ -139,7 +139,7 @@ export function TeamMemberDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
+        <form onSubmit={handleSubmit((data) => onFormSubmit(data as TeamMemberFormValues))} className="space-y-4 py-2">
           {/* Photo Uploader */}
           <div className="space-y-1">
             <Label>Photo</Label>
@@ -150,57 +150,61 @@ export function TeamMemberDialog({
             />
           </div>
 
-          {/* Names */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="nameEn">Name (EN) *</Label>
-              <Input id="nameEn" {...register("nameEn")} placeholder="John Doe" />
-              {errors.nameEn && <span className="text-xs text-destructive">{errors.nameEn.message}</span>}
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="nameAr">Name (AR)</Label>
-              <Input id="nameAr" dir="rtl" {...register("nameAr")} placeholder="جون دو" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="nameKu">Name (KU)</Label>
-              <Input id="nameKu" dir="rtl" {...register("nameKu")} placeholder="جۆن دۆ" />
-            </div>
-          </div>
+          {/* Multilingual Tabs */}
+          <MultilingualTabs
+            englishFields={
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="nameEn">Name (EN) *</Label>
+                  <Input id="nameEn" {...register("nameEn")} placeholder="John Doe" />
+                  {errors.nameEn && <span className="text-xs text-destructive">{errors.nameEn.message}</span>}
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="positionEn">Position (EN)</Label>
+                  <Input id="positionEn" {...register("positionEn")} placeholder="Chief Executive Officer" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="bioEn">Bio (EN)</Label>
+                  <Textarea id="bioEn" rows={3} {...register("bioEn")} placeholder="Enter English biography..." />
+                </div>
+              </div>
+            }
+            arabicFields={
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="nameAr">Name (AR)</Label>
+                  <Input id="nameAr" dir="rtl" {...register("nameAr")} placeholder="جون دو" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="positionAr">Position (AR)</Label>
+                  <Input id="positionAr" dir="rtl" {...register("positionAr")} placeholder="الرئيس التنفيذي" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="bioAr">Bio (AR)</Label>
+                  <Textarea id="bioAr" rows={3} dir="rtl" {...register("bioAr")} placeholder="أدخل السيرة الذاتية بالعربية..." />
+                </div>
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="nameKu">Name (KU)</Label>
+                  <Input id="nameKu" dir="rtl" {...register("nameKu")} placeholder="جۆن دۆ" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="positionKu">Position (KU)</Label>
+                  <Input id="positionKu" dir="rtl" {...register("positionKu")} placeholder="بەڕێوەبەری جێبەجێکار" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="bioKu">Bio (KU)</Label>
+                  <Textarea id="bioKu" rows={3} dir="rtl" {...register("bioKu")} placeholder="بیۆگرافی بە زمانی کوردی بنووسە..." />
+                </div>
+              </div>
+            }
+          />
 
-          {/* Positions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="positionEn">Position (EN)</Label>
-              <Input id="positionEn" {...register("positionEn")} placeholder="Chief Executive Officer" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="positionAr">Position (AR)</Label>
-              <Input id="positionAr" dir="rtl" {...register("positionAr")} placeholder="الرئيس التنفيذي" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="positionKu">Position (KU)</Label>
-              <Input id="positionKu" dir="rtl" {...register("positionKu")} placeholder="بەڕێوەبەری جێبەجێکار" />
-            </div>
-          </div>
-
-          {/* Bios */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="bioEn">Bio (EN)</Label>
-              <Textarea id="bioEn" rows={3} {...register("bioEn")} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="bioAr">Bio (AR)</Label>
-              <Textarea id="bioAr" rows={3} dir="rtl" {...register("bioAr")} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="bioKu">Bio (KU)</Label>
-              <Textarea id="bioKu" rows={3} dir="rtl" {...register("bioKu")} />
-            </div>
-          </div>
-
-          {/* Meta */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Sort Order & Status */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t pt-4 mt-2">
             <div className="space-y-1">
               <Label htmlFor="sortOrder">Sort Order</Label>
               <Input

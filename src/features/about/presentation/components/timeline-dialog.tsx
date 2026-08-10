@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // features/about/presentation/components/timeline-dialog.tsx
-// Dialog form for creating/editing a Timeline Event (timeline_events & timeline_event_translations)
+// Dialog form for creating/editing a Timeline Event with Multilingual Language Tabs
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import type { TimelineEntity } from "../../domain/entities/about.entity";
 
 const timelineSchema = z.object({
@@ -53,7 +54,7 @@ export function TimelineDialog({
   onClose,
   onSubmit,
   initialData,
-  isLoading = false,
+  isLoading,
 }: TimelineDialogProps) {
   const {
     register,
@@ -124,14 +125,60 @@ export function TimelineDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
-          {/* Year & Meta */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <form onSubmit={handleSubmit((data) => onFormSubmit(data as TimelineFormValues))} className="space-y-4 py-2">
+          {/* Multilingual Tabs */}
+          <MultilingualTabs
+            englishFields={
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="titleEn">Title (EN) *</Label>
+                  <Input id="titleEn" {...register("titleEn")} placeholder="Milestone Launched" />
+                  {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="descriptionEn">Description (EN)</Label>
+                  <Textarea id="descriptionEn" rows={3} {...register("descriptionEn")} placeholder="Enter English description..." />
+                </div>
+              </div>
+            }
+            arabicFields={
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="titleAr">Title (AR)</Label>
+                  <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="إطلاق الإنجاز" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="descriptionAr">Description (AR)</Label>
+                  <Textarea id="descriptionAr" rows={3} dir="rtl" {...register("descriptionAr")} placeholder="أدخل الوصف باللغة العربية..." />
+                </div>
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="titleKu">Title (KU)</Label>
+                  <Input id="titleKu" dir="rtl" {...register("titleKu")} placeholder="دەستپێکردنی قۆناغ" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="descriptionKu">Description (KU)</Label>
+                  <Textarea id="descriptionKu" rows={3} dir="rtl" {...register("descriptionKu")} placeholder="وەسف بە زمانی کوردی بنووسە..." />
+                </div>
+              </div>
+            }
+          />
+
+          {/* Event Year, Sort Order & Status */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t pt-4 mt-2">
             <div className="space-y-1">
               <Label htmlFor="eventYear">Event Year *</Label>
-              <Input id="eventYear" {...register("eventYear")} placeholder="e.g. 2024" />
+              <Input
+                id="eventYear"
+                {...register("eventYear")}
+                placeholder="2024"
+              />
               {errors.eventYear && <span className="text-xs text-destructive">{errors.eventYear.message}</span>}
             </div>
+
             <div className="space-y-1">
               <Label htmlFor="sortOrder">Sort Order</Label>
               <Input
@@ -140,6 +187,7 @@ export function TimelineDialog({
                 {...register("sortOrder", { valueAsNumber: true })}
               />
             </div>
+
             <div className="space-y-1">
               <Label>Status</Label>
               <Select value={status} onValueChange={(val) => setValue("status", val as "published" | "draft" | "archived")}>
@@ -150,39 +198,6 @@ export function TimelineDialog({
                   <SelectItem value="archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-          </div>
-
-          {/* Titles */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="titleEn">Title (EN) *</Label>
-              <Input id="titleEn" {...register("titleEn")} placeholder="Milestone Launched" />
-              {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="titleAr">Title (AR)</Label>
-              <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="إطلاق الإنجاز" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="titleKu">Title (KU)</Label>
-              <Input id="titleKu" dir="rtl" {...register("titleKu")} placeholder="دەستپێکردنی قۆناغ" />
-            </div>
-          </div>
-
-          {/* Descriptions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="descriptionEn">Description (EN)</Label>
-              <Textarea id="descriptionEn" rows={3} {...register("descriptionEn")} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="descriptionAr">Description (AR)</Label>
-              <Textarea id="descriptionAr" rows={3} dir="rtl" {...register("descriptionAr")} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="descriptionKu">Description (KU)</Label>
-              <Textarea id="descriptionKu" rows={3} dir="rtl" {...register("descriptionKu")} />
             </div>
           </div>
 

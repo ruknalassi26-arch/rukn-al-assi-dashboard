@@ -1,8 +1,7 @@
 "use client";
 // ==============================================================================
 // features/about/presentation/components/certificate-dialog.tsx
-// Dialog form for creating/editing a Certificate (certifications & certification_translations)
-// Strictly matching DB Schema
+// Dialog form for creating/editing a Certificate with Multilingual Language Tabs
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -26,6 +25,7 @@ import {
   SelectValue,
 } from "@shared/ui";
 import { ImageUploader } from "@shared/upload/image-uploader";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import type { AboutCertificateEntity } from "../../domain/entities/about.entity";
 
 const certificateSchema = z.object({
@@ -57,7 +57,7 @@ export function CertificateDialog({
   onClose,
   onSubmit,
   initialData,
-  isLoading = false,
+  isLoading,
 }: CertificateDialogProps) {
   const {
     register,
@@ -135,7 +135,7 @@ export function CertificateDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
+        <form onSubmit={handleSubmit((data) => onFormSubmit(data as CertificateFormValues))} className="space-y-4 py-2">
           {/* Certificate Image Uploader */}
           <div className="space-y-1">
             <Label>Certificate Image</Label>
@@ -146,53 +146,57 @@ export function CertificateDialog({
             />
           </div>
 
-          {/* Titles */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="titleEn">Title (EN) *</Label>
-              <Input id="titleEn" {...register("titleEn")} placeholder="ISO 9001:2015 Certification" />
-              {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="titleAr">Title (AR)</Label>
-              <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="شهادة الآيزو 9001" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="titleKu">Title (KU)</Label>
-              <Input id="titleKu" dir="rtl" {...register("titleKu")} placeholder="بڕوانامەی ئایزۆ ٩٠٠١" />
-            </div>
-          </div>
+          {/* Multilingual Tabs */}
+          <MultilingualTabs
+            englishFields={
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="titleEn">Certificate Title (EN) *</Label>
+                  <Input id="titleEn" {...register("titleEn")} placeholder="ISO 9001:2015 Quality Management" />
+                  {errors.titleEn && <span className="text-xs text-destructive">{errors.titleEn.message}</span>}
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="descriptionEn">Description (EN)</Label>
+                  <Textarea id="descriptionEn" rows={3} {...register("descriptionEn")} placeholder="Enter English description..." />
+                </div>
+              </div>
+            }
+            arabicFields={
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="titleAr">Certificate Title (AR)</Label>
+                  <Input id="titleAr" dir="rtl" {...register("titleAr")} placeholder="شهادة إدارة الجودة إيزو ٩٠٠١" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="descriptionAr">Description (AR)</Label>
+                  <Textarea id="descriptionAr" rows={3} dir="rtl" {...register("descriptionAr")} placeholder="أدخل الوصف باللغة العربية..." />
+                </div>
+              </div>
+            }
+            kurdishFields={
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="titleKu">Certificate Title (KU)</Label>
+                  <Input id="titleKu" dir="rtl" {...register("titleKu")} placeholder="بڕوانامەی ئایزۆ ٩٠٠١" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="descriptionKu">Description (KU)</Label>
+                  <Textarea id="descriptionKu" rows={3} dir="rtl" {...register("descriptionKu")} placeholder="وەسف بە زمانی کوردی بنووسە..." />
+                </div>
+              </div>
+            }
+          />
 
-          {/* Issued By & Issued Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Issued By, Issued Date, Sort Order & Status */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t pt-4 mt-2">
             <div className="space-y-1">
               <Label htmlFor="issuedBy">Issued By</Label>
-              <Input id="issuedBy" {...register("issuedBy")} placeholder="International Organization for Standardization" />
+              <Input id="issuedBy" {...register("issuedBy")} placeholder="International ISO Organization" />
             </div>
             <div className="space-y-1">
               <Label htmlFor="issuedDate">Issued Date</Label>
               <Input id="issuedDate" type="date" {...register("issuedDate")} />
             </div>
-          </div>
-
-          {/* Descriptions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="descriptionEn">Description (EN)</Label>
-              <Textarea id="descriptionEn" rows={3} {...register("descriptionEn")} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="descriptionAr">Description (AR)</Label>
-              <Textarea id="descriptionAr" rows={3} dir="rtl" {...register("descriptionAr")} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="descriptionKu">Description (KU)</Label>
-              <Textarea id="descriptionKu" rows={3} dir="rtl" {...register("descriptionKu")} />
-            </div>
-          </div>
-
-          {/* Meta */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor="sortOrder">Sort Order</Label>
               <Input
