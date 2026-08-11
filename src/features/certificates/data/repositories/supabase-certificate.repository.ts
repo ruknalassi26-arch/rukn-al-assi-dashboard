@@ -14,6 +14,18 @@ import type {
 import { CertificateEntity } from "../../domain/entities/certificate.entity";
 import type { CertificateStatus } from "../../domain/entities/certificate.entity";
 
+function cleanDateStr(d?: string | null): string {
+  if (!d || typeof d !== "string" || d.trim() === "") return "";
+  return d.split("T")[0];
+}
+
+function parseDatePayload(d?: string | null): string | null {
+  if (!d || typeof d !== "string" || d.trim() === "") return null;
+  const match = d.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) return match[1];
+  return d.trim();
+}
+
 export class SupabaseCertificateRepository implements ICertificateRepository {
   private get supabase() {
     return createClient();
@@ -69,7 +81,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
           descriptionAr: ar.description || "",
           descriptionKu: ku.description || "",
           image: item.image_url || "",
-          issueDate: item.issued_date || "",
+          issueDate: cleanDateStr(item.issued_date),
           expiryDate: "",
           organization: item.issued_by || "",
           organizationAr: "",
@@ -113,7 +125,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
         descriptionAr: ar.description || "",
         descriptionKu: ku.description || "",
         image: data.image_url || "",
-        issueDate: data.issued_date || "",
+        issueDate: cleanDateStr(data.issued_date),
         expiryDate: "",
         organization: data.issued_by || "",
         organizationAr: "",
@@ -133,9 +145,9 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
       .insert({
         image_url: input.image ?? null,
         issued_by: input.organization ?? null,
-        issued_date: input.issueDate ?? null,
+        issued_date: parseDatePayload(input.issueDate),
         sort_order: input.sortOrder ?? 0,
-        status: input.status === "active" ? "published" : "draft",
+        status: (input.status as string) === "active" || input.status === "published" ? "published" : "draft",
       })
       .select("*")
       .single();
@@ -153,15 +165,20 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
   }
 
   async updateCertificate(input: UpdateCertificateInput): Promise<CertificateEntity> {
-    await (this.supabase.from("certifications" as any) as any)
-      .update({
-        image_url: input.image,
-        issued_by: input.organization,
-        issued_date: input.issueDate ?? null,
-        sort_order: input.sortOrder,
-        status: input.status === "active" ? "published" : "draft",
-      })
+    const updatePayload: Record<string, any> = {};
+    if (input.image !== undefined) updatePayload.image_url = input.image;
+    if (input.organization !== undefined) updatePayload.issued_by = input.organization;
+    if (input.issueDate !== undefined) updatePayload.issued_date = parseDatePayload(input.issueDate);
+    if (input.sortOrder !== undefined) updatePayload.sort_order = input.sortOrder;
+    if (input.status !== undefined) {
+      updatePayload.status = (input.status as string) === "active" || input.status === "published" ? "published" : "draft";
+    }
+
+    const { error: updateErr } = await (this.supabase.from("certifications" as any) as any)
+      .update(updatePayload)
       .eq("id", input.id);
+
+    if (updateErr) throw new Error(updateErr.message || "Failed to update certificate");
 
     if (input.titleEn !== undefined || input.descriptionEn !== undefined) {
       await (this.supabase.from("certification_translations" as any) as any).upsert({
@@ -223,7 +240,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
   async bulkUpdateCertificateStatus(ids: string[], status: CertificateStatus): Promise<void> {
     if (ids.length === 0) return;
     await (this.supabase.from("certifications" as any) as any)
-      .update({ status: status === "active" ? "published" : "draft" })
+      .update({ status: (status as string) === "active" || status === "published" ? "published" : "draft" })
       .in("id", ids);
     await this.logActivity("updated", null, `Bulk updated status to ${status}`, { ids, status });
   }

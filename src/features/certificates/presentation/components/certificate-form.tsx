@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,7 +41,7 @@ const certificateSchema = z.object({
   image: z.string().optional().nullable(),
   issueDate: z.string().optional().nullable(),
   expiryDate: z.string().optional().nullable(),
-  status: z.enum(["active", "draft"]),
+  status: z.enum(["active", "published", "draft", "archived"]),
   sortOrder: z.number().min(0),
 });
 
@@ -48,6 +49,19 @@ export type CertificateFormValues = z.infer<typeof certificateSchema>;
 
 interface CertificateFormProps {
   initialData?: CertificateEntity | null;
+}
+
+function formatDateForInput(dateStr?: string | null): string {
+  if (!dateStr || dateStr.trim() === "") return "";
+  const match = dateStr.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) return match[1];
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      return d.toISOString().split("T")[0];
+    }
+  } catch {}
+  return "";
 }
 
 export function CertificateForm({ initialData }: CertificateFormProps) {
@@ -73,24 +87,51 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
       organizationAr: initialData?.organizationAr ?? "",
       organizationKu: initialData?.organizationKu ?? "",
       image: initialData?.image ?? "",
-      issueDate: initialData?.issueDate ?? "",
-      expiryDate: initialData?.expiryDate ?? "",
-      status: initialData?.status ?? "active",
+      issueDate: formatDateForInput(initialData?.issueDate),
+      expiryDate: formatDateForInput(initialData?.expiryDate),
+      status: (initialData?.status as any) ?? "active",
       sortOrder: initialData?.sortOrder ?? 0,
     },
   });
 
-  const { watch, setValue, register, handleSubmit, formState: { errors } } = form;
+  const { watch, setValue, register, handleSubmit, reset, formState: { errors } } = form;
+
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        titleEn: initialData.titleEn ?? "",
+        titleAr: initialData.titleAr ?? "",
+        titleKu: initialData.titleKu ?? "",
+        descriptionEn: initialData.descriptionEn ?? "",
+        descriptionAr: initialData.descriptionAr ?? "",
+        descriptionKu: initialData.descriptionKu ?? "",
+        organization: initialData.organization ?? "",
+        organizationAr: initialData.organizationAr ?? "",
+        organizationKu: initialData.organizationKu ?? "",
+        image: initialData.image ?? "",
+        issueDate: formatDateForInput(initialData.issueDate),
+        expiryDate: formatDateForInput(initialData.expiryDate),
+        status: (initialData.status as any) ?? "active",
+        sortOrder: initialData.sortOrder ?? 0,
+      });
+    }
+  }, [initialData, reset]);
 
   const onSubmit = async (values: CertificateFormValues) => {
     try {
+      const payload = {
+        ...values,
+        issueDate: values.issueDate && values.issueDate.trim() !== "" ? values.issueDate.trim() : null,
+        expiryDate: values.expiryDate && values.expiryDate.trim() !== "" ? values.expiryDate.trim() : null,
+      };
+
       if (isEditing && initialData) {
         await updateCertificateMutation.mutateAsync({
           id: initialData.id,
-          ...values,
+          ...payload,
         });
       } else {
-        await createCertificateMutation.mutateAsync(values);
+        await createCertificateMutation.mutateAsync(payload);
       }
       router.push("/admin/certificates");
     } catch {
@@ -265,13 +306,14 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
                 <Label htmlFor="status">{tForm("status")}</Label>
                 <Select
                   value={watch("status")}
-                  onValueChange={(val) => setValue("status", val as "active" | "draft")}
+                  onValueChange={(val) => setValue("status", val as any)}
                 >
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">{tCommon("active")}</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
                     <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                   </SelectContent>
                 </Select>
