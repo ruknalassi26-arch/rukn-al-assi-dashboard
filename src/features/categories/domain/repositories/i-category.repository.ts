@@ -45,4 +45,6 @@ export interface ICategoryRepository {
   createCategory(input: CreateCategoryInput): Promise<CategoryEntity>;
   updateCategory(input: UpdateCategoryInput): Promise<CategoryEntity>;
   deleteCategory(id: string): Promise<void>;
+  duplicateCategory(id: string): Promise<CategoryEntity>;
+  checkSlugUnique(slug: string, excludeId?: string): Promise<boolean>;
 }

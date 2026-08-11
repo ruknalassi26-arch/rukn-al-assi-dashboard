@@ -13,6 +13,7 @@ import {
   CreateCategoryUseCase,
   UpdateCategoryUseCase,
   DeleteCategoryUseCase,
+  DuplicateCategoryUseCase,
 } from "@features/categories/domain/usecases";
 import type {
   CategoryFilterParams,
@@ -26,6 +27,7 @@ const getCategoryByIdUseCase = new GetCategoryByIdUseCase(repository);
 const createCategoryUseCase = new CreateCategoryUseCase(repository);
 const updateCategoryUseCase = new UpdateCategoryUseCase(repository);
 const deleteCategoryUseCase = new DeleteCategoryUseCase(repository);
+const duplicateCategoryUseCase = new DuplicateCategoryUseCase(repository);
 
 export function useCategories(params?: CategoryFilterParams) {
   return useQuery({
@@ -84,6 +86,27 @@ export function useDeleteCategory() {
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to delete category");
+    },
+  });
+}
+
+export function useDuplicateCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => duplicateCategoryUseCase.execute(id),
+    onMutate: () => {
+      const toastId = toast.loading("Duplicating category...");
+      return { toastId };
+    },
+    onSuccess: (duplicated, _variables, context) => {
+      if (context?.toastId) toast.dismiss(context.toastId);
+      queryClient.invalidateQueries({ queryKey: queryKeys.categories.all });
+      queryClient.invalidateQueries({ queryKey: ["product-categories"] });
+      toast.success(`Duplicated category "${duplicated.nameEn}" successfully`);
+    },
+    onError: (error: Error, _variables, context) => {
+      if (context?.toastId) toast.dismiss(context.toastId);
+      toast.error(error.message || "Failed to duplicate category");
     },
   });
 }

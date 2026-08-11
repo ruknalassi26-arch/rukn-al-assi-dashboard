@@ -234,4 +234,38 @@ export class SupabaseCategoryRepository implements ICategoryRepository {
 
     await this.logActivity("deleted", id, existing?.nameEn ?? "Category");
   }
+
+  async checkSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
+    let query = (this.supabase.from("product_category_translations" as any) as any)
+      .select("product_category_id")
+      .eq("slug", slug);
+
+    if (excludeId) {
+      query = query.neq("product_category_id", excludeId);
+    }
+
+    const { data } = await query;
+    return !data || data.length === 0;
+  }
+
+  async duplicateCategory(id: string): Promise<CategoryEntity> {
+    const existing = await this.getCategoryById(id);
+    if (!existing) throw new Error("Category not found");
+
+    const newTranslations: Record<string, any> = {};
+    for (const [lang, val] of Object.entries(existing.translations)) {
+      newTranslations[lang] = {
+        ...val,
+        slug: `${val.slug}-copy-${Date.now()}`,
+        name: `Copy of ${val.name}`,
+      };
+    }
+
+    return this.createCategory({
+      imageUrl: existing.imageUrl,
+      status: "draft",
+      sortOrder: existing.sortOrder,
+      translations: newTranslations,
+    });
+  }
 }

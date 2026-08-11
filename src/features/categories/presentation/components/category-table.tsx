@@ -17,6 +17,8 @@ import {
   MoreVertical,
   ArrowUpDown,
   Tag,
+  Copy,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -52,6 +54,7 @@ import { useCategoryStore } from "../stores/category.store";
 import {
   useCategories,
   useDeleteCategory,
+  useDuplicateCategory,
 } from "@shared/hooks/categories/use-category-hooks";
 import type { CategoryEntity } from "../../domain/entities/category.entity";
 
@@ -84,6 +87,7 @@ export function CategoryTable() {
   });
 
   const deleteCategoryMutation = useDeleteCategory();
+  const duplicateCategoryMutation = useDuplicateCategory();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const categories = data?.items ?? [];
@@ -300,6 +304,21 @@ export function CategoryTable() {
                               <Link href={`/admin/categories/edit/${cat.id}`}>
                                 <Edit className="mr-2 h-4 w-4 text-emerald-500" /> Edit
                               </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => duplicateCategoryMutation.mutate(cat.id)}
+                              disabled={duplicateCategoryMutation.isPending && duplicateCategoryMutation.variables === cat.id}
+                              className="gap-2"
+                            >
+                              {duplicateCategoryMutation.isPending && duplicateCategoryMutation.variables === cat.id ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin text-primary" /> Duplicating...
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="h-4 w-4 text-slate-500" /> Duplicate
+                                </>
+                              )}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem

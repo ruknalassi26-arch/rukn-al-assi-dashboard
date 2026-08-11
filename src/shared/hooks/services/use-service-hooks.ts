@@ -4,7 +4,7 @@
 // TanStack Query Hooks for Services Feature
 // ==============================================================================
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@core/utils/toast";
+import { toast } from "sonner";
 import { queryKeys } from "@core/constants/query-keys";
 import { SupabaseServiceRepository } from "@features/services/data/repositories/supabase-service.repository";
 import {
@@ -13,6 +13,7 @@ import {
   CreateServiceUseCase,
   UpdateServiceUseCase,
   DeleteServiceUseCase,
+  DuplicateServiceUseCase,
   ToggleFeatureServiceUseCase,
   BulkDeleteServicesUseCase,
   BulkUpdateServiceStatusUseCase,
@@ -30,6 +31,7 @@ const getServiceByIdUseCase = new GetServiceByIdUseCase(repository);
 const createServiceUseCase = new CreateServiceUseCase(repository);
 const updateServiceUseCase = new UpdateServiceUseCase(repository);
 const deleteServiceUseCase = new DeleteServiceUseCase(repository);
+const duplicateServiceUseCase = new DuplicateServiceUseCase(repository);
 const toggleFeatureServiceUseCase = new ToggleFeatureServiceUseCase(repository);
 const bulkDeleteServicesUseCase = new BulkDeleteServicesUseCase(repository);
 const bulkUpdateServiceStatusUseCase = new BulkUpdateServiceStatusUseCase(repository);
@@ -92,6 +94,26 @@ export function useDeleteService() {
   });
 }
 
+export function useDuplicateService() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => duplicateServiceUseCase.execute(id),
+    onMutate: () => {
+      const toastId = toast.loading("Duplicating service...");
+      return { toastId };
+    },
+    onSuccess: (duplicated, _variables, context) => {
+      if (context?.toastId) toast.dismiss(context.toastId);
+      queryClient.invalidateQueries({ queryKey: queryKeys.services.all });
+      toast.success(`Duplicated service "${duplicated.nameEn}" successfully`);
+    },
+    onError: (error: Error, _variables, context) => {
+      if (context?.toastId) toast.dismiss(context.toastId);
+      toast.error(error.message || "Failed to duplicate service");
+    },
+  });
+}
+
 export function useToggleFeatureService() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -101,8 +123,8 @@ export function useToggleFeatureService() {
       queryClient.invalidateQueries({ queryKey: queryKeys.services.all });
       toast.success(
         updated.isFeatured
-          ? `Service "${updated.titleEn}" marked as Featured`
-          : `Service "${updated.titleEn}" unfeatured`
+          ? `Service "${updated.nameEn}" marked as Featured`
+          : `Service "${updated.nameEn}" unfeatured`
       );
     },
     onError: (error: Error) => {

@@ -18,6 +18,8 @@ import {
   MoreVertical,
   ArrowUpDown,
   Download,
+  Copy,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -54,6 +56,7 @@ import { useServiceStore } from "../stores/service.store";
 import {
   useServices,
   useDeleteService,
+  useDuplicateService,
   useToggleFeatureService,
   useBulkDeleteServices,
   useBulkUpdateServiceStatus,
@@ -98,6 +101,7 @@ export function ServiceTable() {
   });
 
   const deleteServiceMutation = useDeleteService();
+  const duplicateServiceMutation = useDuplicateService();
   const toggleFeatureMutation = useToggleFeatureService();
   const bulkDeleteMutation = useBulkDeleteServices();
   const bulkUpdateStatusMutation = useBulkUpdateServiceStatus();
@@ -428,6 +432,21 @@ export function ServiceTable() {
                                 <Link href={`/admin/services/edit/${service.id}`}>
                                   <Edit className="mr-2 h-4 w-4 text-emerald-500" /> Edit
                                 </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => duplicateServiceMutation.mutate(service.id)}
+                                disabled={duplicateServiceMutation.isPending && duplicateServiceMutation.variables === service.id}
+                                className="gap-2"
+                              >
+                                {duplicateServiceMutation.isPending && duplicateServiceMutation.variables === service.id ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin text-primary" /> Duplicating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="h-4 w-4 text-slate-500" /> Duplicate
+                                  </>
+                                )}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem

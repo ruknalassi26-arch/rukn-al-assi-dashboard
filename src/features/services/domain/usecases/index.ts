@@ -6,5 +6,6 @@ export * from "./get-service-by-id.usecase";
 export * from "./create-service.usecase";
 export * from "./update-service.usecase";
 export * from "./delete-service.usecase";
+export * from "./duplicate-service.usecase";
 export * from "./toggle-feature-service.usecase";
 export * from "./bulk-operations.usecase";
