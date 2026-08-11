@@ -26,11 +26,9 @@ export class CompanyInfoEntity {
 
   public getTranslation(lang: string): { history: string; mission: string; vision: string } {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    return (
-      this.translations[lang] ??
-      this.translations[altLang] ??
-      this.translations["en"] ?? { history: "", mission: "", vision: "" }
-    );
+    if (this.translations[lang]) return this.translations[lang];
+    if (this.translations[altLang]) return this.translations[altLang];
+    return { history: "", mission: "", vision: "" };
   }
 }
 
@@ -66,11 +64,9 @@ export class CoreValueEntity {
 
   public getTranslation(lang: string): { title: string; description: string } {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    return (
-      this.translations[lang] ??
-      this.translations[altLang] ??
-      this.translations["en"] ?? { title: "", description: "" }
-    );
+    if (this.translations[lang]) return this.translations[lang];
+    if (this.translations[altLang]) return this.translations[altLang];
+    return { title: "", description: "" };
   }
 }
 
@@ -106,11 +102,9 @@ export class TimelineEntity {
 
   public getTranslation(lang: string): { title: string; description: string } {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    return (
-      this.translations[lang] ??
-      this.translations[altLang] ??
-      this.translations["en"] ?? { title: "", description: "" }
-    );
+    if (this.translations[lang]) return this.translations[lang];
+    if (this.translations[altLang]) return this.translations[altLang];
+    return { title: "", description: "" };
   }
 }
 
@@ -146,11 +140,9 @@ export class TeamMemberEntity {
 
   public getTranslation(lang: string): { name: string; position: string; bio: string } {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    return (
-      this.translations[lang] ??
-      this.translations[altLang] ??
-      this.translations["en"] ?? { name: "", position: "", bio: "" }
-    );
+    if (this.translations[lang]) return this.translations[lang];
+    if (this.translations[altLang]) return this.translations[altLang];
+    return { name: "", position: "", bio: "" };
   }
 }
 
@@ -192,10 +184,8 @@ export class AboutCertificateEntity {
 
   public getTranslation(lang: string): { title: string; description: string } {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    return (
-      this.translations[lang] ??
-      this.translations[altLang] ??
-      this.translations["en"] ?? { title: "", description: "" }
-    );
+    if (this.translations[lang]) return this.translations[lang];
+    if (this.translations[altLang]) return this.translations[altLang];
+    return { title: "", description: "" };
   }
 }

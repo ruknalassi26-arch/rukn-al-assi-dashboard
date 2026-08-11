@@ -42,40 +42,51 @@ export class CategoryEntity {
 
   public getTranslation(lang: string): CategoryTranslationProps {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    return (
-      this.translations[lang] ??
-      this.translations[altLang] ??
-      this.translations["en"] ?? { slug: "", name: "", description: "" }
-    );
+    if (this.translations[lang]) {
+      return this.translations[lang];
+    }
+    if (this.translations[altLang]) {
+      return this.translations[altLang];
+    }
+    return { slug: "", name: "", description: "" };
   }
 
   // Getters for backwards compatibility across existing UI components
   public get nameEn(): string {
-    return this.getTranslation("en").name || this.getTranslation("ar").name || "";
+    return this.getTranslation("en").name || "";
   }
 
   public get nameAr(): string {
-    return this.getTranslation("ar").name || this.nameEn;
+    return this.getTranslation("ar").name || "";
   }
 
   public get nameKu(): string | null {
-    return this.getTranslation("ku").name || null;
+    const kuName = this.getTranslation("ku").name;
+    return kuName && kuName.trim() !== "" ? kuName : null;
   }
 
   public get slug(): string {
-    return this.getTranslation("en").slug || this.getTranslation("ar").slug || "";
+    return (
+      this.getTranslation("en").slug ||
+      this.getTranslation("ar").slug ||
+      this.getTranslation("ku").slug ||
+      ""
+    );
   }
 
   public get descriptionEn(): string | null {
-    return this.getTranslation("en").description || null;
+    const desc = this.getTranslation("en").description;
+    return desc && desc.trim() !== "" ? desc : null;
   }
 
   public get descriptionAr(): string | null {
-    return this.getTranslation("ar").description || null;
+    const desc = this.getTranslation("ar").description;
+    return desc && desc.trim() !== "" ? desc : null;
   }
 
   public get descriptionKu(): string | null {
-    return this.getTranslation("ku").description || null;
+    const desc = this.getTranslation("ku").description;
+    return desc && desc.trim() !== "" ? desc : null;
   }
 
   // Legacy compatibility getters
