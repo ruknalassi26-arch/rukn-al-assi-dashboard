@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // features/services/presentation/components/service-details-drawer.tsx
-// Service Preview & Details Sheet Component
+// Service Preview & Details Sheet Component matching DB schema
 // ==============================================================================
 import React from "react";
 import Image from "next/image";
@@ -57,11 +57,11 @@ export function ServiceDetailsDrawer() {
         ) : service ? (
           <div className="space-y-6 py-2">
             {/* Header Image or Icon */}
-            {service.image ? (
+            {service.heroImageUrl ? (
               <div className="relative h-48 w-full overflow-hidden rounded-lg border bg-muted">
                 <Image
-                  src={service.image}
-                  alt={service.titleEn}
+                  src={service.heroImageUrl}
+                  alt={service.nameEn}
                   fill
                   className="object-cover"
                 />
@@ -75,24 +75,26 @@ export function ServiceDetailsDrawer() {
             {/* Titles */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold">{service.titleEn}</h3>
+                <h3 className="text-xl font-bold">{service.nameEn}</h3>
                 <div className="flex items-center gap-2">
                   {service.isFeatured && (
                     <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-600 gap-1">
                       <Star className="h-3 w-3 fill-amber-500" /> Featured
                     </Badge>
                   )}
-                  <Badge variant={service.isActive ? "default" : "secondary"}>
+                  <Badge variant={service.status === "published" ? "default" : "secondary"}>
                     {service.status}
                   </Badge>
                 </div>
               </div>
-              <p className="text-base font-semibold text-muted-foreground" dir="rtl">
-                {service.titleAr}
-              </p>
-              {service.titleKu && (
-                <p className="text-sm font-medium text-muted-foreground" dir="rtl">
-                  ☀️ {service.titleKu}
+              {service.nameAr && (
+                <p className="text-base font-semibold text-muted-foreground font-arabic" dir="rtl">
+                  {service.nameAr}
+                </p>
+              )}
+              {service.nameKu && (
+                <p className="text-sm font-medium text-muted-foreground font-arabic" dir="rtl">
+                  ☀️ {service.nameKu}
                 </p>
               )}
             </div>
@@ -120,30 +122,44 @@ export function ServiceDetailsDrawer() {
 
             <Separator />
 
-            {/* Descriptions */}
+            {/* Descriptions & Applications */}
             <div className="space-y-4">
-              {service.shortDescriptionEn && (
-                <div className="space-y-1">
-                  <h4 className="text-xs font-semibold uppercase text-muted-foreground">Short Summary (English)</h4>
-                  <p className="text-sm italic text-muted-foreground">{service.shortDescriptionEn}</p>
-                </div>
-              )}
               {service.descriptionEn && (
                 <div className="space-y-1">
-                  <h4 className="text-xs font-semibold uppercase text-muted-foreground">Full Description (English)</h4>
+                  <h4 className="text-xs font-semibold uppercase text-muted-foreground">Description (EN)</h4>
                   <p className="text-sm text-foreground/90 whitespace-pre-wrap">{service.descriptionEn}</p>
                 </div>
               )}
-              {service.descriptionAr && (
-                <div className="space-y-1" dir="rtl">
-                  <h4 className="text-xs font-semibold uppercase text-muted-foreground">الوصف الكامل (بالعربية)</h4>
-                  <p className="text-sm text-foreground/90 whitespace-pre-wrap">{service.descriptionAr}</p>
+              {service.applicationsEn && (
+                <div className="space-y-1">
+                  <h4 className="text-xs font-semibold uppercase text-muted-foreground">Applications (EN)</h4>
+                  <p className="text-sm text-foreground/90 whitespace-pre-wrap">{service.applicationsEn}</p>
                 </div>
               )}
+
+              {service.descriptionAr && (
+                <div className="space-y-1" dir="rtl">
+                  <h4 className="text-xs font-semibold uppercase text-muted-foreground font-arabic">الوصف (عربي)</h4>
+                  <p className="text-sm text-foreground/90 whitespace-pre-wrap font-arabic">{service.descriptionAr}</p>
+                </div>
+              )}
+              {service.applicationsAr && (
+                <div className="space-y-1" dir="rtl">
+                  <h4 className="text-xs font-semibold uppercase text-muted-foreground font-arabic">التطبيقات الاستخدامية (عربي)</h4>
+                  <p className="text-sm text-foreground/90 whitespace-pre-wrap font-arabic">{service.applicationsAr}</p>
+                </div>
+              )}
+
               {service.descriptionKu && (
                 <div className="space-y-1" dir="rtl">
-                  <h4 className="text-xs font-semibold uppercase text-muted-foreground">Pênaseya bi Kurdî</h4>
-                  <p className="text-sm text-foreground/90 whitespace-pre-wrap">{service.descriptionKu}</p>
+                  <h4 className="text-xs font-semibold uppercase text-muted-foreground font-arabic">پێناسە (کوردی)</h4>
+                  <p className="text-sm text-foreground/90 whitespace-pre-wrap font-arabic">{service.descriptionKu}</p>
+                </div>
+              )}
+              {service.applicationsKu && (
+                <div className="space-y-1" dir="rtl">
+                  <h4 className="text-xs font-semibold uppercase text-muted-foreground font-arabic">بەکارهێنانەکان (کوردی)</h4>
+                  <p className="text-sm text-foreground/90 whitespace-pre-wrap font-arabic">{service.applicationsKu}</p>
                 </div>
               )}
             </div>

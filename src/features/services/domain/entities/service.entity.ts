@@ -1,94 +1,123 @@
 // ==============================================================================
 // features/services/domain/entities/service.entity.ts
-// Service Domain Entity Class following Clean Architecture
+// Service Domain Entity Class strictly matching Supabase DB Schema
 // ==============================================================================
 
-export type ServiceStatus = "active" | "draft";
+export type ServiceStatus = "published" | "draft" | "archived";
+
+export interface ServiceTranslationProps {
+  slug: string;
+  name: string;
+  description?: string | null;
+  applications?: string | null;
+}
 
 export interface ServiceProps {
   id: string;
-  slug: string;
-  titleEn: string;
-  titleAr: string;
-  titleKu?: string | null;
-  shortDescriptionEn?: string | null;
-  shortDescriptionAr?: string | null;
-  shortDescriptionKu?: string | null;
-  descriptionEn: string | null;
-  descriptionAr: string | null;
-  descriptionKu?: string | null;
   icon?: string | null;
-  image?: string | null;
-  seoTitleEn?: string | null;
-  seoTitleAr?: string | null;
-  seoTitleKu?: string | null;
-  seoDescriptionEn?: string | null;
-  seoDescriptionAr?: string | null;
-  seoDescriptionKu?: string | null;
-  seoImage?: string | null;
-  isFeatured: boolean;
-  sortOrder: number;
+  heroImageUrl?: string | null;
   status: ServiceStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  isFeatured: boolean;
+  featuredOrder?: number;
+  sortOrder: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  translations: Record<string, ServiceTranslationProps>;
 }
 
 export class ServiceEntity {
   public readonly id: string;
-  public readonly slug: string;
-  public readonly titleEn: string;
-  public readonly titleAr: string;
-  public readonly titleKu: string | null;
-  public readonly shortDescriptionEn: string | null;
-  public readonly shortDescriptionAr: string | null;
-  public readonly shortDescriptionKu: string | null;
-  public readonly descriptionEn: string | null;
-  public readonly descriptionAr: string | null;
-  public readonly descriptionKu: string | null;
   public readonly icon: string | null;
-  public readonly image: string | null;
-  public readonly seoTitleEn: string | null;
-  public readonly seoTitleAr: string | null;
-  public readonly seoTitleKu: string | null;
-  public readonly seoDescriptionEn: string | null;
-  public readonly seoDescriptionAr: string | null;
-  public readonly seoDescriptionKu: string | null;
-  public readonly seoImage: string | null;
-  public readonly isFeatured: boolean;
-  public readonly sortOrder: number;
+  public readonly heroImageUrl: string | null;
   public readonly status: ServiceStatus;
+  public readonly isFeatured: boolean;
+  public readonly featuredOrder: number;
+  public readonly sortOrder: number;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
+  public readonly translations: Record<string, ServiceTranslationProps>;
 
   constructor(props: ServiceProps) {
     this.id = props.id;
-    this.slug = props.slug;
-    this.titleEn = props.titleEn;
-    this.titleAr = props.titleAr;
-    this.titleKu = props.titleKu ?? null;
-    this.shortDescriptionEn = props.shortDescriptionEn ?? null;
-    this.shortDescriptionAr = props.shortDescriptionAr ?? null;
-    this.shortDescriptionKu = props.shortDescriptionKu ?? null;
-    this.descriptionEn = props.descriptionEn;
-    this.descriptionAr = props.descriptionAr;
-    this.descriptionKu = props.descriptionKu ?? null;
     this.icon = props.icon ?? null;
-    this.image = props.image ?? null;
-    this.seoTitleEn = props.seoTitleEn ?? null;
-    this.seoTitleAr = props.seoTitleAr ?? null;
-    this.seoTitleKu = props.seoTitleKu ?? null;
-    this.seoDescriptionEn = props.seoDescriptionEn ?? null;
-    this.seoDescriptionAr = props.seoDescriptionAr ?? null;
-    this.seoDescriptionKu = props.seoDescriptionKu ?? null;
-    this.seoImage = props.seoImage ?? null;
-    this.isFeatured = props.isFeatured;
-    this.sortOrder = props.sortOrder;
-    this.status = props.status;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+    this.heroImageUrl = props.heroImageUrl ?? null;
+    this.status = props.status ?? "published";
+    this.isFeatured = props.isFeatured ?? false;
+    this.featuredOrder = props.featuredOrder ?? 0;
+    this.sortOrder = props.sortOrder ?? 0;
+    this.createdAt = props.createdAt ?? new Date();
+    this.updatedAt = props.updatedAt ?? new Date();
+    this.translations = props.translations ?? {};
+  }
+
+  public getTranslation(lang: string): ServiceTranslationProps | null {
+    const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
+    return this.translations[lang] ?? this.translations[altLang] ?? null;
+  }
+
+  // Getters for backwards compatibility across existing UI components
+  public get nameEn(): string {
+    return this.getTranslation("en")?.name ?? "";
+  }
+
+  public get nameAr(): string {
+    return this.getTranslation("ar")?.name ?? "";
+  }
+
+  public get nameKu(): string | null {
+    return this.getTranslation("ku")?.name ?? null;
+  }
+
+  public get titleEn(): string {
+    return this.nameEn;
+  }
+
+  public get titleAr(): string {
+    return this.nameAr;
+  }
+
+  public get titleKu(): string | null {
+    return this.nameKu;
+  }
+
+  public get slug(): string {
+    return (
+      this.getTranslation("en")?.slug ??
+      this.getTranslation("ar")?.slug ??
+      this.getTranslation("ku")?.slug ??
+      ""
+    );
+  }
+
+  public get descriptionEn(): string | null {
+    return this.getTranslation("en")?.description ?? null;
+  }
+
+  public get descriptionAr(): string | null {
+    return this.getTranslation("ar")?.description ?? null;
+  }
+
+  public get descriptionKu(): string | null {
+    return this.getTranslation("ku")?.description ?? null;
+  }
+
+  public get applicationsEn(): string | null {
+    return this.getTranslation("en")?.applications ?? null;
+  }
+
+  public get applicationsAr(): string | null {
+    return this.getTranslation("ar")?.applications ?? null;
+  }
+
+  public get applicationsKu(): string | null {
+    return this.getTranslation("ku")?.applications ?? null;
+  }
+
+  public get image(): string | null {
+    return this.heroImageUrl;
   }
 
   public get isActive(): boolean {
-    return this.status === "active";
+    return this.status === "published";
   }
 }

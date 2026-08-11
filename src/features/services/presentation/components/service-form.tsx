@@ -1,8 +1,5 @@
 "use client";
-// ==============================================================================
-// features/services/presentation/components/service-form.tsx
-// Service Creation / Editing Form with RHF + Zod + MultilingualTabs
-// ==============================================================================
+
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -34,26 +31,20 @@ import type { ServiceEntity } from "../../domain/entities/service.entity";
 
 const serviceSchema = z.object({
   slug: z.string().min(2, "Slug is required").regex(/^[a-z0-9-]+$/, "Slug must contain lowercase letters, numbers, and hyphens"),
-  titleEn: z.string().min(2, "English title is required"),
-  titleAr: z.string().min(2, "Arabic title is required"),
-  titleKu: z.string().optional().nullable(),
-  shortDescriptionEn: z.string().optional().nullable(),
-  shortDescriptionAr: z.string().optional().nullable(),
-  shortDescriptionKu: z.string().optional().nullable(),
+  nameEn: z.string().min(2, "English name is required"),
+  nameAr: z.string().optional().nullable(),
+  nameKu: z.string().optional().nullable(),
   descriptionEn: z.string().optional().nullable(),
   descriptionAr: z.string().optional().nullable(),
   descriptionKu: z.string().optional().nullable(),
+  applicationsEn: z.string().optional().nullable(),
+  applicationsAr: z.string().optional().nullable(),
+  applicationsKu: z.string().optional().nullable(),
   icon: z.string().optional().nullable(),
-  image: z.string().optional().nullable(),
-  seoTitleEn: z.string().optional().nullable(),
-  seoTitleAr: z.string().optional().nullable(),
-  seoTitleKu: z.string().optional().nullable(),
-  seoDescriptionEn: z.string().optional().nullable(),
-  seoDescriptionAr: z.string().optional().nullable(),
-  seoDescriptionKu: z.string().optional().nullable(),
-  seoImage: z.string().optional().nullable(),
-  status: z.enum(["active", "draft"]),
+  heroImageUrl: z.string().optional().nullable(),
+  status: z.enum(["published", "draft", "archived"]),
   isFeatured: z.boolean(),
+  featuredOrder: z.number().min(0).optional(),
   sortOrder: z.number().min(0),
 });
 
@@ -71,6 +62,11 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
 
   const createServiceMutation = useCreateService();
   const updateServiceMutation = useUpdateService();
+  const isPending = createServiceMutation.isPending || updateServiceMutation.isPending;
+
+  const enTrans = initialData?.getTranslation("en");
+  const arTrans = initialData?.getTranslation("ar");
+  const kuTrans = initialData?.getTranslation("ku");
 
   const {
     register,
@@ -78,79 +74,124 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
     setValue,
     watch,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
-      slug: "",
-      titleEn: "",
-      titleAr: "",
-      titleKu: "",
-      shortDescriptionEn: "",
-      shortDescriptionAr: "",
-      shortDescriptionKu: "",
-      descriptionEn: "",
-      descriptionAr: "",
-      descriptionKu: "",
-      icon: "Wrench",
-      image: null,
-      seoTitleEn: "",
-      seoTitleAr: "",
-      seoTitleKu: "",
-      seoDescriptionEn: "",
-      seoDescriptionAr: "",
-      seoDescriptionKu: "",
-      seoImage: null,
-      status: "active",
-      isFeatured: false,
-      sortOrder: 0,
+      slug: initialData?.slug ?? "",
+      nameEn: enTrans?.name ?? "",
+      nameAr: arTrans?.name ?? "",
+      nameKu: kuTrans?.name ?? "",
+      descriptionEn: enTrans?.description ?? "",
+      descriptionAr: arTrans?.description ?? "",
+      descriptionKu: kuTrans?.description ?? "",
+      applicationsEn: enTrans?.applications ?? "",
+      applicationsAr: arTrans?.applications ?? "",
+      applicationsKu: kuTrans?.applications ?? "",
+      icon: initialData?.icon ?? "Wrench",
+      heroImageUrl: initialData?.heroImageUrl ?? initialData?.image ?? null,
+      status: (initialData?.status as "published" | "draft" | "archived") ?? "published",
+      isFeatured: initialData?.isFeatured ?? false,
+      featuredOrder: initialData?.featuredOrder ?? 0,
+      sortOrder: initialData?.sortOrder ?? 0,
     },
   });
 
-  const titleEn = watch("titleEn");
-
   useEffect(() => {
     if (initialData) {
+      const eT = initialData.getTranslation("en");
+      const aT = initialData.getTranslation("ar");
+      const kT = initialData.getTranslation("ku");
+
       reset({
-        slug: initialData.slug,
-        titleEn: initialData.titleEn,
-        titleAr: initialData.titleAr,
-        titleKu: initialData.titleKu ?? "",
-        shortDescriptionEn: initialData.shortDescriptionEn ?? "",
-        shortDescriptionAr: initialData.shortDescriptionAr ?? "",
-        shortDescriptionKu: initialData.shortDescriptionKu ?? "",
-        descriptionEn: initialData.descriptionEn ?? "",
-        descriptionAr: initialData.descriptionAr ?? "",
-        descriptionKu: initialData.descriptionKu ?? "",
+        slug: initialData.slug ?? "",
+        nameEn: eT?.name ?? "",
+        nameAr: aT?.name ?? "",
+        nameKu: kT?.name ?? "",
+        descriptionEn: eT?.description ?? "",
+        descriptionAr: aT?.description ?? "",
+        descriptionKu: kT?.description ?? "",
+        applicationsEn: eT?.applications ?? "",
+        applicationsAr: aT?.applications ?? "",
+        applicationsKu: kT?.applications ?? "",
         icon: initialData.icon ?? "Wrench",
-        image: initialData.image ?? null,
-        seoTitleEn: initialData.seoTitleEn ?? "",
-        seoTitleAr: initialData.seoTitleAr ?? "",
-        seoTitleKu: initialData.seoTitleKu ?? "",
-        seoDescriptionEn: initialData.seoDescriptionEn ?? "",
-        seoDescriptionAr: initialData.seoDescriptionAr ?? "",
-        seoDescriptionKu: initialData.seoDescriptionKu ?? "",
-        seoImage: initialData.seoImage ?? null,
-        status: initialData.status,
+        heroImageUrl: initialData.heroImageUrl ?? initialData.image ?? null,
+        status: (initialData.status as "published" | "draft" | "archived") ?? "published",
         isFeatured: initialData.isFeatured,
+        featuredOrder: initialData.featuredOrder ?? 0,
         sortOrder: initialData.sortOrder,
       });
     }
   }, [initialData, reset]);
 
+  const nameEn = watch("nameEn");
+  const slug = watch("slug");
+  const statusValue = watch("status");
+  const isFeaturedValue = watch("isFeatured");
+  const heroImageUrlValue = watch("heroImageUrl");
+
+  const generateSlug = () => {
+    if (!nameEn) return;
+    const generated = nameEn
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-");
+    setValue("slug", generated, { shouldValidate: true });
+  };
+
   const onSubmit = async (values: ServiceFormValues) => {
     try {
+      const translations: Record<string, any> = {};
+
+      if (values.nameEn?.trim()) {
+        translations.en = {
+          slug: values.slug,
+          name: values.nameEn.trim(),
+          description: values.descriptionEn?.trim() || null,
+          applications: values.applicationsEn?.trim() || null,
+        };
+      }
+
+      if (values.nameAr?.trim()) {
+        translations.ar = {
+          slug: values.slug,
+          name: values.nameAr.trim(),
+          description: values.descriptionAr?.trim() || null,
+          applications: values.applicationsAr?.trim() || null,
+        };
+      }
+
+      if (values.nameKu?.trim()) {
+        translations.ku = {
+          slug: values.slug,
+          name: values.nameKu.trim(),
+          description: values.descriptionKu?.trim() || null,
+          applications: values.applicationsKu?.trim() || null,
+        };
+      }
+
+      const payload = {
+        icon: values.icon?.trim() || null,
+        heroImageUrl: values.heroImageUrl || null,
+        status: values.status,
+        isFeatured: values.isFeatured,
+        featuredOrder: values.featuredOrder ?? 0,
+        sortOrder: values.sortOrder ?? 0,
+        translations,
+      };
+
       if (isEditing && initialData) {
         await updateServiceMutation.mutateAsync({
           id: initialData.id,
-          ...values,
+          ...payload,
         });
       } else {
-        await createServiceMutation.mutateAsync(values);
+        await createServiceMutation.mutateAsync(payload);
       }
       router.push("/admin/services");
     } catch {
-      // Toast notifications handled in mutations
+      // Handled in mutation hooks
     }
   };
 
@@ -169,7 +210,7 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {isEditing ? `${tForm("editTitle")}: ${initialData.titleEn}` : tForm("createTitle")}
+              {isEditing ? `${tForm("editTitle")}: ${initialData.nameEn}` : tForm("createTitle")}
             </h1>
             <p className="text-sm text-muted-foreground">
               {isEditing ? tForm("editSubtitle") : tForm("createSubtitle")}
@@ -182,12 +223,12 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
             type="button"
             variant="outline"
             onClick={() => router.push("/admin/services")}
-            disabled={isSubmitting}
+            disabled={isPending}
           >
             {tForm("cancel")}
           </Button>
-          <Button type="submit" disabled={isSubmitting} className="gap-2 min-w-[140px]">
-            {isSubmitting ? (
+          <Button type="submit" disabled={isPending} className="gap-2 min-w-[140px]">
+            {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" /> {tForm("saving")}
               </>
@@ -201,7 +242,7 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content Area */}
+        {/* Main Content Fields */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
@@ -217,104 +258,121 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
               <MultilingualTabs
                 englishFields={
                   <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="titleEn">{tForm("titleEn")} *</Label>
-                      <Input id="titleEn" {...register("titleEn")} />
-                      {errors.titleEn && (
-                        <p className="text-xs font-semibold text-destructive">{errors.titleEn.message}</p>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="nameEn">Service Title (EN) *</Label>
+                      <Input id="nameEn" {...register("nameEn")} />
+                      {errors.nameEn && (
+                        <p className="text-xs font-semibold text-destructive">{errors.nameEn.message}</p>
                       )}
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="shortDescriptionEn">{tForm("shortEn")}</Label>
-                      <Textarea id="shortDescriptionEn" className="min-h-[70px]" {...register("shortDescriptionEn")} />
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="descriptionEn">Description (EN)</Label>
+                      <Textarea
+                        id="descriptionEn"
+                        className="min-h-[140px]"
+                        {...register("descriptionEn")}
+                      />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="descriptionEn">{tForm("fullEn")}</Label>
-                      <Textarea id="descriptionEn" className="min-h-[140px]" {...register("descriptionEn")} />
-                    </div>
-                    <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingEn")}</h4>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoTitleEn">{tForm("seoTitleEn")}</Label>
-                        <Input id="seoTitleEn" {...register("seoTitleEn")} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionEn">{tForm("seoDescEn")}</Label>
-                        <Textarea id="seoDescriptionEn" className="min-h-[70px]" {...register("seoDescriptionEn")} />
-                      </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="applicationsEn">Applications (EN)</Label>
+                      <Textarea
+                        id="applicationsEn"
+                        className="min-h-[100px]"
+                        placeholder="Industrial hydraulic systems, mobile machinery..."
+                        {...register("applicationsEn")}
+                      />
                     </div>
                   </div>
                 }
                 arabicFields={
                   <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="titleAr">{tForm("titleAr")} *</Label>
-                      <Input id="titleAr" dir="rtl" {...register("titleAr")} />
-                      {errors.titleAr && (
-                        <p className="text-xs font-semibold text-destructive">{errors.titleAr.message}</p>
-                      )}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="nameAr">اسم الخدمة (عربي)</Label>
+                      <Input id="nameAr" dir="rtl" {...register("nameAr")} />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="shortDescriptionAr">{tForm("shortAr")}</Label>
-                      <Textarea id="shortDescriptionAr" dir="rtl" className="min-h-[70px]" {...register("shortDescriptionAr")} />
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="descriptionAr">الوصف (عربي)</Label>
+                      <Textarea
+                        id="descriptionAr"
+                        dir="rtl"
+                        className="min-h-[140px]"
+                        {...register("descriptionAr")}
+                      />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="descriptionAr">{tForm("fullAr")}</Label>
-                      <Textarea id="descriptionAr" dir="rtl" className="min-h-[140px]" {...register("descriptionAr")} />
-                    </div>
-                    <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingAr")}</h4>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoTitleAr">{tForm("seoTitleAr")}</Label>
-                        <Input id="seoTitleAr" dir="rtl" {...register("seoTitleAr")} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionAr">{tForm("seoDescAr")}</Label>
-                        <Textarea id="seoDescriptionAr" dir="rtl" className="min-h-[70px]" {...register("seoDescriptionAr")} />
-                      </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="applicationsAr">التطبيقات الاستخدامية (عربي)</Label>
+                      <Textarea
+                        id="applicationsAr"
+                        dir="rtl"
+                        className="min-h-[100px]"
+                        placeholder="الأنظمة الهيدروليكية الصناعية..."
+                        {...register("applicationsAr")}
+                      />
                     </div>
                   </div>
                 }
                 kurdishFields={
                   <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="titleKu">{tForm("titleKu")}</Label>
-                      <Input id="titleKu" dir="rtl" {...register("titleKu")} />
+                    <div className="space-y-1.5">
+                      <Label htmlFor="nameKu">ناوی خزمەتگوزاری (کوردی)</Label>
+                      <Input id="nameKu" dir="rtl" {...register("nameKu")} />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="shortDescriptionKu">{tForm("shortKu")}</Label>
-                      <Textarea id="shortDescriptionKu" dir="rtl" className="min-h-[70px]" {...register("shortDescriptionKu")} />
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="descriptionKu">پێناسە (کوردی)</Label>
+                      <Textarea
+                        id="descriptionKu"
+                        dir="rtl"
+                        className="min-h-[140px]"
+                        {...register("descriptionKu")}
+                      />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="descriptionKu">{tForm("fullKu")}</Label>
-                      <Textarea id="descriptionKu" dir="rtl" className="min-h-[140px]" {...register("descriptionKu")} />
-                    </div>
-                    <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingKu")}</h4>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoTitleKu">{tForm("seoTitleKu")}</Label>
-                        <Input id="seoTitleKu" dir="rtl" {...register("seoTitleKu")} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionKu">{tForm("seoDescKu")}</Label>
-                        <Textarea id="seoDescriptionKu" dir="rtl" className="min-h-[70px]" {...register("seoDescriptionKu")} />
-                      </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="applicationsKu">بەکارهێنانەکان (کوردی)</Label>
+                      <Textarea
+                        id="applicationsKu"
+                        dir="rtl"
+                        className="min-h-[100px]"
+                        {...register("applicationsKu")}
+                      />
                     </div>
                   </div>
                 }
               />
             </CardContent>
           </Card>
+
+          {/* Service Cover Image */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Service Cover Image</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ImageUploader
+                label="Hero Cover Image"
+                value={heroImageUrlValue ?? null}
+                onChange={(url) => setValue("heroImageUrl", url)}
+                bucket="service-images"
+                folder="covers"
+              />
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Sidebar Controls */}
+        {/* Sidebar Settings */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>{tForm("publishingTitle")}</CardTitle>
+              <CardTitle>{tForm("settingsTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+              {/* Slug */}
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="slug">{tForm("slug")} *</Label>
                   <Button
@@ -322,16 +380,7 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
                     variant="ghost"
                     size="sm"
                     className="h-6 text-[10px] gap-1 px-1.5"
-                    onClick={() => {
-                      if (titleEn) {
-                        const generatedSlug = titleEn
-                          .toLowerCase()
-                          .trim()
-                          .replace(/[^a-z0-9\s-]/g, "")
-                          .replace(/\s+/g, "-");
-                        setValue("slug", generatedSlug, { shouldValidate: true });
-                      }
-                    }}
+                    onClick={generateSlug}
                   >
                     <Sparkles className="h-3 w-3" /> {tForm("autoSlug")}
                   </Button>
@@ -342,35 +391,44 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
                 )}
               </div>
 
-              <div className="space-y-2">
+              {/* Status */}
+              <div className="space-y-1.5">
                 <Label htmlFor="status">{tForm("status")}</Label>
                 <Select
-                  value={watch("status")}
-                  onValueChange={(val) => setValue("status", val as "active" | "draft")}
+                  value={statusValue}
+                  onValueChange={(val: "published" | "draft" | "archived") => setValue("status", val)}
                 >
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">{tCommon("active")}</SelectItem>
-                    <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <div className="space-y-0.5">
-                  <Label htmlFor="isFeatured" className="text-sm font-semibold">{tForm("featured")}</Label>
+              {/* Icon */}
+              <div className="space-y-1.5">
+                <Label htmlFor="icon">Lucide Icon Identifier</Label>
+                <Input id="icon" {...register("icon")} placeholder="Wrench, Cpu, Cog..." />
+              </div>
+
+              {/* Featured Toggle */}
+              <div className="flex items-center justify-between border p-3 rounded-lg">
+                <div>
+                  <Label className="font-semibold text-sm">{tForm("featured")}</Label>
                   <p className="text-xs text-muted-foreground">{tForm("featuredDesc")}</p>
                 </div>
                 <Switch
-                  id="isFeatured"
-                  checked={watch("isFeatured")}
-                  onCheckedChange={(checked) => setValue("isFeatured", checked)}
+                  checked={isFeaturedValue}
+                  onCheckedChange={(val) => setValue("isFeatured", val)}
                 />
               </div>
 
-              <div className="space-y-2">
+              {/* Sort Order */}
+              <div className="space-y-1.5">
                 <Label htmlFor="sortOrder">{tForm("sortOrder")}</Label>
                 <Input
                   id="sortOrder"
@@ -379,26 +437,6 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
                   {...register("sortOrder", { valueAsNumber: true })}
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="icon">{tForm("icon")}</Label>
-                <Input id="icon" {...register("icon")} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Service Image */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Service Cover Image</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ImageUploader
-                value={watch("image") ?? ""}
-                onChange={(url) => setValue("image", url)}
-                bucket="service-images"
-                folder="cover"
-              />
             </CardContent>
           </Card>
         </div>

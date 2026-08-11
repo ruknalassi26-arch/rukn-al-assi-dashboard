@@ -208,7 +208,7 @@ export function ServiceTable() {
               {selectedIds.length} service{selectedIds.length > 1 ? "s" : ""} selected
             </span>
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("active")}>
+              <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("published")}>
                 Publish Selected
               </Button>
               <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("draft")}>
@@ -244,8 +244,9 @@ export function ServiceTable() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                <SelectItem value="active">{tCommon("active")}</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
               </SelectContent>
             </Select>
 
@@ -396,16 +397,20 @@ export function ServiceTable() {
                         {/* Sort Order */}
                         <TableCell className="text-sm font-mono">{service.sortOrder}</TableCell>
 
-                        {/* Status */}
-                          {service.isActive ? (
-                            <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold">
-                              {service.status}
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-semibold">
-                              {service.status}
-                            </Badge>
-                          )}
+                        <TableCell>
+                          <Badge
+                            variant={
+                              service.status === "published"
+                                ? "default"
+                                : service.status === "draft"
+                                ? "secondary"
+                                : "outline"
+                            }
+                            className="capitalize text-xs font-semibold"
+                          >
+                            {service.status}
+                          </Badge>
+                        </TableCell>
 
                         {/* Actions */}
                         <TableCell className="text-end">
