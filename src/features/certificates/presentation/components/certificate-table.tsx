@@ -18,6 +18,8 @@ import {
   ArrowUpDown,
   Calendar,
   Building2,
+  Copy,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -54,6 +56,7 @@ import { useCertificateStore } from "../stores/certificate.store";
 import {
   useCertificates,
   useDeleteCertificate,
+  useDuplicateCertificate,
   useBulkDeleteCertificates,
   useBulkUpdateCertificateStatus,
 } from "@shared/hooks/certificates/use-certificate-hooks";
@@ -92,6 +95,7 @@ export function CertificateTable() {
   });
 
   const deleteCertificateMutation = useDeleteCertificate();
+  const duplicateCertificateMutation = useDuplicateCertificate();
   const bulkDeleteMutation = useBulkDeleteCertificates();
   const bulkUpdateStatusMutation = useBulkUpdateCertificateStatus();
 
@@ -369,6 +373,21 @@ export function CertificateTable() {
                                 <Link href={`/admin/certificates/edit/${cert.id}`}>
                                   <Edit className="mr-2 h-4 w-4 text-emerald-500" /> Edit
                                 </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => duplicateCertificateMutation.mutate(cert.id)}
+                                disabled={duplicateCertificateMutation.isPending && duplicateCertificateMutation.variables === cert.id}
+                                className="gap-2"
+                              >
+                                {duplicateCertificateMutation.isPending && duplicateCertificateMutation.variables === cert.id ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin text-primary" /> Duplicating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="h-4 w-4 text-slate-500" /> Duplicate
+                                  </>
+                                )}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem

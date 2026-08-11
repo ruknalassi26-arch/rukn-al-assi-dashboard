@@ -6,4 +6,5 @@ export * from "./get-certificate-by-id.usecase";
 export * from "./create-certificate.usecase";
 export * from "./update-certificate.usecase";
 export * from "./delete-certificate.usecase";
+export * from "./duplicate-certificate.usecase";
 export * from "./bulk-operations.usecase";

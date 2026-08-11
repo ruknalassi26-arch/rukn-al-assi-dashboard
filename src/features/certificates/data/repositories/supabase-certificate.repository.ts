@@ -193,6 +193,25 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
     await this.logActivity("deleted", id, existing?.titleEn ?? "Certificate");
   }
 
+  async duplicateCertificate(id: string): Promise<CertificateEntity> {
+    const existing = await this.getCertificateById(id);
+    if (!existing) throw new Error("Certificate not found");
+
+    return this.createCertificate({
+      titleEn: `Copy of ${existing.titleEn}`,
+      titleAr: existing.titleAr ? `نسخة من ${existing.titleAr}` : `Copy of ${existing.titleEn}`,
+      titleKu: existing.titleKu ? `کۆپیی ${existing.titleKu}` : null,
+      descriptionEn: existing.descriptionEn,
+      descriptionAr: existing.descriptionAr,
+      descriptionKu: existing.descriptionKu,
+      image: existing.image,
+      issueDate: existing.issueDate,
+      organization: existing.organization,
+      sortOrder: existing.sortOrder,
+      status: "draft",
+    });
+  }
+
   async bulkDeleteCertificates(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     await (this.supabase.from("certifications" as any) as any)

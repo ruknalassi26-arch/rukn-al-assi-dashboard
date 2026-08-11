@@ -13,6 +13,7 @@ import {
   CreateCertificateUseCase,
   UpdateCertificateUseCase,
   DeleteCertificateUseCase,
+  DuplicateCertificateUseCase,
   BulkDeleteCertificatesUseCase,
   BulkUpdateCertificateStatusUseCase,
 } from "@features/certificates/domain/usecases";
@@ -29,6 +30,7 @@ const getCertificateByIdUseCase = new GetCertificateByIdUseCase(repository);
 const createCertificateUseCase = new CreateCertificateUseCase(repository);
 const updateCertificateUseCase = new UpdateCertificateUseCase(repository);
 const deleteCertificateUseCase = new DeleteCertificateUseCase(repository);
+const duplicateCertificateUseCase = new DuplicateCertificateUseCase(repository);
 const bulkDeleteCertificatesUseCase = new BulkDeleteCertificatesUseCase(repository);
 const bulkUpdateCertificateStatusUseCase = new BulkUpdateCertificateStatusUseCase(repository);
 
@@ -92,6 +94,28 @@ export function useDeleteCertificate() {
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to delete certificate");
+    },
+  });
+}
+
+export function useDuplicateCertificate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => duplicateCertificateUseCase.execute(id),
+    onMutate: () => {
+      const toastId = toast.loading("Duplicating certificate...");
+      return { toastId };
+    },
+    onSuccess: (duplicated, _variables, context) => {
+      if (context?.toastId) toast.dismiss(context.toastId);
+      queryClient.invalidateQueries({ queryKey: queryKeys.certificates.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.homepage.certificates() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.about.certificates() });
+      toast.success(`Duplicated certificate "${duplicated.titleEn}" successfully`);
+    },
+    onError: (error: Error, _variables, context) => {
+      if (context?.toastId) toast.dismiss(context.toastId);
+      toast.error(error.message || "Failed to duplicate certificate");
     },
   });
 }

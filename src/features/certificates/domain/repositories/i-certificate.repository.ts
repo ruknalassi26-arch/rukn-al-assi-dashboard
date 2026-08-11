@@ -48,6 +48,7 @@ export interface ICertificateRepository {
   createCertificate(input: CreateCertificateInput): Promise<CertificateEntity>;
   updateCertificate(input: UpdateCertificateInput): Promise<CertificateEntity>;
   deleteCertificate(id: string): Promise<void>;
+  duplicateCertificate(id: string): Promise<CertificateEntity>;
   bulkDeleteCertificates(ids: string[]): Promise<void>;
   bulkUpdateCertificateStatus(ids: string[], status: CertificateStatus): Promise<void>;
 }
