@@ -31,7 +31,7 @@ import type { CategoryEntity } from "../../domain/entities/category.entity";
 const categorySchema = z.object({
   slug: z.string().min(2, "Slug is required").regex(/^[a-z0-9-]+$/, "Slug must contain lowercase letters, numbers, and hyphens"),
   nameEn: z.string().min(2, "English name is required"),
-  nameAr: z.string().min(2, "Arabic name is required"),
+  nameAr: z.string().optional().nullable(),
   nameKu: z.string().optional().nullable(),
   descriptionEn: z.string().optional().nullable(),
   descriptionAr: z.string().optional().nullable(),
@@ -50,23 +50,27 @@ interface CategoryFormProps {
 export function CategoryForm({ initialData }: CategoryFormProps) {
   const router = useRouter();
   const tForm = useTranslations("categoryForm");
-  const tCommon = useTranslations("common");
   const isEditing = !!initialData;
 
   const createCategoryMutation = useCreateCategory();
   const updateCategoryMutation = useUpdateCategory();
   const isSubmitting = createCategoryMutation.isPending || updateCategoryMutation.isPending;
 
+  // Retrieve exact translations for each language without English fallback
+  const enTrans = initialData?.getTranslation("en");
+  const arTrans = initialData?.getTranslation("ar");
+  const kuTrans = initialData?.getTranslation("ku");
+
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       slug: initialData?.slug ?? "",
-      nameEn: initialData?.nameEn ?? "",
-      nameAr: initialData?.nameAr ?? "",
-      nameKu: initialData?.nameKu ?? "",
-      descriptionEn: initialData?.descriptionEn ?? "",
-      descriptionAr: initialData?.descriptionAr ?? "",
-      descriptionKu: initialData?.descriptionKu ?? "",
+      nameEn: enTrans?.name ?? "",
+      nameAr: arTrans?.name ?? "",
+      nameKu: kuTrans?.name ?? "",
+      descriptionEn: enTrans?.description ?? "",
+      descriptionAr: arTrans?.description ?? "",
+      descriptionKu: kuTrans?.description ?? "",
       image: initialData?.imageUrl ?? initialData?.image ?? "",
       status: (initialData?.status as "published" | "draft" | "archived") ?? "published",
       sortOrder: initialData?.sortOrder ?? 0,
@@ -91,24 +95,29 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
 
   const onSubmit = async (values: CategoryFormValues) => {
     try {
-      const translations: Record<string, { slug: string; name: string; description?: string | null }> = {
-        en: {
-          slug: values.slug,
-          name: values.nameEn,
-          description: values.descriptionEn || null,
-        },
-        ar: {
-          slug: values.slug,
-          name: values.nameAr,
-          description: values.descriptionAr || null,
-        },
-      };
+      const translations: Record<string, { slug: string; name: string; description?: string | null }> = {};
 
-      if (values.nameKu) {
+      if (values.nameEn?.trim()) {
+        translations.en = {
+          slug: values.slug,
+          name: values.nameEn.trim(),
+          description: values.descriptionEn?.trim() || null,
+        };
+      }
+
+      if (values.nameAr?.trim()) {
+        translations.ar = {
+          slug: values.slug,
+          name: values.nameAr.trim(),
+          description: values.descriptionAr?.trim() || null,
+        };
+      }
+
+      if (values.nameKu?.trim()) {
         translations.ku = {
           slug: values.slug,
-          name: values.nameKu,
-          description: values.descriptionKu || null,
+          name: values.nameKu.trim(),
+          description: values.descriptionKu?.trim() || null,
         };
       }
 
@@ -219,15 +228,12 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                 arabicFields={
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="nameAr">{tForm("nameAr")} *</Label>
+                      <Label htmlFor="nameAr">{tForm("nameAr")}</Label>
                       <Input
                         id="nameAr"
                         dir="rtl"
                         {...register("nameAr")}
                       />
-                      {errors.nameAr && (
-                        <p className="text-xs font-semibold text-destructive">{errors.nameAr.message}</p>
-                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="descriptionAr">{tForm("descAr")}</Label>

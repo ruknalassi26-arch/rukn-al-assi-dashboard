@@ -1,7 +1,7 @@
 // ==============================================================================
 // features/about/domain/entities/about.entity.ts
 // Domain Entity Classes for About Us Management
-// Strictly matching Supabase DB Schema
+// Strictly matching Supabase DB Schema - No English fallback for admin fields
 // ==============================================================================
 
 export type SectionStatus = "published" | "draft" | "archived";
@@ -26,9 +26,10 @@ export class CompanyInfoEntity {
 
   public getTranslation(lang: string): { history: string; mission: string; vision: string } {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    if (this.translations[lang]) return this.translations[lang];
-    if (this.translations[altLang]) return this.translations[altLang];
-    return { history: "", mission: "", vision: "" };
+    return (
+      this.translations[lang] ??
+      this.translations[altLang] ?? { history: "", mission: "", vision: "" }
+    );
   }
 }
 
@@ -56,7 +57,7 @@ export class CoreValueEntity {
     this.id = props.id;
     this.icon = props.icon ?? null;
     this.sortOrder = props.sortOrder ?? 0;
-    this.status = props.status ?? "active";
+    this.status = props.status ?? "published";
     this.translations = props.translations ?? {};
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();
@@ -64,9 +65,10 @@ export class CoreValueEntity {
 
   public getTranslation(lang: string): { title: string; description: string } {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    if (this.translations[lang]) return this.translations[lang];
-    if (this.translations[altLang]) return this.translations[altLang];
-    return { title: "", description: "" };
+    return (
+      this.translations[lang] ??
+      this.translations[altLang] ?? { title: "", description: "" }
+    );
   }
 }
 
@@ -94,7 +96,7 @@ export class TimelineEntity {
     this.id = props.id;
     this.eventYear = String(props.eventYear ?? "");
     this.sortOrder = props.sortOrder ?? 0;
-    this.status = props.status ?? "active";
+    this.status = props.status ?? "published";
     this.translations = props.translations ?? {};
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();
@@ -102,9 +104,10 @@ export class TimelineEntity {
 
   public getTranslation(lang: string): { title: string; description: string } {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    if (this.translations[lang]) return this.translations[lang];
-    if (this.translations[altLang]) return this.translations[altLang];
-    return { title: "", description: "" };
+    return (
+      this.translations[lang] ??
+      this.translations[altLang] ?? { title: "", description: "" }
+    );
   }
 }
 
@@ -132,7 +135,7 @@ export class TeamMemberEntity {
     this.id = props.id;
     this.photoUrl = props.photoUrl ?? null;
     this.sortOrder = props.sortOrder ?? 0;
-    this.status = props.status ?? "active";
+    this.status = props.status ?? "published";
     this.translations = props.translations ?? {};
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();
@@ -140,9 +143,10 @@ export class TeamMemberEntity {
 
   public getTranslation(lang: string): { name: string; position: string; bio: string } {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    if (this.translations[lang]) return this.translations[lang];
-    if (this.translations[altLang]) return this.translations[altLang];
-    return { name: "", position: "", bio: "" };
+    return (
+      this.translations[lang] ??
+      this.translations[altLang] ?? { name: "", position: "", bio: "" }
+    );
   }
 }
 
@@ -176,7 +180,7 @@ export class AboutCertificateEntity {
     this.issuedBy = props.issuedBy ?? null;
     this.issuedDate = props.issuedDate ?? null;
     this.sortOrder = props.sortOrder ?? 0;
-    this.status = props.status ?? "active";
+    this.status = props.status ?? "published";
     this.translations = props.translations ?? {};
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();
@@ -184,8 +188,9 @@ export class AboutCertificateEntity {
 
   public getTranslation(lang: string): { title: string; description: string } {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    if (this.translations[lang]) return this.translations[lang];
-    if (this.translations[altLang]) return this.translations[altLang];
-    return { title: "", description: "" };
+    return (
+      this.translations[lang] ??
+      this.translations[altLang] ?? { title: "", description: "" }
+    );
   }
 }
