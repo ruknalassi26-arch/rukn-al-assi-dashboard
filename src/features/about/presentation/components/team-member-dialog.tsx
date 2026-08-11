@@ -146,7 +146,8 @@ export function TeamMemberDialog({
             <ImageUploader
               value={photoUrl ?? null}
               onChange={(url) => setValue("photoUrl", url ?? null)}
-              folder="team"
+              bucket="team-photos"
+              folder="members"
             />
           </div>
 

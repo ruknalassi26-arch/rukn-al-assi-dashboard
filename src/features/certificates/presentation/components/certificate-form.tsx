@@ -316,6 +316,8 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
               <ImageUploader
                 value={watch("image") ?? ""}
                 onChange={(url) => setValue("image", url)}
+                bucket="certificates"
+                folder="certs"
               />
             </CardContent>
           </Card>

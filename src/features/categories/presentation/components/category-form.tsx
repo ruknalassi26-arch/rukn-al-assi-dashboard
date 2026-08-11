@@ -364,6 +364,8 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
               <ImageUploader
                 value={watch("image") ?? ""}
                 onChange={(url) => setValue("image", url)}
+                bucket="product-images"
+                folder="categories"
               />
             </CardContent>
           </Card>

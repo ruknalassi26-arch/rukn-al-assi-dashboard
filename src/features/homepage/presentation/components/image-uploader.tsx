@@ -23,7 +23,7 @@ interface ImageUploaderProps {
 export function ImageUploader({
   value,
   onChange,
-  bucket = "general",
+  bucket = "branding",
   folder = "homepage",
   label = "Upload Image",
   className = "",

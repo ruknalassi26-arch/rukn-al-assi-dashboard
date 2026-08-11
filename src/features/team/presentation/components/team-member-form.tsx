@@ -398,7 +398,8 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
               <ImageUploader
                 value={watch("photo") ?? ""}
                 onChange={(url) => setValue("photo", url)}
-                folder="team-photos"
+                bucket="team-photos"
+                folder="members"
               />
             </CardContent>
           </Card>

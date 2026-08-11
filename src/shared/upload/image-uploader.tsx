@@ -25,7 +25,7 @@ interface ImageUploaderProps {
 export function ImageUploader({
   value,
   onChange,
-  bucket = "general",
+  bucket = "product-images",
   folder = "uploads",
   label,
   className = "",

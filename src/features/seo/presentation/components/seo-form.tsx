@@ -356,7 +356,7 @@ export function SeoForm() {
               <ImageUploader
                 value={watch("ogImageUrl") ?? null}
                 onChange={(url) => setValue("ogImageUrl", url)}
-                bucket="seo"
+                bucket="branding"
                 folder="og-images"
                 label="Upload OG Share Image"
               />

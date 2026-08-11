@@ -357,7 +357,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 label={tForm("thumbnailLabel")}
                 value={thumbnailValue ?? null}
                 onChange={(url) => setValue("thumbnail", url)}
-                folder="product-thumbnails"
+                bucket="product-images"
+                folder="thumbnails"
               />
 
               {/* Gallery Images List */}
@@ -397,7 +398,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
                       label={`${tForm("galleryLabel")} #${idx + 1}`}
                       value={field.url}
                       onChange={(url) => setValue(`images.${idx}.url`, url ?? "")}
-                      folder="products"
+                      bucket="product-images"
+                      folder="gallery"
                     />
                   </div>
                 ))}
@@ -419,7 +421,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     label={tForm("uploadPdf")}
                     value={datasheetUrlValue ?? null}
                     onChange={(url) => setValue("datasheetUrl", url)}
-                    folder="product-datasheets"
+                    bucket="product-datasheets"
+                    folder="datasheets"
                   />
                 </div>
               </div>
@@ -429,6 +432,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 label={tForm("ogImage")}
                 value={seoImageValue ?? null}
                 onChange={(url) => setValue("seoImage", url)}
+                bucket="product-images"
                 folder="seo"
               />
             </CardContent>

@@ -396,6 +396,8 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
               <ImageUploader
                 value={watch("image") ?? ""}
                 onChange={(url) => setValue("image", url)}
+                bucket="service-images"
+                folder="cover"
               />
             </CardContent>
           </Card>

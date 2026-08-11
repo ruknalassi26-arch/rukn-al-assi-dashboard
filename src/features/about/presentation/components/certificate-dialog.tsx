@@ -142,7 +142,8 @@ export function CertificateDialog({
             <ImageUploader
               value={imageUrl ?? null}
               onChange={(url) => setValue("imageUrl", url ?? null)}
-              folder="certificates"
+              bucket="certificates"
+              folder="certs"
             />
           </div>
 
