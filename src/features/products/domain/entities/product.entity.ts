@@ -1,134 +1,160 @@
 // ==============================================================================
 // features/products/domain/entities/product.entity.ts
-// Domain Entity Classes for Products Management
+// Domain Entity Classes for Products Management strictly matching Supabase schema
 // ==============================================================================
+import { CategoryEntity } from "@features/categories/domain/entities/category.entity";
 
-export type ProductStatus = "active" | "draft" | "archived";
+export type ProductStatus = "published" | "draft" | "archived";
 
-export interface ProductCategoryProps {
-  id: string;
+export interface ProductTranslationProps {
   slug: string;
-  nameEn: string;
-  nameAr: string;
-  descriptionEn: string | null;
-  descriptionAr: string | null;
-  icon: string | null;
-  sortOrder: number;
-  status: "active" | "draft";
-  createdAt: Date;
-  updatedAt: Date;
+  name: string;
+  shortDescription?: string | null;
+  specifications?: Record<string, any> | null;
 }
 
-export class ProductCategoryEntity {
-  public readonly id: string;
-  public readonly slug: string;
-  public readonly nameEn: string;
-  public readonly nameAr: string;
-  public readonly descriptionEn: string | null;
-  public readonly descriptionAr: string | null;
-  public readonly icon: string | null;
-  public readonly sortOrder: number;
-  public readonly status: "active" | "draft";
-  public readonly createdAt: Date;
-  public readonly updatedAt: Date;
+export interface SeoMetaProps {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImageUrl?: string | null;
+}
 
-  constructor(props: ProductCategoryProps) {
-    this.id = props.id;
-    this.slug = props.slug;
-    this.nameEn = props.nameEn;
-    this.nameAr = props.nameAr;
-    this.descriptionEn = props.descriptionEn;
-    this.descriptionAr = props.descriptionAr;
-    this.icon = props.icon;
-    this.sortOrder = props.sortOrder;
-    this.status = props.status;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
-  }
+export interface ProductImageProps {
+  id?: string;
+  imageUrl: string;
+  mimeType?: string | null;
+  isPrimary: boolean;
+  sortOrder: number;
 }
 
 export interface ProductProps {
   id: string;
-  slug: string;
-  nameEn: string;
-  nameAr: string;
-  shortDescriptionEn: string | null;
-  shortDescriptionAr: string | null;
-  descriptionEn: string | null;
-  descriptionAr: string | null;
-  seoTitleEn: string | null;
-  seoTitleAr: string | null;
-  seoDescriptionEn: string | null;
-  seoDescriptionAr: string | null;
-  categoryId: string | null;
-  category?: ProductCategoryEntity | null;
-  images: string[];
-  thumbnail: string | null;
-  datasheetUrl: string | null;
-  seoImage: string | null;
+  sku?: string | null;
+  categoryId?: string | null;
+  category?: CategoryEntity | null;
+  datasheetUrl?: string | null;
   status: ProductStatus;
   isFeatured: boolean;
+  featuredOrder?: number | null;
   sortOrder: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+  images?: ProductImageProps[];
+  translations: Record<string, ProductTranslationProps>;
+  seoMeta?: Record<string, SeoMetaProps>;
 }
 
 export class ProductEntity {
   public readonly id: string;
-  public readonly slug: string;
-  public readonly nameEn: string;
-  public readonly nameAr: string;
-  public readonly shortDescriptionEn: string | null;
-  public readonly shortDescriptionAr: string | null;
-  public readonly descriptionEn: string | null;
-  public readonly descriptionAr: string | null;
-  public readonly seoTitleEn: string | null;
-  public readonly seoTitleAr: string | null;
-  public readonly seoDescriptionEn: string | null;
-  public readonly seoDescriptionAr: string | null;
+  public readonly sku: string | null;
   public readonly categoryId: string | null;
-  public readonly category?: ProductCategoryEntity | null;
-  public readonly images: string[];
-  public readonly thumbnail: string | null;
+  public readonly category?: CategoryEntity | null;
   public readonly datasheetUrl: string | null;
-  public readonly seoImage: string | null;
   public readonly status: ProductStatus;
   public readonly isFeatured: boolean;
+  public readonly featuredOrder: number;
   public readonly sortOrder: number;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
+  public readonly images: ProductImageProps[];
+  public readonly translations: Record<string, ProductTranslationProps>;
+  public readonly seoMeta: Record<string, SeoMetaProps>;
 
   constructor(props: ProductProps) {
     this.id = props.id;
-    this.slug = props.slug;
-    this.nameEn = props.nameEn;
-    this.nameAr = props.nameAr;
-    this.shortDescriptionEn = props.shortDescriptionEn;
-    this.shortDescriptionAr = props.shortDescriptionAr;
-    this.descriptionEn = props.descriptionEn;
-    this.descriptionAr = props.descriptionAr;
-    this.seoTitleEn = props.seoTitleEn;
-    this.seoTitleAr = props.seoTitleAr;
-    this.seoDescriptionEn = props.seoDescriptionEn;
-    this.seoDescriptionAr = props.seoDescriptionAr;
-    this.categoryId = props.categoryId;
-    this.category = props.category;
+    this.sku = props.sku ?? null;
+    this.categoryId = props.categoryId ?? null;
+    this.category = props.category ?? null;
+    this.datasheetUrl = props.datasheetUrl ?? null;
+    this.status = props.status ?? "published";
+    this.isFeatured = props.isFeatured ?? false;
+    this.featuredOrder = props.featuredOrder ?? 0;
+    this.sortOrder = props.sortOrder ?? 0;
+    this.createdAt = props.createdAt ?? new Date();
+    this.updatedAt = props.updatedAt ?? new Date();
     this.images = props.images ?? [];
-    this.thumbnail = props.thumbnail ?? (props.images && props.images.length > 0 ? props.images[0] : null);
-    this.datasheetUrl = props.datasheetUrl;
-    this.seoImage = props.seoImage;
-    this.status = props.status;
-    this.isFeatured = props.isFeatured;
-    this.sortOrder = props.sortOrder;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+    this.translations = props.translations ?? {};
+    this.seoMeta = props.seoMeta ?? {};
+  }
+
+  public getTranslation(lang: string): ProductTranslationProps | null {
+    const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
+    return this.translations[lang] ?? this.translations[altLang] ?? null;
+  }
+
+  public getSeoMeta(lang: string): SeoMetaProps | null {
+    const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
+    return this.seoMeta[lang] ?? this.seoMeta[altLang] ?? null;
+  }
+
+  // Getters for backwards compatibility across existing UI components
+  public get nameEn(): string {
+    return this.getTranslation("en")?.name ?? "";
+  }
+
+  public get nameAr(): string {
+    return this.getTranslation("ar")?.name ?? "";
+  }
+
+  public get nameKu(): string | null {
+    return this.getTranslation("ku")?.name ?? null;
+  }
+
+  public get slug(): string {
+    return (
+      this.getTranslation("en")?.slug ??
+      this.getTranslation("ar")?.slug ??
+      this.getTranslation("ku")?.slug ??
+      ""
+    );
+  }
+
+  public get shortDescriptionEn(): string | null {
+    return this.getTranslation("en")?.shortDescription ?? null;
+  }
+
+  public get shortDescriptionAr(): string | null {
+    return this.getTranslation("ar")?.shortDescription ?? null;
+  }
+
+  public get shortDescriptionKu(): string | null {
+    return this.getTranslation("ku")?.shortDescription ?? null;
+  }
+
+  public get specificationsEn(): Record<string, any> | null {
+    return this.getTranslation("en")?.specifications ?? null;
+  }
+
+  public get specificationsAr(): Record<string, any> | null {
+    return this.getTranslation("ar")?.specifications ?? null;
+  }
+
+  public get specificationsKu(): Record<string, any> | null {
+    return this.getTranslation("ku")?.specifications ?? null;
+  }
+
+  public get primaryImage(): string | null {
+    const primary = this.images.find((img) => img.isPrimary);
+    return primary ? primary.imageUrl : (this.images[0]?.imageUrl ?? null);
+  }
+
+  public get thumbnail(): string | null {
+    return this.primaryImage;
+  }
+
+  public get galleryImages(): string[] {
+    return this.images.filter((img) => !img.isPrimary).map((img) => img.imageUrl);
+  }
+
+  public get allImages(): string[] {
+    return this.images.map((img) => img.imageUrl);
   }
 
   public get isActive(): boolean {
-    return this.status === "active";
+    return this.status === "published";
   }
 
   public get displayImage(): string | null {
-    return this.thumbnail ?? (this.images.length > 0 ? this.images[0] : null);
+    return this.primaryImage;
   }
 }

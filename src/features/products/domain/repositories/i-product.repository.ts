@@ -1,8 +1,9 @@
 // ==============================================================================
 // features/products/domain/repositories/i-product.repository.ts
-// Domain Repository Interface for Products Management
+// Domain Repository Interface for Products Management strictly matching DB schema
 // ==============================================================================
-import { ProductEntity, ProductCategoryEntity, ProductStatus } from "../entities/product.entity";
+import type { ProductEntity, ProductStatus } from "../entities/product.entity";
+import type { CategoryEntity } from "@features/categories/domain/entities/category.entity";
 
 export interface ProductFilterParams {
   search?: string;
@@ -23,26 +24,36 @@ export interface PaginatedProducts {
   totalPages: number;
 }
 
-export interface CreateProductInput {
+export interface ProductTranslationInput {
   slug: string;
-  nameEn: string;
-  nameAr: string;
-  shortDescriptionEn?: string | null;
-  shortDescriptionAr?: string | null;
-  descriptionEn?: string | null;
-  descriptionAr?: string | null;
-  seoTitleEn?: string | null;
-  seoTitleAr?: string | null;
-  seoDescriptionEn?: string | null;
-  seoDescriptionAr?: string | null;
+  name: string;
+  shortDescription?: string | null;
+  specifications?: Record<string, any> | null;
+}
+
+export interface SeoMetaInput {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImageUrl?: string | null;
+}
+
+export interface ProductImageInput {
+  imageUrl: string;
+  isPrimary: boolean;
+  sortOrder: number;
+}
+
+export interface CreateProductInput {
+  sku?: string | null;
   categoryId?: string | null;
-  images?: string[];
-  thumbnail?: string | null;
   datasheetUrl?: string | null;
-  seoImage?: string | null;
   status?: ProductStatus;
   isFeatured?: boolean;
+  featuredOrder?: number;
   sortOrder?: number;
+  translations: Record<string, ProductTranslationInput>;
+  seoMeta?: Record<string, SeoMetaInput>;
+  images?: ProductImageInput[];
 }
 
 export interface UpdateProductInput extends Partial<CreateProductInput> {
@@ -60,6 +71,6 @@ export interface IProductRepository {
   toggleFeatureProduct(id: string, isFeatured: boolean): Promise<ProductEntity>;
   bulkDeleteProducts(ids: string[]): Promise<void>;
   bulkUpdateProductStatus(ids: string[], status: ProductStatus): Promise<void>;
-  getCategories(): Promise<ProductCategoryEntity[]>;
+  getCategories(): Promise<CategoryEntity[]>;
   checkSlugUnique(slug: string, excludeId?: string): Promise<boolean>;
 }

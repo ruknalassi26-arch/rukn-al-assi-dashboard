@@ -8,10 +8,11 @@ export class UpdateProductUseCase {
   constructor(private readonly repository: IProductRepository) {}
 
   async execute(input: UpdateProductInput): Promise<ProductEntity> {
-    if (input.slug) {
-      const isUnique = await this.repository.checkSlugUnique(input.slug, input.id);
+    const slug = input.translations?.en?.slug ?? (input.translations ? Object.values(input.translations)[0]?.slug : undefined);
+    if (slug) {
+      const isUnique = await this.repository.checkSlugUnique(slug, input.id);
       if (!isUnique) {
-        throw new Error(`Slug "${input.slug}" is already in use by another product.`);
+        throw new Error(`Slug "${slug}" is already in use by another product.`);
       }
     }
     return this.repository.updateProduct(input);

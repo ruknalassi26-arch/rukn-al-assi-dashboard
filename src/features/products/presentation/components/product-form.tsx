@@ -1,8 +1,5 @@
 "use client";
-// ==============================================================================
-// features/products/presentation/components/product-form.tsx
-// Complete Form for Creating / Editing Products with Bilingual Tabs & Storage Uploads
-// ==============================================================================
+
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -33,16 +30,17 @@ import { useProductCategories, useCreateProduct, useUpdateProduct } from "@share
 import type { ProductEntity } from "../../domain/entities/product.entity";
 
 const productSchema = z.object({
+  sku: z.string().optional().nullable(),
   slug: z.string().min(2, "Slug is required").regex(/^[a-z0-9-]+$/, "Slug must contain lowercase letters, numbers, and hyphens"),
   nameEn: z.string().min(2, "English name is required"),
-  nameAr: z.string().min(2, "Arabic name is required"),
+  nameAr: z.string().optional().nullable(),
   nameKu: z.string().optional().nullable(),
   shortDescriptionEn: z.string().optional().nullable(),
   shortDescriptionAr: z.string().optional().nullable(),
   shortDescriptionKu: z.string().optional().nullable(),
-  descriptionEn: z.string().optional().nullable(),
-  descriptionAr: z.string().optional().nullable(),
-  descriptionKu: z.string().optional().nullable(),
+  specificationsEn: z.string().optional().nullable(),
+  specificationsAr: z.string().optional().nullable(),
+  specificationsKu: z.string().optional().nullable(),
   seoTitleEn: z.string().optional().nullable(),
   seoTitleAr: z.string().optional().nullable(),
   seoTitleKu: z.string().optional().nullable(),
@@ -54,8 +52,9 @@ const productSchema = z.object({
   thumbnail: z.string().optional().nullable(),
   datasheetUrl: z.string().optional().nullable(),
   seoImage: z.string().optional().nullable(),
-  status: z.enum(["active", "draft", "archived"]),
+  status: z.enum(["published", "draft", "archived"]),
   isFeatured: z.boolean(),
+  featuredOrder: z.number().min(0).optional(),
   sortOrder: z.number().min(0),
 });
 
@@ -63,6 +62,39 @@ export type ProductFormValues = z.infer<typeof productSchema>;
 
 interface ProductFormProps {
   initialData?: ProductEntity | null;
+}
+
+function parseSpecifications(text?: string | null): Record<string, any> | null {
+  if (!text || text.trim() === "") return null;
+  try {
+    const trimmed = text.trim();
+    if (trimmed.startsWith("{")) return JSON.parse(trimmed);
+  } catch {}
+
+  const lines = text.split("\n");
+  const obj: Record<string, any> = {};
+  for (const line of lines) {
+    const parts = line.split(":");
+    if (parts.length >= 2) {
+      const k = parts[0].trim();
+      const v = parts.slice(1).join(":").trim();
+      if (k) obj[k] = v;
+    } else if (line.trim()) {
+      obj[`spec_${Object.keys(obj).length + 1}`] = line.trim();
+    }
+  }
+  return Object.keys(obj).length > 0 ? obj : { details: text.trim() };
+}
+
+function formatSpecificationsForEdit(specs: any): string {
+  if (!specs) return "";
+  if (typeof specs === "string") return specs;
+  if (typeof specs === "object") {
+    return Object.entries(specs)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join("\n");
+  }
+  return String(specs);
 }
 
 export function ProductForm({ initialData }: ProductFormProps) {
@@ -77,6 +109,14 @@ export function ProductForm({ initialData }: ProductFormProps) {
   const isEditing = !!initialData;
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  const enTrans = initialData?.getTranslation("en");
+  const arTrans = initialData?.getTranslation("ar");
+  const kuTrans = initialData?.getTranslation("ku");
+
+  const enSeo = initialData?.getSeoMeta("en");
+  const arSeo = initialData?.getSeoMeta("ar");
+  const kuSeo = initialData?.getSeoMeta("ku");
+
   const {
     register,
     handleSubmit,
@@ -88,30 +128,32 @@ export function ProductForm({ initialData }: ProductFormProps) {
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      slug: "",
-      nameEn: "",
-      nameAr: "",
-      nameKu: "",
-      shortDescriptionEn: "",
-      shortDescriptionAr: "",
-      shortDescriptionKu: "",
-      descriptionEn: "",
-      descriptionAr: "",
-      descriptionKu: "",
-      seoTitleEn: "",
-      seoTitleAr: "",
-      seoTitleKu: "",
-      seoDescriptionEn: "",
-      seoDescriptionAr: "",
-      seoDescriptionKu: "",
-      categoryId: "",
-      images: [],
-      thumbnail: null,
-      datasheetUrl: null,
-      seoImage: null,
-      status: "active",
-      isFeatured: false,
-      sortOrder: 0,
+      sku: initialData?.sku ?? "",
+      slug: initialData?.slug ?? "",
+      nameEn: enTrans?.name ?? "",
+      nameAr: arTrans?.name ?? "",
+      nameKu: kuTrans?.name ?? "",
+      shortDescriptionEn: enTrans?.shortDescription ?? "",
+      shortDescriptionAr: arTrans?.shortDescription ?? "",
+      shortDescriptionKu: kuTrans?.shortDescription ?? "",
+      specificationsEn: formatSpecificationsForEdit(enTrans?.specifications),
+      specificationsAr: formatSpecificationsForEdit(arTrans?.specifications),
+      specificationsKu: formatSpecificationsForEdit(kuTrans?.specifications),
+      seoTitleEn: enSeo?.metaTitle ?? "",
+      seoTitleAr: arSeo?.metaTitle ?? "",
+      seoTitleKu: kuSeo?.metaTitle ?? "",
+      seoDescriptionEn: enSeo?.metaDescription ?? "",
+      seoDescriptionAr: arSeo?.metaDescription ?? "",
+      seoDescriptionKu: kuSeo?.metaDescription ?? "",
+      categoryId: initialData?.categoryId ?? "",
+      images: (initialData?.galleryImages ?? []).map((url) => ({ url })),
+      thumbnail: initialData?.thumbnail ?? null,
+      datasheetUrl: initialData?.datasheetUrl ?? null,
+      seoImage: enSeo?.ogImageUrl ?? arSeo?.ogImageUrl ?? kuSeo?.ogImageUrl ?? null,
+      status: (initialData?.status as "published" | "draft" | "archived") ?? "published",
+      isFeatured: initialData?.isFeatured ?? false,
+      featuredOrder: initialData?.featuredOrder ?? 0,
+      sortOrder: initialData?.sortOrder ?? 0,
     },
   });
 
@@ -122,30 +164,39 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
   useEffect(() => {
     if (initialData) {
+      const eT = initialData.getTranslation("en");
+      const aT = initialData.getTranslation("ar");
+      const kT = initialData.getTranslation("ku");
+      const eS = initialData.getSeoMeta("en");
+      const aS = initialData.getSeoMeta("ar");
+      const kS = initialData.getSeoMeta("ku");
+
       reset({
-        slug: initialData.slug,
-        nameEn: initialData.nameEn,
-        nameAr: initialData.nameAr,
-        nameKu: ((initialData as unknown as Record<string, unknown>).nameKu as string) ?? "",
-        shortDescriptionEn: initialData.shortDescriptionEn ?? "",
-        shortDescriptionAr: initialData.shortDescriptionAr ?? "",
-        shortDescriptionKu: ((initialData as unknown as Record<string, unknown>).shortDescriptionKu as string) ?? "",
-        descriptionEn: initialData.descriptionEn ?? "",
-        descriptionAr: initialData.descriptionAr ?? "",
-        descriptionKu: ((initialData as unknown as Record<string, unknown>).descriptionKu as string) ?? "",
-        seoTitleEn: initialData.seoTitleEn ?? "",
-        seoTitleAr: initialData.seoTitleAr ?? "",
-        seoTitleKu: ((initialData as unknown as Record<string, unknown>).seoTitleKu as string) ?? "",
-        seoDescriptionEn: initialData.seoDescriptionEn ?? "",
-        seoDescriptionAr: initialData.seoDescriptionAr ?? "",
-        seoDescriptionKu: ((initialData as unknown as Record<string, unknown>).seoDescriptionKu as string) ?? "",
+        sku: initialData.sku ?? "",
+        slug: initialData.slug ?? "",
+        nameEn: eT?.name ?? "",
+        nameAr: aT?.name ?? "",
+        nameKu: kT?.name ?? "",
+        shortDescriptionEn: eT?.shortDescription ?? "",
+        shortDescriptionAr: aT?.shortDescription ?? "",
+        shortDescriptionKu: kT?.shortDescription ?? "",
+        specificationsEn: formatSpecificationsForEdit(eT?.specifications),
+        specificationsAr: formatSpecificationsForEdit(aT?.specifications),
+        specificationsKu: formatSpecificationsForEdit(kT?.specifications),
+        seoTitleEn: eS?.metaTitle ?? "",
+        seoTitleAr: aS?.metaTitle ?? "",
+        seoTitleKu: kS?.metaTitle ?? "",
+        seoDescriptionEn: eS?.metaDescription ?? "",
+        seoDescriptionAr: aS?.metaDescription ?? "",
+        seoDescriptionKu: kS?.metaDescription ?? "",
         categoryId: initialData.categoryId ?? "",
-        images: (initialData.images ?? []).map((url) => ({ url })),
+        images: (initialData.galleryImages ?? []).map((url) => ({ url })),
         thumbnail: initialData.thumbnail,
         datasheetUrl: initialData.datasheetUrl,
-        seoImage: initialData.seoImage,
-        status: initialData.status,
+        seoImage: eS?.ogImageUrl ?? aS?.ogImageUrl ?? kS?.ogImageUrl ?? null,
+        status: (initialData.status as "published" | "draft" | "archived") ?? "published",
         isFeatured: initialData.isFeatured,
+        featuredOrder: initialData.featuredOrder ?? 0,
         sortOrder: initialData.sortOrder,
       });
     }
@@ -171,27 +222,92 @@ export function ProductForm({ initialData }: ProductFormProps) {
   };
 
   const onSubmit = async (values: ProductFormValues) => {
-    const imagesList = values.images.map((img) => img.url).filter(Boolean);
+    // 1. Translations dictionary per language
+    const translations: Record<string, any> = {};
+
+    if (values.nameEn?.trim()) {
+      translations.en = {
+        slug: values.slug,
+        name: values.nameEn.trim(),
+        shortDescription: values.shortDescriptionEn?.trim() || null,
+        specifications: parseSpecifications(values.specificationsEn),
+      };
+    }
+
+    if (values.nameAr?.trim()) {
+      translations.ar = {
+        slug: values.slug,
+        name: values.nameAr.trim(),
+        shortDescription: values.shortDescriptionAr?.trim() || null,
+        specifications: parseSpecifications(values.specificationsAr),
+      };
+    }
+
+    if (values.nameKu?.trim()) {
+      translations.ku = {
+        slug: values.slug,
+        name: values.nameKu.trim(),
+        shortDescription: values.shortDescriptionKu?.trim() || null,
+        specifications: parseSpecifications(values.specificationsKu),
+      };
+    }
+
+    // 2. SEO Meta dictionary
+    const seoMeta: Record<string, any> = {};
+    if (values.seoTitleEn || values.seoDescriptionEn || values.seoImage) {
+      seoMeta.en = {
+        metaTitle: values.seoTitleEn || null,
+        metaDescription: values.seoDescriptionEn || null,
+        ogImageUrl: values.seoImage || null,
+      };
+    }
+    if (values.seoTitleAr || values.seoDescriptionAr || values.seoImage) {
+      seoMeta.ar = {
+        metaTitle: values.seoTitleAr || null,
+        metaDescription: values.seoDescriptionAr || null,
+        ogImageUrl: values.seoImage || null,
+      };
+    }
+    if (values.seoTitleKu || values.seoDescriptionKu || values.seoImage) {
+      seoMeta.ku = {
+        metaTitle: values.seoTitleKu || null,
+        metaDescription: values.seoDescriptionKu || null,
+        ogImageUrl: values.seoImage || null,
+      };
+    }
+
+    // 3. Structured Product Images Array
+    const images: Array<{ imageUrl: string; isPrimary: boolean; sortOrder: number }> = [];
+    if (values.thumbnail) {
+      images.push({
+        imageUrl: values.thumbnail,
+        isPrimary: true,
+        sortOrder: 0,
+      });
+    }
+
+    values.images.forEach((img, idx) => {
+      if (img.url?.trim()) {
+        images.push({
+          imageUrl: img.url.trim(),
+          isPrimary: false,
+          sortOrder: idx + 1,
+        });
+      }
+    });
+
     const payload = {
+      sku: values.sku?.trim() || null,
       slug: values.slug,
-      nameEn: values.nameEn,
-      nameAr: values.nameAr,
-      shortDescriptionEn: values.shortDescriptionEn || null,
-      shortDescriptionAr: values.shortDescriptionAr || null,
-      descriptionEn: values.descriptionEn || null,
-      descriptionAr: values.descriptionAr || null,
-      seoTitleEn: values.seoTitleEn || null,
-      seoTitleAr: values.seoTitleAr || null,
-      seoDescriptionEn: values.seoDescriptionEn || null,
-      seoDescriptionAr: values.seoDescriptionAr || null,
-      categoryId: values.categoryId || null,
-      images: imagesList,
-      thumbnail: values.thumbnail || (imagesList.length > 0 ? imagesList[0] : null),
+      categoryId: values.categoryId && values.categoryId !== "none" ? values.categoryId : null,
       datasheetUrl: values.datasheetUrl || null,
-      seoImage: values.seoImage || null,
       status: values.status,
       isFeatured: values.isFeatured,
-      sortOrder: values.sortOrder,
+      featuredOrder: values.featuredOrder ?? 0,
+      sortOrder: values.sortOrder ?? 0,
+      translations,
+      seoMeta,
+      images,
     };
 
     if (isEditing && initialData) {
@@ -203,9 +319,9 @@ export function ProductForm({ initialData }: ProductFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-5xl mx-auto">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-5xl mx-auto pb-16">
       {/* Header Bar */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 border-b pb-4">
         <div className="flex items-center gap-3">
           <Button type="button" variant="outline" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4" />
@@ -224,7 +340,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
           <Button type="button" variant="outline" onClick={() => router.back()} disabled={isPending}>
             {tForm("cancel")}
           </Button>
-          <Button type="submit" disabled={isPending} className="gap-2">
+          <Button type="submit" disabled={isPending} className="gap-2 min-w-[140px]">
             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {isEditing ? tForm("saveChanges") : tForm("createBtn")}
           </Button>
@@ -258,8 +374,14 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="descriptionEn">{tForm("fullEn")}</Label>
-                      <Textarea id="descriptionEn" rows={6} {...register("descriptionEn")} />
+                      <Label htmlFor="specificationsEn">Specifications</Label>
+                      <Textarea
+                        id="specificationsEn"
+                        rows={6}
+                        placeholder={"Pressure: 250 bar\nFlow Rate: 120 L/min\nMaterial: Stainless Steel"}
+                        {...register("specificationsEn")}
+                      />
+                      <p className="text-[11px] text-muted-foreground">Enter technical specifications (e.g. Key: Value pairs per line).</p>
                     </div>
 
                     {/* SEO English Sub-section */}
@@ -279,9 +401,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 arabicFields={
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="nameAr">{tForm("nameAr")} *</Label>
+                      <Label htmlFor="nameAr">{tForm("nameAr")}</Label>
                       <Input id="nameAr" dir="rtl" {...register("nameAr")} />
-                      {errors.nameAr && <span className="text-xs text-destructive">{errors.nameAr.message}</span>}
                     </div>
 
                     <div className="space-y-1.5">
@@ -290,8 +411,14 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="descriptionAr">{tForm("fullAr")}</Label>
-                      <Textarea id="descriptionAr" dir="rtl" rows={6} {...register("descriptionAr")} />
+                      <Label htmlFor="specificationsAr">المواصفات الفنية</Label>
+                      <Textarea
+                        id="specificationsAr"
+                        dir="rtl"
+                        rows={6}
+                        placeholder={"الضغط: 250 بار\nمعدل التدفق: 120 لتر/دقيقة"}
+                        {...register("specificationsAr")}
+                      />
                     </div>
 
                     {/* SEO Arabic Sub-section */}
@@ -321,8 +448,14 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="descriptionKu">{tForm("fullKu")}</Label>
-                      <Textarea id="descriptionKu" dir="rtl" rows={6} {...register("descriptionKu")} />
+                      <Label htmlFor="specificationsKu">تایبەتمەندییە تەکنیکییەکان</Label>
+                      <Textarea
+                        id="specificationsKu"
+                        dir="rtl"
+                        rows={6}
+                        placeholder={"پەستان: 250 بار"}
+                        {...register("specificationsKu")}
+                      />
                     </div>
 
                     {/* SEO Kurdish Sub-section */}
@@ -405,29 +538,24 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 ))}
               </div>
 
-              {/* Technical Datasheet Upload */}
+              {/* Technical Datasheet Upload (PDF Only) */}
               <div className="space-y-2 border p-4 rounded-lg bg-muted/10">
                 <Label className="font-semibold text-sm flex items-center gap-2">
                   <FileText className="h-4 w-4 text-primary" /> {tForm("datasheetTitle")}
                 </Label>
-                <div className="flex items-center gap-3">
-                  <Input
-                    value={datasheetUrlValue ?? ""}
-                    onChange={(e) => setValue("datasheetUrl", e.target.value)}
-                    placeholder="PDF URL..."
-                    className="text-xs"
-                  />
-                  <ImageUploader
-                    label={tForm("uploadPdf")}
-                    value={datasheetUrlValue ?? null}
-                    onChange={(url) => setValue("datasheetUrl", url)}
-                    bucket="product-datasheets"
-                    folder="datasheets"
-                  />
-                </div>
+                <ImageUploader
+                  label="Upload Technical PDF Datasheet"
+                  value={datasheetUrlValue ?? null}
+                  onChange={(url) => setValue("datasheetUrl", url)}
+                  bucket="product-datasheets"
+                  folder="datasheets"
+                  fileType="pdf"
+                  accept="application/pdf"
+                  hintText="PDF (max 10MB)"
+                />
               </div>
 
-              {/* SEO Banner Image */}
+              {/* SEO Banner / OG Image */}
               <ImageUploader
                 label={tForm("ogImage")}
                 value={seoImageValue ?? null}
@@ -446,6 +574,12 @@ export function ProductForm({ initialData }: ProductFormProps) {
               <CardTitle>{tForm("publishingTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Product SKU */}
+              <div className="space-y-1.5">
+                <Label htmlFor="sku">Product SKU</Label>
+                <Input id="sku" {...register("sku")} placeholder="SKU-HYD-1001" />
+              </div>
+
               {/* Slug Generator */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
@@ -460,7 +594,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     <Sparkles className="h-3 w-3" /> {tForm("autoSlug")}
                   </Button>
                 </div>
-                <Input id="slug" {...register("slug")} placeholder="industrial-valve-x" />
+                <Input id="slug" {...register("slug")} placeholder="hydraulic-pump-x1" />
                 {errors.slug && <span className="text-xs text-destructive">{errors.slug.message}</span>}
               </div>
 
@@ -486,12 +620,12 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 <Label>{tForm("status")}</Label>
                 <Select
                   value={statusValue}
-                  onValueChange={(val: "active" | "draft" | "archived") => setValue("status", val)}
+                  onValueChange={(val: "published" | "draft" | "archived") => setValue("status", val)}
                 >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">{tCommon("active")}</SelectItem>
-                    <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
                     <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
@@ -509,12 +643,26 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 />
               </div>
 
-              {/* Display Order */}
+              {/* Featured Order */}
+              {isFeaturedValue && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="featuredOrder">Featured Order</Label>
+                  <Input
+                    id="featuredOrder"
+                    type="number"
+                    min={0}
+                    {...register("featuredOrder", { valueAsNumber: true })}
+                  />
+                </div>
+              )}
+
+              {/* Display Sort Order */}
               <div className="space-y-1.5">
                 <Label htmlFor="sortOrder">{tForm("sortOrder")}</Label>
                 <Input
                   id="sortOrder"
                   type="number"
+                  min={0}
                   {...register("sortOrder", { valueAsNumber: true })}
                 />
               </div>

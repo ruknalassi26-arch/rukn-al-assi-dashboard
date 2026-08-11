@@ -216,7 +216,7 @@ export function ProductTable() {
               <SelectTrigger className="text-xs"><SelectValue placeholder={t("allStatuses")} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                <SelectItem value="active">{tCommon("active")}</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 <SelectItem value="archived">{tCommon("archived")}</SelectItem>
               </SelectContent>
@@ -249,9 +249,9 @@ export function ProductTable() {
                   size="sm"
                   variant="outline"
                   className="h-7 text-xs gap-1"
-                  onClick={() => bulkStatusMutation.mutate({ ids: selectedIds, status: "active" })}
+                  onClick={() => bulkStatusMutation.mutate({ ids: selectedIds, status: "published" })}
                 >
-                  <CheckCircle className="h-3.5 w-3.5 text-emerald-600" /> Set Active
+                  <CheckCircle className="h-3.5 w-3.5 text-emerald-600" /> Set Published
                 </Button>
                 <Button
                   size="sm"
@@ -382,7 +382,7 @@ export function ProductTable() {
                         <TableCell>
                           <Badge
                             variant={
-                              product.status === "active"
+                              product.status === "published"
                                 ? "default"
                                 : product.status === "draft"
                                 ? "secondary"

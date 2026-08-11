@@ -1,9 +1,9 @@
 // ==============================================================================
 // features/products/data/repositories/supabase-product.repository.ts
 // Supabase Data Repository Implementation for Products Management
+// Strictly matching products, product_translations, product_images, & seo_meta DB schema
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
-import type { UpdateTables } from "@core/types/database.types";
 import type {
   IProductRepository,
   ProductFilterParams,
@@ -11,14 +11,41 @@ import type {
   CreateProductInput,
   UpdateProductInput,
 } from "../../domain/repositories/i-product.repository";
-import { ProductEntity, ProductCategoryEntity } from "../../domain/entities/product.entity";
+import { ProductEntity } from "../../domain/entities/product.entity";
 import type { ProductStatus } from "../../domain/entities/product.entity";
-import { toProductEntity, toProductCategoryEntity } from "../mapper/product.mapper";
-import type { ProductWithCategoryDTO, ProductCategoryDTO } from "../dto/product.dto";
+import { CategoryEntity } from "@features/categories/domain/entities/category.entity";
+import { toCategoryEntity } from "@features/categories/data/mapper/category.mapper";
+import { toProductEntity } from "../mapper/product.mapper";
+import type { ProductWithRelationsDTO } from "../dto/product.dto";
+import type { CategoryWithTranslationsDTO } from "@features/categories/data/dto/category.dto";
 
 export class SupabaseProductRepository implements IProductRepository {
   private get supabase() {
     return createClient();
+  }
+
+  private async getValidLanguageCodes(): Promise<string[]> {
+    try {
+      const { data } = await (this.supabase.from("languages" as any) as any).select("code");
+      if (data && data.length > 0) {
+        return data.map((l: any) => l.code);
+      }
+    } catch {}
+    return ["en", "ar", "ku"];
+  }
+
+  private resolveLangCode(lang: string, dbCodes: string[]): string {
+    if (dbCodes.includes(lang)) return lang;
+    if (lang === "ckb" && dbCodes.includes("ku")) return "ku";
+    if (lang === "ku" && dbCodes.includes("ckb")) return "ckb";
+    if (lang === "en" && dbCodes.includes("en-US")) return "en-US";
+    if (lang === "ar" && dbCodes.includes("ar-IQ")) return "ar-IQ";
+
+    const basePrefix = lang.split("-")[0];
+    const matched = dbCodes.find((c) => c === basePrefix || c.startsWith(basePrefix + "-"));
+    if (matched) return matched;
+
+    return dbCodes[0] || lang;
   }
 
   private async logActivity(
@@ -45,35 +72,25 @@ export class SupabaseProductRepository implements IProductRepository {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 10;
     const offset = (page - 1) * limit;
-    const sortBy = params?.sortBy ?? "created_at";
+    const sortBy = params?.sortBy === "name_en" ? "sort_order" : (params?.sortBy ?? "created_at");
     const sortOrder = params?.sortOrder ?? "desc";
 
-    let query = this.supabase
-      .from("products")
-      .select("*, product_categories(*)", { count: "exact" });
+    let query = (this.supabase.from("products" as any) as any)
+      .select("*, product_translations(*), product_images(*), seo_meta(*), product_categories(*, product_category_translations(*))", { count: "exact" })
+      .is("deleted_at", null);
 
-    // Search filter
-    if (params?.search && params.search.trim() !== "") {
-      const searchStr = params.search.trim();
-      query = query.or(`name_en.ilike.%${searchStr}%,name_ar.ilike.%${searchStr}%,slug.ilike.%${searchStr}%`);
-    }
-
-    // Category filter
     if (params?.categoryId && params.categoryId !== "all") {
       query = query.eq("category_id", params.categoryId);
     }
 
-    // Status filter
     if (params?.status && params.status !== "all") {
       query = query.eq("status", params.status);
     }
 
-    // Featured filter
     if (params?.isFeatured !== undefined) {
       query = query.eq("is_featured", params.isFeatured);
     }
 
-    // Sorting & Pagination
     query = query.order(sortBy, { ascending: sortOrder === "asc" }).range(offset, offset + limit - 1);
 
     const { data, count, error } = await query;
@@ -82,106 +99,245 @@ export class SupabaseProductRepository implements IProductRepository {
       return { items: [], total: 0, page, limit, totalPages: 0 };
     }
 
-    const items = (data as ProductWithCategoryDTO[]).map(toProductEntity);
-    const total = count ?? 0;
+    let items = (data as ProductWithRelationsDTO[]).map(toProductEntity);
+
+    if (params?.search && params.search.trim() !== "") {
+      const searchLower = params.search.trim().toLowerCase();
+      items = items.filter(
+        (prod) =>
+          prod.nameEn.toLowerCase().includes(searchLower) ||
+          prod.nameAr.toLowerCase().includes(searchLower) ||
+          (prod.nameKu && prod.nameKu.toLowerCase().includes(searchLower)) ||
+          prod.slug.toLowerCase().includes(searchLower) ||
+          (prod.sku && prod.sku.toLowerCase().includes(searchLower))
+      );
+    }
+
+    const total = count ?? items.length;
     const totalPages = Math.ceil(total / limit);
 
     return { items, total, page, limit, totalPages };
   }
 
   async getProductById(id: string): Promise<ProductEntity | null> {
-    const { data, error } = await this.supabase
-      .from("products")
-      .select("*, product_categories(*)")
+    const { data, error } = await (this.supabase.from("products" as any) as any)
+      .select("*, product_translations(*), product_images(*), seo_meta(*), product_categories(*, product_category_translations(*))")
       .eq("id", id)
       .single();
 
     if (error || !data) return null;
-    return toProductEntity(data as ProductWithCategoryDTO);
+    return toProductEntity(data as ProductWithRelationsDTO);
   }
 
   async getProductBySlug(slug: string): Promise<ProductEntity | null> {
-    const { data, error } = await this.supabase
-      .from("products")
-      .select("*, product_categories(*)")
+    const { data: transData, error: transErr } = await (this.supabase.from("product_translations" as any) as any)
+      .select("product_id")
       .eq("slug", slug)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
-    if (error || !data) return null;
-    return toProductEntity(data as ProductWithCategoryDTO);
+    if (transErr || !transData?.product_id) return null;
+    return this.getProductById(transData.product_id);
+  }
+
+  async checkSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
+    let query = (this.supabase.from("product_translations" as any) as any)
+      .select("product_id")
+      .eq("slug", slug);
+
+    if (excludeId) {
+      query = query.neq("product_id", excludeId);
+    }
+
+    const { data } = await query;
+    return !data || data.length === 0;
   }
 
   async createProduct(input: CreateProductInput): Promise<ProductEntity> {
-    const payload = {
-      slug: input.slug,
-      name_en: input.nameEn,
-      name_ar: input.nameAr,
-      short_description_en: input.shortDescriptionEn ?? null,
-      short_description_ar: input.shortDescriptionAr ?? null,
-      description_en: input.descriptionEn ?? null,
-      description_ar: input.descriptionAr ?? null,
-      seo_title_en: input.seoTitleEn ?? null,
-      seo_title_ar: input.seoTitleAr ?? null,
-      seo_description_en: input.seoDescriptionEn ?? null,
-      seo_description_ar: input.seoDescriptionAr ?? null,
-      category_id: input.categoryId ?? null,
-      images: input.images ?? [],
-      thumbnail: input.thumbnail ?? (input.images && input.images.length > 0 ? input.images[0] : null),
-      datasheet_url: input.datasheetUrl ?? null,
-      seo_image: input.seoImage ?? null,
-      status: input.status ?? "active",
-      is_featured: input.isFeatured ?? false,
-      sort_order: input.sortOrder ?? 0,
-    };
-
-    const { data, error } = await this.supabase
-      .from("products")
-      .insert(payload)
-      .select("*, product_categories(*)")
+    // 1. Insert into products (ONLY base table fields)
+    const { data, error } = await (this.supabase.from("products" as any) as any)
+      .insert({
+        category_id: input.categoryId ?? null,
+        sku: input.sku ?? null,
+        datasheet_url: input.datasheetUrl ?? null,
+        status: input.status ?? "published",
+        is_featured: input.isFeatured ?? false,
+        featured_order: input.featuredOrder ?? 0,
+        sort_order: input.sortOrder ?? 0,
+      })
+      .select("id")
       .single();
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create product");
 
-    const created = toProductEntity(data as ProductWithCategoryDTO);
+    const productId = data.id;
+    const dbCodes = await this.getValidLanguageCodes();
+
+    // 2. Insert into product_translations
+    if (input.translations && Object.keys(input.translations).length > 0) {
+      const transPayloads = Object.entries(input.translations)
+        .filter(([, val]) => val && val.name && val.name.trim() !== "")
+        .map(([lang, val]) => ({
+          product_id: productId,
+          language_code: this.resolveLangCode(lang, dbCodes),
+          slug: val.slug,
+          name: val.name.trim(),
+          short_description: val.shortDescription ?? null,
+          specifications: val.specifications ?? null,
+        }));
+
+      if (transPayloads.length > 0) {
+        const { error: transErr } = await (this.supabase.from("product_translations" as any) as any)
+          .insert(transPayloads);
+        if (transErr) throw new Error(transErr.message || "Failed to create product translations");
+      }
+    }
+
+    // 3. Insert into product_images
+    if (input.images && input.images.length > 0) {
+      const imagePayloads = input.images.map((img) => ({
+        product_id: productId,
+        image_url: img.imageUrl,
+        mime_type: "image/jpeg",
+        is_primary: img.isPrimary,
+        sort_order: img.sortOrder,
+      }));
+
+      const { error: imgErr } = await (this.supabase.from("product_images" as any) as any)
+        .insert(imagePayloads);
+      if (imgErr) throw new Error(imgErr.message || "Failed to save product images");
+    }
+
+    // 4. Insert into seo_meta
+    if (input.seoMeta && Object.keys(input.seoMeta).length > 0) {
+      const seoPayloads = Object.entries(input.seoMeta)
+        .filter(([, val]) => val && (val.metaTitle || val.metaDescription || val.ogImageUrl))
+        .map(([lang, val]) => ({
+          entity_type: "product",
+          entity_id: productId,
+          language_code: this.resolveLangCode(lang, dbCodes),
+          meta_title: val.metaTitle ?? null,
+          meta_description: val.metaDescription ?? null,
+          og_image_url: val.ogImageUrl ?? null,
+        }));
+
+      if (seoPayloads.length > 0) {
+        const { error: seoErr } = await (this.supabase.from("seo_meta" as any) as any)
+          .insert(seoPayloads);
+        if (seoErr) throw new Error(seoErr.message || "Failed to save SEO metadata");
+      }
+    }
+
+    const created = await this.getProductById(productId);
+    if (!created) throw new Error("Failed to retrieve created product");
     await this.logActivity("created", created.id, created.nameEn);
     return created;
   }
 
   async updateProduct(input: UpdateProductInput): Promise<ProductEntity> {
-    const payload: UpdateTables<"products"> = {
+    // 1. Update products base table
+    const productUpdatePayload: Record<string, any> = {
       updated_at: new Date().toISOString(),
     };
+    if (input.categoryId !== undefined) productUpdatePayload.category_id = input.categoryId;
+    if (input.sku !== undefined) productUpdatePayload.sku = input.sku;
+    if (input.datasheetUrl !== undefined) productUpdatePayload.datasheet_url = input.datasheetUrl;
+    if (input.status !== undefined) productUpdatePayload.status = input.status;
+    if (input.isFeatured !== undefined) productUpdatePayload.is_featured = input.isFeatured;
+    if (input.featuredOrder !== undefined) productUpdatePayload.featured_order = input.featuredOrder;
+    if (input.sortOrder !== undefined) productUpdatePayload.sort_order = input.sortOrder;
 
-    if (input.slug !== undefined) payload.slug = input.slug;
-    if (input.nameEn !== undefined) payload.name_en = input.nameEn;
-    if (input.nameAr !== undefined) payload.name_ar = input.nameAr;
-    if (input.shortDescriptionEn !== undefined) payload.short_description_en = input.shortDescriptionEn;
-    if (input.shortDescriptionAr !== undefined) payload.short_description_ar = input.shortDescriptionAr;
-    if (input.descriptionEn !== undefined) payload.description_en = input.descriptionEn;
-    if (input.descriptionAr !== undefined) payload.description_ar = input.descriptionAr;
-    if (input.seoTitleEn !== undefined) payload.seo_title_en = input.seoTitleEn;
-    if (input.seoTitleAr !== undefined) payload.seo_title_ar = input.seoTitleAr;
-    if (input.seoDescriptionEn !== undefined) payload.seo_description_en = input.seoDescriptionEn;
-    if (input.seoDescriptionAr !== undefined) payload.seo_description_ar = input.seoDescriptionAr;
-    if (input.categoryId !== undefined) payload.category_id = input.categoryId;
-    if (input.images !== undefined) payload.images = input.images;
-    if (input.thumbnail !== undefined) payload.thumbnail = input.thumbnail;
-    if (input.datasheetUrl !== undefined) payload.datasheet_url = input.datasheetUrl;
-    if (input.seoImage !== undefined) payload.seo_image = input.seoImage;
-    if (input.status !== undefined) payload.status = input.status;
-    if (input.isFeatured !== undefined) payload.is_featured = input.isFeatured;
-    if (input.sortOrder !== undefined) payload.sort_order = input.sortOrder;
+    const { error: baseErr } = await (this.supabase.from("products" as any) as any)
+      .update(productUpdatePayload)
+      .eq("id", input.id);
 
-    const { data, error } = await this.supabase
-      .from("products")
-      .update(payload)
-      .eq("id", input.id)
-      .select("*, product_categories(*)")
-      .single();
+    if (baseErr) throw new Error(baseErr.message || "Failed to update product");
 
-    if (error || !data) throw new Error(error?.message ?? "Failed to update product");
+    const dbCodes = await this.getValidLanguageCodes();
+    const languagesToCheck = ["en", "ar", "ku"];
 
-    const updated = toProductEntity(data as ProductWithCategoryDTO);
+    // 2. Upsert / Delete product_translations
+    if (input.translations) {
+      for (const langKey of languagesToCheck) {
+        const val = input.translations[langKey];
+        const targetLangCode = this.resolveLangCode(langKey, dbCodes);
+
+        if (val && val.name && val.name.trim() !== "") {
+          const { error: transErr } = await (this.supabase.from("product_translations" as any) as any)
+            .upsert(
+              {
+                product_id: input.id,
+                language_code: targetLangCode,
+                slug: val.slug,
+                name: val.name.trim(),
+                short_description: val.shortDescription ?? null,
+                specifications: val.specifications ?? null,
+              },
+              { onConflict: "product_id,language_code" }
+            );
+          if (transErr) throw new Error(transErr.message || "Failed to update product translations");
+        } else if (langKey !== "en") {
+          await (this.supabase.from("product_translations" as any) as any)
+            .delete()
+            .eq("product_id", input.id)
+            .eq("language_code", targetLangCode);
+        }
+      }
+    }
+
+    // 3. Update product_images
+    if (input.images !== undefined) {
+      await (this.supabase.from("product_images" as any) as any)
+        .delete()
+        .eq("product_id", input.id);
+
+      if (input.images.length > 0) {
+        const imagePayloads = input.images.map((img) => ({
+          product_id: input.id,
+          image_url: img.imageUrl,
+          mime_type: "image/jpeg",
+          is_primary: img.isPrimary,
+          sort_order: img.sortOrder,
+        }));
+
+        const { error: imgErr } = await (this.supabase.from("product_images" as any) as any)
+          .insert(imagePayloads);
+        if (imgErr) throw new Error(imgErr.message || "Failed to update product images");
+      }
+    }
+
+    // 4. Update seo_meta
+    if (input.seoMeta !== undefined) {
+      for (const langKey of languagesToCheck) {
+        const val = input.seoMeta[langKey];
+        const targetLangCode = this.resolveLangCode(langKey, dbCodes);
+
+        if (val && (val.metaTitle || val.metaDescription || val.ogImageUrl)) {
+          const { error: seoErr } = await (this.supabase.from("seo_meta" as any) as any)
+            .upsert(
+              {
+                entity_type: "product",
+                entity_id: input.id,
+                language_code: targetLangCode,
+                meta_title: val.metaTitle ?? null,
+                meta_description: val.metaDescription ?? null,
+                og_image_url: val.ogImageUrl ?? null,
+              },
+              { onConflict: "entity_type,entity_id,language_code" }
+            );
+          if (seoErr) throw new Error(seoErr.message || "Failed to update SEO metadata");
+        } else {
+          await (this.supabase.from("seo_meta" as any) as any)
+            .delete()
+            .eq("entity_type", "product")
+            .eq("entity_id", input.id)
+            .eq("language_code", targetLangCode);
+        }
+      }
+    }
+
+    const updated = await this.getProductById(input.id);
+    if (!updated) throw new Error("Failed to retrieve updated product");
     await this.logActivity("updated", updated.id, updated.nameEn);
     return updated;
   }
@@ -189,9 +345,8 @@ export class SupabaseProductRepository implements IProductRepository {
   async deleteProduct(id: string): Promise<void> {
     const existing = await this.getProductById(id);
 
-    const { error } = await this.supabase
-      .from("products")
-      .delete()
+    const { error } = await (this.supabase.from("products" as any) as any)
+      .update({ deleted_at: new Date().toISOString(), status: "archived" })
       .eq("id", id);
 
     if (error) throw new Error(error.message);
@@ -200,33 +355,29 @@ export class SupabaseProductRepository implements IProductRepository {
   }
 
   async duplicateProduct(id: string): Promise<ProductEntity> {
-    const original = await this.getProductById(id);
-    if (!original) throw new Error("Original product not found");
+    const existing = await this.getProductById(id);
+    if (!existing) throw new Error("Product not found");
 
-    const newSlug = `${original.slug}-copy-${Date.now()}`;
-    const newNameEn = `${original.nameEn} (Copy)`;
-    const newNameAr = `${original.nameAr} (نسخة)`;
+    const newTranslations: Record<string, any> = {};
+    for (const [lang, val] of Object.entries(existing.translations)) {
+      newTranslations[lang] = {
+        ...val,
+        slug: `${val.slug}-copy-${Date.now()}`,
+        name: `Copy of ${val.name}`,
+      };
+    }
 
     return this.createProduct({
-      slug: newSlug,
-      nameEn: newNameEn,
-      nameAr: newNameAr,
-      shortDescriptionEn: original.shortDescriptionEn,
-      shortDescriptionAr: original.shortDescriptionAr,
-      descriptionEn: original.descriptionEn,
-      descriptionAr: original.descriptionAr,
-      seoTitleEn: original.seoTitleEn,
-      seoTitleAr: original.seoTitleAr,
-      seoDescriptionEn: original.seoDescriptionEn,
-      seoDescriptionAr: original.seoDescriptionAr,
-      categoryId: original.categoryId,
-      images: original.images,
-      thumbnail: original.thumbnail,
-      datasheetUrl: original.datasheetUrl,
-      seoImage: original.seoImage,
+      sku: existing.sku ? `${existing.sku}-COPY` : null,
+      categoryId: existing.categoryId,
+      datasheetUrl: existing.datasheetUrl,
       status: "draft",
       isFeatured: false,
-      sortOrder: original.sortOrder + 1,
+      featuredOrder: 0,
+      sortOrder: existing.sortOrder,
+      translations: newTranslations,
+      seoMeta: existing.seoMeta,
+      images: existing.images,
     });
   }
 
@@ -235,48 +386,28 @@ export class SupabaseProductRepository implements IProductRepository {
   }
 
   async bulkDeleteProducts(ids: string[]): Promise<void> {
-    if (ids.length === 0) return;
-    const { error } = await this.supabase
-      .from("products")
-      .delete()
+    const { error } = await (this.supabase.from("products" as any) as any)
+      .update({ deleted_at: new Date().toISOString(), status: "archived" })
       .in("id", ids);
 
     if (error) throw new Error(error.message);
-    await this.logActivity("deleted", null, `${ids.length} products`, { count: ids.length });
   }
 
   async bulkUpdateProductStatus(ids: string[], status: ProductStatus): Promise<void> {
-    if (ids.length === 0) return;
-    const { error } = await this.supabase
-      .from("products")
-      .update({ status, updated_at: new Date().toISOString() })
+    const { error } = await (this.supabase.from("products" as any) as any)
+      .update({ status })
       .in("id", ids);
 
     if (error) throw new Error(error.message);
-    await this.logActivity("updated", null, `Bulk updated status to ${status}`, { ids, status });
   }
 
-  async getCategories(): Promise<ProductCategoryEntity[]> {
-    const { data, error } = await this.supabase
-      .from("product_categories")
-      .select("*")
+  async getCategories(): Promise<CategoryEntity[]> {
+    const { data, error } = await (this.supabase.from("product_categories" as any) as any)
+      .select("*, product_category_translations(*)")
+      .is("deleted_at", null)
       .order("sort_order", { ascending: true });
 
     if (error || !data) return [];
-    return (data as ProductCategoryDTO[]).map(toProductCategoryEntity);
-  }
-
-  async checkSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
-    let query = this.supabase
-      .from("products")
-      .select("id")
-      .eq("slug", slug);
-
-    if (excludeId) {
-      query = query.neq("id", excludeId);
-    }
-
-    const { data } = await query;
-    return !data || data.length === 0;
+    return (data as CategoryWithTranslationsDTO[]).map(toCategoryEntity);
   }
 }

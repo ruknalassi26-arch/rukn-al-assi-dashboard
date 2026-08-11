@@ -1,50 +1,68 @@
 // ==============================================================================
 // features/products/data/mapper/product.mapper.ts
-// Maps between Supabase DTOs and Product Domain Entity Classes
+// Maps between Supabase DTOs and Product Domain Entity
 // ==============================================================================
-import { ProductEntity, ProductCategoryEntity } from "../../domain/entities/product.entity";
-import type { ProductWithCategoryDTO, ProductCategoryDTO } from "../dto/product.dto";
+import {
+  ProductEntity,
+  type ProductTranslationProps,
+  type SeoMetaProps,
+  type ProductImageProps,
+} from "../../domain/entities/product.entity";
+import { toCategoryEntity } from "@features/categories/data/mapper/category.mapper";
+import type { ProductWithRelationsDTO } from "../dto/product.dto";
 
-export function toProductCategoryEntity(dto: ProductCategoryDTO): ProductCategoryEntity {
-  return new ProductCategoryEntity({
-    id: dto.id,
-    slug: dto.slug,
-    nameEn: dto.name_en,
-    nameAr: dto.name_ar,
-    descriptionEn: dto.description_en,
-    descriptionAr: dto.description_ar,
-    icon: dto.icon,
-    sortOrder: dto.sort_order ?? 0,
-    status: dto.status,
-    createdAt: new Date(dto.created_at),
-    updatedAt: new Date(dto.updated_at),
-  });
-}
+export function toProductEntity(dto: ProductWithRelationsDTO): ProductEntity {
+  const transList = dto.product_translations ?? [];
+  const translations: Record<string, ProductTranslationProps> = {};
 
-export function toProductEntity(dto: ProductWithCategoryDTO): ProductEntity {
+  for (const t of transList) {
+    if (t.language_code) {
+      translations[t.language_code] = {
+        slug: t.slug || "",
+        name: t.name || "",
+        shortDescription: t.short_description || null,
+        specifications: t.specifications || null,
+      };
+    }
+  }
+
+  const seoList = dto.seo_meta ?? [];
+  const seoMeta: Record<string, SeoMetaProps> = {};
+  for (const s of seoList) {
+    if (s.language_code) {
+      seoMeta[s.language_code] = {
+        metaTitle: s.meta_title || null,
+        metaDescription: s.meta_description || null,
+        ogImageUrl: s.og_image_url || null,
+      };
+    }
+  }
+
+  const imgList = dto.product_images ?? [];
+  const images: ProductImageProps[] = imgList.map((img) => ({
+    id: img.id,
+    imageUrl: img.image_url,
+    mimeType: img.mime_type ?? null,
+    isPrimary: img.is_primary ?? false,
+    sortOrder: img.sort_order ?? 0,
+  }));
+
+  const category = dto.product_categories ? toCategoryEntity(dto.product_categories) : null;
+
   return new ProductEntity({
     id: dto.id,
-    slug: dto.slug,
-    nameEn: dto.name_en,
-    nameAr: dto.name_ar,
-    shortDescriptionEn: dto.short_description_en,
-    shortDescriptionAr: dto.short_description_ar,
-    descriptionEn: dto.description_en,
-    descriptionAr: dto.description_ar,
-    seoTitleEn: dto.seo_title_en,
-    seoTitleAr: dto.seo_title_ar,
-    seoDescriptionEn: dto.seo_description_en,
-    seoDescriptionAr: dto.seo_description_ar,
-    categoryId: dto.category_id,
-    category: dto.product_categories ? toProductCategoryEntity(dto.product_categories) : null,
-    images: dto.images ?? [],
-    thumbnail: dto.thumbnail ?? (dto.images && dto.images.length > 0 ? dto.images[0] : null),
-    datasheetUrl: dto.datasheet_url,
-    seoImage: dto.seo_image,
-    status: dto.status,
+    sku: dto.sku ?? null,
+    categoryId: dto.category_id ?? null,
+    category,
+    datasheetUrl: dto.datasheet_url ?? null,
+    status: dto.status ?? "published",
     isFeatured: dto.is_featured ?? false,
+    featuredOrder: dto.featured_order ?? 0,
     sortOrder: dto.sort_order ?? 0,
-    createdAt: new Date(dto.created_at),
-    updatedAt: new Date(dto.updated_at),
+    createdAt: dto.created_at ? new Date(dto.created_at) : new Date(),
+    updatedAt: dto.updated_at ? new Date(dto.updated_at) : new Date(),
+    images,
+    translations,
+    seoMeta,
   });
 }
