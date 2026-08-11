@@ -1,6 +1,6 @@
 // ==============================================================================
 // features/categories/domain/repositories/i-category.repository.ts
-// ICategoryRepository Contract Interface
+// ICategoryRepository Contract Interface matching DB Schema
 // ==============================================================================
 import type { CategoryEntity, CategoryStatus } from "../entities/category.entity";
 
@@ -9,7 +9,7 @@ export interface CategoryFilterParams {
   status?: CategoryStatus | "all";
   page?: number;
   limit?: number;
-  sortBy?: "name_en" | "sort_order" | "created_at";
+  sortBy?: "sort_order" | "created_at" | "name_en";
   sortOrder?: "asc" | "desc";
 }
 
@@ -21,24 +21,17 @@ export interface PaginatedCategories {
   totalPages: number;
 }
 
-export interface CreateCategoryInput {
+export interface CategoryTranslationInput {
   slug: string;
-  nameEn: string;
-  nameAr: string;
-  nameKu?: string | null;
-  descriptionEn?: string | null;
-  descriptionAr?: string | null;
-  descriptionKu?: string | null;
-  icon?: string | null;
-  image?: string | null;
-  seoTitleEn?: string | null;
-  seoTitleAr?: string | null;
-  seoTitleKu?: string | null;
-  seoDescriptionEn?: string | null;
-  seoDescriptionAr?: string | null;
-  seoDescriptionKu?: string | null;
+  name: string;
+  description?: string | null;
+}
+
+export interface CreateCategoryInput {
+  imageUrl?: string | null;
   sortOrder?: number;
   status?: CategoryStatus;
+  translations: Record<string, CategoryTranslationInput>;
 }
 
 export interface UpdateCategoryInput extends Partial<CreateCategoryInput> {

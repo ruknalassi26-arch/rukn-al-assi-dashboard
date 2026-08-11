@@ -22,7 +22,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Switch,
 } from "@shared/ui";
 import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
@@ -37,15 +36,8 @@ const categorySchema = z.object({
   descriptionEn: z.string().optional().nullable(),
   descriptionAr: z.string().optional().nullable(),
   descriptionKu: z.string().optional().nullable(),
-  icon: z.string().optional().nullable(),
   image: z.string().optional().nullable(),
-  seoTitleEn: z.string().optional().nullable(),
-  seoTitleAr: z.string().optional().nullable(),
-  seoTitleKu: z.string().optional().nullable(),
-  seoDescriptionEn: z.string().optional().nullable(),
-  seoDescriptionAr: z.string().optional().nullable(),
-  seoDescriptionKu: z.string().optional().nullable(),
-  status: z.enum(["active", "draft"]),
+  status: z.enum(["published", "draft", "archived"]),
   sortOrder: z.number().min(0),
 });
 
@@ -75,15 +67,8 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
       descriptionEn: initialData?.descriptionEn ?? "",
       descriptionAr: initialData?.descriptionAr ?? "",
       descriptionKu: initialData?.descriptionKu ?? "",
-      icon: initialData?.icon ?? "",
-      image: initialData?.image ?? "",
-      seoTitleEn: initialData?.seoTitleEn ?? "",
-      seoTitleAr: initialData?.seoTitleAr ?? "",
-      seoTitleKu: initialData?.seoTitleKu ?? "",
-      seoDescriptionEn: initialData?.seoDescriptionEn ?? "",
-      seoDescriptionAr: initialData?.seoDescriptionAr ?? "",
-      seoDescriptionKu: initialData?.seoDescriptionKu ?? "",
-      status: initialData?.status ?? "active",
+      image: initialData?.imageUrl ?? initialData?.image ?? "",
+      status: (initialData?.status as "published" | "draft" | "archived") ?? "published",
       sortOrder: initialData?.sortOrder ?? 0,
     },
   });
@@ -106,13 +91,41 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
 
   const onSubmit = async (values: CategoryFormValues) => {
     try {
+      const translations: Record<string, { slug: string; name: string; description?: string | null }> = {
+        en: {
+          slug: values.slug,
+          name: values.nameEn,
+          description: values.descriptionEn || null,
+        },
+        ar: {
+          slug: values.slug,
+          name: values.nameAr,
+          description: values.descriptionAr || null,
+        },
+      };
+
+      if (values.nameKu) {
+        translations.ku = {
+          slug: values.slug,
+          name: values.nameKu,
+          description: values.descriptionKu || null,
+        };
+      }
+
+      const payload = {
+        imageUrl: values.image || null,
+        sortOrder: values.sortOrder,
+        status: values.status,
+        translations,
+      };
+
       if (isEditing && initialData) {
         await updateCategoryMutation.mutateAsync({
           id: initialData.id,
-          ...values,
+          ...payload,
         });
       } else {
-        await createCategoryMutation.mutateAsync(values);
+        await createCategoryMutation.mutateAsync(payload);
       }
       router.push("/admin/categories");
     } catch {
@@ -201,17 +214,6 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                         {...register("descriptionEn")}
                       />
                     </div>
-                    <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingEn")}</h4>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoTitleEn">{tForm("seoTitleEn")}</Label>
-                        <Input id="seoTitleEn" {...register("seoTitleEn")} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionEn">{tForm("seoDescEn")}</Label>
-                        <Textarea id="seoDescriptionEn" className="min-h-[70px]" {...register("seoDescriptionEn")} />
-                      </div>
-                    </div>
                   </div>
                 }
                 arabicFields={
@@ -236,17 +238,6 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                         {...register("descriptionAr")}
                       />
                     </div>
-                    <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingAr")}</h4>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoTitleAr">{tForm("seoTitleAr")}</Label>
-                        <Input id="seoTitleAr" dir="rtl" {...register("seoTitleAr")} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionAr">{tForm("seoDescAr")}</Label>
-                        <Textarea id="seoDescriptionAr" dir="rtl" className="min-h-[70px]" {...register("seoDescriptionAr")} />
-                      </div>
-                    </div>
                   </div>
                 }
                 kurdishFields={
@@ -267,17 +258,6 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                         className="min-h-[120px]"
                         {...register("descriptionKu")}
                       />
-                    </div>
-                    <div className="space-y-4 pt-4 border-t">
-                      <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingKu")}</h4>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoTitleKu">{tForm("seoTitleKu")}</Label>
-                        <Input id="seoTitleKu" dir="rtl" {...register("seoTitleKu")} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="seoDescriptionKu">{tForm("seoDescKu")}</Label>
-                        <Textarea id="seoDescriptionKu" dir="rtl" className="min-h-[70px]" {...register("seoDescriptionKu")} />
-                      </div>
                     </div>
                   </div>
                 }
@@ -326,14 +306,15 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                 <Label htmlFor="status">{tForm("status")}</Label>
                 <Select
                   value={watch("status")}
-                  onValueChange={(val) => setValue("status", val as "active" | "draft")}
+                  onValueChange={(val) => setValue("status", val as "published" | "draft" | "archived")}
                 >
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">{tCommon("active")}</SelectItem>
-                    <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -346,11 +327,6 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
                   min={0}
                   {...register("sortOrder", { valueAsNumber: true })}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="icon">{tForm("icon")}</Label>
-                <Input id="icon" {...register("icon")} />
               </div>
             </CardContent>
           </Card>

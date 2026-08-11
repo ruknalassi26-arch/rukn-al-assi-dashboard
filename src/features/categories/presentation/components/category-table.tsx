@@ -157,8 +157,9 @@ export function CategoryTable() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                <SelectItem value="active">{tCommon("active")}</SelectItem>
-                <SelectItem value="draft">{tCommon("draft")}</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -267,14 +268,17 @@ export function CategoryTable() {
                       {/* Sort Order */}
                       <TableCell className="text-sm font-mono">{cat.sortOrder}</TableCell>
 
-                      {/* Status */}
                       <TableCell>
-                        {cat.isActive ? (
-                          <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold">
+                        {cat.status === "published" ? (
+                          <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-semibold capitalize">
+                            {cat.status}
+                          </Badge>
+                        ) : cat.status === "archived" ? (
+                          <Badge className="bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30 font-semibold capitalize">
                             {cat.status}
                           </Badge>
                         ) : (
-                          <Badge className="bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-semibold">
+                          <Badge className="bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-semibold capitalize">
                             {cat.status}
                           </Badge>
                         )}
