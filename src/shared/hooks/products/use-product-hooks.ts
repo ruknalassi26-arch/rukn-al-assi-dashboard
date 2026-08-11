@@ -103,11 +103,17 @@ export function useDuplicateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => duplicateProductUseCase.execute(id),
-    onSuccess: (duplicated) => {
+    onMutate: () => {
+      const toastId = toast.loading("Duplicating product...");
+      return { toastId };
+    },
+    onSuccess: (duplicated, _variables, context) => {
+      if (context?.toastId) toast.dismiss(context.toastId);
       queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
       toast.success(`Duplicated product "${duplicated.nameEn}" successfully`);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.toastId) toast.dismiss(context.toastId);
       toast.error(error.message || "Failed to duplicate product");
     },
   });

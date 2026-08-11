@@ -22,6 +22,7 @@ import {
   XCircle,
   Archive,
   ArrowUpDown,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -431,9 +432,18 @@ export function ProductTable() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => duplicateMutation.mutate(product.id)}
+                                disabled={duplicateMutation.isPending && duplicateMutation.variables === product.id}
                                 className="gap-2"
                               >
-                                <Copy className="h-4 w-4" /> Duplicate
+                                {duplicateMutation.isPending && duplicateMutation.variables === product.id ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin text-primary" /> Duplicating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="h-4 w-4" /> Duplicate
+                                  </>
+                                )}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
