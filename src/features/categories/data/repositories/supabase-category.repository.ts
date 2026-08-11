@@ -2,6 +2,7 @@
 // features/categories/data/repositories/supabase-category.repository.ts
 // Supabase Data Repository Implementation for Categories Management
 // Strictly matching product_categories and product_category_translations DB schema
+// No English fallback for Admin forms or DB operations
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
 import type {
@@ -143,20 +144,24 @@ export class SupabaseCategoryRepository implements ICategoryRepository {
     const categoryId = data.id;
     const dbCodes = await this.getValidLanguageCodes();
 
-    // 2. Insert into product_category_translations
+    // 2. Insert into product_category_translations ONLY for provided translations with non-empty name
     if (input.translations && Object.keys(input.translations).length > 0) {
-      const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
-        product_category_id: categoryId,
-        language_code: this.resolveLangCode(lang, dbCodes),
-        slug: val.slug,
-        name: val.name,
-        description: val.description ?? null,
-      }));
+      const transPayloads = Object.entries(input.translations)
+        .filter(([, val]) => val && val.name && val.name.trim() !== "")
+        .map(([lang, val]) => ({
+          product_category_id: categoryId,
+          language_code: this.resolveLangCode(lang, dbCodes),
+          slug: val.slug,
+          name: val.name.trim(),
+          description: val.description ?? null,
+        }));
 
-      const { error: transErr } = await (this.supabase.from("product_category_translations" as any) as any)
-        .insert(transPayloads);
+      if (transPayloads.length > 0) {
+        const { error: transErr } = await (this.supabase.from("product_category_translations" as any) as any)
+          .insert(transPayloads);
 
-      if (transErr) throw new Error(transErr.message || "Failed to create category translations");
+        if (transErr) throw new Error(transErr.message || "Failed to create category translations");
+      }
     }
 
     const created = await this.getCategoryById(categoryId);
@@ -180,21 +185,35 @@ export class SupabaseCategoryRepository implements ICategoryRepository {
       if (baseErr) throw new Error(baseErr.message || "Failed to update product category");
     }
 
-    // 2. Upsert product_category_translations
-    if (input.translations && Object.keys(input.translations).length > 0) {
+    // 2. Upsert / Delete product_category_translations independently per language
+    if (input.translations) {
       const dbCodes = await this.getValidLanguageCodes();
-      const transPayloads = Object.entries(input.translations).map(([lang, val]) => ({
-        product_category_id: input.id,
-        language_code: this.resolveLangCode(lang, dbCodes),
-        slug: val.slug,
-        name: val.name,
-        description: val.description ?? null,
-      }));
+      const languagesToCheck = ["en", "ar", "ku"];
 
-      for (const payload of transPayloads) {
-        const { error: transErr } = await (this.supabase.from("product_category_translations" as any) as any)
-          .upsert(payload, { onConflict: "product_category_id,language_code" });
-        if (transErr) throw new Error(transErr.message || "Failed to update category translations");
+      for (const langKey of languagesToCheck) {
+        const val = input.translations[langKey];
+        const targetLangCode = this.resolveLangCode(langKey, dbCodes);
+
+        if (val && val.name && val.name.trim() !== "") {
+          const { error: transErr } = await (this.supabase.from("product_category_translations" as any) as any)
+            .upsert(
+              {
+                product_category_id: input.id,
+                language_code: targetLangCode,
+                slug: val.slug,
+                name: val.name.trim(),
+                description: val.description ?? null,
+              },
+              { onConflict: "product_category_id,language_code" }
+            );
+          if (transErr) throw new Error(transErr.message || "Failed to update category translations");
+        } else if (langKey !== "en") {
+          // If a non-English language name is cleared by admin, remove its translation row
+          await (this.supabase.from("product_category_translations" as any) as any)
+            .delete()
+            .eq("product_category_id", input.id)
+            .eq("language_code", targetLangCode);
+        }
       }
     }
 
