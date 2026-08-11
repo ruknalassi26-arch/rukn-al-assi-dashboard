@@ -139,6 +139,48 @@ export class SupabaseAboutRepository implements IAboutRepository {
     return (await this.getCompanyInfo())!;
   }
 
+  async updateCompanyInfoTranslationsBatch(inputs: UpdateCompanyInfoTranslationInput[]): Promise<CompanyInfoEntity> {
+    let profileId = 1;
+    const { data: existing } = await (this.supabase.from("company_profile" as any) as any)
+      .select("id")
+      .limit(1)
+      .maybeSingle();
+
+    if (existing?.id) {
+      profileId = existing.id;
+    } else {
+      const { data: created, error: createErr } = await (this.supabase.from("company_profile" as any) as any)
+        .insert({ id: 1 })
+        .select("id")
+        .maybeSingle();
+      if (createErr) throw new Error(createErr.message || "Failed to initialize company profile row");
+      if (created?.id) profileId = created.id;
+    }
+
+    const dbCodes = await this.getValidLanguageCodes();
+
+    const payloads = inputs.map((input) => ({
+      company_profile_id: profileId,
+      language_code: this.resolveLangCode(input.language_code, dbCodes),
+      history: input.history || "",
+      mission: input.mission || "",
+      vision: input.vision || "",
+    }));
+
+    if (payloads.length > 0) {
+      const { error: upsertErr } = await (this.supabase.from("company_profile_translations" as any) as any).upsert(
+        payloads,
+        { onConflict: "company_profile_id,language_code" }
+      );
+
+      if (upsertErr) {
+        throw new Error(upsertErr.message || "Failed to update company profile information in database.");
+      }
+    }
+
+    return (await this.getCompanyInfo())!;
+  }
+
   // ============================================================================
   // 2. CORE VALUES
   // Tables: core_values (id, icon, sort_order, status, deleted_at)

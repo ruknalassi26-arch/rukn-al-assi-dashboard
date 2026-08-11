@@ -57,6 +57,7 @@ export interface IAboutRepository {
   // ---------- Company Info ----------
   getCompanyInfo(): Promise<CompanyInfoEntity | null>;
   updateCompanyInfoTranslation(input: UpdateCompanyInfoTranslationInput): Promise<CompanyInfoEntity>;
+  updateCompanyInfoTranslationsBatch(inputs: UpdateCompanyInfoTranslationInput[]): Promise<CompanyInfoEntity>;
 
   // ---------- Core Values ----------
   getCoreValues(): Promise<CoreValueEntity[]>;

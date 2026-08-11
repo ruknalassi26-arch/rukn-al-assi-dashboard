@@ -47,6 +47,21 @@ export function useUpdateCompanyInfoTranslation() {
   });
 }
 
+export function useUpdateCompanyInfoTranslationsBatch() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (inputs: UpdateCompanyInfoTranslationInput[]) =>
+      getRepo().updateCompanyInfoTranslationsBatch(inputs),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.about.companyInfo() });
+      toast.success("Company profile information updated successfully.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to update company profile information.");
+    },
+  });
+}
+
 // ---------- 2. Core Values ----------
 export function useCoreValues() {
   return useQuery({

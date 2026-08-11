@@ -22,7 +22,7 @@ import {
   TabsTrigger,
   Skeleton,
 } from "@shared/ui";
-import { useCompanyInfo, useUpdateCompanyInfoTranslation } from "@shared/hooks/about/use-about-hooks";
+import { useCompanyInfo, useUpdateCompanyInfoTranslationsBatch } from "@shared/hooks/about/use-about-hooks";
 import { useLanguages } from "@shared/hooks/settings/use-language-hooks";
 import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
 import { ErrorState } from "@shared/components/error-state";
@@ -60,14 +60,12 @@ export function CompanyInfoManager() {
   }, [activeLanguages, activeLang]);
 
   const { data: companyData, isLoading: isDataLoading, error, refetch } = useCompanyInfo();
-  const updateMutation = useUpdateCompanyInfoTranslation();
+  const updateBatchMutation = useUpdateCompanyInfoTranslationsBatch();
 
   // Dictionary state for all translations by language code
   const [translationsState, setTranslationsState] = useState<
     Record<string, { history: string; mission: string; vision: string }>
   >({});
-
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (companyData) {
@@ -96,27 +94,22 @@ export function CompanyInfoManager() {
     }));
   };
 
-  // Saves ALL languages using exact language codes from public.languages
+  // Saves ALL languages in one batch mutation (triggers 1 single toast)
   const handleSaveAll = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!canManage) return;
 
-    setIsSaving(true);
-    try {
-      for (const lang of activeLanguages) {
-        const fields = translationsState[lang.code] || { history: "", mission: "", vision: "" };
-        await updateMutation.mutateAsync({
-          language_code: lang.code,
-          history: fields.history,
-          mission: fields.mission,
-          vision: fields.vision,
-        });
-      }
-    } catch {
-      // Error handled by mutation toast
-    } finally {
-      setIsSaving(false);
-    }
+    const payload = activeLanguages.map((lang) => {
+      const fields = translationsState[lang.code] || { history: "", mission: "", vision: "" };
+      return {
+        language_code: lang.code,
+        history: fields.history,
+        mission: fields.mission,
+        vision: fields.vision,
+      };
+    });
+
+    await updateBatchMutation.mutateAsync(payload);
   };
 
   if (isDataLoading || isLangsLoading) {
@@ -177,10 +170,10 @@ export function CompanyInfoManager() {
               <Button
                 type="button"
                 onClick={() => handleSaveAll()}
-                disabled={isSaving || updateMutation.isPending}
+                disabled={updateBatchMutation.isPending}
                 className="gap-2 shrink-0 h-9"
               >
-                {isSaving || updateMutation.isPending ? (
+                {updateBatchMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4" />
