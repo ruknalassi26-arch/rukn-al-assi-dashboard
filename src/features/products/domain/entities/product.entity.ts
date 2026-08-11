@@ -13,12 +13,6 @@ export interface ProductTranslationProps {
   specifications?: Record<string, any> | null;
 }
 
-export interface SeoMetaProps {
-  metaTitle?: string | null;
-  metaDescription?: string | null;
-  ogImageUrl?: string | null;
-}
-
 export interface ProductImageProps {
   id?: string;
   imageUrl: string;
@@ -41,7 +35,6 @@ export interface ProductProps {
   updatedAt?: Date;
   images?: ProductImageProps[];
   translations: Record<string, ProductTranslationProps>;
-  seoMeta?: Record<string, SeoMetaProps>;
 }
 
 export class ProductEntity {
@@ -58,7 +51,6 @@ export class ProductEntity {
   public readonly updatedAt: Date;
   public readonly images: ProductImageProps[];
   public readonly translations: Record<string, ProductTranslationProps>;
-  public readonly seoMeta: Record<string, SeoMetaProps>;
 
   constructor(props: ProductProps) {
     this.id = props.id;
@@ -74,17 +66,11 @@ export class ProductEntity {
     this.updatedAt = props.updatedAt ?? new Date();
     this.images = props.images ?? [];
     this.translations = props.translations ?? {};
-    this.seoMeta = props.seoMeta ?? {};
   }
 
   public getTranslation(lang: string): ProductTranslationProps | null {
     const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
     return this.translations[lang] ?? this.translations[altLang] ?? null;
-  }
-
-  public getSeoMeta(lang: string): SeoMetaProps | null {
-    const altLang = lang === "ckb" ? "ku" : lang === "ku" ? "ckb" : lang;
-    return this.seoMeta[lang] ?? this.seoMeta[altLang] ?? null;
   }
 
   // Getters for backwards compatibility across existing UI components

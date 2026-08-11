@@ -39,22 +39,9 @@ export interface ProductImageRow {
   sort_order: number;
 }
 
-export interface SeoMetaRow {
-  id?: string;
-  entity_type: string;
-  entity_id: string;
-  language_code: string;
-  meta_title: string | null;
-  meta_description: string | null;
-  og_image_url: string | null;
-  canonical_url?: string | null;
-  schema_json?: Record<string, any> | null;
-}
-
 export interface ProductWithRelationsDTO extends ProductRow {
   product_translations?: ProductTranslationRow[];
   product_images?: ProductImageRow[];
-  seo_meta?: SeoMetaRow[];
   product_categories?: CategoryWithTranslationsDTO | null;
 }
 

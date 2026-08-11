@@ -5,7 +5,6 @@
 import {
   ProductEntity,
   type ProductTranslationProps,
-  type SeoMetaProps,
   type ProductImageProps,
 } from "../../domain/entities/product.entity";
 import { toCategoryEntity } from "@features/categories/data/mapper/category.mapper";
@@ -22,18 +21,6 @@ export function toProductEntity(dto: ProductWithRelationsDTO): ProductEntity {
         name: t.name || "",
         shortDescription: t.short_description || null,
         specifications: t.specifications || null,
-      };
-    }
-  }
-
-  const seoList = dto.seo_meta ?? [];
-  const seoMeta: Record<string, SeoMetaProps> = {};
-  for (const s of seoList) {
-    if (s.language_code) {
-      seoMeta[s.language_code] = {
-        metaTitle: s.meta_title || null,
-        metaDescription: s.meta_description || null,
-        ogImageUrl: s.og_image_url || null,
       };
     }
   }
@@ -63,6 +50,5 @@ export function toProductEntity(dto: ProductWithRelationsDTO): ProductEntity {
     updatedAt: dto.updated_at ? new Date(dto.updated_at) : new Date(),
     images,
     translations,
-    seoMeta,
   });
 }

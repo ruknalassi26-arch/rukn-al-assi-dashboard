@@ -31,12 +31,6 @@ export interface ProductTranslationInput {
   specifications?: Record<string, any> | null;
 }
 
-export interface SeoMetaInput {
-  metaTitle?: string | null;
-  metaDescription?: string | null;
-  ogImageUrl?: string | null;
-}
-
 export interface ProductImageInput {
   imageUrl: string;
   isPrimary: boolean;
@@ -52,7 +46,6 @@ export interface CreateProductInput {
   featuredOrder?: number;
   sortOrder?: number;
   translations: Record<string, ProductTranslationInput>;
-  seoMeta?: Record<string, SeoMetaInput>;
   images?: ProductImageInput[];
 }
 

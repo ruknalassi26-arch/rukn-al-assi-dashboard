@@ -1,7 +1,8 @@
 // ==============================================================================
 // features/products/data/repositories/supabase-product.repository.ts
 // Supabase Data Repository Implementation for Products Management
-// Strictly matching products, product_translations, product_images, & seo_meta DB schema
+// Strictly matching products, product_translations, product_images, & product_categories DB schema
+// Without querying invalid seo_meta foreign-key relationship
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
 import type {
@@ -76,7 +77,7 @@ export class SupabaseProductRepository implements IProductRepository {
     const sortOrder = params?.sortOrder ?? "desc";
 
     let query = (this.supabase.from("products" as any) as any)
-      .select("*, product_translations(*), product_images(*), seo_meta(*), product_categories(*, product_category_translations(*))", { count: "exact" })
+      .select("*, product_translations(*), product_images(*), product_categories(*, product_category_translations(*))", { count: "exact" })
       .is("deleted_at", null);
 
     if (params?.categoryId && params.categoryId !== "all") {
@@ -121,7 +122,7 @@ export class SupabaseProductRepository implements IProductRepository {
 
   async getProductById(id: string): Promise<ProductEntity | null> {
     const { data, error } = await (this.supabase.from("products" as any) as any)
-      .select("*, product_translations(*), product_images(*), seo_meta(*), product_categories(*, product_category_translations(*))")
+      .select("*, product_translations(*), product_images(*), product_categories(*, product_category_translations(*))")
       .eq("id", id)
       .single();
 
@@ -208,26 +209,6 @@ export class SupabaseProductRepository implements IProductRepository {
       if (imgErr) throw new Error(imgErr.message || "Failed to save product images");
     }
 
-    // 4. Insert into seo_meta
-    if (input.seoMeta && Object.keys(input.seoMeta).length > 0) {
-      const seoPayloads = Object.entries(input.seoMeta)
-        .filter(([, val]) => val && (val.metaTitle || val.metaDescription || val.ogImageUrl))
-        .map(([lang, val]) => ({
-          entity_type: "product",
-          entity_id: productId,
-          language_code: this.resolveLangCode(lang, dbCodes),
-          meta_title: val.metaTitle ?? null,
-          meta_description: val.metaDescription ?? null,
-          og_image_url: val.ogImageUrl ?? null,
-        }));
-
-      if (seoPayloads.length > 0) {
-        const { error: seoErr } = await (this.supabase.from("seo_meta" as any) as any)
-          .insert(seoPayloads);
-        if (seoErr) throw new Error(seoErr.message || "Failed to save SEO metadata");
-      }
-    }
-
     const created = await this.getProductById(productId);
     if (!created) throw new Error("Failed to retrieve created product");
     await this.logActivity("created", created.id, created.nameEn);
@@ -306,36 +287,6 @@ export class SupabaseProductRepository implements IProductRepository {
       }
     }
 
-    // 4. Update seo_meta
-    if (input.seoMeta !== undefined) {
-      for (const langKey of languagesToCheck) {
-        const val = input.seoMeta[langKey];
-        const targetLangCode = this.resolveLangCode(langKey, dbCodes);
-
-        if (val && (val.metaTitle || val.metaDescription || val.ogImageUrl)) {
-          const { error: seoErr } = await (this.supabase.from("seo_meta" as any) as any)
-            .upsert(
-              {
-                entity_type: "product",
-                entity_id: input.id,
-                language_code: targetLangCode,
-                meta_title: val.metaTitle ?? null,
-                meta_description: val.metaDescription ?? null,
-                og_image_url: val.ogImageUrl ?? null,
-              },
-              { onConflict: "entity_type,entity_id,language_code" }
-            );
-          if (seoErr) throw new Error(seoErr.message || "Failed to update SEO metadata");
-        } else {
-          await (this.supabase.from("seo_meta" as any) as any)
-            .delete()
-            .eq("entity_type", "product")
-            .eq("entity_id", input.id)
-            .eq("language_code", targetLangCode);
-        }
-      }
-    }
-
     const updated = await this.getProductById(input.id);
     if (!updated) throw new Error("Failed to retrieve updated product");
     await this.logActivity("updated", updated.id, updated.nameEn);
@@ -376,7 +327,6 @@ export class SupabaseProductRepository implements IProductRepository {
       featuredOrder: 0,
       sortOrder: existing.sortOrder,
       translations: newTranslations,
-      seoMeta: existing.seoMeta,
       images: existing.images,
     });
   }

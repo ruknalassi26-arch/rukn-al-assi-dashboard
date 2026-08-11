@@ -41,17 +41,10 @@ const productSchema = z.object({
   specificationsEn: z.string().optional().nullable(),
   specificationsAr: z.string().optional().nullable(),
   specificationsKu: z.string().optional().nullable(),
-  seoTitleEn: z.string().optional().nullable(),
-  seoTitleAr: z.string().optional().nullable(),
-  seoTitleKu: z.string().optional().nullable(),
-  seoDescriptionEn: z.string().optional().nullable(),
-  seoDescriptionAr: z.string().optional().nullable(),
-  seoDescriptionKu: z.string().optional().nullable(),
   categoryId: z.string().optional().nullable(),
   images: z.array(z.object({ url: z.string() })),
   thumbnail: z.string().optional().nullable(),
   datasheetUrl: z.string().optional().nullable(),
-  seoImage: z.string().optional().nullable(),
   status: z.enum(["published", "draft", "archived"]),
   isFeatured: z.boolean(),
   featuredOrder: z.number().min(0).optional(),
@@ -113,10 +106,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
   const arTrans = initialData?.getTranslation("ar");
   const kuTrans = initialData?.getTranslation("ku");
 
-  const enSeo = initialData?.getSeoMeta("en");
-  const arSeo = initialData?.getSeoMeta("ar");
-  const kuSeo = initialData?.getSeoMeta("ku");
-
   const {
     register,
     handleSubmit,
@@ -139,17 +128,10 @@ export function ProductForm({ initialData }: ProductFormProps) {
       specificationsEn: formatSpecificationsForEdit(enTrans?.specifications),
       specificationsAr: formatSpecificationsForEdit(arTrans?.specifications),
       specificationsKu: formatSpecificationsForEdit(kuTrans?.specifications),
-      seoTitleEn: enSeo?.metaTitle ?? "",
-      seoTitleAr: arSeo?.metaTitle ?? "",
-      seoTitleKu: kuSeo?.metaTitle ?? "",
-      seoDescriptionEn: enSeo?.metaDescription ?? "",
-      seoDescriptionAr: arSeo?.metaDescription ?? "",
-      seoDescriptionKu: kuSeo?.metaDescription ?? "",
       categoryId: initialData?.categoryId ?? "",
       images: (initialData?.galleryImages ?? []).map((url) => ({ url })),
       thumbnail: initialData?.thumbnail ?? null,
       datasheetUrl: initialData?.datasheetUrl ?? null,
-      seoImage: enSeo?.ogImageUrl ?? arSeo?.ogImageUrl ?? kuSeo?.ogImageUrl ?? null,
       status: (initialData?.status as "published" | "draft" | "archived") ?? "published",
       isFeatured: initialData?.isFeatured ?? false,
       featuredOrder: initialData?.featuredOrder ?? 0,
@@ -167,9 +149,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
       const eT = initialData.getTranslation("en");
       const aT = initialData.getTranslation("ar");
       const kT = initialData.getTranslation("ku");
-      const eS = initialData.getSeoMeta("en");
-      const aS = initialData.getSeoMeta("ar");
-      const kS = initialData.getSeoMeta("ku");
 
       reset({
         sku: initialData.sku ?? "",
@@ -183,17 +162,10 @@ export function ProductForm({ initialData }: ProductFormProps) {
         specificationsEn: formatSpecificationsForEdit(eT?.specifications),
         specificationsAr: formatSpecificationsForEdit(aT?.specifications),
         specificationsKu: formatSpecificationsForEdit(kT?.specifications),
-        seoTitleEn: eS?.metaTitle ?? "",
-        seoTitleAr: aS?.metaTitle ?? "",
-        seoTitleKu: kS?.metaTitle ?? "",
-        seoDescriptionEn: eS?.metaDescription ?? "",
-        seoDescriptionAr: aS?.metaDescription ?? "",
-        seoDescriptionKu: kS?.metaDescription ?? "",
         categoryId: initialData.categoryId ?? "",
         images: (initialData.galleryImages ?? []).map((url) => ({ url })),
         thumbnail: initialData.thumbnail,
         datasheetUrl: initialData.datasheetUrl,
-        seoImage: eS?.ogImageUrl ?? aS?.ogImageUrl ?? kS?.ogImageUrl ?? null,
         status: (initialData.status as "published" | "draft" | "archived") ?? "published",
         isFeatured: initialData.isFeatured,
         featuredOrder: initialData.featuredOrder ?? 0,
@@ -208,7 +180,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
   const isFeaturedValue = watch("isFeatured");
   const thumbnailValue = watch("thumbnail");
   const datasheetUrlValue = watch("datasheetUrl");
-  const seoImageValue = watch("seoImage");
 
   const generateSlug = () => {
     if (!nameEnValue) return;
@@ -252,31 +223,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
       };
     }
 
-    // 2. SEO Meta dictionary
-    const seoMeta: Record<string, any> = {};
-    if (values.seoTitleEn || values.seoDescriptionEn || values.seoImage) {
-      seoMeta.en = {
-        metaTitle: values.seoTitleEn || null,
-        metaDescription: values.seoDescriptionEn || null,
-        ogImageUrl: values.seoImage || null,
-      };
-    }
-    if (values.seoTitleAr || values.seoDescriptionAr || values.seoImage) {
-      seoMeta.ar = {
-        metaTitle: values.seoTitleAr || null,
-        metaDescription: values.seoDescriptionAr || null,
-        ogImageUrl: values.seoImage || null,
-      };
-    }
-    if (values.seoTitleKu || values.seoDescriptionKu || values.seoImage) {
-      seoMeta.ku = {
-        metaTitle: values.seoTitleKu || null,
-        metaDescription: values.seoDescriptionKu || null,
-        ogImageUrl: values.seoImage || null,
-      };
-    }
-
-    // 3. Structured Product Images Array
+    // 2. Structured Product Images Array
     const images: Array<{ imageUrl: string; isPrimary: boolean; sortOrder: number }> = [];
     if (values.thumbnail) {
       images.push({
@@ -306,7 +253,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
       featuredOrder: values.featuredOrder ?? 0,
       sortOrder: values.sortOrder ?? 0,
       translations,
-      seoMeta,
       images,
     };
 
@@ -381,20 +327,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                         placeholder={"Pressure: 250 bar\nFlow Rate: 120 L/min\nMaterial: Stainless Steel"}
                         {...register("specificationsEn")}
                       />
-                      <p className="text-[11px] text-muted-foreground">Enter technical specifications (e.g. Key: Value pairs per line).</p>
-                    </div>
-
-                    {/* SEO English Sub-section */}
-                    <div className="border p-4 rounded-lg bg-muted/10 space-y-3">
-                      <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingEn")}</h4>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="seoTitleEn">{tForm("seoTitleEn")}</Label>
-                        <Input id="seoTitleEn" {...register("seoTitleEn")} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="seoDescriptionEn">{tForm("seoDescEn")}</Label>
-                        <Textarea id="seoDescriptionEn" rows={2} {...register("seoDescriptionEn")} />
-                      </div>
+                      <p className="text-[11px] text-muted-foreground">Enter technical specifications (Key: Value pairs per line).</p>
                     </div>
                   </div>
                 }
@@ -420,19 +353,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
                         {...register("specificationsAr")}
                       />
                     </div>
-
-                    {/* SEO Arabic Sub-section */}
-                    <div className="border p-4 rounded-lg bg-muted/10 space-y-3">
-                      <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingAr")}</h4>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="seoTitleAr">{tForm("seoTitleAr")}</Label>
-                        <Input id="seoTitleAr" dir="rtl" {...register("seoTitleAr")} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="seoDescriptionAr">{tForm("seoDescAr")}</Label>
-                        <Textarea id="seoDescriptionAr" dir="rtl" rows={2} {...register("seoDescriptionAr")} />
-                      </div>
-                    </div>
                   </div>
                 }
                 kurdishFields={
@@ -456,19 +376,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
                         placeholder={"پەستان: 250 بار"}
                         {...register("specificationsKu")}
                       />
-                    </div>
-
-                    {/* SEO Kurdish Sub-section */}
-                    <div className="border p-4 rounded-lg bg-muted/10 space-y-3">
-                      <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">{tForm("seoHeadingKu")}</h4>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="seoTitleKu">{tForm("seoTitleKu")}</Label>
-                        <Input id="seoTitleKu" dir="rtl" {...register("seoTitleKu")} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="seoDescriptionKu">{tForm("seoDescKu")}</Label>
-                        <Textarea id="seoDescriptionKu" dir="rtl" rows={2} {...register("seoDescriptionKu")} />
-                      </div>
                     </div>
                   </div>
                 }
@@ -554,15 +461,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
                   hintText="PDF (max 10MB)"
                 />
               </div>
-
-              {/* SEO Banner / OG Image */}
-              <ImageUploader
-                label={tForm("ogImage")}
-                value={seoImageValue ?? null}
-                onChange={(url) => setValue("seoImage", url)}
-                bucket="product-images"
-                folder="seo"
-              />
             </CardContent>
           </Card>
         </div>
