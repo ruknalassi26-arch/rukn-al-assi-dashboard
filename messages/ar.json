@@ -64,6 +64,8 @@
     "submit": "إرسال",
     "cancel": "إلغاء",
     "save": "حفظ",
+    "saving": "جاري الحفظ...",
+    "saveChanges": "حفظ التغييرات",
     "delete": "حذف",
     "edit": "تعديل",
     "search": "بحث",
