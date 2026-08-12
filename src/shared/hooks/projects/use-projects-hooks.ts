@@ -1,13 +1,10 @@
 "use client";
 // ==============================================================================
 // shared/hooks/projects/use-projects-hooks.ts
-// Centralized TanStack Query Hooks for Projects Feature
-// Strictly matching project_categories (id, status, deleted_at)
-// and project_category_translations (project_category_id, language_code, slug, name, description)
+// Centralized TanStack Query Hooks for Projects & Project Categories
 // ==============================================================================
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@core/constants/query-keys";
-import { createClient } from "@core/lib/supabase/client";
 import { SupabaseProjectRepository } from "@features/projects/data/repositories/supabase-project.repository";
 import {
   GetProjectsUseCase,
@@ -25,87 +22,18 @@ import type {
   UpdateProjectInput,
 } from "@features/projects/domain/repositories/i-project.repository";
 import type { ProjectStatus } from "@features/projects/domain/entities/project.entity";
+import type { ProjectCategoryEntity } from "@features/projects/domain/entities/project-category.entity";
 import { toast } from "sonner";
 
 const repository = new SupabaseProjectRepository();
 
-export interface ProjectCategoryOption {
-  id: string;
-  nameEn: string;
-  nameAr?: string | null;
-  nameKu?: string | null;
-}
-
 export function useProjectCategoriesQuery() {
   return useQuery({
     queryKey: ["project-categories"],
-    queryFn: async (): Promise<ProjectCategoryOption[]> => {
-      const supabase = createClient();
-      try {
-        const { data, error } = await (supabase.from("project_categories" as any) as any)
-          .select("id, project_category_translations(language_code, name)")
-          .is("deleted_at", null);
-
-        if (!error && data && data.length > 0) {
-          return (data as any[]).map((item) => {
-            const trans = item.project_category_translations || [];
-            const en = trans.find((t: any) => t.language_code === "en") || {};
-            const ar = trans.find((t: any) => t.language_code === "ar") || {};
-            const ku = trans.find((t: any) => t.language_code === "ku" || t.language_code === "ckb") || {};
-            return {
-              id: item.id,
-              nameEn: en.name || "Category",
-              nameAr: ar.name || null,
-              nameKu: ku.name || null,
-            };
-          });
-        }
-
-        // Fallback sync from product_categories if project_categories is empty
-        const { data: prodData } = await (supabase.from("product_categories" as any) as any)
-          .select("id, status, product_category_translations(language_code, name, slug, description)")
-          .is("deleted_at", null);
-
-        if (!prodData || prodData.length === 0) return [];
-
-        for (const item of prodData as any[]) {
-          await (supabase.from("project_categories" as any) as any).upsert({
-            id: item.id,
-            status: item.status ?? "published",
-          });
-
-          const trans = item.product_category_translations || [];
-          for (const t of trans) {
-            await (supabase.from("project_category_translations" as any) as any).upsert(
-              {
-                project_category_id: item.id,
-                language_code: t.language_code,
-                slug: t.slug,
-                name: t.name,
-                description: t.description,
-              },
-              { onConflict: "project_category_id,language_code" }
-            );
-          }
-        }
-
-        return (prodData as any[]).map((item) => {
-          const trans = item.product_category_translations || [];
-          const en = trans.find((t: any) => t.language_code === "en") || {};
-          const ar = trans.find((t: any) => t.language_code === "ar") || {};
-          const ku = trans.find((t: any) => t.language_code === "ku" || t.language_code === "ckb") || {};
-          return {
-            id: item.id,
-            nameEn: en.name || "Category",
-            nameAr: ar.name || null,
-            nameKu: ku.name || null,
-          };
-        });
-      } catch {
-        return [];
-      }
+    queryFn: async (): Promise<ProjectCategoryEntity[]> => {
+      return repository.getProjectCategories();
     },
-    staleTime: 30 * 1000,
+    staleTime: 60 * 1000,
   });
 }
 

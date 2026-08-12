@@ -501,19 +501,11 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none" className="text-xs">{t("form.noCategory")}</SelectItem>
-                    {categories.map((cat) => {
-                      const label =
-                        locale === "ar" && cat.nameAr
-                          ? cat.nameAr
-                          : (locale === "ckb" || locale === "ku") && cat.nameKu
-                          ? cat.nameKu
-                          : cat.nameEn;
-                      return (
-                        <SelectItem key={cat.id} value={cat.id} className="text-xs">
-                          {label}
-                        </SelectItem>
-                      );
-                    })}
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id} className="text-xs">
+                        {cat.getLocalizedName(locale)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

@@ -3,6 +3,7 @@
 // IProjectRepository Contract Interface strictly matching Supabase SQL Schema
 // ==============================================================================
 import type { ProjectEntity, ProjectStatus } from "../entities/project.entity";
+import type { ProjectCategoryEntity } from "../entities/project-category.entity";
 
 export interface ProjectFilters {
   search?: string;
@@ -67,4 +68,5 @@ export interface IProjectRepository {
   bulkDeleteProjects(ids: string[]): Promise<void>;
   toggleProjectStatus(id: string, status: ProjectStatus): Promise<ProjectEntity>;
   toggleProjectFeatured(id: string, isFeatured: boolean): Promise<ProjectEntity>;
+  getProjectCategories(): Promise<ProjectCategoryEntity[]>;
 }

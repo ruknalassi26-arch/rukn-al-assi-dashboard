@@ -1,7 +1,7 @@
 // ==============================================================================
 // features/projects/data/repositories/supabase-project.repository.ts
-// Supabase Data Repository Implementation for Projects Feature
-// Strictly matching SQL Schema (projects, project_translations, project_images)
+// Supabase Data Repository Implementation for Projects & Project Categories
+// Strictly matching SQL Schema (projects, project_translations, project_images, project_categories, project_category_translations)
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
 import type {
@@ -12,6 +12,9 @@ import type {
   UpdateProjectInput,
 } from "../../domain/repositories/i-project.repository";
 import { ProjectEntity, type ProjectStatus } from "../../domain/entities/project.entity";
+import { ProjectCategoryEntity } from "../../domain/entities/project-category.entity";
+import { toProjectCategoryEntity } from "../mapper/project-category.mapper";
+import type { ProjectCategoryJoinDTO } from "../dto/project-category.dto";
 
 interface TranslationDTO {
   project_id: string;
@@ -94,12 +97,26 @@ export class SupabaseProjectRepository implements IProjectRepository {
     return createClient();
   }
 
+  async getProjectCategories(): Promise<ProjectCategoryEntity[]> {
+    try {
+      const { data, error } = await (this.supabase.from("project_categories" as any) as any)
+        .select("*, project_category_translations(*)")
+        .is("deleted_at", null);
+
+      if (error || !data) return [];
+      return (data as unknown as ProjectCategoryJoinDTO[]).map(toProjectCategoryEntity);
+    } catch {
+      return [];
+    }
+  }
+
   private async resolveValidCategoryId(categoryId?: string | null): Promise<string | null> {
     if (!categoryId || categoryId === "none" || categoryId.trim() === "") return null;
     try {
       const { data } = await (this.supabase.from("project_categories" as any) as any)
         .select("id")
         .eq("id", categoryId.trim())
+        .is("deleted_at", null)
         .maybeSingle();
       return data?.id ?? null;
     } catch {
