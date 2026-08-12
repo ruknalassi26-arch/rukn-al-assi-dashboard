@@ -94,6 +94,19 @@ export class SupabaseProjectRepository implements IProjectRepository {
     return createClient();
   }
 
+  private async resolveValidCategoryId(categoryId?: string | null): Promise<string | null> {
+    if (!categoryId || categoryId === "none" || categoryId.trim() === "") return null;
+    try {
+      const { data } = await (this.supabase.from("product_categories" as any) as any)
+        .select("id")
+        .eq("id", categoryId.trim())
+        .maybeSingle();
+      return data?.id ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   private async logActivity(
     action: "created" | "updated" | "deleted",
     entityId: string | null,
@@ -184,9 +197,11 @@ export class SupabaseProjectRepository implements IProjectRepository {
   }
 
   async createProject(input: CreateProjectInput): Promise<ProjectEntity> {
+    const validCategoryId = await this.resolveValidCategoryId(input.categoryId);
+
     const { data, error } = await (this.supabase.from("projects" as any) as any)
       .insert({
-        category_id: input.categoryId || null,
+        category_id: validCategoryId,
         client_name: input.clientName || null,
         location: input.location || null,
         completion_date: input.completionDate || null,
@@ -260,7 +275,10 @@ export class SupabaseProjectRepository implements IProjectRepository {
 
   async updateProject(input: UpdateProjectInput): Promise<ProjectEntity> {
     const updatePayload: Record<string, any> = {};
-    if (input.categoryId !== undefined) updatePayload.category_id = input.categoryId || null;
+
+    if (input.categoryId !== undefined) {
+      updatePayload.category_id = await this.resolveValidCategoryId(input.categoryId);
+    }
     if (input.clientName !== undefined) updatePayload.client_name = input.clientName || null;
     if (input.location !== undefined) updatePayload.location = input.location || null;
     if (input.completionDate !== undefined) updatePayload.completion_date = input.completionDate || null;
