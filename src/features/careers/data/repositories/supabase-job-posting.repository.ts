@@ -1,6 +1,7 @@
 // ==============================================================================
 // features/careers/data/repositories/supabase-job-posting.repository.ts
 // Supabase Implementation of JobPostingRepository
+// Strictly matching job_postings DB schema (closes_at column, not closing_date)
 // ==============================================================================
 
 import { createClient } from "@core/lib/supabase/client";
@@ -52,7 +53,7 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
       department: row.department ?? null,
       employmentType: row.employment_type ?? "full_time",
       location: row.location ?? null,
-      closingDate: row.closing_date ?? null,
+      closingDate: row.closes_at ?? null,
       sortOrder: row.sort_order ?? 0,
       status: row.status ?? "draft",
       createdAt: row.created_at,
@@ -134,7 +135,7 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
       department: posting.department ?? null,
       employment_type: posting.employmentType,
       location: posting.location ?? null,
-      closing_date: posting.closingDate ?? null,
+      closes_at: posting.closingDate ?? null,
       sort_order: posting.sortOrder ?? 0,
       status: posting.status ?? "draft",
     };
@@ -169,7 +170,7 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
     if (posting.department !== undefined) payload.department = posting.department;
     if (posting.employmentType !== undefined) payload.employment_type = posting.employmentType;
     if (posting.location !== undefined) payload.location = posting.location;
-    if (posting.closingDate !== undefined) payload.closing_date = posting.closingDate;
+    if (posting.closingDate !== undefined) payload.closes_at = posting.closingDate;
     if (posting.sortOrder !== undefined) payload.sort_order = posting.sortOrder;
     if (posting.status !== undefined) payload.status = posting.status;
     payload.updated_at = new Date().toISOString();

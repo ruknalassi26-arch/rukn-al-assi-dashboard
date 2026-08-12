@@ -694,7 +694,7 @@ export interface Database {
           department: string | null;
           employment_type: "full_time" | "part_time" | "contract" | "internship";
           location: string | null;
-          closing_date: string | null;
+          closes_at: string | null;
           sort_order: number;
           status: "draft" | "published" | "archived";
           created_at: string;
