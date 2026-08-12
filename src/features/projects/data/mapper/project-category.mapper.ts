@@ -21,9 +21,6 @@ export function toProjectCategoryEntity(dto: ProjectCategoryJoinDTO): ProjectCat
     slugEn: en.slug || null,
     slugAr: ar.slug || null,
     slugKu: ku.slug || null,
-    descriptionEn: en.description || null,
-    descriptionAr: ar.description || null,
-    descriptionKu: ku.description || null,
     createdAt: dto.created_at ? new Date(dto.created_at) : new Date(),
     updatedAt: dto.updated_at ? new Date(dto.updated_at) : new Date(),
   });
