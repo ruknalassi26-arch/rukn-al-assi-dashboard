@@ -38,7 +38,7 @@ export function BranchDetailsDrawer() {
               <span>{t("title")}</span>
             </div>
             {branch && (
-              <Link href={`/admin/contact/branches/edit/${branch.id}`} onClick={() => closeDrawer()}>
+              <Link href={`/admin/branches/edit/${branch.id}`} onClick={() => closeDrawer()}>
                 <Button size="sm" variant="outline" className="gap-1.5">
                   <Edit className="h-4 w-4" /> {tCommon("edit")}
                 </Button>

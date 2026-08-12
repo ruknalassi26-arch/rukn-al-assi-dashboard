@@ -188,8 +188,6 @@ export class SupabaseContactRepository implements IContactRepository {
       status: mapStatusToDb(input.status),
     };
 
-    console.log("[Supabase INSERT branches payload]:", branchPayload);
-
     const { data: branchRow, error: branchError } = await (this.supabase.from("branches" as any) as any)
       .insert(branchPayload)
       .select("*")
@@ -213,12 +211,8 @@ export class SupabaseContactRepository implements IContactRepository {
       });
     }
 
-    const { error: transError } = await (this.supabase.from("branch_translations" as any) as any)
+    await (this.supabase.from("branch_translations" as any) as any)
       .insert(translationsPayload);
-
-    if (transError) {
-      console.error("Failed to insert branch translations:", transError.message);
-    }
 
     const created = (await this.getBranchById(branchRow.id))!;
     await this.logActivity("created", created.id, created.nameEn);
@@ -235,8 +229,6 @@ export class SupabaseContactRepository implements IContactRepository {
       sort_order: input.sortOrder ?? 0,
       status: mapStatusToDb(input.status),
     };
-
-    console.log("[Supabase PATCH branches payload]:", branchPayload);
 
     const { error: branchError } = await (this.supabase.from("branches" as any) as any)
       .update(branchPayload)
@@ -287,7 +279,6 @@ export class SupabaseContactRepository implements IContactRepository {
   async bulkUpdateBranchStatus(ids: string[], status: BranchStatus): Promise<void> {
     if (ids.length === 0) return;
     const dbStatus = mapStatusToDb(status);
-    console.log("[Supabase PATCH bulk status payload]:", { ids, status: dbStatus });
     await (this.supabase.from("branches" as any) as any)
       .update({ status: dbStatus })
       .in("id", ids);

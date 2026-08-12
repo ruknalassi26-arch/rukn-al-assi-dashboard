@@ -157,7 +157,7 @@ export function BranchTable() {
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="gap-1.5">
             <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> {t("refresh")}
           </Button>
-          <Link href="/admin/contact/branches/create">
+          <Link href="/admin/branches/create">
             <Button size="sm" className="gap-1.5">
               <Plus className="h-4 w-4" /> {t("addBranch")}
             </Button>
@@ -271,7 +271,7 @@ export function BranchTable() {
                         title={t("emptyTitle")}
                         description={t("emptyDescription")}
                         action={
-                          <Link href="/admin/contact/branches/create">
+                          <Link href="/admin/branches/create">
                             <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" />{t("addBranch")}</Button>
                           </Link>
                         }
@@ -359,7 +359,7 @@ export function BranchTable() {
                                 <Eye className="mr-2 h-4 w-4 text-blue-500" /> View Details
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link href={`/admin/contact/branches/edit/${branch.id}`}>
+                                <Link href={`/admin/branches/edit/${branch.id}`}>
                                   <Edit className="mr-2 h-4 w-4 text-emerald-500" /> Edit Branch
                                 </Link>
                               </DropdownMenuItem>

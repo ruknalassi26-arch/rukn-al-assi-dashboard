@@ -125,7 +125,7 @@ export function BranchForm({ initialData }: BranchFormProps) {
       } else {
         await createBranchMutation.mutateAsync(values);
       }
-      router.push("/admin/contact");
+      router.push("/admin/branches");
     } catch {
       // Toast notifications handled in mutations
     }
@@ -140,7 +140,7 @@ export function BranchForm({ initialData }: BranchFormProps) {
             type="button"
             variant="outline"
             size="icon"
-            onClick={() => router.push("/admin/contact")}
+            onClick={() => router.push("/admin/branches")}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -158,7 +158,7 @@ export function BranchForm({ initialData }: BranchFormProps) {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/admin/contact")}
+            onClick={() => router.push("/admin/branches")}
             disabled={isSubmitting}
           >
             {tForm("cancel")}
