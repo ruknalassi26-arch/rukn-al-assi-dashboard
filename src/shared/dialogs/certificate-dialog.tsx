@@ -40,7 +40,6 @@ const certificateSchema = z.object({
   descriptionKu: z.string().optional().nullable(),
   image: z.string().optional().nullable(),
   issueDate: z.string().optional().nullable(),
-  expiryDate: z.string().optional().nullable(),
   organization: z.string().optional().nullable(),
   sortOrder: z.number().min(0),
   status: z.enum(["active", "draft"]),
@@ -85,7 +84,6 @@ export function CertificateDialog({
       descriptionKu: "",
       image: null,
       issueDate: "",
-      expiryDate: "",
       organization: "",
       sortOrder: 1,
       status: "active",
@@ -107,7 +105,6 @@ export function CertificateDialog({
           descriptionKu: ku.description || "",
           image: initialData.imageUrl,
           issueDate: formatDateForInput(initialData.issuedDate),
-          expiryDate: formatDateForInput((initialData as any).expiryDate),
           organization: initialData.issuedBy ?? "",
           sortOrder: initialData.sortOrder,
           status: initialData.status === "published" ? "active" : (initialData.status as any),
@@ -122,7 +119,6 @@ export function CertificateDialog({
           descriptionKu: ((initialData as unknown as Record<string, unknown>).descriptionKu as string) ?? "",
           image: initialData.image,
           issueDate: formatDateForInput((initialData as any).issueDate),
-          expiryDate: formatDateForInput((initialData as any).expiryDate),
           organization: (initialData as any).organization ?? "",
           sortOrder: initialData.sortOrder,
           status: initialData.status,
@@ -138,7 +134,6 @@ export function CertificateDialog({
         descriptionKu: "",
         image: null,
         issueDate: "",
-        expiryDate: "",
         organization: "",
         sortOrder: 1,
         status: "active",
@@ -212,7 +207,7 @@ export function CertificateDialog({
             }
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t pt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t pt-3">
             <div>
               <Label className="text-xs" htmlFor="organization">{tDialogs("issuerEn")}</Label>
               <Input id="organization" {...register("organization")} placeholder="e.g. TÜV Rheinland" />
@@ -220,10 +215,6 @@ export function CertificateDialog({
             <div>
               <Label className="text-xs" htmlFor="issueDate">{tDialogs("issueDate")}</Label>
               <Input id="issueDate" type="date" {...register("issueDate")} />
-            </div>
-            <div>
-              <Label className="text-xs" htmlFor="expiryDate">{tDialogs("expiryDate")}</Label>
-              <Input id="expiryDate" type="date" {...register("expiryDate")} />
             </div>
           </div>
 

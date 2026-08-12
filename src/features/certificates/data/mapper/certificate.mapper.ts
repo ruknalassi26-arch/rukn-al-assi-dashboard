@@ -16,7 +16,6 @@ export function toCertificateEntity(dto: CertificateDTO): CertificateEntity {
     descriptionKu: dto.description_ku ?? null,
     image: dto.image,
     issueDate: dto.issue_date,
-    expiryDate: dto.expiry_date,
     organization: dto.organization,
     organizationAr: dto.organization_ar ?? null,
     organizationKu: dto.organization_ku ?? null,

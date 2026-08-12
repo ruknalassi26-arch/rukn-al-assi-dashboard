@@ -35,7 +35,7 @@ export function EditCertificatePage({ certificateId }: EditCertificatePageProps)
 
   return (
     <CertificateForm
-      key={`${certificate.id}-${certificate.issueDate ?? ""}-${certificate.expiryDate ?? ""}`}
+      key={`${certificate.id}-${certificate.issueDate ?? ""}`}
       initialData={certificate}
     />
   );

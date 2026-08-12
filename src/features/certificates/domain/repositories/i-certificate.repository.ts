@@ -1,6 +1,6 @@
 // ==============================================================================
 // features/certificates/domain/repositories/i-certificate.repository.ts
-// ICertificateRepository Contract Interface
+// ICertificateRepository Contract Interface strictly matching Supabase SQL Schema
 // ==============================================================================
 import type { CertificateEntity, CertificateStatus } from "../entities/certificate.entity";
 
@@ -30,7 +30,6 @@ export interface CreateCertificateInput {
   descriptionKu?: string | null;
   image?: string | null;
   issueDate?: string | null;
-  expiryDate?: string | null;
   organization?: string | null;
   organizationAr?: string | null;
   organizationKu?: string | null;

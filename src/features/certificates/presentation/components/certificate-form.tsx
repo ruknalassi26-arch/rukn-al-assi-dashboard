@@ -41,7 +41,6 @@ const certificateSchema = z.object({
   organizationKu: z.string().optional().nullable(),
   image: z.string().optional().nullable(),
   issueDate: z.string().optional().nullable(),
-  expiryDate: z.string().optional().nullable(),
   status: z.enum(["active", "draft"]),
   sortOrder: z.number().min(0),
 });
@@ -76,7 +75,6 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
       organizationKu: initialData?.organizationKu ?? "",
       image: initialData?.image ?? "",
       issueDate: formatDateForInput(initialData?.issueDate),
-      expiryDate: formatDateForInput(initialData?.expiryDate),
       status: initialData?.status ?? "active",
       sortOrder: initialData?.sortOrder ?? 0,
     },
@@ -98,7 +96,6 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
         organizationKu: initialData.organizationKu ?? "",
         image: initialData.image ?? "",
         issueDate: formatDateForInput(initialData.issueDate),
-        expiryDate: formatDateForInput(initialData.expiryDate),
         status: initialData.status ?? "active",
         sortOrder: initialData.sortOrder ?? 0,
       });
@@ -110,7 +107,6 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
       const payload = {
         ...values,
         issueDate: values.issueDate && values.issueDate.trim() !== "" ? values.issueDate.trim() : null,
-        expiryDate: values.expiryDate && values.expiryDate.trim() !== "" ? values.expiryDate.trim() : null,
       };
 
       if (isEditing && initialData) {
@@ -312,15 +308,6 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
                   id="issueDate"
                   type="date"
                   {...register("issueDate")}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="expiryDate">{tForm("expiryDate")}</Label>
-                <Input
-                  id="expiryDate"
-                  type="date"
-                  {...register("expiryDate")}
                 />
               </div>
 

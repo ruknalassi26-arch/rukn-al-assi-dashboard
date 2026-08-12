@@ -1,7 +1,7 @@
 // ==============================================================================
 // features/certificates/data/repositories/supabase-certificate.repository.ts
 // Supabase Data Repository Implementation for Certificates Management
-// Strictly matching official SQL Schema (certifications & certification_translations)
+// Strictly matching official SQL Schema for certifications and certification_translations
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
 import type {
@@ -84,7 +84,6 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
           descriptionKu: ku.description || null,
           image: item.image_url || null,
           issueDate: item.issued_date ? formatDateForInput(item.issued_date) : null,
-          expiryDate: item.expiry_date ? formatDateForInput(item.expiry_date) : null,
           organization: item.issued_by || null,
           organizationAr: null,
           organizationKu: null,
@@ -128,7 +127,6 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
         descriptionKu: ku.description || null,
         image: data.image_url || null,
         issueDate: data.issued_date ? formatDateForInput(data.issued_date) : null,
-        expiryDate: data.expiry_date ? formatDateForInput(data.expiry_date) : null,
         organization: data.issued_by || null,
         organizationAr: null,
         organizationKu: null,
@@ -143,15 +141,16 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
   }
 
   async createCertificate(input: CreateCertificateInput): Promise<CertificateEntity> {
+    const insertPayload: Record<string, any> = {
+      image_url: input.image ?? "",
+      issued_by: input.organization ?? null,
+      issued_date: cleanDateValue(input.issueDate),
+      sort_order: input.sortOrder ?? 0,
+      status: input.status === "active" ? "published" : "draft",
+    };
+
     const { data, error } = await (this.supabase.from("certifications" as any) as any)
-      .insert({
-        image_url: input.image ?? null,
-        issued_by: input.organization ?? null,
-        issued_date: cleanDateValue(input.issueDate),
-        expiry_date: cleanDateValue(input.expiryDate),
-        sort_order: input.sortOrder ?? 0,
-        status: input.status === "active" ? "published" : "draft",
-      })
+      .insert(insertPayload)
       .select("*")
       .single();
 
@@ -182,14 +181,14 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
     if (input.image !== undefined) updatePayload.image_url = input.image;
     if (input.organization !== undefined) updatePayload.issued_by = input.organization;
     if (input.issueDate !== undefined) updatePayload.issued_date = cleanDateValue(input.issueDate);
-    if (input.expiryDate !== undefined) updatePayload.expiry_date = cleanDateValue(input.expiryDate);
     if (input.sortOrder !== undefined) updatePayload.sort_order = input.sortOrder;
     if (input.status !== undefined) updatePayload.status = input.status === "active" ? "published" : "draft";
 
     if (Object.keys(updatePayload).length > 0) {
-      await (this.supabase.from("certifications" as any) as any)
+      const { error } = await (this.supabase.from("certifications" as any) as any)
         .update(updatePayload)
         .eq("id", input.id);
+      if (error) throw new Error(error.message);
     }
 
     if (input.titleEn !== undefined || input.descriptionEn !== undefined) {
@@ -256,7 +255,6 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
       descriptionKu: existing.descriptionKu,
       image: existing.image,
       issueDate: existing.issueDate,
-      expiryDate: existing.expiryDate,
       organization: existing.organization,
       sortOrder: existing.sortOrder,
       status: "draft",

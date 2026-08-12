@@ -1,6 +1,6 @@
 // ==============================================================================
 // features/certificates/domain/entities/certificate.entity.ts
-// Certificate Domain Entity Class following Clean Architecture
+// Certificate Domain Entity Class strictly matching Supabase SQL Schema
 // ==============================================================================
 
 export type CertificateStatus = "active" | "draft";
@@ -15,7 +15,6 @@ export interface CertificateProps {
   descriptionKu?: string | null;
   image: string | null;
   issueDate: string | null;
-  expiryDate: string | null;
   organization: string | null;
   organizationAr?: string | null;
   organizationKu?: string | null;
@@ -35,7 +34,6 @@ export class CertificateEntity {
   public readonly descriptionKu: string | null;
   public readonly image: string | null;
   public readonly issueDate: string | null;
-  public readonly expiryDate: string | null;
   public readonly organization: string | null;
   public readonly organizationAr: string | null;
   public readonly organizationKu: string | null;
@@ -49,27 +47,21 @@ export class CertificateEntity {
     this.titleEn = props.titleEn;
     this.titleAr = props.titleAr;
     this.titleKu = props.titleKu ?? null;
-    this.descriptionEn = props.descriptionEn;
-    this.descriptionAr = props.descriptionAr;
+    this.descriptionEn = props.descriptionEn ?? null;
+    this.descriptionAr = props.descriptionAr ?? null;
     this.descriptionKu = props.descriptionKu ?? null;
-    this.image = props.image;
-    this.issueDate = props.issueDate;
-    this.expiryDate = props.expiryDate;
-    this.organization = props.organization;
+    this.image = props.image ?? null;
+    this.issueDate = props.issueDate ?? null;
+    this.organization = props.organization ?? null;
     this.organizationAr = props.organizationAr ?? null;
     this.organizationKu = props.organizationKu ?? null;
-    this.sortOrder = props.sortOrder;
-    this.status = props.status;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+    this.sortOrder = props.sortOrder ?? 0;
+    this.status = props.status ?? "active";
+    this.createdAt = props.createdAt ?? new Date();
+    this.updatedAt = props.updatedAt ?? new Date();
   }
 
   public get isActive(): boolean {
     return this.status === "active";
-  }
-
-  public get isExpired(): boolean {
-    if (!this.expiryDate) return false;
-    return new Date(this.expiryDate).getTime() < Date.now();
   }
 }

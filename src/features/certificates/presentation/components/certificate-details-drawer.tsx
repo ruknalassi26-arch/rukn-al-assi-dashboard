@@ -109,13 +109,6 @@ export function CertificateDetailsDrawer() {
                 <span className="font-semibold">Issue Date:</span>
                 <span>{certificate.issueDate ?? "N/A"}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="font-semibold">Expiry Date:</span>
-                <span className={certificate.isExpired ? "font-bold text-destructive" : ""}>
-                  {certificate.expiryDate ?? tCommon("noExpiry")}
-                </span>
-              </div>
             </div>
 
             <Separator />
