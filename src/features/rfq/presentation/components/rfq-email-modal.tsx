@@ -52,7 +52,7 @@ export function RfqEmailModal() {
       setValue("subject", `Quotation Request #${rfq.referenceNumber} - Rukn Al Assi Co.`);
       setValue(
         "message",
-        `Dear ${rfq.contactName},\n\nThank you for reaching out to Rukn Al Assi Co. regarding your quotation request for "${rfq.productName || "hydraulic equipment"}".\n\nIn response to your request (Ref: #${rfq.referenceNumber}):\n\n[Type your quotation details / response here]\n\nBest regards,\nSales & Engineering Team\nRukn Al Assi Co.`
+        `Dear ${rfq.contactName},\n\nThank you for reaching out to Rukn Al Assi Co. regarding your quotation request.\n\nIn response to your request (Ref: #${rfq.referenceNumber}):\n\n[Type your quotation details / response here]\n\nBest regards,\nSales & Engineering Team\nRukn Al Assi Co.`
       );
     }
   }, [rfq, setValue]);

@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // features/rfq/presentation/components/rfq-table.tsx
-// Modern Enterprise Data Table for RFQ Requests Management with Export CSV
+// Modern Enterprise Data Table for RFQ Requests Management with Create RFQ Modal
 // ==============================================================================
 import React, { useState } from "react";
 import {
@@ -17,6 +17,10 @@ import {
   Calendar,
   Building2,
   Package,
+  Plus,
+  Phone,
+  MapPin,
+  User,
 } from "lucide-react";
 import {
   Card,
@@ -57,10 +61,15 @@ import {
   useBulkDeleteRfqs,
   useBulkUpdateRfqStatus,
 } from "@shared/hooks/rfq/use-rfq-hooks";
-import { RFQ_STATUS_VARIANTS } from "../../domain/enums/rfq.enums";
+import { useRouter, useParams } from "next/navigation";
+import { RFQ_STATUS_VARIANTS, RFQ_STATUS_LABELS } from "../../domain/enums/rfq.enums";
 import type { RfqRequestEntity, RfqStatus } from "../../domain/entities/rfq-request.entity";
 
 export function RfqTable() {
+  const router = useRouter();
+  const params = useParams();
+  const locale = (params?.locale as string) || "en";
+
   const t = useTranslations("rfqAdmin");
   const tCommon = useTranslations("common");
   const {
@@ -138,7 +147,7 @@ export function RfqTable() {
     clearSelection();
   };
 
-  const handleSortToggle = (column: "created_at" | "reference_number" | "company_name" | "status") => {
+  const handleSortToggle = (column: "created_at" | "full_name" | "company_name" | "status") => {
     if (sortBy === column) {
       setSorting(column, sortOrder === "asc" ? "desc" : "asc");
     } else {
@@ -150,16 +159,14 @@ export function RfqTable() {
   const handleExportCsv = () => {
     if (rfqs.length === 0) return;
 
-    const headers = ["Reference #", "Company Name", "Contact Name", "Email", "Phone", "Product", "Quantity", "Status", "Date"];
+    const headers = ["Full Name", "Company Name", "Phone", "Address", "Status", "Items Count", "Date"];
     const rows = rfqs.map((r) => [
-      `"${r.referenceNumber}"`,
-      `"${r.companyName.replace(/"/g, '""')}"`,
-      `"${r.contactName.replace(/"/g, '""')}"`,
-      `"${r.email}"`,
-      `"${r.phone ?? ""}"`,
-      `"${(r.productName ?? "").replace(/"/g, '""')}"`,
-      `"${r.quantity ?? ""}"`,
+      `"${r.fullName.replace(/"/g, '""')}"`,
+      `"${(r.companyName ?? "").replace(/"/g, '""')}"`,
+      `"${r.phone}"`,
+      `"${(r.address ?? "").replace(/"/g, '""')}"`,
       `"${r.status}"`,
+      `"${r.items.length}"`,
       `"${r.createdAt.toISOString()}"`,
     ]);
 
@@ -181,19 +188,22 @@ export function RfqTable() {
         <div>
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
-            {t("title")}
+            RFQ Requests Management
           </CardTitle>
           <CardDescription>
-            {t("subtitle")}
+            Manage customer quotation requests, create new RFQs, and track assigned/quoted status.
           </CardDescription>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={rfqs.length === 0} className="gap-1.5">
-            <Download className="h-4 w-4" /> {t("exportCsv")}
+            <Download className="h-4 w-4" /> Export CSV
           </Button>
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="gap-1.5">
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> {t("refresh")}
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+          </Button>
+          <Button size="sm" onClick={() => router.push(`/${locale}/admin/rfq/create`)} className="gap-1.5 font-semibold">
+            <Plus className="h-4 w-4" /> Create RFQ
           </Button>
         </div>
       </CardHeader>
@@ -206,17 +216,14 @@ export function RfqTable() {
               {selectedIds.length} RFQ request{selectedIds.length > 1 ? "s" : ""} selected
             </span>
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("reviewed")}>
-                Mark In Review
+              <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("assigned")}>
+                Mark Assigned
               </Button>
               <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("quoted")}>
                 Mark Quoted
               </Button>
-              <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("closed")}>
-                Close Selected
-              </Button>
-              <Button size="sm" variant="destructive" onClick={() => setIsBulkDeleteOpen(true)} className="gap-1.5">
-                <Trash2 className="h-4 w-4" /> Delete Selected
+              <Button size="sm" variant="destructive" onClick={() => setIsBulkDeleteOpen(true)}>
+                Delete Selected
               </Button>
               <Button size="sm" variant="ghost" onClick={clearSelection}>
                 Clear
@@ -227,37 +234,31 @@ export function RfqTable() {
 
         {/* Filters Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
-            <div className="relative w-full sm:w-64">
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="relative w-full sm:w-72">
               <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={t("searchPlaceholder")}
+                placeholder="Search by name, phone, company..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="ps-9 h-9"
               />
             </div>
-
-            <Input
-              placeholder={t("companyFilter")}
-              value={companyFilter}
-              onChange={(e) => setCompanyFilter(e.target.value)}
-              className="w-full sm:w-48 h-9"
-            />
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
             {/* Status Filter */}
             <Select value={status} onValueChange={(val: RfqStatus | "all") => setStatus(val)}>
-              <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder={t("allStatuses")} />
+              <SelectTrigger className="w-[150px] h-9">
+                <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                <SelectItem value="pending">{t("statuses.pending")}</SelectItem>
-                <SelectItem value="reviewed">{t("statuses.reviewed")}</SelectItem>
-                <SelectItem value="quoted">{t("statuses.quoted")}</SelectItem>
-                <SelectItem value="closed">{t("statuses.closed")}</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
+                {(["new", "assigned", "quoted", "won", "lost", "closed"] as RfqStatus[]).map((st) => (
+                  <SelectItem key={st} value={st}>
+                    {RFQ_STATUS_LABELS[st]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -282,32 +283,32 @@ export function RfqTable() {
                       onCheckedChange={handleSelectAllToggle}
                     />
                   </TableHead>
-                  <TableHead className="cursor-pointer text-start" onClick={() => handleSortToggle("reference_number")}>
+                  <TableHead className="cursor-pointer text-start" onClick={() => handleSortToggle("full_name")}>
                     <div className="flex items-center gap-1">
-                      <span>{t("headers.ref")}</span>
+                      <span>Customer & Contact</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
                   <TableHead className="cursor-pointer text-start" onClick={() => handleSortToggle("company_name")}>
                     <div className="flex items-center gap-1">
-                      <span>{t("headers.company")}</span>
+                      <span>Company / Address</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead className="text-start">{t("headers.item")}</TableHead>
+                  <TableHead className="text-start">Requested Items</TableHead>
                   <TableHead className="cursor-pointer text-start" onClick={() => handleSortToggle("created_at")}>
                     <div className="flex items-center gap-1">
-                      <span>{t("headers.date")}</span>
+                      <span>Date</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
                   <TableHead className="cursor-pointer text-start" onClick={() => handleSortToggle("status")}>
                     <div className="flex items-center gap-1">
-                      <span>{t("headers.status")}</span>
+                      <span>Status</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead className="text-end">{t("headers.actions")}</TableHead>
+                  <TableHead className="text-end">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -315,8 +316,8 @@ export function RfqTable() {
                   Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
                       <TableCell><Skeleton className="h-4 w-4" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-36" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
@@ -328,8 +329,8 @@ export function RfqTable() {
                     <TableCell colSpan={7} className="h-64 text-center">
                       <EmptyState
                         icon={FileText}
-                        title={t("emptyTitle")}
-                        description={t("emptyDescription")}
+                        title="No RFQ Requests Found"
+                        description="Click 'Create RFQ' above to create your first quotation request."
                       />
                     </TableCell>
                   </TableRow>
@@ -345,33 +346,49 @@ export function RfqTable() {
                           />
                         </TableCell>
 
-                        {/* Ref # */}
-                        <TableCell className="font-mono font-bold text-primary">
-                          #{rfq.referenceNumber}
-                        </TableCell>
-
-                        {/* Company & Contact */}
+                        {/* Customer & Contact */}
                         <TableCell className="font-semibold text-foreground">
                           <div>
-                            <div className="flex items-center gap-1.5">
-                              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                              <span>{rfq.companyName}</span>
+                            <div className="flex items-center gap-1.5 text-sm">
+                              <User className="h-3.5 w-3.5 text-primary shrink-0" />
+                              <span>{rfq.fullName}</span>
                             </div>
-                            <div className="text-xs font-normal text-muted-foreground">
-                              {rfq.contactName} ({rfq.email})
+                            <div className="flex items-center gap-1 text-xs font-normal text-muted-foreground mt-0.5">
+                              <Phone className="h-3 w-3 shrink-0" />
+                              <span>{rfq.phone}</span>
                             </div>
                           </div>
                         </TableCell>
 
-                        {/* Requested Item */}
-                        <TableCell className="text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1.5 font-medium text-foreground">
-                            <Package className="h-3.5 w-3.5 text-primary" />
-                            <span>{rfq.productName ?? tCommon("generalQuotation")}</span>
+                        {/* Company & Address */}
+                        <TableCell className="text-sm text-foreground">
+                          <div>
+                            {rfq.companyName && (
+                              <div className="flex items-center gap-1.5 font-medium">
+                                <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                <span>{rfq.companyName}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <MapPin className="h-3 w-3 shrink-0 text-muted-foreground/70" />
+                              <span className="truncate max-w-[200px]">{rfq.address || "No address specified"}</span>
+                            </div>
                           </div>
-                          {rfq.quantity && (
-                            <div className="text-xs text-muted-foreground">
-                              Qty: {rfq.quantity} {rfq.unit ?? ""}
+                        </TableCell>
+
+                        {/* Requested Items */}
+                        <TableCell className="text-sm">
+                          {rfq.items.length === 0 ? (
+                            <span className="text-xs text-muted-foreground italic">General Request</span>
+                          ) : (
+                            <div className="space-y-0.5">
+                              <Badge variant="secondary" className="text-xs font-normal gap-1">
+                                <Package className="h-3 w-3 text-primary" />
+                                {rfq.items.length} item{rfq.items.length > 1 ? "s" : ""}
+                              </Badge>
+                              <div className="text-xs text-muted-foreground truncate max-w-[180px]">
+                                {rfq.items.map((i) => i.productName || i.serviceName || i.itemType).join(", ")}
+                              </div>
                             </div>
                           )}
                         </TableCell>
@@ -387,7 +404,7 @@ export function RfqTable() {
                         {/* Status */}
                         <TableCell>
                           <Badge variant={RFQ_STATUS_VARIANTS[rfq.status]}>
-                            {t(`statuses.${rfq.status}`)}
+                            {RFQ_STATUS_LABELS[rfq.status] || rfq.status}
                           </Badge>
                         </TableCell>
 
@@ -402,9 +419,6 @@ export function RfqTable() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => openDrawer(rfq.id)}>
                                 <Eye className="me-2 h-4 w-4 text-blue-500" /> View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => openEmailModal(rfq.id)}>
-                                <Mail className="me-2 h-4 w-4 text-emerald-500" /> Reply by Email
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem

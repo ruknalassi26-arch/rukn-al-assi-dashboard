@@ -5,22 +5,28 @@
 import type { RfqStatus } from "../entities/rfq-request.entity";
 
 export enum RfqStatusEnum {
-  Pending = "pending",
-  Reviewed = "reviewed",
+  New = "new",
+  Assigned = "assigned",
   Quoted = "quoted",
+  Won = "won",
+  Lost = "lost",
   Closed = "closed",
 }
 
 export const RFQ_STATUS_LABELS: Record<RfqStatus, string> = {
-  pending: "Pending",
-  reviewed: "In Review",
+  new: "New",
+  assigned: "Assigned",
   quoted: "Quoted",
+  won: "Won",
+  lost: "Lost",
   closed: "Closed",
 };
 
 export const RFQ_STATUS_VARIANTS: Record<RfqStatus, "default" | "secondary" | "outline" | "destructive"> = {
-  pending: "outline",
-  reviewed: "secondary",
+  new: "outline",
+  assigned: "secondary",
   quoted: "default",
+  won: "default",
+  lost: "destructive",
   closed: "destructive",
 };

@@ -13,7 +13,7 @@ interface RfqState {
   dateTo: string;
   page: number;
   limit: number;
-  sortBy: "created_at" | "reference_number" | "company_name" | "status";
+  sortBy: "created_at" | "full_name" | "company_name" | "status";
   sortOrder: "asc" | "desc";
   selectedIds: string[];
   selectedRfqId: string | null;
@@ -28,7 +28,7 @@ interface RfqState {
   setDateRange: (dateFrom: string, dateTo: string) => void;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
-  setSorting: (sortBy: "created_at" | "reference_number" | "company_name" | "status", sortOrder: "asc" | "desc") => void;
+  setSorting: (sortBy: "created_at" | "full_name" | "company_name" | "status", sortOrder: "asc" | "desc") => void;
   setSelectedIds: (ids: string[]) => void;
   toggleSelectId: (id: string) => void;
   clearSelection: () => void;

@@ -95,7 +95,7 @@ export class SupabaseNotificationRepository implements INotificationRepository {
 
     try {
       const [rfqRes, contactRes] = await Promise.all([
-        this.supabase.from("rfq_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        this.supabase.from("rfq_requests").select("*", { count: "exact", head: true }).eq("status", "new"),
         this.supabase.from("contact_messages").select("*", { count: "exact", head: true }).eq("status", "new"),
       ]);
 

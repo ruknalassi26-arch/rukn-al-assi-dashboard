@@ -3,6 +3,7 @@
 // ==============================================================================
 export * from "./get-rfqs.usecase";
 export * from "./get-rfq-by-id.usecase";
+export * from "./create-rfq.usecase";
 export * from "./update-rfq-status.usecase";
 export * from "./delete-rfq.usecase";
 export * from "./send-email-reply.usecase";

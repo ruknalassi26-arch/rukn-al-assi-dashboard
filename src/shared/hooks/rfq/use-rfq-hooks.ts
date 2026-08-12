@@ -10,6 +10,7 @@ import { SupabaseRfqRepository } from "@features/rfq/data/repositories/supabase-
 import {
   GetRfqsUseCase,
   GetRfqByIdUseCase,
+  CreateRfqUseCase,
   UpdateRfqStatusUseCase,
   DeleteRfqUseCase,
   SendEmailReplyUseCase,
@@ -20,11 +21,12 @@ import type {
   RfqFilterParams,
   SendEmailReplyInput,
 } from "@features/rfq/domain/repositories/i-rfq.repository";
-import type { RfqStatus } from "@features/rfq/domain/entities/rfq-request.entity";
+import type { RfqStatus, CreateRfqInput } from "@features/rfq/domain/entities/rfq-request.entity";
 
 const repository = new SupabaseRfqRepository();
 const getRfqsUseCase = new GetRfqsUseCase(repository);
 const getRfqByIdUseCase = new GetRfqByIdUseCase(repository);
+const createRfqUseCase = new CreateRfqUseCase(repository);
 const updateRfqStatusUseCase = new UpdateRfqStatusUseCase(repository);
 const deleteRfqUseCase = new DeleteRfqUseCase(repository);
 const sendEmailReplyUseCase = new SendEmailReplyUseCase(repository);
@@ -33,7 +35,7 @@ const bulkUpdateRfqStatusUseCase = new BulkUpdateRfqStatusUseCase(repository);
 
 export function useRfqs(params?: RfqFilterParams) {
   return useQuery({
-    queryKey: queryKeys.rfq.lists(),
+    queryKey: [...queryKeys.rfq.lists(), params],
     queryFn: () => getRfqsUseCase.execute(params),
   });
 }
@@ -43,6 +45,29 @@ export function useRfq(id: string) {
     queryKey: queryKeys.rfq.detail(id),
     queryFn: () => getRfqByIdUseCase.execute(id),
     enabled: !!id,
+  });
+}
+
+export function useCreateRfq() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateRfqInput) => createRfqUseCase.execute(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.rfq.all });
+      toast.success("RFQ created successfully!");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to create RFQ request");
+    },
+  });
+}
+
+export function useUploadRfqAttachment() {
+  return useMutation({
+    mutationFn: (file: File) => createRfqUseCase.uploadAttachment(file),
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to upload attachment");
+    },
   });
 }
 

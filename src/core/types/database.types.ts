@@ -179,32 +179,104 @@ export interface Database {
       rfq_requests: {
         Row: {
           id: string;
-          reference_number: string;
-          company_name: string;
-          contact_name?: string;
-          full_name?: string;
-          email: string;
-          phone: string | null;
-          country: string | null;
-          product_id: string | null;
-          product_name: string | null;
-          quantity: number | null;
-          unit: string | null;
-          requirements: string | null;
-          attachment_url: string | null;
-          status: "pending" | "reviewed" | "quoted" | "closed";
+          full_name: string;
+          company_name: string | null;
+          phone: string;
+          address: string;
           notes: string | null;
+          status: "new" | "assigned" | "quoted" | "won" | "lost" | "closed";
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["rfq_requests"]["Row"], "id" | "reference_number" | "created_at" | "updated_at"> & {
+        Insert: {
           id?: string;
-          reference_number?: string;
+          full_name: string;
+          company_name?: string | null;
+          phone: string;
+          address: string;
+          notes?: string | null;
+          status?: "new" | "assigned" | "quoted" | "won" | "lost" | "closed";
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["rfq_requests"]["Insert"]>;
         Relationships: [];
+      };
+      rfq_items: {
+        Row: {
+          id: string;
+          rfq_id: string;
+          item_type: "product" | "service";
+          product_id: string | null;
+          service_id: string | null;
+          quantity: number;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          rfq_id: string;
+          item_type: "product" | "service";
+          product_id?: string | null;
+          service_id?: string | null;
+          quantity?: number;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["rfq_items"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "rfq_items_rfq_id_fkey";
+            columns: ["rfq_id"];
+            isOneToOne: false;
+            referencedRelation: "rfq_requests";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "rfq_items_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "rfq_items_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      rfq_attachments: {
+        Row: {
+          id: string;
+          rfq_id: string;
+          file_url: string;
+          file_name: string;
+          mime_type: string | null;
+          file_size_kb: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          rfq_id: string;
+          file_url: string;
+          file_name: string;
+          mime_type?: string | null;
+          file_size_kb?: number | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["rfq_attachments"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "rfq_attachments_rfq_id_fkey";
+            columns: ["rfq_id"];
+            isOneToOne: false;
+            referencedRelation: "rfq_requests";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       contact_submissions: {
         Row: {

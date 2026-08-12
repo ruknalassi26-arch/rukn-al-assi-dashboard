@@ -1,22 +1,19 @@
 "use client";
 // ==============================================================================
 // features/rfq/presentation/components/rfq-details-drawer.tsx
-// RFQ Request Full Details Sheet Component
+// RFQ Request Full Details Sheet Component with Items Display
 // ==============================================================================
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import {
   FileText,
-  Mail,
   Phone,
   Building2,
-  Globe,
   Calendar,
   Package,
-  Paperclip,
-  CheckCircle2,
-  Clock,
-  Send,
+  Wrench,
+  User,
+  MapPin,
 } from "lucide-react";
 import {
   Dialog,
@@ -34,6 +31,12 @@ import {
   SelectValue,
   Textarea,
   Label,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
 } from "@shared/ui";
 import { useRfqStore } from "../stores/rfq.store";
 import { useRfq, useUpdateRfqStatus } from "@shared/hooks/rfq/use-rfq-hooks";
@@ -41,14 +44,11 @@ import { RFQ_STATUS_LABELS, RFQ_STATUS_VARIANTS } from "../../domain/enums/rfq.e
 import type { RfqStatus } from "../../domain/entities/rfq-request.entity";
 
 export function RfqDetailsDrawer() {
-  const t = useTranslations("rfqAdmin");
   const tCommon = useTranslations("common");
   const {
     drawerOpen,
     selectedRfqId,
     closeDrawer,
-    openEmailModal,
-    openAttachmentViewer,
   } = useRfqStore();
 
   const { data: rfq, isLoading } = useRfq(selectedRfqId ?? "");
@@ -56,11 +56,22 @@ export function RfqDetailsDrawer() {
 
   const [notes, setNotes] = useState("");
 
+  useEffect(() => {
+    if (rfq) {
+      setNotes(rfq.notes ?? "");
+    }
+  }, [rfq]);
+
   if (!selectedRfqId) return null;
 
   const handleStatusChange = async (newStatus: RfqStatus) => {
     if (!rfq) return;
     await updateStatusMutation.mutateAsync({ id: rfq.id, status: newStatus, notes });
+  };
+
+  const handleSaveNotes = async () => {
+    if (!rfq) return;
+    await updateStatusMutation.mutateAsync({ id: rfq.id, status: rfq.status, notes });
   };
 
   return (
@@ -70,25 +81,13 @@ export function RfqDetailsDrawer() {
           <DialogTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
             <div className="flex items-center gap-2 text-lg font-bold">
               <FileText className="h-5 w-5 text-primary" />
-              <span>{t("title")}</span>
+              <span>RFQ Details</span>
               {rfq && (
                 <span className="text-xs font-mono font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded">
                   #{rfq.referenceNumber}
                 </span>
               )}
             </div>
-
-            {rfq && (
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => openEmailModal(rfq.id)}
-                  className="gap-1.5"
-                >
-                  <Send className="h-4 w-4" /> {tCommon("toEmail")}
-                </Button>
-              </div>
-            )}
           </DialogTitle>
         </DialogHeader>
 
@@ -100,7 +99,7 @@ export function RfqDetailsDrawer() {
           </div>
         ) : rfq ? (
           <div className="space-y-6 py-2">
-            {/* Status Bar */}
+            {/* Status & Date Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card border shadow-2xs">
               <div>
                 <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
@@ -113,145 +112,134 @@ export function RfqDetailsDrawer() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <Select
-                    value={rfq.status}
-                    onValueChange={(val) => handleStatusChange(val as RfqStatus)}
-                    disabled={updateStatusMutation.isPending}
-                  >
-                    <SelectTrigger className="w-[150px] h-9">
-                      <SelectValue placeholder={tCommon("status")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">{tCommon("pending")}</SelectItem>
-                      <SelectItem value="reviewed">{tCommon("reviewed")}</SelectItem>
-                      <SelectItem value="quoted">{tCommon("quoted")}</SelectItem>
-                      <SelectItem value="closed">{tCommon("closed")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Badge variant={RFQ_STATUS_VARIANTS[rfq.status]}>
-                    {RFQ_STATUS_LABELS[rfq.status]}
-                  </Badge>
-                </div>
+                <Select
+                  value={rfq.status}
+                  onValueChange={(val) => handleStatusChange(val as RfqStatus)}
+                  disabled={updateStatusMutation.isPending}
+                >
+                  <SelectTrigger className="w-[150px] h-9">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(["new", "assigned", "quoted", "won", "lost", "closed"] as RfqStatus[]).map((st) => (
+                      <SelectItem key={st} value={st}>
+                        {RFQ_STATUS_LABELS[st]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Badge variant={RFQ_STATUS_VARIANTS[rfq.status]}>
+                  {RFQ_STATUS_LABELS[rfq.status]}
+                </Badge>
               </div>
             </div>
 
             {/* Customer Information Grid */}
             <div className="space-y-3">
               <h4 className="text-sm font-bold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
-                <Building2 className="h-4 w-4 text-primary" /> Customer & Company Information
+                <User className="h-4 w-4 text-primary" /> Customer & Contact Information
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-lg border bg-background text-sm">
                 <div>
-                  <span className="text-xs font-semibold text-muted-foreground block">Company Name</span>
-                  <span className="font-semibold text-foreground">{rfq.companyName}</span>
+                  <span className="text-xs font-semibold text-muted-foreground block">Full Name</span>
+                  <span className="font-semibold text-foreground">{rfq.fullName}</span>
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-muted-foreground block">Contact Person</span>
-                  <span className="font-semibold text-foreground">{rfq.contactName}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <div>
-                    <span className="text-xs font-semibold text-muted-foreground block">Email</span>
-                    <a href={`mailto:${rfq.email}`} className="text-primary underline font-medium">
-                      {rfq.email}
-                    </a>
-                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground block">Company Name</span>
+                  <span className="font-semibold text-foreground">{rfq.companyName || "N/A"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div>
                     <span className="text-xs font-semibold text-muted-foreground block">Phone</span>
-                    <span>{rfq.phone ?? "N/A"}</span>
+                    <a href={`tel:${rfq.phone}`} className="text-primary underline font-medium">
+                      {rfq.phone}
+                    </a>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 col-span-1 sm:col-span-2">
-                  <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div>
-                    <span className="text-xs font-semibold text-muted-foreground block">Country</span>
-                    <span>{rfq.country ?? "N/A"}</span>
+                    <span className="text-xs font-semibold text-muted-foreground block">Address</span>
+                    <span>{rfq.address || "N/A"}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Requested Products / Services */}
+            {/* Requested Products / Services Items Table */}
             <div className="space-y-3">
               <h4 className="text-sm font-bold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
-                <Package className="h-4 w-4 text-primary" /> Requested Product / Service & Quantity
+                <Package className="h-4 w-4 text-primary" /> Requested Items ({rfq.items.length})
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-lg border bg-background text-sm">
-                <div className="col-span-1 sm:col-span-2">
-                  <span className="text-xs font-semibold text-muted-foreground block">Product / Service Requested</span>
-                  <span className="font-bold text-foreground text-base">{rfq.productName ?? "General Inquiry"}</span>
-                </div>
-                <div>
-                  <span className="text-xs font-semibold text-muted-foreground block">Quantity / Units</span>
-                  <span className="font-mono font-bold text-foreground">
-                    {rfq.quantity ? `${rfq.quantity} ${rfq.unit ?? "units"}` : "N/A"}
-                  </span>
-                </div>
-              </div>
-            </div>
 
-            {/* Technical Requirements & Description */}
-            {rfq.requirements && (
-              <div className="space-y-2">
-                <h4 className="text-xs font-semibold uppercase text-muted-foreground">Technical Requirements / Specs</h4>
-                <div className="p-4 rounded-lg border bg-muted/20 text-sm whitespace-pre-wrap leading-relaxed">
-                  {rfq.requirements}
-                </div>
-              </div>
-            )}
-
-            {/* Attachments Section */}
-            <div className="space-y-2">
-              <h4 className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
-                <Paperclip className="h-3.5 w-3.5" /> Attachments
-              </h4>
-              {rfq.hasAttachment ? (
-                <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/10">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <Paperclip className="h-4 w-4 text-primary shrink-0" />
-                    <span className="text-xs font-mono truncate">{rfq.attachmentUrl}</span>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => openAttachmentViewer(rfq.attachmentUrl!)}
-                    className="gap-1 text-xs shrink-0"
-                  >
-                    View Attachment
-                  </Button>
+              {rfq.items.length === 0 ? (
+                <div className="p-4 rounded-lg border bg-muted/20 text-center text-xs text-muted-foreground italic">
+                  No specific product or service items attached to this RFQ request.
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground italic">No attachment provided with this request.</p>
+                <div className="rounded-md border overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-muted/40">
+                      <TableRow>
+                        <TableHead className="w-24">Type</TableHead>
+                        <TableHead>Item Name</TableHead>
+                        <TableHead className="w-20 text-center">Qty</TableHead>
+                        <TableHead>Notes</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {rfq.items.map((item, idx) => (
+                        <TableRow key={item.id || idx}>
+                          <TableCell>
+                            <Badge variant="outline" className="capitalize text-xs font-medium gap-1">
+                              {item.itemType === "product" ? (
+                                <Package className="h-3 w-3 text-blue-500" />
+                              ) : (
+                                <Wrench className="h-3 w-3 text-purple-500" />
+                              )}
+                              {item.itemType}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-semibold text-sm">
+                            {item.productName || item.serviceName || "Custom Item"}
+                          </TableCell>
+                          <TableCell className="text-center font-mono font-bold text-sm">
+                            {item.quantity}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {item.notes || "—"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </div>
 
             <Separator />
 
-            {/* Admin Notes */}
+            {/* Internal Notes */}
             <div className="space-y-2">
               <Label htmlFor="adminNotes" className="text-xs font-semibold uppercase text-muted-foreground">
-                Internal Admin Notes
+                Internal Notes / Requirements
               </Label>
               <Textarea
                 id="adminNotes"
-                placeholder="Add internal notes about pricing, availability, or communication history..."
-                value={notes || rfq.notes || ""}
+                placeholder="Add internal notes about pricing, status, or customer communication..."
+                value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="text-xs min-h-[70px]"
+                className="text-xs min-h-[80px]"
               />
               <div className="flex justify-end pt-1">
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={() => handleStatusChange(rfq.status)}
+                  onClick={handleSaveNotes}
                   disabled={updateStatusMutation.isPending}
                 >
-                  Save Internal Notes
+                  Save Notes
                 </Button>
               </div>
             </div>
