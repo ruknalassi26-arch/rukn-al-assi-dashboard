@@ -56,7 +56,12 @@
       "buttonTextKu": "Button Text (Kurdish)",
       "headingEn": "Heading (English)",
       "headingAr": "Heading (Arabic)",
-      "headingKu": "Heading (Kurdish)"
+      "headingKu": "Heading (Kurdish)",
+      "status": "Status",
+      "active": "Active",
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
     },
     "back": "Back",
     "readMore": "Read more",
