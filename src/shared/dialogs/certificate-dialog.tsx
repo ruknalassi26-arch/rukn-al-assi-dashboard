@@ -27,6 +27,7 @@ import {
 } from "@shared/ui";
 import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
+import { formatDateForInput } from "@features/certificates/data/repositories/supabase-certificate.repository";
 import type { CertificateEntity } from "@features/homepage/domain/entities/homepage.entity";
 import type { AboutCertificateEntity } from "@features/about/domain/entities/about.entity";
 
@@ -105,8 +106,8 @@ export function CertificateDialog({
           descriptionAr: ar.description || "",
           descriptionKu: ku.description || "",
           image: initialData.imageUrl,
-          issueDate: initialData.issuedDate ?? "",
-          expiryDate: "",
+          issueDate: formatDateForInput(initialData.issuedDate),
+          expiryDate: formatDateForInput((initialData as any).expiryDate),
           organization: initialData.issuedBy ?? "",
           sortOrder: initialData.sortOrder,
           status: initialData.status === "published" ? "active" : (initialData.status as any),
@@ -120,8 +121,8 @@ export function CertificateDialog({
           descriptionAr: (initialData as any).descriptionAr ?? "",
           descriptionKu: ((initialData as unknown as Record<string, unknown>).descriptionKu as string) ?? "",
           image: initialData.image,
-          issueDate: (initialData as any).issueDate ?? "",
-          expiryDate: (initialData as any).expiryDate ?? "",
+          issueDate: formatDateForInput((initialData as any).issueDate),
+          expiryDate: formatDateForInput((initialData as any).expiryDate),
           organization: (initialData as any).organization ?? "",
           sortOrder: initialData.sortOrder,
           status: initialData.status,

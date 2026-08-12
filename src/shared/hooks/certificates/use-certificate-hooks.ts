@@ -46,6 +46,8 @@ export function useCertificate(id: string) {
     queryKey: queryKeys.certificates.detail(id),
     queryFn: () => getCertificateByIdUseCase.execute(id),
     enabled: !!id,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 }
 
