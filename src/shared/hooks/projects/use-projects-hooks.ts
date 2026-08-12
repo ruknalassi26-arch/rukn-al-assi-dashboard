@@ -2,6 +2,8 @@
 // ==============================================================================
 // shared/hooks/projects/use-projects-hooks.ts
 // Centralized TanStack Query Hooks for Projects Feature
+// Strictly matching project_categories (id, status, deleted_at)
+// and project_category_translations (project_category_id, language_code, slug, name, description)
 // ==============================================================================
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@core/constants/query-keys";
@@ -52,7 +54,7 @@ export function useProjectCategoriesQuery() {
             const ku = trans.find((t: any) => t.language_code === "ku" || t.language_code === "ckb") || {};
             return {
               id: item.id,
-              nameEn: en.name || item.name || "Category",
+              nameEn: en.name || "Category",
               nameAr: ar.name || null,
               nameKu: ku.name || null,
             };
@@ -61,7 +63,7 @@ export function useProjectCategoriesQuery() {
 
         // Fallback sync from product_categories if project_categories is empty
         const { data: prodData } = await (supabase.from("product_categories" as any) as any)
-          .select("id, status, sort_order, product_category_translations(language_code, name, slug, description)")
+          .select("id, status, product_category_translations(language_code, name, slug, description)")
           .is("deleted_at", null);
 
         if (!prodData || prodData.length === 0) return [];
@@ -70,7 +72,6 @@ export function useProjectCategoriesQuery() {
           await (supabase.from("project_categories" as any) as any).upsert({
             id: item.id,
             status: item.status ?? "published",
-            sort_order: item.sort_order ?? 0,
           });
 
           const trans = item.product_category_translations || [];
@@ -95,7 +96,7 @@ export function useProjectCategoriesQuery() {
           const ku = trans.find((t: any) => t.language_code === "ku" || t.language_code === "ckb") || {};
           return {
             id: item.id,
-            nameEn: en.name || item.name || "Category",
+            nameEn: en.name || "Category",
             nameAr: ar.name || null,
             nameKu: ku.name || null,
           };
