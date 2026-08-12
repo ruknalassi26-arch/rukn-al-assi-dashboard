@@ -717,29 +717,33 @@ export interface Database {
       career_applications: {
         Row: {
           id: string;
-          job_id: string | null;
-          job_title: string | null;
-          applicant_name: string;
+          job_posting_id: string | null;
+          full_name: string;
           email: string;
           phone: string;
           cover_message: string | null;
           cv_file_url: string;
           cv_file_name: string;
           status: "new" | "reviewed" | "shortlisted" | "rejected" | "hired";
-          notes: string | null;
           created_at: string;
-          updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["career_applications"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: {
           id?: string;
+          job_posting_id?: string | null;
+          full_name: string;
+          email: string;
+          phone: string;
+          cover_message?: string | null;
+          cv_file_url: string;
+          cv_file_name: string;
+          status?: "new" | "reviewed" | "shortlisted" | "rejected" | "hired";
           created_at?: string;
-          updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["career_applications"]["Insert"]>;
         Relationships: [
           {
-            foreignKeyName: "career_applications_job_id_fkey";
-            columns: ["job_id"];
+            foreignKeyName: "career_applications_job_posting_id_fkey";
+            columns: ["job_posting_id"];
             isOneToOne: false;
             referencedRelation: "job_postings";
             referencedColumns: ["id"];

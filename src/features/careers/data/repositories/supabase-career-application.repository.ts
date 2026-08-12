@@ -10,6 +10,10 @@ import type {
 } from "../../domain/repositories/career-application.repository";
 import type { CareerApplicationEntity } from "../../domain/entities/career.entity";
 import type { ApplicationStatus } from "../../domain/enums/career.enum";
+import {
+  toCareerApplicationEntity,
+  toCareerApplicationInsertPayload,
+} from "../mapper/career-application.mapper";
 
 export class SupabaseCareerApplicationRepository implements CareerApplicationRepository {
   private get supabase() {
@@ -36,38 +40,23 @@ export class SupabaseCareerApplicationRepository implements CareerApplicationRep
     }
   }
 
-  private mapToEntity(row: any): CareerApplicationEntity {
-    return {
-      id: row.id,
-      jobId: row.job_id ?? null,
-      jobTitle: row.job_title ?? null,
-      applicantName: row.applicant_name,
-      email: row.email,
-      phone: row.phone,
-      coverMessage: row.cover_message ?? null,
-      cvFileUrl: row.cv_file_url,
-      cvFileName: row.cv_file_name,
-      status: row.status ?? "new",
-      notes: row.notes ?? null,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    };
-  }
-
   async getApplications(options?: GetCareerApplicationsOptions): Promise<{ data: CareerApplicationEntity[]; total: number }> {
-    let query = (this.supabase.from("career_applications" as any) as any).select("*", { count: "exact" });
+    let query = (this.supabase.from("career_applications" as any) as any).select(
+      "*, job_postings:job_posting_id(id, job_posting_translations(language_code, title))",
+      { count: "exact" }
+    );
 
     if (options?.status && options.status !== "all") {
       query = query.eq("status", options.status);
     }
 
     if (options?.jobId) {
-      query = query.eq("job_id", options.jobId);
+      query = query.eq("job_posting_id", options.jobId);
     }
 
     if (options?.search && options.search.trim() !== "") {
       const search = options.search.trim();
-      query = query.or(`applicant_name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%,job_title.ilike.%${search}%`);
+      query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`);
     }
 
     query = query.order("created_at", { ascending: false });
@@ -81,43 +70,32 @@ export class SupabaseCareerApplicationRepository implements CareerApplicationRep
     if (error) throw new Error(error.message);
 
     return {
-      data: (data ?? []).map((r: any) => this.mapToEntity(r)),
+      data: (data ?? []).map((r: any) => toCareerApplicationEntity(r)),
       total: count ?? 0,
     };
   }
 
   async getApplicationById(id: string): Promise<CareerApplicationEntity | null> {
     const { data, error } = await (this.supabase.from("career_applications" as any) as any)
-      .select("*")
+      .select("*, job_postings:job_posting_id(id, job_posting_translations(language_code, title))")
       .eq("id", id)
       .maybeSingle();
 
     if (error) throw new Error(error.message);
-    return data ? this.mapToEntity(data) : null;
+    return data ? toCareerApplicationEntity(data) : null;
   }
 
   async submitApplication(application: Omit<CareerApplicationEntity, "id" | "createdAt" | "updatedAt">): Promise<CareerApplicationEntity> {
-    const payload = {
-      job_id: application.jobId ?? null,
-      job_title: application.jobTitle ?? null,
-      applicant_name: application.applicantName,
-      email: application.email,
-      phone: application.phone,
-      cover_message: application.coverMessage ?? null,
-      cv_file_url: application.cvFileUrl,
-      cv_file_name: application.cvFileName,
-      status: application.status ?? "new",
-      notes: application.notes ?? null,
-    };
+    const payload = toCareerApplicationInsertPayload(application);
 
     const { data, error } = await (this.supabase.from("career_applications" as any) as any)
       .insert(payload)
-      .select("*")
+      .select("*, job_postings:job_posting_id(id, job_posting_translations(language_code, title))")
       .single();
 
     if (error) throw new Error(error.message);
 
-    const entity = this.mapToEntity(data);
+    const entity = toCareerApplicationEntity(data);
     await this.logActivity("created", entity.id, `Application from ${entity.applicantName}`);
     return entity;
   }
@@ -125,21 +103,17 @@ export class SupabaseCareerApplicationRepository implements CareerApplicationRep
   async updateApplicationStatus(id: string, status: ApplicationStatus, notes?: string | null): Promise<CareerApplicationEntity> {
     const payload: Record<string, any> = {
       status,
-      updated_at: new Date().toISOString(),
     };
-    if (notes !== undefined) {
-      payload.notes = notes;
-    }
 
     const { data, error } = await (this.supabase.from("career_applications" as any) as any)
       .update(payload)
       .eq("id", id)
-      .select("*")
+      .select("*, job_postings:job_posting_id(id, job_posting_translations(language_code, title))")
       .single();
 
     if (error) throw new Error(error.message);
 
-    const entity = this.mapToEntity(data);
+    const entity = toCareerApplicationEntity(data);
     await this.logActivity("updated", entity.id, `Application status: ${status}`);
     return entity;
   }
