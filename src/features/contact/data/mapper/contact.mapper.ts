@@ -4,7 +4,8 @@
 // ==============================================================================
 import { ContactInfoEntity } from "../../domain/entities/contact-info.entity";
 import { BranchEntity } from "../../domain/entities/branch.entity";
-import type { ContactInfoDTO, BranchDTO } from "../dto/contact.dto";
+import type { BranchTranslationProps } from "../../domain/entities/branch.entity";
+import type { ContactInfoDTO, BranchWithTranslationsDTO } from "../dto/contact.dto";
 
 export function toContactInfoEntity(dto: ContactInfoDTO): ContactInfoEntity {
   return new ContactInfoEntity({
@@ -34,30 +35,47 @@ export function toContactInfoEntity(dto: ContactInfoDTO): ContactInfoEntity {
   });
 }
 
-export function toBranchEntity(dto: BranchDTO): BranchEntity {
+export function toBranchEntity(dto: BranchWithTranslationsDTO): BranchEntity {
+  const translations: Record<string, BranchTranslationProps> = {};
+  let nameEn = "";
+  let nameAr = "";
+  let nameKu: string | null = null;
+  let addressEn: string | null = null;
+  let addressAr: string | null = null;
+  let addressKu: string | null = null;
+
+  if (dto.branch_translations && Array.isArray(dto.branch_translations)) {
+    dto.branch_translations.forEach((t) => {
+      const code = t.language_code === "ckb" ? "ku" : t.language_code;
+      translations[code] = { name: t.name, address: t.address };
+      if (code === "en") {
+        nameEn = t.name;
+        addressEn = t.address;
+      } else if (code === "ar") {
+        nameAr = t.name;
+        addressAr = t.address;
+      } else if (code === "ku") {
+        nameKu = t.name;
+        addressKu = t.address;
+      }
+    });
+  }
+
   return new BranchEntity({
     id: dto.id,
-    nameEn: dto.name_en,
-    nameAr: dto.name_ar,
-    nameKu: dto.name_ku ?? null,
-    addressEn: dto.address_en,
-    addressAr: dto.address_ar,
-    addressKu: dto.address_ku ?? null,
-    cityEn: dto.city_en,
-    cityAr: dto.city_ar,
-    cityKu: dto.city_ku ?? null,
-    email: dto.email,
+    latitude: dto.map_lat,
+    longitude: dto.map_lng,
     phone: dto.phone,
-    googleMapsUrl: dto.google_maps_url,
-    latitude: dto.latitude ?? null,
-    longitude: dto.longitude ?? null,
-    workingHoursEn: dto.working_hours_en,
-    workingHoursAr: dto.working_hours_ar,
-    workingHoursKu: dto.working_hours_ku ?? null,
-    isHeadquarters: dto.is_headquarters ?? false,
+    email: dto.email,
+    whatsappNumber: dto.whatsapp_number,
     sortOrder: dto.sort_order ?? 0,
-    status: dto.status,
-    createdAt: new Date(dto.created_at),
-    updatedAt: new Date(dto.updated_at),
+    status: (dto.status as string) === "active" ? "published" : (dto.status ?? "published"),
+    translations,
+    nameEn,
+    nameAr,
+    nameKu,
+    addressEn,
+    addressAr,
+    addressKu,
   });
 }

@@ -18,6 +18,7 @@ import {
   MapPin,
   Mail,
   Phone,
+  MessageSquare,
 } from "lucide-react";
 import {
   Card,
@@ -58,7 +59,6 @@ import {
   useBulkUpdateBranchStatus,
 } from "@shared/hooks/contact/use-contact-hooks";
 import { useTranslations } from "next-intl";
-import { BRANCH_STATUS_LABELS, BRANCH_STATUS_VARIANTS } from "../../domain/enums/contact.enums";
 import type { BranchEntity, BranchStatus } from "../../domain/entities/branch.entity";
 
 export function BranchTable() {
@@ -131,7 +131,7 @@ export function BranchTable() {
     clearSelection();
   };
 
-  const handleSortToggle = (column: "name_en" | "sort_order" | "created_at") => {
+  const handleSortToggle = (column: "sort_order") => {
     if (sortBy === column) {
       setSorting(column, sortOrder === "asc" ? "desc" : "asc");
     } else {
@@ -173,7 +173,7 @@ export function BranchTable() {
               {selectedIds.length} branch{selectedIds.length > 1 ? "es" : ""} selected
             </span>
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("active")}>
+              <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("published")}>
                 Publish Selected
               </Button>
               <Button size="sm" variant="outline" onClick={() => handleBulkStatusChange("draft")}>
@@ -235,13 +235,10 @@ export function BranchTable() {
                       onCheckedChange={handleSelectAllToggle}
                     />
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSortToggle("name_en")}>
-                    <div className="flex items-center gap-1">
-                      <span>{t("table.branchName")}</span>
-                      <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
-                    </div>
+                  <TableHead>
+                    <span>{t("table.branchName")}</span>
                   </TableHead>
-                  <TableHead>{t("table.cityRegion")}</TableHead>
+                  <TableHead>Address</TableHead>
                   <TableHead>{t("table.contact")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("sort_order")}>
                     <div className="flex items-center gap-1">
@@ -295,26 +292,17 @@ export function BranchTable() {
 
                         {/* Name */}
                         <TableCell className="font-semibold text-foreground">
-                          <div className="flex items-center gap-2">
-                            <div>
-                              <div className="flex items-center gap-1.5">
-                                <span>{branch.nameEn}</span>
-                                {branch.isHeadquarters && (
-                                  <Badge variant="default" className="text-[10px] py-0 bg-amber-500">
-                                    HQ
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="text-xs font-normal text-muted-foreground" dir="rtl">{branch.nameAr}</div>
-                            </div>
+                          <div>
+                            <div>{branch.nameEn}</div>
+                            <div className="text-xs font-normal text-muted-foreground" dir="rtl">{branch.nameAr}</div>
                           </div>
                         </TableCell>
 
-                        {/* City / Location */}
-                        <TableCell className="text-sm text-muted-foreground">
+                        {/* Address */}
+                        <TableCell className="text-sm text-muted-foreground max-w-[200px]">
                           <div className="flex items-center gap-1">
-                            <MapPin className="h-3.5 w-3.5" />
-                            <span>{branch.cityEn ?? "N/A"}</span>
+                            <MapPin className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">{branch.addressEn || branch.addressAr || "N/A"}</span>
                           </div>
                         </TableCell>
 
@@ -331,6 +319,12 @@ export function BranchTable() {
                               <div className="flex items-center gap-1">
                                 <Phone className="h-3 w-3" />
                                 <span>{branch.phone}</span>
+                              </div>
+                            )}
+                            {branch.whatsappNumber && (
+                              <div className="flex items-center gap-1">
+                                <MessageSquare className="h-3 w-3 text-emerald-500" />
+                                <span>{branch.whatsappNumber}</span>
                               </div>
                             )}
                           </div>

@@ -9,12 +9,25 @@ import type {
   BranchFilterParams,
   PaginatedBranches,
   UpdateContactInfoInput,
-  CreateBranchInput,
-  UpdateBranchInput,
 } from "../../domain/repositories/i-contact.repository";
 import { ContactInfoEntity } from "../../domain/entities/contact-info.entity";
 import { BranchEntity } from "../../domain/entities/branch.entity";
-import type { BranchStatus } from "../../domain/entities/branch.entity";
+import type { BranchStatus, CreateBranchInput, UpdateBranchInput } from "../../domain/entities/branch.entity";
+import { toBranchEntity } from "../mapper/contact.mapper";
+
+function sanitizeCoordinate(val: unknown, min: number, max: number): number | null {
+  if (val === undefined || val === null || val === "") return null;
+  const num = typeof val === "number" ? val : parseFloat(String(val));
+  if (isNaN(num) || !isFinite(num)) return null;
+  if (num < min || num > max) return null;
+  return num;
+}
+
+function mapStatusToDb(status?: string): "published" | "draft" | "archived" {
+  if (status === "active" || status === "published") return "published";
+  if (status === "archived") return "archived";
+  return "draft";
+}
 
 export class SupabaseContactRepository implements IContactRepository {
   private get supabase() {
@@ -133,46 +146,14 @@ export class SupabaseContactRepository implements IContactRepository {
       const { data, count, error } = await (this.supabase.from("branches" as any) as any)
         .select("*, branch_translations(*)", { count: "exact" })
         .is("deleted_at", null)
-        .order("sort_order", { ascending: true })
+        .order("sort_order", { ascending: params?.sortOrder === "asc" })
         .range(offset, offset + limit - 1);
 
       if (error || !data) {
         return { items: [], total: 0, page, limit, totalPages: 0 };
       }
 
-      const items = data.map((item: any) => {
-        const transList: any[] = item.branch_translations || [];
-        const en = transList.find((t: any) => t.language_code === "en") || {};
-        const ar = transList.find((t: any) => t.language_code === "ar") || {};
-        const ku = transList.find((t: any) => t.language_code === "ku") || {};
-
-        return new BranchEntity({
-          id: item.id,
-          nameEn: en.name || "Branch",
-          nameAr: ar.name || "فرع",
-          nameKu: ku.name || "",
-          addressEn: en.address || "",
-          addressAr: ar.address || "",
-          addressKu: ku.address || "",
-          cityEn: "Erbil",
-          cityAr: "أربيل",
-          cityKu: "",
-          email: item.email || "",
-          phone: item.phone || "",
-          googleMapsUrl: null,
-          latitude: item.map_lat ?? null,
-          longitude: item.map_lng ?? null,
-          workingHoursEn: "",
-          workingHoursAr: "",
-          workingHoursKu: "",
-          isHeadquarters: false,
-          sortOrder: item.sort_order ?? 0,
-          status: item.status === "published" ? "active" : "draft",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      });
-
+      const items = data.map(toBranchEntity);
       const total = count ?? items.length;
       const totalPages = Math.ceil(total / limit);
 
@@ -190,96 +171,97 @@ export class SupabaseContactRepository implements IContactRepository {
         .single();
 
       if (error || !data) return null;
-
-      const transList: any[] = data.branch_translations || [];
-      const en = transList.find((t: any) => t.language_code === "en") || {};
-      const ar = transList.find((t: any) => t.language_code === "ar") || {};
-      const ku = transList.find((t: any) => t.language_code === "ku") || {};
-
-      return new BranchEntity({
-        id: data.id,
-        nameEn: en.name || "Branch",
-        nameAr: ar.name || "فرع",
-        nameKu: ku.name || "",
-        addressEn: en.address || "",
-        addressAr: ar.address || "",
-        addressKu: ku.address || "",
-        cityEn: "Erbil",
-        cityAr: "أربيل",
-        cityKu: "",
-        email: data.email || "",
-        phone: data.phone || "",
-        googleMapsUrl: null,
-        latitude: data.map_lat ?? null,
-        longitude: data.map_lng ?? null,
-        workingHoursEn: "",
-        workingHoursAr: "",
-        workingHoursKu: "",
-        isHeadquarters: false,
-        sortOrder: data.sort_order ?? 0,
-        status: data.status === "published" ? "active" : "draft",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      return toBranchEntity(data);
     } catch {
       return null;
     }
   }
 
   async createBranch(input: CreateBranchInput): Promise<BranchEntity> {
-    const { data, error } = await (this.supabase.from("branches" as any) as any)
-      .insert({
-        map_lat: input.latitude,
-        map_lng: input.longitude,
-        phone: input.phone,
-        email: input.email,
-        whatsapp_number: input.phone,
-        sort_order: input.sortOrder ?? 0,
-        status: input.status === "active" ? "published" : "draft",
-      })
+    const branchPayload = {
+      map_lat: sanitizeCoordinate(input.latitude, -90, 90),
+      map_lng: sanitizeCoordinate(input.longitude, -180, 180),
+      phone: input.phone?.trim() || null,
+      email: input.email?.trim() || null,
+      whatsapp_number: input.whatsappNumber?.trim() || null,
+      sort_order: input.sortOrder ?? 0,
+      status: mapStatusToDb(input.status),
+    };
+
+    console.log("[Supabase INSERT branches payload]:", branchPayload);
+
+    const { data: branchRow, error: branchError } = await (this.supabase.from("branches" as any) as any)
+      .insert(branchPayload)
       .select("*")
       .single();
 
-    if (error || !data) throw new Error(error?.message ?? "Failed to create branch");
+    if (branchError || !branchRow) {
+      throw new Error(branchError?.message ?? "Failed to create branch");
+    }
 
-    await (this.supabase.from("branch_translations" as any) as any).insert([
-      { branch_id: data.id, language_code: "en", name: input.nameEn, address: input.addressEn },
-      { branch_id: data.id, language_code: "ar", name: input.nameAr, address: input.addressAr },
-    ]);
+    const translationsPayload = [
+      { branch_id: branchRow.id, language_code: "en", name: input.nameEn.trim(), address: input.addressEn?.trim() || null },
+      { branch_id: branchRow.id, language_code: "ar", name: input.nameAr.trim(), address: input.addressAr?.trim() || null },
+    ];
 
-    const created = (await this.getBranchById(data.id))!;
+    if (input.nameKu?.trim() || input.addressKu?.trim()) {
+      translationsPayload.push({
+        branch_id: branchRow.id,
+        language_code: "ku",
+        name: input.nameKu?.trim() || "",
+        address: input.addressKu?.trim() || null,
+      });
+    }
+
+    const { error: transError } = await (this.supabase.from("branch_translations" as any) as any)
+      .insert(translationsPayload);
+
+    if (transError) {
+      console.error("Failed to insert branch translations:", transError.message);
+    }
+
+    const created = (await this.getBranchById(branchRow.id))!;
     await this.logActivity("created", created.id, created.nameEn);
     return created;
   }
 
   async updateBranch(input: UpdateBranchInput): Promise<BranchEntity> {
-    await (this.supabase.from("branches" as any) as any)
-      .update({
-        map_lat: input.latitude,
-        map_lng: input.longitude,
-        phone: input.phone,
-        email: input.email,
-        sort_order: input.sortOrder,
-        status: input.status === "active" ? "published" : "draft",
-      })
+    const branchPayload = {
+      map_lat: sanitizeCoordinate(input.latitude, -90, 90),
+      map_lng: sanitizeCoordinate(input.longitude, -180, 180),
+      phone: input.phone?.trim() || null,
+      email: input.email?.trim() || null,
+      whatsapp_number: input.whatsappNumber?.trim() || null,
+      sort_order: input.sortOrder ?? 0,
+      status: mapStatusToDb(input.status),
+    };
+
+    console.log("[Supabase PATCH branches payload]:", branchPayload);
+
+    const { error: branchError } = await (this.supabase.from("branches" as any) as any)
+      .update(branchPayload)
       .eq("id", input.id);
 
-    if (input.nameEn !== undefined || input.addressEn !== undefined) {
-      await (this.supabase.from("branch_translations" as any) as any).upsert({
+    if (branchError) {
+      throw new Error(branchError.message);
+    }
+
+    const translationsPayload = [
+      { branch_id: input.id, language_code: "en", name: input.nameEn.trim(), address: input.addressEn?.trim() || null },
+      { branch_id: input.id, language_code: "ar", name: input.nameAr.trim(), address: input.addressAr?.trim() || null },
+    ];
+
+    if (input.nameKu?.trim() || input.addressKu?.trim()) {
+      translationsPayload.push({
         branch_id: input.id,
-        language_code: "en",
-        name: input.nameEn || "",
-        address: input.addressEn || "",
+        language_code: "ku",
+        name: input.nameKu?.trim() || "",
+        address: input.addressKu?.trim() || null,
       });
     }
-    if (input.nameAr !== undefined || input.addressAr !== undefined) {
-      await (this.supabase.from("branch_translations" as any) as any).upsert({
-        branch_id: input.id,
-        language_code: "ar",
-        name: input.nameAr || "",
-        address: input.addressAr || "",
-      });
-    }
+
+    await (this.supabase.from("branch_translations" as any) as any)
+      .upsert(translationsPayload, { onConflict: "branch_id,language_code" });
 
     const updated = (await this.getBranchById(input.id))!;
     await this.logActivity("updated", updated.id, updated.nameEn);
@@ -304,9 +286,11 @@ export class SupabaseContactRepository implements IContactRepository {
 
   async bulkUpdateBranchStatus(ids: string[], status: BranchStatus): Promise<void> {
     if (ids.length === 0) return;
+    const dbStatus = mapStatusToDb(status);
+    console.log("[Supabase PATCH bulk status payload]:", { ids, status: dbStatus });
     await (this.supabase.from("branches" as any) as any)
-      .update({ status: status === "active" ? "published" : "draft" })
+      .update({ status: dbStatus })
       .in("id", ids);
-    await this.logActivity("updated", null, `Bulk updated status to ${status}`, { ids, status });
+    await this.logActivity("updated", null, `Bulk updated status to ${dbStatus}`, { ids, status: dbStatus });
   }
 }

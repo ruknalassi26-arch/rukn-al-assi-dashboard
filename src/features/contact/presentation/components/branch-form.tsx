@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
-import { Loader2, Save, ArrowLeft, Building2 } from "lucide-react";
+import { Loader2, Save, ArrowLeft, Building2, MapPin, Phone, Mail, MessageSquare } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -21,7 +21,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Checkbox,
 } from "@shared/ui";
 import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { useCreateBranch, useUpdateBranch } from "@shared/hooks/contact/use-contact-hooks";
@@ -34,19 +33,24 @@ const branchSchema = z.object({
   addressEn: z.string().optional().nullable(),
   addressAr: z.string().optional().nullable(),
   addressKu: z.string().optional().nullable(),
-  cityEn: z.string().optional().nullable(),
-  cityAr: z.string().optional().nullable(),
-  cityKu: z.string().optional().nullable(),
   email: z.string().email("Invalid email address").optional().or(z.literal("")).nullable(),
   phone: z.string().optional().nullable(),
-  googleMapsUrl: z.string().optional().nullable(),
-  latitude: z.number().optional().nullable(),
-  longitude: z.number().optional().nullable(),
-  workingHoursEn: z.string().optional().nullable(),
-  workingHoursAr: z.string().optional().nullable(),
-  workingHoursKu: z.string().optional().nullable(),
-  isHeadquarters: z.boolean(),
-  status: z.enum(["active", "draft"]),
+  whatsappNumber: z.string().optional().nullable(),
+  latitude: z
+    .number()
+    .min(-90, "Latitude must be between -90 and 90")
+    .max(90, "Latitude must be between -90 and 90")
+    .optional()
+    .or(z.nan())
+    .nullable(),
+  longitude: z
+    .number()
+    .min(-180, "Longitude must be between -180 and 180")
+    .max(180, "Longitude must be between -180 and 180")
+    .optional()
+    .or(z.nan())
+    .nullable(),
+  status: z.enum(["published", "draft", "archived", "active"]),
   sortOrder: z.number().min(0),
 });
 
@@ -81,19 +85,12 @@ export function BranchForm({ initialData }: BranchFormProps) {
       addressEn: "",
       addressAr: "",
       addressKu: "",
-      cityEn: "",
-      cityAr: "",
-      cityKu: "",
       email: "",
       phone: "",
-      googleMapsUrl: "",
-      latitude: 0,
-      longitude: 0,
-      workingHoursEn: "",
-      workingHoursAr: "",
-      workingHoursKu: "",
-      isHeadquarters: false,
-      status: "active",
+      whatsappNumber: "",
+      latitude: undefined,
+      longitude: undefined,
+      status: "published",
       sortOrder: 0,
     },
   });
@@ -107,19 +104,12 @@ export function BranchForm({ initialData }: BranchFormProps) {
         addressEn: initialData.addressEn ?? "",
         addressAr: initialData.addressAr ?? "",
         addressKu: initialData.addressKu ?? "",
-        cityEn: initialData.cityEn ?? "",
-        cityAr: initialData.cityAr ?? "",
-        cityKu: initialData.cityKu ?? "",
         email: initialData.email ?? "",
         phone: initialData.phone ?? "",
-        googleMapsUrl: initialData.googleMapsUrl ?? "",
-        latitude: initialData.latitude ?? 0,
-        longitude: initialData.longitude ?? 0,
-        workingHoursEn: initialData.workingHoursEn ?? "",
-        workingHoursAr: initialData.workingHoursAr ?? "",
-        workingHoursKu: initialData.workingHoursKu ?? "",
-        isHeadquarters: initialData.isHeadquarters,
-        status: initialData.status,
+        whatsappNumber: initialData.whatsappNumber ?? "",
+        latitude: initialData.latitude ?? undefined,
+        longitude: initialData.longitude ?? undefined,
+        status: initialData.status === "active" ? "published" : initialData.status,
         sortOrder: initialData.sortOrder,
       });
     }
@@ -208,6 +198,7 @@ export function BranchForm({ initialData }: BranchFormProps) {
                       <Label htmlFor="nameEn">{tForm("nameEn")} *</Label>
                       <Input
                         id="nameEn"
+                        placeholder="e.g. Erbil Main Branch"
                         {...register("nameEn")}
                       />
                       {errors.nameEn && (
@@ -215,25 +206,12 @@ export function BranchForm({ initialData }: BranchFormProps) {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cityEn">{tForm("cityEn")}</Label>
-                      <Input
-                        id="cityEn"
-                        {...register("cityEn")}
-                      />
-                    </div>
-                    <div className="space-y-2">
                       <Label htmlFor="addressEn">{tForm("addressEn")}</Label>
                       <Textarea
                         id="addressEn"
-                        className="min-h-[80px]"
+                        placeholder="e.g. 100 Meter Street, Industrial Zone, Erbil"
+                        className="min-h-[90px]"
                         {...register("addressEn")}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="workingHoursEn">{tForm("hoursEn")}</Label>
-                      <Input
-                        id="workingHoursEn"
-                        {...register("workingHoursEn")}
                       />
                     </div>
                   </div>
@@ -245,6 +223,7 @@ export function BranchForm({ initialData }: BranchFormProps) {
                       <Input
                         id="nameAr"
                         dir="rtl"
+                        placeholder="مثال: الفرع الرئيسي - أربيل"
                         {...register("nameAr")}
                       />
                       {errors.nameAr && (
@@ -252,28 +231,13 @@ export function BranchForm({ initialData }: BranchFormProps) {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cityAr">{tForm("cityAr")}</Label>
-                      <Input
-                        id="cityAr"
-                        dir="rtl"
-                        {...register("cityAr")}
-                      />
-                    </div>
-                    <div className="space-y-2">
                       <Label htmlFor="addressAr">{tForm("addressAr")}</Label>
                       <Textarea
                         id="addressAr"
                         dir="rtl"
-                        className="min-h-[80px]"
+                        placeholder="مثال: شارع 100 متري، المنطقة الصناعية، أربيل"
+                        className="min-h-[90px]"
                         {...register("addressAr")}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="workingHoursAr">{tForm("hoursAr")}</Label>
-                      <Input
-                        id="workingHoursAr"
-                        dir="rtl"
-                        {...register("workingHoursAr")}
                       />
                     </div>
                   </div>
@@ -285,15 +249,8 @@ export function BranchForm({ initialData }: BranchFormProps) {
                       <Input
                         id="nameKu"
                         dir="rtl"
+                        placeholder="نموونە: لقی سەرەکی هەولێر"
                         {...register("nameKu")}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cityKu">{tForm("cityKu")}</Label>
-                      <Input
-                        id="cityKu"
-                        dir="rtl"
-                        {...register("cityKu")}
                       />
                     </div>
                     <div className="space-y-2">
@@ -301,16 +258,9 @@ export function BranchForm({ initialData }: BranchFormProps) {
                       <Textarea
                         id="addressKu"
                         dir="rtl"
-                        className="min-h-[80px]"
+                        placeholder="نموونە: شەقامی ١٠٠ مەتری، ناوچەی پیشەسازی، هەولێر"
+                        className="min-h-[90px]"
                         {...register("addressKu")}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="workingHoursKu">{tForm("hoursKu")}</Label>
-                      <Input
-                        id="workingHoursKu"
-                        dir="rtl"
-                        {...register("workingHoursKu")}
                       />
                     </div>
                   </div>
@@ -319,37 +269,36 @@ export function BranchForm({ initialData }: BranchFormProps) {
             </CardContent>
           </Card>
 
-          {/* Location Coordinates & Maps */}
+          {/* Map Coordinates */}
           <Card>
             <CardHeader>
-              <CardTitle>{tForm("mapTitle")}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                Map Coordinates
+              </CardTitle>
+              <CardDescription>
+                Specify GPS latitude and longitude coordinates for map location pin.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="googleMapsUrl">{tForm("googleMapsUrl")}</Label>
-                <Input
-                  id="googleMapsUrl"
-                  placeholder="https://maps.google.com/..."
-                  {...register("googleMapsUrl")}
-                />
-              </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="latitude">{tForm("latitude")}</Label>
+                  <Label htmlFor="latitude">Latitude (map_lat)</Label>
                   <Input
                     id="latitude"
                     type="number"
                     step="any"
+                    placeholder="e.g. 36.1911"
                     {...register("latitude", { valueAsNumber: true })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="longitude">{tForm("longitude")}</Label>
+                  <Label htmlFor="longitude">Longitude (map_lng)</Label>
                   <Input
                     id="longitude"
                     type="number"
                     step="any"
+                    placeholder="e.g. 44.0091"
                     {...register("longitude", { valueAsNumber: true })}
                   />
                 </div>
@@ -368,28 +317,17 @@ export function BranchForm({ initialData }: BranchFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="status">{tForm("status")}</Label>
                 <Select
-                  value={watch("status")}
-                  onValueChange={(val) => setValue("status", val as "active" | "draft")}
+                  value={watch("status") === "active" ? "published" : watch("status")}
+                  onValueChange={(val) => setValue("status", val as "published" | "draft")}
                 >
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">{tCommon("active")}</SelectItem>
+                    <SelectItem value="published">{tCommon("active")}</SelectItem>
                     <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="flex items-center space-x-2 pt-2">
-                <Checkbox
-                  id="isHeadquarters"
-                  checked={watch("isHeadquarters")}
-                  onCheckedChange={(checked) => setValue("isHeadquarters", !!checked)}
-                />
-                <Label htmlFor="isHeadquarters" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  {tForm("mainHq")}
-                </Label>
               </div>
 
               <div className="space-y-2 pt-2">
@@ -407,11 +345,17 @@ export function BranchForm({ initialData }: BranchFormProps) {
           {/* Branch Contact Details */}
           <Card>
             <CardHeader>
-              <CardTitle>{tForm("contactTitle")}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Phone className="h-5 w-5 text-primary" />
+                Branch Contact Details
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">{tForm("email")}</Label>
+                <Label htmlFor="email" className="flex items-center gap-1.5">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  {tForm("email")}
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -424,11 +368,26 @@ export function BranchForm({ initialData }: BranchFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">{tForm("phone")}</Label>
+                <Label htmlFor="phone" className="flex items-center gap-1.5">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  {tForm("phone")}
+                </Label>
                 <Input
                   id="phone"
-                  placeholder="+964 7XX XXX XXXX"
+                  placeholder="+964 750 000 0000"
                   {...register("phone")}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="whatsappNumber" className="flex items-center gap-1.5">
+                  <MessageSquare className="h-4 w-4 text-emerald-500" />
+                  WhatsApp Number
+                </Label>
+                <Input
+                  id="whatsappNumber"
+                  placeholder="+964 750 000 0000"
+                  {...register("whatsappNumber")}
                 />
               </div>
             </CardContent>

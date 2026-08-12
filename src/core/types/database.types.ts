@@ -690,39 +690,55 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["website_settings"]["Insert"]>;
         Relationships: [];
       };
-      company_branches: {
+      branches: {
         Row: {
           id: string;
-          name_en: string;
-          name_ar: string;
-          name_ku?: string | null;
-          address_en: string | null;
-          address_ar: string | null;
-          address_ku?: string | null;
-          city_en: string | null;
-          city_ar: string | null;
-          city_ku?: string | null;
-          email: string | null;
+          map_lat: number | null;
+          map_lng: number | null;
           phone: string | null;
-          google_maps_url: string | null;
-          latitude?: number | null;
-          longitude?: number | null;
-          working_hours_en: string | null;
-          working_hours_ar: string | null;
-          working_hours_ku?: string | null;
-          is_headquarters: boolean;
+          email: string | null;
+          whatsapp_number: string | null;
           sort_order: number;
-          status: "active" | "draft";
-          created_at: string;
-          updated_at: string;
+          status: "draft" | "published" | "archived";
+          deleted_at: string | null;
         };
-        Insert: Omit<Database["public"]["Tables"]["company_branches"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: {
           id?: string;
-          created_at?: string;
-          updated_at?: string;
+          map_lat?: number | null;
+          map_lng?: number | null;
+          phone?: string | null;
+          email?: string | null;
+          whatsapp_number?: string | null;
+          sort_order?: number;
+          status?: "draft" | "published" | "archived";
+          deleted_at?: string | null;
         };
-        Update: Partial<Database["public"]["Tables"]["company_branches"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["branches"]["Insert"]>;
         Relationships: [];
+      };
+      branch_translations: {
+        Row: {
+          branch_id: string;
+          language_code: string;
+          name: string;
+          address: string | null;
+        };
+        Insert: {
+          branch_id: string;
+          language_code: string;
+          name: string;
+          address?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["branch_translations"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "branch_translations_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       seo_settings: {
         Row: {

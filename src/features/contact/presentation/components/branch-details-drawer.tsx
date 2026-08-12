@@ -6,7 +6,7 @@
 import React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Building2, Edit, Mail, Phone, MapPin, Clock, ExternalLink } from "lucide-react";
+import { Building2, Edit, Mail, Phone, MapPin, MessageSquare } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -57,14 +57,7 @@ export function BranchDetailsDrawer() {
             {/* Header Identity */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold">{branch.nameEn}</h3>
-                  {branch.isHeadquarters && (
-                    <Badge variant="default" className="bg-amber-500">
-                      Headquarters
-                    </Badge>
-                  )}
-                </div>
+                <h3 className="text-xl font-bold">{branch.nameEn}</h3>
                 <Badge variant={branch.isActive ? "default" : "secondary"}>
                   {branch.status}
                 </Badge>
@@ -74,7 +67,7 @@ export function BranchDetailsDrawer() {
               </p>
               {branch.nameKu && (
                 <p className="text-sm font-medium text-muted-foreground" dir="rtl">
-                  ☀️ {branch.nameKu}
+                  {branch.nameKu}
                 </p>
               )}
             </div>
@@ -94,15 +87,19 @@ export function BranchDetailsDrawer() {
                 <span>{branch.phone ?? "N/A"}</span>
               </div>
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="font-semibold">City:</span>
-                <span>{branch.cityEn ?? "N/A"}</span>
+                <MessageSquare className="h-4 w-4 text-emerald-500" />
+                <span className="font-semibold">WhatsApp:</span>
+                <span>{branch.whatsappNumber ?? "N/A"}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="font-semibold">Working Hours:</span>
-                <span>{branch.workingHoursEn ?? "N/A"}</span>
-              </div>
+              {(branch.latitude !== null || branch.longitude !== null) && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-semibold">Coordinates:</span>
+                  <span>
+                    {branch.latitude ?? "N/A"}, {branch.longitude ?? "N/A"}
+                  </span>
+                </div>
+              )}
             </div>
 
             <Separator />
@@ -125,19 +122,6 @@ export function BranchDetailsDrawer() {
                 <div className="space-y-1" dir="rtl">
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground">ناونیشان (بە کوردی)</h4>
                   <p className="text-sm text-foreground/90">{branch.addressKu}</p>
-                </div>
-              )}
-
-              {branch.googleMapsUrl && (
-                <div className="pt-2">
-                  <a
-                    href={branch.googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold hover:underline"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" /> Open Google Maps Link
-                  </a>
                 </div>
               )}
             </div>

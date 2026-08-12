@@ -1,16 +1,17 @@
 // ==============================================================================
 // features/contact/domain/repositories/i-contact.repository.ts
-// IContactRepository Contract Interface (Refactored: No SEO fields)
+// IContactRepository Contract Interface strictly matching Supabase DB schema
 // ==============================================================================
 import type { ContactInfoEntity } from "../entities/contact-info.entity";
-import type { BranchEntity, BranchStatus } from "../entities/branch.entity";
+import type { BranchEntity, BranchStatus, CreateBranchInput, UpdateBranchInput } from "../entities/branch.entity";
+export type { CreateBranchInput, UpdateBranchInput };
 
 export interface BranchFilterParams {
   search?: string;
   status?: BranchStatus | "all";
   page?: number;
   limit?: number;
-  sortBy?: "name_en" | "sort_order" | "created_at";
+  sortBy?: "sort_order";
   sortOrder?: "asc" | "desc";
 }
 
@@ -44,33 +45,6 @@ export interface UpdateContactInfoInput {
   instagramUrl?: string | null;
   youtubeUrl?: string | null;
   whatsappNumber?: string | null;
-}
-
-export interface CreateBranchInput {
-  nameEn: string;
-  nameAr: string;
-  nameKu?: string | null;
-  addressEn?: string | null;
-  addressAr?: string | null;
-  addressKu?: string | null;
-  cityEn?: string | null;
-  cityAr?: string | null;
-  cityKu?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  googleMapsUrl?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  workingHoursEn?: string | null;
-  workingHoursAr?: string | null;
-  workingHoursKu?: string | null;
-  isHeadquarters?: boolean;
-  sortOrder?: number;
-  status?: BranchStatus;
-}
-
-export interface UpdateBranchInput extends Partial<CreateBranchInput> {
-  id: string;
 }
 
 export interface IContactRepository {

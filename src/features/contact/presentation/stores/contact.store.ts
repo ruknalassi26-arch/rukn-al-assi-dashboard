@@ -11,7 +11,7 @@ interface ContactState {
   status: BranchStatus | "all";
   page: number;
   limit: number;
-  sortBy: "name_en" | "sort_order" | "created_at";
+  sortBy: "sort_order";
   sortOrder: "asc" | "desc";
   selectedIds: string[];
   selectedBranchId: string | null;
@@ -22,7 +22,7 @@ interface ContactState {
   setStatus: (status: BranchStatus | "all") => void;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
-  setSorting: (sortBy: "name_en" | "sort_order" | "created_at", sortOrder: "asc" | "desc") => void;
+  setSorting: (sortBy: "sort_order", sortOrder: "asc" | "desc") => void;
   setSelectedIds: (ids: string[]) => void;
   toggleSelectId: (id: string) => void;
   clearSelection: () => void;
