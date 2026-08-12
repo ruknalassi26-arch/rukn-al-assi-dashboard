@@ -44,22 +44,52 @@ export function useProjectCategoriesQuery() {
           .select("id, project_category_translations(language_code, name)")
           .is("deleted_at", null);
 
-        if (error || !data || data.length === 0) {
-          const { data: rawData } = await (supabase.from("project_categories" as any) as any)
-            .select("*")
-            .is("deleted_at", null);
-
-          if (!rawData) return [];
-          return (rawData as any[]).map((c) => ({
-            id: c.id,
-            nameEn: c.name_en || c.name || "Category",
-            nameAr: c.name_ar || null,
-            nameKu: c.name_ku || null,
-          }));
+        if (!error && data && data.length > 0) {
+          return (data as any[]).map((item) => {
+            const trans = item.project_category_translations || [];
+            const en = trans.find((t: any) => t.language_code === "en") || {};
+            const ar = trans.find((t: any) => t.language_code === "ar") || {};
+            const ku = trans.find((t: any) => t.language_code === "ku" || t.language_code === "ckb") || {};
+            return {
+              id: item.id,
+              nameEn: en.name || item.name || "Category",
+              nameAr: ar.name || null,
+              nameKu: ku.name || null,
+            };
+          });
         }
 
-        return (data as any[]).map((item) => {
-          const trans = item.project_category_translations || [];
+        // Fallback sync from product_categories if project_categories is empty
+        const { data: prodData } = await (supabase.from("product_categories" as any) as any)
+          .select("id, status, sort_order, product_category_translations(language_code, name, slug, description)")
+          .is("deleted_at", null);
+
+        if (!prodData || prodData.length === 0) return [];
+
+        for (const item of prodData as any[]) {
+          await (supabase.from("project_categories" as any) as any).upsert({
+            id: item.id,
+            status: item.status ?? "published",
+            sort_order: item.sort_order ?? 0,
+          });
+
+          const trans = item.product_category_translations || [];
+          for (const t of trans) {
+            await (supabase.from("project_category_translations" as any) as any).upsert(
+              {
+                project_category_id: item.id,
+                language_code: t.language_code,
+                slug: t.slug,
+                name: t.name,
+                description: t.description,
+              },
+              { onConflict: "project_category_id,language_code" }
+            );
+          }
+        }
+
+        return (prodData as any[]).map((item) => {
+          const trans = item.product_category_translations || [];
           const en = trans.find((t: any) => t.language_code === "en") || {};
           const ar = trans.find((t: any) => t.language_code === "ar") || {};
           const ku = trans.find((t: any) => t.language_code === "ku" || t.language_code === "ckb") || {};
@@ -74,7 +104,7 @@ export function useProjectCategoriesQuery() {
         return [];
       }
     },
-    staleTime: 60 * 1000,
+    staleTime: 30 * 1000,
   });
 }
 

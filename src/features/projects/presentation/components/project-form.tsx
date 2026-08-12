@@ -236,7 +236,7 @@ export function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
               </>
             ) : (
               <>
-                <Save className="h-3.5 w-3.5" /> {isEdit ? tCommon("saveChanges") : t("createTitle")}
+                <Save className="h-3.5 w-3.5" /> {isEdit ? tCommon("save") : t("createTitle")}
               </>
             )}
           </Button>
