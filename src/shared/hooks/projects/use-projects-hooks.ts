@@ -5,6 +5,7 @@
 // ==============================================================================
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@core/constants/query-keys";
+import { createClient } from "@core/lib/supabase/client";
 import { SupabaseProjectRepository } from "@features/projects/data/repositories/supabase-project.repository";
 import {
   GetProjectsUseCase,
@@ -25,6 +26,57 @@ import type { ProjectStatus } from "@features/projects/domain/entities/project.e
 import { toast } from "sonner";
 
 const repository = new SupabaseProjectRepository();
+
+export interface ProjectCategoryOption {
+  id: string;
+  nameEn: string;
+  nameAr?: string | null;
+  nameKu?: string | null;
+}
+
+export function useProjectCategoriesQuery() {
+  return useQuery({
+    queryKey: ["project-categories"],
+    queryFn: async (): Promise<ProjectCategoryOption[]> => {
+      const supabase = createClient();
+      try {
+        const { data, error } = await (supabase.from("project_categories" as any) as any)
+          .select("id, project_category_translations(language_code, name)")
+          .is("deleted_at", null);
+
+        if (error || !data || data.length === 0) {
+          const { data: rawData } = await (supabase.from("project_categories" as any) as any)
+            .select("*")
+            .is("deleted_at", null);
+
+          if (!rawData) return [];
+          return (rawData as any[]).map((c) => ({
+            id: c.id,
+            nameEn: c.name_en || c.name || "Category",
+            nameAr: c.name_ar || null,
+            nameKu: c.name_ku || null,
+          }));
+        }
+
+        return (data as any[]).map((item) => {
+          const trans = item.project_category_translations || [];
+          const en = trans.find((t: any) => t.language_code === "en") || {};
+          const ar = trans.find((t: any) => t.language_code === "ar") || {};
+          const ku = trans.find((t: any) => t.language_code === "ku" || t.language_code === "ckb") || {};
+          return {
+            id: item.id,
+            nameEn: en.name || item.name || "Category",
+            nameAr: ar.name || null,
+            nameKu: ku.name || null,
+          };
+        });
+      } catch {
+        return [];
+      }
+    },
+    staleTime: 60 * 1000,
+  });
+}
 
 export function useProjectsQuery(filters: ProjectFilters = {}) {
   return useQuery({

@@ -8,7 +8,7 @@ import { Search, RotateCcw } from "lucide-react";
 import { useLocale } from "next-intl";
 import { Input, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/ui";
 import { useProjectsStore } from "../stores/projects.store";
-import { useCategories } from "@shared/hooks/categories/use-category-hooks";
+import { useProjectCategoriesQuery } from "@shared/hooks/projects/use-projects-hooks";
 
 export function ProjectFilters() {
   const locale = useLocale();
@@ -27,8 +27,7 @@ export function ProjectFilters() {
     resetFilters,
   } = useProjectsStore();
 
-  const { data: categoriesData } = useCategories({ limit: 100 });
-  const categories = categoriesData?.items ?? [];
+  const { data: categories = [] } = useProjectCategoriesQuery();
 
   const hasActiveFilters =
     search.trim().length > 0 ||
@@ -57,11 +56,19 @@ export function ProjectFilters() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all" className="text-xs">{tCommon("all")}</SelectItem>
-            {categories.map((cat: any) => (
-              <SelectItem key={cat.id} value={cat.id} className="text-xs">
-                {cat.getLocalizedName ? cat.getLocalizedName(locale) : cat.nameEn || cat.name_en || cat.id}
-              </SelectItem>
-            ))}
+            {categories.map((cat) => {
+              const label =
+                locale === "ar" && cat.nameAr
+                  ? cat.nameAr
+                  : (locale === "ckb" || locale === "ku") && cat.nameKu
+                  ? cat.nameKu
+                  : cat.nameEn;
+              return (
+                <SelectItem key={cat.id} value={cat.id} className="text-xs">
+                  {label}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
 

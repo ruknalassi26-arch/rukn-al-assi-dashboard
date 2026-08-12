@@ -97,7 +97,7 @@ export class SupabaseProjectRepository implements IProjectRepository {
   private async resolveValidCategoryId(categoryId?: string | null): Promise<string | null> {
     if (!categoryId || categoryId === "none" || categoryId.trim() === "") return null;
     try {
-      const { data } = await (this.supabase.from("product_categories" as any) as any)
+      const { data } = await (this.supabase.from("project_categories" as any) as any)
         .select("id")
         .eq("id", categoryId.trim())
         .maybeSingle();
