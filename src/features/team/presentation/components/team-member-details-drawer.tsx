@@ -1,13 +1,13 @@
 "use client";
 // ==============================================================================
 // features/team/presentation/components/team-member-details-drawer.tsx
-// Team Member Preview & Details Sheet Component
+// Team Member Preview & Details Sheet Component strictly matching SQL schema
 // ==============================================================================
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Users, Edit, Mail, Phone, Globe, Briefcase, Layers } from "lucide-react";
+import { Users, Edit, Briefcase, Layers } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -80,9 +80,11 @@ export function TeamMemberDetailsDrawer() {
                     {member.status}
                   </Badge>
                 </div>
-                <p className="text-base font-semibold text-primary" dir="rtl">
-                  {member.fullNameAr}
-                </p>
+                {member.fullNameAr && (
+                  <p className="text-base font-semibold text-primary" dir="rtl">
+                    {member.fullNameAr}
+                  </p>
+                )}
                 {member.fullNameKu && (
                   <p className="text-sm font-medium text-muted-foreground" dir="rtl">
                     ☀️ {member.fullNameKu}
@@ -91,40 +93,14 @@ export function TeamMemberDetailsDrawer() {
                 <div className="flex items-center gap-2 pt-1 text-sm text-muted-foreground">
                   <Briefcase className="h-4 w-4" />
                   <span>{member.positionEn ?? "N/A"}</span>
-                  {member.departmentEn && (
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
-                      {member.departmentEn}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
 
             <Separator />
 
-            {/* Contact Grid */}
+            {/* Display Meta */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="font-semibold">Email:</span>
-                <span>{member.email ?? "N/A"}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span className="font-semibold">Phone:</span>
-                <span>{member.phone ?? "N/A"}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <span className="font-semibold">LinkedIn:</span>
-                {member.linkedin ? (
-                  <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-primary underline truncate">
-                    {member.linkedin}
-                  </a>
-                ) : (
-                  <span>N/A</span>
-                )}
-              </div>
               <div className="flex items-center gap-2">
                 <Layers className="h-4 w-4 text-muted-foreground" />
                 <span className="font-semibold">Sort Order:</span>

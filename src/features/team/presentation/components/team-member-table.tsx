@@ -16,8 +16,6 @@ import {
   Eye,
   MoreVertical,
   ArrowUpDown,
-  Mail,
-  Phone,
   Briefcase,
 } from "lucide-react";
 import {
@@ -244,7 +242,6 @@ export function TeamMemberTable() {
                     </div>
                   </TableHead>
                   <TableHead>{t("table.positionDept")}</TableHead>
-                  <TableHead>{t("table.contactInfo")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("sort_order")}>
                     <div className="flex items-center gap-1">
                       <span>{t("table.order")}</span>
@@ -263,7 +260,6 @@ export function TeamMemberTable() {
                       <TableCell><Skeleton className="h-10 w-10 rounded-full" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
                       <TableCell className="text-end"><Skeleton className="h-8 w-8 ms-auto rounded" /></TableCell>
@@ -271,7 +267,7 @@ export function TeamMemberTable() {
                   ))
                 ) : members.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="h-64 text-center">
+                    <TableCell colSpan={7} className="h-64 text-center">
                       <EmptyState
                         icon={Users}
                         title={t("emptyTitle")}
@@ -317,34 +313,11 @@ export function TeamMemberTable() {
                           </div>
                         </TableCell>
 
-                        {/* Position & Department */}
+                        {/* Position */}
                         <TableCell className="text-sm text-muted-foreground">
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-1.5 font-medium text-foreground">
-                              <Briefcase className="h-3.5 w-3.5 text-primary" />
-                              <span>{member.positionEn ?? "N/A"}</span>
-                            </div>
-                            {member.departmentEn && (
-                              <div className="text-xs text-muted-foreground">{member.departmentEn}</div>
-                            )}
-                          </div>
-                        </TableCell>
-
-                        {/* Contact Info */}
-                        <TableCell className="text-xs text-muted-foreground">
-                          <div className="space-y-0.5">
-                            {member.email && (
-                              <div className="flex items-center gap-1">
-                                <Mail className="h-3 w-3" />
-                                <span className="truncate max-w-[140px]">{member.email}</span>
-                              </div>
-                            )}
-                            {member.phone && (
-                              <div className="flex items-center gap-1">
-                                <Phone className="h-3 w-3" />
-                                <span>{member.phone}</span>
-                              </div>
-                            )}
+                          <div className="flex items-center gap-1.5 font-medium text-foreground">
+                            <Briefcase className="h-3.5 w-3.5 text-primary" />
+                            <span>{member.positionEn ?? "N/A"}</span>
                           </div>
                         </TableCell>
 

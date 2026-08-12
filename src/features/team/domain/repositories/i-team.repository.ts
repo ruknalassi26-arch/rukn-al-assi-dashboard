@@ -1,6 +1,6 @@
 // ==============================================================================
 // features/team/domain/repositories/i-team.repository.ts
-// ITeamRepository Contract Interface
+// ITeamRepository Contract Interface strictly matching Supabase SQL Schema
 // ==============================================================================
 import type { TeamMemberEntity, TeamMemberStatus } from "../entities/team-member.entity";
 
@@ -23,21 +23,15 @@ export interface PaginatedTeamMembers {
 
 export interface CreateTeamMemberInput {
   fullNameEn: string;
-  fullNameAr: string;
+  fullNameAr?: string | null;
   fullNameKu?: string | null;
   positionEn?: string | null;
   positionAr?: string | null;
   positionKu?: string | null;
-  departmentEn?: string | null;
-  departmentAr?: string | null;
-  departmentKu?: string | null;
   biographyEn?: string | null;
   biographyAr?: string | null;
   biographyKu?: string | null;
   photo?: string | null;
-  linkedin?: string | null;
-  email?: string | null;
-  phone?: string | null;
   sortOrder?: number;
   status?: TeamMemberStatus;
 }
