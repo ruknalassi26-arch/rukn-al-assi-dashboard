@@ -102,7 +102,7 @@ export function JobPostingForm({ initialData }: JobPostingFormProps) {
       reset({
         slug: initialData.slug,
         titleEn: initialData.titleEn,
-        titleAr: initialData.titleAr,
+        titleAr: initialData.titleAr ?? "",
         titleKu: initialData.titleKu ?? "",
         descriptionEn: initialData.descriptionEn ?? "",
         descriptionAr: initialData.descriptionAr ?? "",
