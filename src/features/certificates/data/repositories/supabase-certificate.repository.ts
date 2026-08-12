@@ -14,16 +14,18 @@ import type {
 import { CertificateEntity } from "../../domain/entities/certificate.entity";
 import type { CertificateStatus } from "../../domain/entities/certificate.entity";
 
-function cleanDateStr(d?: string | null): string {
-  if (!d || typeof d !== "string" || d.trim() === "") return "";
-  return d.split("T")[0];
+export function formatDateForInput(dateStr?: string | null): string {
+  if (!dateStr || dateStr.trim() === "") return "";
+  const trimmed = dateStr.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  if (trimmed.includes("T")) return trimmed.split("T")[0];
+  if (trimmed.includes(" ")) return trimmed.split(" ")[0];
+  return trimmed;
 }
 
-function parseDatePayload(d?: string | null): string | null {
-  if (!d || typeof d !== "string" || d.trim() === "") return null;
-  const match = d.match(/^(\d{4}-\d{2}-\d{2})/);
-  if (match) return match[1];
-  return d.trim();
+function cleanDateValue(val?: string | null): string | null {
+  if (!val || val.trim() === "") return null;
+  return formatDateForInput(val);
 }
 
 export class SupabaseCertificateRepository implements ICertificateRepository {
@@ -76,20 +78,20 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
           id: item.id,
           titleEn: en.title || "Certification",
           titleAr: ar.title || "شهادة اعتمادات",
-          titleKu: ku.title || "",
-          descriptionEn: en.description || "",
-          descriptionAr: ar.description || "",
-          descriptionKu: ku.description || "",
-          image: item.image_url || "",
-          issueDate: cleanDateStr(item.issued_date),
-          expiryDate: "",
-          organization: item.issued_by || "",
-          organizationAr: "",
-          organizationKu: "",
+          titleKu: ku.title || null,
+          descriptionEn: en.description || null,
+          descriptionAr: ar.description || null,
+          descriptionKu: ku.description || null,
+          image: item.image_url || null,
+          issueDate: item.issued_date ? formatDateForInput(item.issued_date) : null,
+          expiryDate: item.expiry_date ? formatDateForInput(item.expiry_date) : null,
+          organization: item.issued_by || null,
+          organizationAr: null,
+          organizationKu: null,
           sortOrder: item.sort_order ?? 0,
           status: item.status === "published" ? "active" : "draft",
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: item.created_at ? new Date(item.created_at) : new Date(),
+          updatedAt: item.updated_at ? new Date(item.updated_at) : new Date(),
         });
       });
 
@@ -120,20 +122,20 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
         id: data.id,
         titleEn: en.title || "Certification",
         titleAr: ar.title || "شهادة اعتمادات",
-        titleKu: ku.title || "",
-        descriptionEn: en.description || "",
-        descriptionAr: ar.description || "",
-        descriptionKu: ku.description || "",
-        image: data.image_url || "",
-        issueDate: cleanDateStr(data.issued_date),
-        expiryDate: "",
-        organization: data.issued_by || "",
-        organizationAr: "",
-        organizationKu: "",
+        titleKu: ku.title || null,
+        descriptionEn: en.description || null,
+        descriptionAr: ar.description || null,
+        descriptionKu: ku.description || null,
+        image: data.image_url || null,
+        issueDate: data.issued_date ? formatDateForInput(data.issued_date) : null,
+        expiryDate: data.expiry_date ? formatDateForInput(data.expiry_date) : null,
+        organization: data.issued_by || null,
+        organizationAr: null,
+        organizationKu: null,
         sortOrder: data.sort_order ?? 0,
         status: data.status === "published" ? "active" : "draft",
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: data.created_at ? new Date(data.created_at) : new Date(),
+        updatedAt: data.updated_at ? new Date(data.updated_at) : new Date(),
       });
     } catch {
       return null;
@@ -145,19 +147,30 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
       .insert({
         image_url: input.image ?? null,
         issued_by: input.organization ?? null,
-        issued_date: parseDatePayload(input.issueDate),
+        issued_date: cleanDateValue(input.issueDate),
+        expiry_date: cleanDateValue(input.expiryDate),
         sort_order: input.sortOrder ?? 0,
-        status: (input.status as string) === "active" || input.status === "published" ? "published" : "draft",
+        status: input.status === "active" ? "published" : "draft",
       })
       .select("*")
       .single();
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create certificate");
 
-    await (this.supabase.from("certification_translations" as any) as any).insert([
-      { certification_id: data.id, language_code: "en", title: input.titleEn, description: input.descriptionEn },
-      { certification_id: data.id, language_code: "ar", title: input.titleAr, description: input.descriptionAr },
-    ]);
+    const transPayloads = [];
+    if (input.titleEn?.trim()) {
+      transPayloads.push({ certification_id: data.id, language_code: "en", title: input.titleEn.trim(), description: input.descriptionEn ?? null });
+    }
+    if (input.titleAr?.trim()) {
+      transPayloads.push({ certification_id: data.id, language_code: "ar", title: input.titleAr.trim(), description: input.descriptionAr ?? null });
+    }
+    if (input.titleKu?.trim()) {
+      transPayloads.push({ certification_id: data.id, language_code: "ku", title: input.titleKu.trim(), description: input.descriptionKu ?? null });
+    }
+
+    if (transPayloads.length > 0) {
+      await (this.supabase.from("certification_translations" as any) as any).insert(transPayloads);
+    }
 
     const created = (await this.getCertificateById(data.id))!;
     await this.logActivity("created", created.id, created.titleEn);
@@ -168,33 +181,53 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
     const updatePayload: Record<string, any> = {};
     if (input.image !== undefined) updatePayload.image_url = input.image;
     if (input.organization !== undefined) updatePayload.issued_by = input.organization;
-    if (input.issueDate !== undefined) updatePayload.issued_date = parseDatePayload(input.issueDate);
+    if (input.issueDate !== undefined) updatePayload.issued_date = cleanDateValue(input.issueDate);
+    if (input.expiryDate !== undefined) updatePayload.expiry_date = cleanDateValue(input.expiryDate);
     if (input.sortOrder !== undefined) updatePayload.sort_order = input.sortOrder;
-    if (input.status !== undefined) {
-      updatePayload.status = (input.status as string) === "active" || input.status === "published" ? "published" : "draft";
+    if (input.status !== undefined) updatePayload.status = input.status === "active" ? "published" : "draft";
+
+    if (Object.keys(updatePayload).length > 0) {
+      await (this.supabase.from("certifications" as any) as any)
+        .update(updatePayload)
+        .eq("id", input.id);
     }
-
-    const { error: updateErr } = await (this.supabase.from("certifications" as any) as any)
-      .update(updatePayload)
-      .eq("id", input.id);
-
-    if (updateErr) throw new Error(updateErr.message || "Failed to update certificate");
 
     if (input.titleEn !== undefined || input.descriptionEn !== undefined) {
-      await (this.supabase.from("certification_translations" as any) as any).upsert({
-        certification_id: input.id,
-        language_code: "en",
-        title: input.titleEn || "",
-        description: input.descriptionEn || "",
-      });
+      if (input.titleEn?.trim()) {
+        await (this.supabase.from("certification_translations" as any) as any).upsert({
+          certification_id: input.id,
+          language_code: "en",
+          title: input.titleEn.trim(),
+          description: input.descriptionEn ?? null,
+        }, { onConflict: "certification_id,language_code" });
+      }
     }
+
     if (input.titleAr !== undefined || input.descriptionAr !== undefined) {
-      await (this.supabase.from("certification_translations" as any) as any).upsert({
-        certification_id: input.id,
-        language_code: "ar",
-        title: input.titleAr || "",
-        description: input.descriptionAr || "",
-      });
+      if (input.titleAr?.trim()) {
+        await (this.supabase.from("certification_translations" as any) as any).upsert({
+          certification_id: input.id,
+          language_code: "ar",
+          title: input.titleAr.trim(),
+          description: input.descriptionAr ?? null,
+        }, { onConflict: "certification_id,language_code" });
+      }
+    }
+
+    if (input.titleKu !== undefined || input.descriptionKu !== undefined) {
+      if (input.titleKu?.trim()) {
+        await (this.supabase.from("certification_translations" as any) as any).upsert({
+          certification_id: input.id,
+          language_code: "ku",
+          title: input.titleKu.trim(),
+          description: input.descriptionKu ?? null,
+        }, { onConflict: "certification_id,language_code" });
+      } else {
+        await (this.supabase.from("certification_translations" as any) as any)
+          .delete()
+          .eq("certification_id", input.id)
+          .eq("language_code", "ku");
+      }
     }
 
     const updated = (await this.getCertificateById(input.id))!;
@@ -223,6 +256,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
       descriptionKu: existing.descriptionKu,
       image: existing.image,
       issueDate: existing.issueDate,
+      expiryDate: existing.expiryDate,
       organization: existing.organization,
       sortOrder: existing.sortOrder,
       status: "draft",
@@ -240,7 +274,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
   async bulkUpdateCertificateStatus(ids: string[], status: CertificateStatus): Promise<void> {
     if (ids.length === 0) return;
     await (this.supabase.from("certifications" as any) as any)
-      .update({ status: (status as string) === "active" || status === "published" ? "published" : "draft" })
+      .update({ status: status === "active" ? "published" : "draft" })
       .in("id", ids);
     await this.logActivity("updated", null, `Bulk updated status to ${status}`, { ids, status });
   }

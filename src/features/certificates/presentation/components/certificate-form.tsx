@@ -26,6 +26,7 @@ import {
 import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
 import { useCreateCertificate, useUpdateCertificate } from "@shared/hooks/certificates/use-certificate-hooks";
+import { formatDateForInput } from "../../data/repositories/supabase-certificate.repository";
 import type { CertificateEntity } from "../../domain/entities/certificate.entity";
 
 const certificateSchema = z.object({
@@ -41,7 +42,7 @@ const certificateSchema = z.object({
   image: z.string().optional().nullable(),
   issueDate: z.string().optional().nullable(),
   expiryDate: z.string().optional().nullable(),
-  status: z.enum(["active", "published", "draft", "archived"]),
+  status: z.enum(["active", "draft"]),
   sortOrder: z.number().min(0),
 });
 
@@ -49,19 +50,6 @@ export type CertificateFormValues = z.infer<typeof certificateSchema>;
 
 interface CertificateFormProps {
   initialData?: CertificateEntity | null;
-}
-
-function formatDateForInput(dateStr?: string | null): string {
-  if (!dateStr || dateStr.trim() === "") return "";
-  const match = dateStr.match(/^(\d{4}-\d{2}-\d{2})/);
-  if (match) return match[1];
-  try {
-    const d = new Date(dateStr);
-    if (!isNaN(d.getTime())) {
-      return d.toISOString().split("T")[0];
-    }
-  } catch {}
-  return "";
 }
 
 export function CertificateForm({ initialData }: CertificateFormProps) {
@@ -89,7 +77,7 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
       image: initialData?.image ?? "",
       issueDate: formatDateForInput(initialData?.issueDate),
       expiryDate: formatDateForInput(initialData?.expiryDate),
-      status: (initialData?.status as any) ?? "active",
+      status: initialData?.status ?? "active",
       sortOrder: initialData?.sortOrder ?? 0,
     },
   });
@@ -111,7 +99,7 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
         image: initialData.image ?? "",
         issueDate: formatDateForInput(initialData.issueDate),
         expiryDate: formatDateForInput(initialData.expiryDate),
-        status: (initialData.status as any) ?? "active",
+        status: initialData.status ?? "active",
         sortOrder: initialData.sortOrder ?? 0,
       });
     }
@@ -306,14 +294,13 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
                 <Label htmlFor="status">{tForm("status")}</Label>
                 <Select
                   value={watch("status")}
-                  onValueChange={(val) => setValue("status", val as any)}
+                  onValueChange={(val) => setValue("status", val as "active" | "draft")}
                 >
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">{tCommon("active")}</SelectItem>
-                    <SelectItem value="published">Published</SelectItem>
                     <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                   </SelectContent>
                 </Select>

@@ -3,7 +3,7 @@
 // Certificate Domain Entity Class following Clean Architecture
 // ==============================================================================
 
-export type CertificateStatus = "active" | "published" | "draft" | "archived";
+export type CertificateStatus = "active" | "draft";
 
 export interface CertificateProps {
   id: string;
