@@ -681,22 +681,15 @@ export interface Database {
       job_postings: {
         Row: {
           id: string;
-          slug: string;
-          title_en: string;
-          title_ar: string;
-          title_ku: string | null;
-          description_en: string | null;
-          description_ar: string | null;
-          description_ku: string | null;
-          requirements_en: string | null;
-          requirements_ar: string | null;
-          requirements_ku: string | null;
           department: string | null;
           employment_type: "full_time" | "part_time" | "contract" | "internship";
           location: string | null;
           closes_at: string | null;
           sort_order: number;
           status: "draft" | "published" | "archived";
+          deleted_at: string | null;
+          created_by: string | null;
+          updated_by: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -706,6 +699,19 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["job_postings"]["Insert"]>;
+        Relationships: [];
+      };
+      job_posting_translations: {
+        Row: {
+          job_posting_id: string;
+          language_code: string;
+          slug: string | null;
+          title: string;
+          description: string | null;
+          requirements: string | null;
+        };
+        Insert: Database["public"]["Tables"]["job_posting_translations"]["Row"];
+        Update: Partial<Database["public"]["Tables"]["job_posting_translations"]["Insert"]>;
         Relationships: [];
       };
       career_applications: {
