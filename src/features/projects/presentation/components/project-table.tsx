@@ -139,7 +139,7 @@ export function ProjectTable() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleBulkStatusChange("active")}
+                onClick={() => handleBulkStatusChange("published")}
                 className="h-8 text-xs gap-1"
               >
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> {t("bulkActivate")}
@@ -255,7 +255,7 @@ export function ProjectTable() {
 
                   {/* Client */}
                   <TableCell className="text-xs text-muted-foreground">
-                    {project.client || "—"}
+                    {project.clientName || "—"}
                   </TableCell>
 
                   {/* Status Badge */}

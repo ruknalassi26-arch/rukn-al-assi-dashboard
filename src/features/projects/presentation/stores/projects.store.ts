@@ -3,11 +3,12 @@
 // Zustand Store for Projects List Filters, Pagination, Sorting & Bulk Selection
 // ==============================================================================
 import { create } from "zustand";
+import type { ProjectStatus } from "../../domain/entities/project.entity";
 
 interface ProjectsState {
   search: string;
   categoryId: string;
-  status: string;
+  status: ProjectStatus | "all";
   isFeatured: boolean | undefined;
   page: number;
   pageSize: number;
@@ -18,7 +19,7 @@ interface ProjectsState {
 
   setSearch: (search: string) => void;
   setCategoryId: (categoryId: string) => void;
-  setStatus: (status: string) => void;
+  setStatus: (status: ProjectStatus | "all") => void;
   setIsFeatured: (isFeatured: boolean | undefined) => void;
   setPage: (page: number) => void;
   setPageSize: (pageSize: number) => void;

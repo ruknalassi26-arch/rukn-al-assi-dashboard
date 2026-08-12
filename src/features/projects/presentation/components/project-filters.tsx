@@ -71,12 +71,9 @@ export function ProjectFilters() {
             <SelectValue placeholder={tCommon("status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all" className="text-xs">{tCommon("all")}</SelectItem>
-            <SelectItem value="active" className="text-xs">{tCommon("active")}</SelectItem>
-            <SelectItem value="completed" className="text-xs">{tCommon("completed")}</SelectItem>
-            <SelectItem value="ongoing" className="text-xs">{tCommon("ongoing")}</SelectItem>
-            <SelectItem value="upcoming" className="text-xs">{tCommon("upcoming")}</SelectItem>
-            <SelectItem value="draft" className="text-xs">{tCommon("draft")}</SelectItem>
+            <SelectItem value="published" className="text-xs">Published</SelectItem>
+            <SelectItem value="draft" className="text-xs">Draft</SelectItem>
+            <SelectItem value="archived" className="text-xs">Archived</SelectItem>
           </SelectContent>
         </Select>
 

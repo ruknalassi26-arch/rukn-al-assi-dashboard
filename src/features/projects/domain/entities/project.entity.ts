@@ -1,133 +1,160 @@
 // ==============================================================================
 // features/projects/domain/entities/project.entity.ts
-// Project Domain Entity Class
+// Project Domain Entity Class strictly matching Supabase SQL Schema
 // ==============================================================================
-import { getStoragePublicUrl } from "@core/utils/storage";
 
-export type ProjectStatus = "active" | "draft" | "completed" | "ongoing" | "upcoming";
+export type ProjectStatus = "draft" | "published" | "archived";
+
+export interface ProjectImageEntity {
+  id?: string;
+  imageUrl: string;
+  mimeType?: string | null;
+  sortOrder: number;
+}
 
 export interface ProjectProps {
   id: string;
-  slug: string;
+  categoryId?: string | null;
+  categoryName?: string | null;
+  clientName?: string | null;
+  location?: string | null;
+  completionDate?: string | null;
+  status: ProjectStatus;
+  isFeatured: boolean;
+  featuredOrder: number;
+  sortOrder: number;
+
+  // Multilingual translations (project_translations)
   titleEn: string;
-  titleAr: string;
+  titleAr?: string | null;
   titleKu?: string | null;
-  shortDescriptionEn?: string | null;
-  shortDescriptionAr?: string | null;
-  shortDescriptionKu?: string | null;
+  slugEn?: string | null;
+  slugAr?: string | null;
+  slugKu?: string | null;
   descriptionEn?: string | null;
   descriptionAr?: string | null;
   descriptionKu?: string | null;
-  categoryId?: string | null;
-  categoryName?: string | null;
-  client?: string | null;
-  location?: string | null;
-  year?: number | null;
-  completionDate?: string | null;
-  coverImage?: string | null;
-  images?: string[];
-  status: ProjectStatus;
-  isFeatured: boolean;
-  sortOrder: number;
-  createdAt: Date;
-  updatedAt: Date;
+  challengeEn?: string | null;
+  challengeAr?: string | null;
+  challengeKu?: string | null;
+  solutionEn?: string | null;
+  solutionAr?: string | null;
+  solutionKu?: string | null;
+
+  // Gallery Images (project_images)
+  images?: ProjectImageEntity[] | string[];
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export class ProjectEntity {
   public readonly id: string;
-  public readonly slug: string;
+  public readonly categoryId: string | null;
+  public readonly categoryName: string | null;
+  public readonly clientName: string | null;
+  public readonly location: string | null;
+  public readonly completionDate: string | null;
+  public readonly status: ProjectStatus;
+  public readonly isFeatured: boolean;
+  public readonly featuredOrder: number;
+  public readonly sortOrder: number;
+
   public readonly titleEn: string;
-  public readonly titleAr: string;
+  public readonly titleAr: string | null;
   public readonly titleKu: string | null;
-  public readonly shortDescriptionEn: string | null;
-  public readonly shortDescriptionAr: string | null;
-  public readonly shortDescriptionKu: string | null;
+  public readonly slugEn: string | null;
+  public readonly slugAr: string | null;
+  public readonly slugKu: string | null;
   public readonly descriptionEn: string | null;
   public readonly descriptionAr: string | null;
   public readonly descriptionKu: string | null;
-  public readonly categoryId: string | null;
-  public readonly categoryName: string | null;
-  public readonly client: string | null;
-  public readonly location: string | null;
-  public readonly year: number | null;
-  public readonly completionDate: string | null;
-  public readonly coverImage: string | null;
+  public readonly challengeEn: string | null;
+  public readonly challengeAr: string | null;
+  public readonly challengeKu: string | null;
+  public readonly solutionEn: string | null;
+  public readonly solutionAr: string | null;
+  public readonly solutionKu: string | null;
+
   public readonly images: string[];
-  public readonly status: ProjectStatus;
-  public readonly isFeatured: boolean;
-  public readonly sortOrder: number;
+  public readonly imageDetails: ProjectImageEntity[];
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
 
   constructor(props: ProjectProps) {
     this.id = props.id;
-    this.slug = props.slug;
-    this.titleEn = props.titleEn;
-    this.titleAr = props.titleAr;
+    this.categoryId = props.categoryId ?? null;
+    this.categoryName = props.categoryName ?? null;
+    this.clientName = props.clientName ?? null;
+    this.location = props.location ?? null;
+    this.completionDate = props.completionDate ?? null;
+    this.status = props.status ?? "published";
+    this.isFeatured = props.isFeatured ?? false;
+    this.featuredOrder = props.featuredOrder ?? 0;
+    this.sortOrder = props.sortOrder ?? 0;
+
+    this.titleEn = props.titleEn ?? "";
+    this.titleAr = props.titleAr ?? null;
     this.titleKu = props.titleKu ?? null;
-    this.shortDescriptionEn = props.shortDescriptionEn ?? null;
-    this.shortDescriptionAr = props.shortDescriptionAr ?? null;
-    this.shortDescriptionKu = props.shortDescriptionKu ?? null;
+    this.slugEn = props.slugEn ?? null;
+    this.slugAr = props.slugAr ?? null;
+    this.slugKu = props.slugKu ?? null;
     this.descriptionEn = props.descriptionEn ?? null;
     this.descriptionAr = props.descriptionAr ?? null;
     this.descriptionKu = props.descriptionKu ?? null;
-    this.categoryId = props.categoryId ?? null;
-    this.categoryName = props.categoryName ?? null;
-    this.client = props.client ?? null;
-    this.location = props.location ?? null;
-    this.year = props.year ?? null;
-    this.completionDate = props.completionDate ?? null;
-    this.coverImage = props.coverImage ?? null;
-    this.images = props.images ?? [];
-    this.status = props.status;
-    this.isFeatured = props.isFeatured;
-    this.sortOrder = props.sortOrder;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+    this.challengeEn = props.challengeEn ?? null;
+    this.challengeAr = props.challengeAr ?? null;
+    this.challengeKu = props.challengeKu ?? null;
+    this.solutionEn = props.solutionEn ?? null;
+    this.solutionAr = props.solutionAr ?? null;
+    this.solutionKu = props.solutionKu ?? null;
+
+    if (Array.isArray(props.images)) {
+      if (props.images.length > 0 && typeof props.images[0] === "string") {
+        this.images = props.images as string[];
+        this.imageDetails = (props.images as string[]).map((url, idx) => ({
+          imageUrl: url,
+          sortOrder: idx,
+        }));
+      } else {
+        const details = (props.images as ProjectImageEntity[]).sort(
+          (a, b) => a.sortOrder - b.sortOrder
+        );
+        this.imageDetails = details;
+        this.images = details.map((d) => d.imageUrl);
+      }
+    } else {
+      this.images = [];
+      this.imageDetails = [];
+    }
+
+    this.createdAt = props.createdAt ?? new Date();
+    this.updatedAt = props.updatedAt ?? new Date();
   }
 
-  public getLocalizedTitle(locale: string): string {
-    if (locale === "ar" && this.titleAr) return this.titleAr;
-    if ((locale === "ckb" || locale === "ku") && this.titleKu) return this.titleKu;
-    return this.titleEn || this.titleAr;
-  }
-
-  public getLocalizedShortDescription(locale: string): string {
-    if (locale === "ar" && this.shortDescriptionAr) return this.shortDescriptionAr;
-    if ((locale === "ckb" || locale === "ku") && this.shortDescriptionKu) return this.shortDescriptionKu;
-    return this.shortDescriptionEn || this.shortDescriptionAr || "";
-  }
-
-  public getLocalizedDescription(locale: string): string {
-    if (locale === "ar" && this.descriptionAr) return this.descriptionAr;
-    if ((locale === "ckb" || locale === "ku") && this.descriptionKu) return this.descriptionKu;
-    return this.descriptionEn || this.descriptionAr || "";
+  public get primaryImageUrl(): string | null {
+    return this.images[0] ?? null;
   }
 
   public get coverImageUrl(): string | null {
-    if (!this.coverImage) return this.images[0] ? getStoragePublicUrl("project-images", this.images[0]) : null;
-    if (this.coverImage.startsWith("http://") || this.coverImage.startsWith("https://")) {
-      return this.coverImage;
-    }
-    return getStoragePublicUrl("project-images", this.coverImage);
+    return this.primaryImageUrl;
   }
 
-  public get galleryImageUrls(): string[] {
-    return this.images.map((img) => {
-      if (img.startsWith("http://") || img.startsWith("https://")) return img;
-      return getStoragePublicUrl("project-images", img);
-    });
+  public get slug(): string {
+    return this.slugEn || this.slugAr || this.slugKu || this.id;
+  }
+
+  public get isActive(): boolean {
+    return this.status === "published";
   }
 
   public get statusBadgeVariant(): "default" | "secondary" | "destructive" | "outline" {
     switch (this.status) {
-      case "active":
-      case "completed":
+      case "published":
         return "default";
-      case "ongoing":
-        return "secondary";
-      case "upcoming":
       case "draft":
+        return "secondary";
+      case "archived":
       default:
         return "outline";
     }
@@ -135,17 +162,26 @@ export class ProjectEntity {
 
   public get statusLabel(): string {
     switch (this.status) {
-      case "completed":
-        return "Completed";
-      case "ongoing":
-        return "Ongoing";
-      case "upcoming":
-        return "Upcoming";
-      case "active":
-        return "Active";
+      case "published":
+        return "Published";
       case "draft":
-      default:
         return "Draft";
+      case "archived":
+        return "Archived";
+      default:
+        return "Published";
     }
+  }
+
+  public getLocalizedTitle(locale: string): string {
+    if (locale === "ar" && this.titleAr) return this.titleAr;
+    if ((locale === "ckb" || locale === "ku") && this.titleKu) return this.titleKu;
+    return this.titleEn || this.titleAr || "";
+  }
+
+  public getLocalizedDescription(locale: string): string {
+    if (locale === "ar" && this.descriptionAr) return this.descriptionAr;
+    if ((locale === "ckb" || locale === "ku") && this.descriptionKu) return this.descriptionKu;
+    return this.descriptionEn || this.descriptionAr || "";
   }
 }

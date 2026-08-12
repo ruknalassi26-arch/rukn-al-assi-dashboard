@@ -1,13 +1,13 @@
 // ==============================================================================
 // features/projects/domain/repositories/i-project.repository.ts
-// IProjectRepository Contract Interface
+// IProjectRepository Contract Interface strictly matching Supabase SQL Schema
 // ==============================================================================
 import type { ProjectEntity, ProjectStatus } from "../entities/project.entity";
 
 export interface ProjectFilters {
   search?: string;
   categoryId?: string;
-  status?: string;
+  status?: ProjectStatus | "all";
   isFeatured?: boolean;
   page?: number;
   pageSize?: number;
@@ -24,26 +24,34 @@ export interface PaginatedProjects {
 }
 
 export interface CreateProjectInput {
-  slug: string;
+  categoryId?: string | null;
+  clientName?: string | null;
+  location?: string | null;
+  completionDate?: string | null;
+  status: ProjectStatus;
+  isFeatured?: boolean;
+  featuredOrder?: number;
+  sortOrder?: number;
+
+  // Multilingual
   titleEn: string;
-  titleAr: string;
+  titleAr?: string | null;
   titleKu?: string | null;
-  shortDescriptionEn?: string | null;
-  shortDescriptionAr?: string | null;
-  shortDescriptionKu?: string | null;
+  slugEn?: string | null;
+  slugAr?: string | null;
+  slugKu?: string | null;
   descriptionEn?: string | null;
   descriptionAr?: string | null;
   descriptionKu?: string | null;
-  categoryId?: string | null;
-  client?: string | null;
-  location?: string | null;
-  completionDate?: string | null;
-  year?: number | null;
-  coverImage?: string | null;
+  challengeEn?: string | null;
+  challengeAr?: string | null;
+  challengeKu?: string | null;
+  solutionEn?: string | null;
+  solutionAr?: string | null;
+  solutionKu?: string | null;
+
+  // Images
   images?: string[];
-  status: ProjectStatus;
-  isFeatured: boolean;
-  sortOrder: number;
 }
 
 export interface UpdateProjectInput extends Partial<CreateProjectInput> {
