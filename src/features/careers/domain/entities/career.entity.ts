@@ -9,7 +9,7 @@ export interface JobPostingEntity {
   id: string;
   slug: string;
   titleEn: string;
-  titleAr: string;
+  titleAr?: string | null;
   titleKu?: string | null;
   descriptionEn?: string | null;
   descriptionAr?: string | null;

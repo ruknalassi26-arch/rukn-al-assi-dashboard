@@ -1,7 +1,7 @@
 // ==============================================================================
 // features/careers/data/repositories/supabase-job-posting.repository.ts
 // Supabase Implementation of JobPostingRepository
-// Strictly matching SQL schema: job_postings + job_posting_translations
+// Strictly separating job_postings and job_posting_translations tables
 // ==============================================================================
 
 import { createClient } from "@core/lib/supabase/client";
@@ -11,29 +11,8 @@ import type {
 } from "../../domain/repositories/job-posting.repository";
 import type { JobPostingEntity } from "../../domain/entities/career.entity";
 import type { JobPostingStatus } from "../../domain/enums/career.enum";
-
-interface JobPostingTranslationDTO {
-  job_posting_id: string;
-  language_code: string;
-  slug: string | null;
-  title: string | null;
-  description: string | null;
-  requirements: string | null;
-}
-
-interface JobPostingJoinDTO {
-  id: string;
-  department: string | null;
-  employment_type: string;
-  location: string | null;
-  closes_at: string | null;
-  sort_order: number;
-  status: string;
-  deleted_at: string | null;
-  created_at: string;
-  updated_at: string;
-  job_posting_translations: JobPostingTranslationDTO[] | null;
-}
+import type { JobPostingJoinDTO } from "../dto/job-posting.dto";
+import { toJobPostingEntity } from "../mapper/job-posting.mapper";
 
 export class SupabaseJobPostingRepository implements JobPostingRepository {
   private get supabase() {
@@ -60,36 +39,6 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
     }
   }
 
-  private mapToEntity(row: JobPostingJoinDTO): JobPostingEntity {
-    const transList = row.job_posting_translations || [];
-    const emptyTrans: Partial<JobPostingTranslationDTO> = {};
-    const en = transList.find((t) => t.language_code === "en") || emptyTrans;
-    const ar = transList.find((t) => t.language_code === "ar") || emptyTrans;
-    const ku = transList.find((t) => t.language_code === "ku" || t.language_code === "ckb") || emptyTrans;
-
-    return {
-      id: row.id,
-      slug: en.slug || ar.slug || ku.slug || row.id,
-      titleEn: en.title || "Untitled Job",
-      titleAr: ar.title || null,
-      titleKu: ku.title || null,
-      descriptionEn: en.description || null,
-      descriptionAr: ar.description || null,
-      descriptionKu: ku.description || null,
-      requirementsEn: en.requirements || null,
-      requirementsAr: ar.requirements || null,
-      requirementsKu: ku.requirements || null,
-      department: row.department ?? null,
-      employmentType: (row.employment_type as any) ?? "full_time",
-      location: row.location ?? null,
-      closingDate: row.closes_at ?? null,
-      sortOrder: row.sort_order ?? 0,
-      status: (row.status as any) ?? "draft",
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    };
-  }
-
   async getPostings(options?: GetJobPostingsOptions): Promise<{ data: JobPostingEntity[]; total: number }> {
     let query = (this.supabase.from("job_postings" as any) as any)
       .select("*, job_posting_translations(*)", { count: "exact" })
@@ -109,16 +58,16 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
     const { data, count, error } = await query;
     if (error) throw new Error(error.message);
 
-    let items = (data as unknown as JobPostingJoinDTO[] ?? []).map((r) => this.mapToEntity(r));
+    let items = (data as unknown as JobPostingJoinDTO[] ?? []).map(toJobPostingEntity);
 
     if (options?.search && options.search.trim() !== "") {
-      const term = options.search.trim().toLowerCase();
+      const search = options.search.trim().toLowerCase();
       items = items.filter(
         (item) =>
-          item.titleEn.toLowerCase().includes(term) ||
-          (item.titleAr && item.titleAr.toLowerCase().includes(term)) ||
-          (item.department && item.department.toLowerCase().includes(term)) ||
-          (item.location && item.location.toLowerCase().includes(term))
+          item.titleEn.toLowerCase().includes(search) ||
+          (item.titleAr && item.titleAr.toLowerCase().includes(search)) ||
+          (item.department && item.department.toLowerCase().includes(search)) ||
+          (item.location && item.location.toLowerCase().includes(search))
       );
     }
 
@@ -135,18 +84,16 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
       .maybeSingle();
 
     if (error || !data) return null;
-    return this.mapToEntity(data as unknown as JobPostingJoinDTO);
+    return toJobPostingEntity(data as unknown as JobPostingJoinDTO);
   }
 
   async getPostingBySlug(slug: string): Promise<JobPostingEntity | null> {
-    // Query job_posting_translations to find matching job_posting_id
-    const { data: trans } = await (this.supabase.from("job_posting_translations" as any) as any)
-      .select("job_posting_id")
-      .eq("slug", slug)
-      .maybeSingle();
+    const { data, error } = await (this.supabase.from("job_postings" as any) as any)
+      .select("*, job_posting_translations(*)");
 
-    if (!trans?.job_posting_id) return null;
-    return this.getPostingById(trans.job_posting_id);
+    if (error || !data) return null;
+    const items = (data as unknown as JobPostingJoinDTO[]).map(toJobPostingEntity);
+    return items.find((item) => item.slug === slug) ?? null;
   }
 
   async getPublishedPostings(): Promise<JobPostingEntity[]> {
@@ -158,11 +105,11 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
       .order("created_at", { ascending: false });
 
     if (error || !data) return [];
-    return (data as unknown as JobPostingJoinDTO[]).map((r) => this.mapToEntity(r));
+    return (data as unknown as JobPostingJoinDTO[]).map(toJobPostingEntity);
   }
 
   async createPosting(posting: Omit<JobPostingEntity, "id" | "createdAt" | "updatedAt">): Promise<JobPostingEntity> {
-    const jobPayload = {
+    const mainPayload = {
       department: posting.department ?? null,
       employment_type: posting.employmentType,
       location: posting.location ?? null,
@@ -172,21 +119,21 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
     };
 
     const { data, error } = await (this.supabase.from("job_postings" as any) as any)
-      .insert(jobPayload)
-      .select("*")
+      .insert(mainPayload)
+      .select("id")
       .single();
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create job posting");
 
+    const jobId = data.id;
     const defaultSlug = posting.slug || posting.titleEn.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
     const transPayloads = [];
-
     if (posting.titleEn?.trim()) {
       transPayloads.push({
-        job_posting_id: data.id,
+        job_posting_id: jobId,
         language_code: "en",
-        slug: defaultSlug,
+        slug: posting.slug || defaultSlug,
         title: posting.titleEn.trim(),
         description: posting.descriptionEn || null,
         requirements: posting.requirementsEn || null,
@@ -195,9 +142,9 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
 
     if (posting.titleAr?.trim()) {
       transPayloads.push({
-        job_posting_id: data.id,
+        job_posting_id: jobId,
         language_code: "ar",
-        slug: defaultSlug,
+        slug: posting.slug || defaultSlug,
         title: posting.titleAr.trim(),
         description: posting.descriptionAr || null,
         requirements: posting.requirementsAr || null,
@@ -206,9 +153,9 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
 
     if (posting.titleKu?.trim()) {
       transPayloads.push({
-        job_posting_id: data.id,
+        job_posting_id: jobId,
         language_code: "ku",
-        slug: defaultSlug,
+        slug: posting.slug || defaultSlug,
         title: posting.titleKu.trim(),
         description: posting.descriptionKu || null,
         requirements: posting.requirementsKu || null,
@@ -216,12 +163,11 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
     }
 
     if (transPayloads.length > 0) {
-      const { error: transErr } = await (this.supabase.from("job_posting_translations" as any) as any)
-        .insert(transPayloads);
+      const { error: transErr } = await (this.supabase.from("job_posting_translations" as any) as any).insert(transPayloads);
       if (transErr) throw new Error(transErr.message || "Failed to save job posting translations");
     }
 
-    const created = (await this.getPostingById(data.id))!;
+    const created = (await this.getPostingById(jobId))!;
     await this.logActivity("created", created.id, created.titleEn);
     return created;
   }
@@ -230,18 +176,18 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
     id: string,
     posting: Partial<Omit<JobPostingEntity, "id" | "createdAt" | "updatedAt">>
   ): Promise<JobPostingEntity> {
-    const jobPayload: Record<string, any> = {};
-    if (posting.department !== undefined) jobPayload.department = posting.department || null;
-    if (posting.employmentType !== undefined) jobPayload.employment_type = posting.employmentType;
-    if (posting.location !== undefined) jobPayload.location = posting.location || null;
-    if (posting.closingDate !== undefined) jobPayload.closes_at = posting.closingDate || null;
-    if (posting.sortOrder !== undefined) jobPayload.sort_order = posting.sortOrder;
-    if (posting.status !== undefined) jobPayload.status = posting.status;
-    jobPayload.updated_at = new Date().toISOString();
+    const mainPayload: Record<string, any> = {};
+    if (posting.department !== undefined) mainPayload.department = posting.department;
+    if (posting.employmentType !== undefined) mainPayload.employment_type = posting.employmentType;
+    if (posting.location !== undefined) mainPayload.location = posting.location;
+    if (posting.closingDate !== undefined) mainPayload.closes_at = posting.closingDate;
+    if (posting.sortOrder !== undefined) mainPayload.sort_order = posting.sortOrder;
+    if (posting.status !== undefined) mainPayload.status = posting.status;
+    mainPayload.updated_at = new Date().toISOString();
 
-    if (Object.keys(jobPayload).length > 0) {
+    if (Object.keys(mainPayload).length > 0) {
       const { error } = await (this.supabase.from("job_postings" as any) as any)
-        .update(jobPayload)
+        .update(mainPayload)
         .eq("id", id);
       if (error) throw new Error(error.message);
     }
@@ -255,7 +201,7 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
           {
             job_posting_id: id,
             language_code: "en",
-            slug: defaultSlug,
+            slug: posting.slug || defaultSlug,
             title: posting.titleEn.trim(),
             description: posting.descriptionEn || null,
             requirements: posting.requirementsEn || null,
@@ -272,7 +218,7 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
           {
             job_posting_id: id,
             language_code: "ar",
-            slug: defaultSlug,
+            slug: posting.slug || defaultSlug,
             title: posting.titleAr.trim(),
             description: posting.descriptionAr || null,
             requirements: posting.requirementsAr || null,
@@ -294,7 +240,7 @@ export class SupabaseJobPostingRepository implements JobPostingRepository {
           {
             job_posting_id: id,
             language_code: "ku",
-            slug: defaultSlug,
+            slug: posting.slug || defaultSlug,
             title: posting.titleKu.trim(),
             description: posting.descriptionKu || null,
             requirements: posting.requirementsKu || null,

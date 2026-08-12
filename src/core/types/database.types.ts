@@ -705,7 +705,7 @@ export interface Database {
         Row: {
           job_posting_id: string;
           language_code: string;
-          slug: string | null;
+          slug: string;
           title: string;
           description: string | null;
           requirements: string | null;
