@@ -378,12 +378,12 @@ export function TeamMemberTable() {
                                 <span>{tCommon("viewAll")}</span>
                               </DropdownMenuItem>
 
-                              <Link href={`/admin/team/${member.id}/edit`}>
-                                <DropdownMenuItem className="gap-2 text-xs">
-                                  <Edit className="h-3.5 w-3.5" />
+                              <DropdownMenuItem asChild className="gap-2 text-xs">
+                                <Link href={`/admin/team/edit/${member.id}`}>
+                                  <Edit className="h-3.5 w-3.5 text-emerald-500" />
                                   <span>{tCommon("edit")}</span>
-                                </DropdownMenuItem>
-                              </Link>
+                                </Link>
+                              </DropdownMenuItem>
 
                               <DropdownMenuSeparator />
 
