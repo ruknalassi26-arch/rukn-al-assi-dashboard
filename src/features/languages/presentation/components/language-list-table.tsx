@@ -46,10 +46,14 @@ import { usePermission } from "@features/roles-permissions/presentation/hooks/us
 import { LanguageDialog } from "./language-dialog";
 import type { LanguageEntity } from "../../domain/entities/language.entity";
 
-export function LanguageListTable() {
+interface LanguageListTableProps {
+  isReadOnly?: boolean;
+}
+
+export function LanguageListTable({ isReadOnly = false }: LanguageListTableProps) {
   const tCommon = useTranslations("common");
   const { hasPermission } = usePermission();
-  const canManage = hasPermission("settings", "manage");
+  const canManage = !isReadOnly && hasPermission("settings", "manage");
 
   const { data: languages, isLoading, isError, refetch } = useLanguages();
   const deleteMutation = useDeleteLanguage();
@@ -70,6 +74,7 @@ export function LanguageListTable() {
   };
 
   const handleToggleRequired = async (lang: LanguageEntity) => {
+    if (isReadOnly) return;
     await updateMutation.mutateAsync({
       code: lang.code,
       input: { isRequired: !lang.isRequired },
@@ -77,6 +82,7 @@ export function LanguageListTable() {
   };
 
   const handleToggleActive = async (lang: LanguageEntity) => {
+    if (isReadOnly) return;
     await updateMutation.mutateAsync({
       code: lang.code,
       input: { isActive: !lang.isActive },
@@ -84,13 +90,23 @@ export function LanguageListTable() {
   };
 
   const handleDelete = async () => {
-    if (!deletingCode) return;
+    if (!deletingCode || isReadOnly) return;
     await deleteMutation.mutateAsync(deletingCode);
     setDeletingCode(null);
   };
 
   return (
     <div className="space-y-4">
+      {/* Read-Only Explanatory Callout Banner */}
+      {isReadOnly && (
+        <div className="p-3.5 rounded-xl border bg-primary/5 text-xs text-foreground flex items-center gap-2.5">
+          <AlertCircle className="h-4 w-4 text-primary shrink-0" />
+          <span className="font-medium">
+            Languages are managed globally because they affect the entire website and admin panel.
+          </span>
+        </div>
+      )}
+
       {/* Controls Bar */}
       <div className="flex items-center justify-between gap-4 border-b pb-4">
         <div>
@@ -98,7 +114,9 @@ export function LanguageListTable() {
             <Globe className="h-5 w-5 text-primary" /> System Languages & Localization
           </h2>
           <p className="text-sm text-muted-foreground">
-            Manage supported languages, direction (RTL/LTR), and mandatory translation rules across the portal.
+            {isReadOnly
+              ? "View active system languages and mandatory translation policies."
+              : "Manage supported languages, direction (RTL/LTR), and mandatory translation rules across the portal."}
           </p>
         </div>
 
@@ -120,7 +138,7 @@ export function LanguageListTable() {
               <TableHead className="text-center">Direction</TableHead>
               <TableHead className="text-center">Translation Policy</TableHead>
               <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-end">Actions</TableHead>
+              {!isReadOnly && <TableHead className="text-end">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -224,34 +242,36 @@ export function LanguageListTable() {
                   </TableCell>
 
                   {/* Actions */}
-                  <TableCell className="text-end">
-                    {canManage && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(lang)}>
-                            <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleActive(lang)}>
-                            <ArrowUpDown className="mr-2 h-4 w-4" />
-                            {lang.isActive ? "Deactivate Language" : "Activate Language"}
-                          </DropdownMenuItem>
-                          {!lang.isRequired && (
-                            <DropdownMenuItem
-                              onClick={() => setDeletingCode(lang.code)}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" /> {tCommon("delete")}
+                  {!isReadOnly && (
+                    <TableCell className="text-end">
+                      {canManage && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEdit(lang)}>
+                              <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
                             </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </TableCell>
+                            <DropdownMenuItem onClick={() => handleToggleActive(lang)}>
+                              <ArrowUpDown className="mr-2 h-4 w-4" />
+                              {lang.isActive ? "Deactivate Language" : "Activate Language"}
+                            </DropdownMenuItem>
+                            {!lang.isRequired && (
+                              <DropdownMenuItem
+                                onClick={() => setDeletingCode(lang.code)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" /> {tCommon("delete")}
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}
