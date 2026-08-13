@@ -88,6 +88,9 @@
     "clear": "Clear",
     "notFound": "Not found",
     "featured": "Featured",
+    "standard": "Standard",
+    "standardOnly": "Standard Only",
+    "hidden": "Hidden",
     "active": "Active",
     "draft": "Draft",
     "hidden": "Hidden",
@@ -1485,6 +1488,13 @@
     "searchProjects": "Search projects...",
     "clientsTitle": "Clients & Partners",
     "clientsSubtitle": "Manage client logos and partner links displayed on the homepage.",
-    "searchClients": "Search clients & partners..."
+    "searchClients": "Search clients & partners...",
+    "addClient": "Add Client & Partner",
+    "editClient": "Edit Client & Partner",
+    "clientLogo": "Client / Partner Logo",
+    "clientNameEn": "Client Name (English)",
+    "clientNameAr": "Client Name (Arabic)",
+    "clientNameKu": "Client Name (Kurdish)",
+    "websiteUrl": "Website / Partner URL"
   }
 }

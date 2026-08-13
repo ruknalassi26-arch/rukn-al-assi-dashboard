@@ -965,59 +965,133 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   // ============================================================================
   async getClients(): Promise<ClientEntity[]> {
     try {
-      const { data, error } = await this.supabase
-        .from("clients")
-        .select("*")
+      const { data, error } = await (this.supabase.from("clients" as any) as any)
+        .select("*, client_translations(*)")
         .order("sort_order", { ascending: true });
 
       if (!error && data) {
         return data.map(toClientEntity);
+      }
+
+      const { data: rawData, error: rawErr } = await (this.supabase.from("clients" as any) as any)
+        .select("*")
+        .order("sort_order", { ascending: true });
+
+      if (!rawErr && rawData) {
+        return rawData.map(toClientEntity);
       }
     } catch {}
     return [];
   }
 
   async createClient(client: Omit<ClientEntity, "id" | "createdAt" | "updatedAt">): Promise<ClientEntity> {
-    const payload: InsertTables<"clients"> = {
-      name_en: client.nameEn,
-      name_ar: client.nameAr,
+    const nameVal = client.nameEn || client.nameAr || "";
+    const dbStatus = client.status === "draft" ? "draft" : "published";
+    const basePayload: any = {
       logo_url: client.logoUrl || null,
       website_url: client.websiteUrl || null,
       sort_order: client.sortOrder ?? 0,
-      status: client.status ?? "active",
+      status: dbStatus,
     };
 
-    const { data, error } = await this.supabase
-      .from("clients")
-      .insert(payload)
+    // 1. Insert core record with dbStatus ('published' / 'draft')
+    let { data, error } = await (this.supabase.from("clients" as any) as any)
+      .insert(basePayload)
       .select()
       .single();
 
+    // Fallback if check constraint 23514 rejects 'published' and expects 'active'
+    if (error && error.code === "23514") {
+      basePayload.status = client.status ?? "active";
+      const res = await (this.supabase.from("clients" as any) as any)
+        .insert(basePayload)
+        .select()
+        .single();
+      data = res.data;
+      error = res.error;
+    }
+
+    // 2. If client creation succeeded, handle translations
+    if (!error && data) {
+      const clientId = data.id;
+      try {
+        const transPayload = [
+          { client_id: clientId, language_code: "en", name: client.nameEn || nameVal },
+          { client_id: clientId, language_code: "ar", name: client.nameAr || nameVal },
+        ];
+        await (this.supabase.from("client_translations" as any) as any).insert(transPayload);
+      } catch {}
+
+      await this.logActivity("created", "clients", nameVal);
+      return toClientEntity({
+        ...data,
+        client_translations: [
+          { language_code: "en", name: client.nameEn || nameVal },
+          { language_code: "ar", name: client.nameAr || nameVal },
+        ],
+      });
+    }
+
+    // Fallback: If core insert failed with PGRST204, try with name column
+    if (error && error.code === "PGRST204") {
+      basePayload.name = nameVal;
+      const res = await (this.supabase.from("clients" as any) as any)
+        .insert(basePayload)
+        .select()
+        .single();
+      data = res.data;
+      error = res.error;
+    }
+
     if (error || !data) throw new Error(error?.message ?? "Failed to create client");
 
-    await this.logActivity("created", "clients", client.nameEn);
+    await this.logActivity("created", "clients", nameVal);
     return toClientEntity(data);
   }
 
   async updateClient(id: string, client: Partial<ClientEntity>): Promise<ClientEntity> {
-    const payload: UpdateTables<"clients"> = {};
-    if (client.nameEn !== undefined) payload.name_en = client.nameEn;
-    if (client.nameAr !== undefined) payload.name_ar = client.nameAr;
+    const payload: any = {};
+    const nameVal = client.nameEn || client.nameAr;
     if (client.logoUrl !== undefined) payload.logo_url = client.logoUrl;
     if (client.websiteUrl !== undefined) payload.website_url = client.websiteUrl;
     if (client.sortOrder !== undefined) payload.sort_order = client.sortOrder;
-    if (client.status !== undefined) payload.status = client.status;
+    if (client.status !== undefined) {
+      payload.status = client.status === "draft" ? "draft" : "published";
+    }
 
-    const { data, error } = await this.supabase
-      .from("clients")
+    let { data, error } = await (this.supabase.from("clients" as any) as any)
       .update(payload)
       .eq("id", id)
       .select()
       .single();
 
+    if (error && error.code === "23514" && client.status !== undefined) {
+      payload.status = client.status;
+      const res = await (this.supabase.from("clients" as any) as any)
+        .update(payload)
+        .eq("id", id)
+        .select()
+        .single();
+      data = res.data;
+      error = res.error;
+    }
+
+    if (!error && data) {
+      if (nameVal !== undefined) {
+        try {
+          const transPayload = [
+            { client_id: id, language_code: "en", name: client.nameEn || nameVal },
+            { client_id: id, language_code: "ar", name: client.nameAr || nameVal },
+          ];
+          await (this.supabase.from("client_translations" as any) as any)
+            .upsert(transPayload, { onConflict: "client_id,language_code" });
+        } catch {}
+      }
+    }
+
     if (error || !data) throw new Error(error?.message ?? "Failed to update client");
 
-    await this.logActivity("updated", "clients", data.name_en);
+    await this.logActivity("updated", "clients", nameVal || id);
     return toClientEntity(data);
   }
 

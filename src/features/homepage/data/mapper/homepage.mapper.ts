@@ -163,15 +163,21 @@ export function toFeaturedProjectEntity(dto: any): FeaturedProjectEntity {
   });
 }
 
-export function toClientEntity(dto: ClientDTO): ClientEntity {
+export function toClientEntity(dto: any): ClientEntity {
+  const transList = dto.client_translations || dto.translations || [];
+  const en = transList.find((t: any) => t.language_code === "en") || {};
+  const ar = transList.find((t: any) => t.language_code === "ar") || {};
+
+  const nameVal = dto.name || dto.company_name || dto.title || dto.name_en || dto.name_ar || "";
+
   return new ClientEntity({
     id: dto.id,
-    nameEn: dto.name_en || "",
-    nameAr: dto.name_ar || "",
-    logoUrl: dto.logo_url || null,
-    websiteUrl: dto.website_url || null,
+    nameEn: en.name || en.title || dto.name_en || dto.name || nameVal,
+    nameAr: ar.name || ar.title || dto.name_ar || dto.name || nameVal,
+    logoUrl: dto.logo_url || dto.logo || dto.image_url || null,
+    websiteUrl: dto.website_url || dto.website || dto.url || null,
     sortOrder: dto.sort_order ?? 0,
-    status: dto.status || "active",
+    status: (dto.status === "published" || dto.status === "active") ? "active" : "draft",
     createdAt: new Date(dto.created_at || Date.now()),
     updatedAt: new Date(dto.updated_at || Date.now()),
   });

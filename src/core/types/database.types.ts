@@ -727,8 +727,9 @@ export interface Database {
       clients: {
         Row: {
           id: string;
-          name_en: string;
-          name_ar: string;
+          name: string;
+          name_en?: string | null;
+          name_ar?: string | null;
           logo_url: string | null;
           website_url: string | null;
           sort_order: number;
@@ -736,8 +737,15 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["clients"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: {
           id?: string;
+          name?: string;
+          name_en?: string | null;
+          name_ar?: string | null;
+          logo_url?: string | null;
+          website_url?: string | null;
+          sort_order?: number;
+          status?: "active" | "draft";
           created_at?: string;
           updated_at?: string;
         };
