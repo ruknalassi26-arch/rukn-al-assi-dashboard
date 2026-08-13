@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // features/global-search/presentation/components/global-search-modal.tsx
-// Global Command Palette Search Modal with Ctrl+K Listener & Highlights
+// Global Command Palette Search Modal with Ctrl+K Listener & Real DB Results
 // ==============================================================================
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -30,9 +30,13 @@ import {
   Users,
   FileText,
   Mail,
+  Briefcase,
+  MapPin,
+  Building2,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { useGlobalSearchStore } from "../stores/global-search.store";
 import { useGlobalSearchQuery } from "@shared/hooks/global-search/use-global-search-hooks";
@@ -50,7 +54,6 @@ export function GlobalSearchModal() {
     moduleFilter,
     page,
     recentSearches,
-    openModal,
     closeModal,
     setQuery,
     setModuleFilter,
@@ -61,15 +64,18 @@ export function GlobalSearchModal() {
   } = useGlobalSearchStore();
 
   const MODULE_TABS = [
-    { value: "all", label: t("tabs.all") },
-    { value: "products", label: t("tabs.products") },
-    { value: "categories", label: t("tabs.categories") },
-    { value: "services", label: t("tabs.services") },
-    { value: "projects", label: t("tabs.projects") },
-    { value: "certificates", label: t("tabs.certificates") },
-    { value: "team", label: t("tabs.team") },
-    { value: "rfq", label: t("tabs.rfq") },
-    { value: "contact", label: t("tabs.contact") },
+    { value: "all", label: t("tabs.all") || "All" },
+    { value: "products", label: t("tabs.products") || "Products" },
+    { value: "categories", label: t("tabs.categories") || "Categories" },
+    { value: "services", label: t("tabs.services") || "Services" },
+    { value: "projects", label: t("tabs.projects") || "Projects" },
+    { value: "certificates", label: t("tabs.certificates") || "Certificates" },
+    { value: "team", label: t("tabs.team") || "Team" },
+    { value: "rfq", label: t("tabs.rfq") || "RFQs" },
+    { value: "contact", label: t("tabs.contact") || "Contact" },
+    { value: "careers", label: "Jobs" },
+    { value: "branches", label: "Branches" },
+    { value: "clients", label: "Clients" },
   ];
 
   // Global Ctrl+K / Cmd+K Hotkey Listener (works across English, Arabic, Kurdish keyboard layouts)
@@ -85,7 +91,7 @@ export function GlobalSearchModal() {
     return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, []);
 
-  const { data, isLoading } = useGlobalSearchQuery(query, moduleFilter, page, 10);
+  const { data, isLoading, isFetching, isError } = useGlobalSearchQuery(query, moduleFilter, page, 10);
 
   const results = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -116,6 +122,12 @@ export function GlobalSearchModal() {
         return <FileText className="h-4 w-4 text-orange-500" />;
       case "contact":
         return <Mail className="h-4 w-4 text-rose-500" />;
+      case "careers":
+        return <Briefcase className="h-4 w-4 text-purple-600" />;
+      case "branches":
+        return <MapPin className="h-4 w-4 text-emerald-600" />;
+      case "clients":
+        return <Building2 className="h-4 w-4 text-sky-600" />;
       default:
         return <Search className="h-4 w-4 text-primary" />;
     }
@@ -125,15 +137,19 @@ export function GlobalSearchModal() {
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
       <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-0 overflow-hidden gap-0">
         <DialogHeader className="sr-only">
-          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogTitle>{t("title") || "Global Search"}</DialogTitle>
         </DialogHeader>
 
         {/* Input Bar */}
-        <div className="relative flex items-center border-b px-4 py-3 bg-card gap-2">
-          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+        <div className="relative flex items-center border-b ps-4 pe-14 py-3 bg-card gap-2">
+          {isFetching ? (
+            <Loader2 className="h-4 w-4 text-primary animate-spin shrink-0" />
+          ) : (
+            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+          )}
           <Input
             autoFocus
-            placeholder={t("placeholder")}
+            placeholder={t("placeholder") || "Search products, categories, services, projects..."}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="border-0 focus-visible:ring-0 text-sm shadow-none px-2 h-8 flex-1"
@@ -143,7 +159,8 @@ export function GlobalSearchModal() {
               variant="ghost"
               size="icon"
               onClick={() => setQuery("")}
-              className="h-6 w-6 text-muted-foreground hover:text-foreground shrink-0"
+              title="Clear search query"
+              className="h-6 w-6 text-muted-foreground hover:text-foreground shrink-0 rounded-full hover:bg-muted"
             >
               <X className="h-3.5 w-3.5" />
             </Button>
@@ -156,7 +173,7 @@ export function GlobalSearchModal() {
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span className="font-semibold flex items-center gap-1.5">
                 <History className="h-3.5 w-3.5 text-primary" />
-                {t("recentSearches")}
+                {t("recentSearches") || "Recent Searches"}
               </span>
               <button
                 type="button"
@@ -164,7 +181,7 @@ export function GlobalSearchModal() {
                 className="hover:text-destructive text-[11px] flex items-center gap-1"
               >
                 <Trash2 className="h-3 w-3" />
-                <span>{t("clearAll")}</span>
+                <span>{t("clearAll") || "Clear All"}</span>
               </button>
             </div>
 
@@ -191,7 +208,7 @@ export function GlobalSearchModal() {
         )}
 
         {/* Filter Category Tabs */}
-        {query.trim().length > 0 && (
+        {query.trim().length >= 2 && (
           <div className="flex items-center gap-1 px-4 py-2 bg-muted/40 border-b overflow-x-auto no-scrollbar">
             {MODULE_TABS.map((tab) => {
               const count = moduleCounts[tab.value] ?? 0;
@@ -221,12 +238,12 @@ export function GlobalSearchModal() {
 
         {/* Results Stream Area */}
         <ScrollArea className="flex-1 p-4">
-          {query.trim().length === 0 ? (
+          {query.trim().length < 2 ? (
             <div className="text-center py-12 space-y-2">
               <Search className="h-8 w-8 mx-auto text-muted-foreground/40" />
-              <p className="text-xs font-semibold text-muted-foreground">{t("emptySearchTitle")}</p>
+              <p className="text-xs font-semibold text-muted-foreground">Type at least 2 characters to search</p>
               <p className="text-[11px] text-muted-foreground/80">
-                {t("emptySearchDesc")}
+                Search across products, projects, services, categories, team members, and RFQs.
               </p>
             </div>
           ) : isLoading ? (
@@ -241,12 +258,16 @@ export function GlobalSearchModal() {
                 </div>
               ))}
             </div>
+          ) : isError ? (
+            <div className="text-center py-12 space-y-2 border border-destructive/30 rounded-lg bg-destructive/5 text-destructive">
+              <p className="text-xs font-semibold">Unable to search. Please try again.</p>
+            </div>
           ) : results.length === 0 ? (
             <div className="text-center py-12 space-y-2 border border-dashed rounded-lg bg-muted/20">
               <Search className="h-8 w-8 mx-auto text-muted-foreground/40" />
-              <p className="text-xs font-semibold text-muted-foreground">{t("noResultsTitle")} "{query}"</p>
+              <p className="text-xs font-semibold text-muted-foreground">No results found for "{query}"</p>
               <p className="text-[11px] text-muted-foreground/80">
-                {t("noResultsDesc")}
+                Try refining your keywords or searching in English, Arabic, or Kurdish.
               </p>
             </div>
           ) : (
@@ -292,10 +313,10 @@ export function GlobalSearchModal() {
         </ScrollArea>
 
         {/* Footer Pagination */}
-        {query.trim().length > 0 && total > 0 && (
+        {query.trim().length >= 2 && total > 0 && (
           <div className="p-3 border-t bg-card flex items-center justify-between gap-2 text-xs text-muted-foreground">
             <span>
-              {t("foundResults", { total })}
+              Found {total} result{total === 1 ? "" : "s"}
             </span>
 
             <div className="flex items-center gap-1">

@@ -15,7 +15,7 @@ const searchAllUseCase = new SearchAllUseCase(repository);
 /**
  * Custom Debounce Hook to delay state updates
  */
-export function useDebounce<T>(value: T, delay = 300): T {
+export function useDebounce<T>(value: T, delay = 400): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export function useGlobalSearchQuery(
   page = 1,
   pageSize = 10
 ) {
-  const debouncedQuery = useDebounce(query, 300);
+  const debouncedQuery = useDebounce(query, 400);
 
   return useQuery({
     queryKey: queryKeys.globalSearch.query(debouncedQuery, moduleFilter, page),
@@ -48,7 +48,7 @@ export function useGlobalSearchQuery(
         page,
         pageSize,
       }),
-    enabled: debouncedQuery.trim().length > 0,
+    enabled: debouncedQuery.trim().length >= 2,
     staleTime: 60 * 1000,
   });
 }

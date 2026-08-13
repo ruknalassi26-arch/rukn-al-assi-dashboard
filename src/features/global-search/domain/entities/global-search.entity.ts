@@ -11,7 +11,10 @@ export type SearchModuleType =
   | "certificates"
   | "team"
   | "rfq"
-  | "contact";
+  | "contact"
+  | "careers"
+  | "branches"
+  | "clients";
 
 export interface SearchResultItemProps {
   id: string;
@@ -57,6 +60,12 @@ export class SearchResultItemEntity {
         return "RFQ Request";
       case "contact":
         return "Contact Message";
+      case "careers":
+        return "Job Posting";
+      case "branches":
+        return "Branch";
+      case "clients":
+        return "Client Partner";
       default:
         return String(this.module).toUpperCase();
     }
@@ -69,6 +78,12 @@ export class SearchResultItemEntity {
       case "services":
         return "secondary";
       case "rfq":
+        return "outline";
+      case "careers":
+        return "secondary";
+      case "branches":
+        return "outline";
+      case "clients":
         return "outline";
       default:
         return "secondary";
