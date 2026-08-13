@@ -3,24 +3,30 @@
 // Maps between Supabase DTOs and SEO Domain Entity Classes
 // ==============================================================================
 import { SeoSettingEntity } from "../../domain/entities/seo-setting.entity";
+import type { SeoPageKey } from "../../domain/entities/seo-setting.entity";
 import type { SeoSettingDTO } from "../dto/seo.dto";
 
-export function toSeoSettingEntity(dto: SeoSettingDTO): SeoSettingEntity {
+export function toSeoSettingEntity(pageKey: SeoPageKey, rows: SeoSettingDTO[]): SeoSettingEntity {
+  const enRow: Partial<SeoSettingDTO> = rows.find((r) => r.entity_type === pageKey && r.language_code === "en") || {};
+  const arRow: Partial<SeoSettingDTO> = rows.find((r) => r.entity_type === pageKey && r.language_code === "ar") || {};
+  const kuRow: Partial<SeoSettingDTO> = rows.find((r) => r.entity_type === pageKey && r.language_code === "ku") || {};
+
   return new SeoSettingEntity({
-    id: dto.id,
-    pageKey: dto.page_key,
-    metaTitleEn: dto.meta_title_en,
-    metaTitleAr: dto.meta_title_ar,
-    metaTitleKu: dto.meta_title_ku ?? null,
-    metaDescriptionEn: dto.meta_description_en,
-    metaDescriptionAr: dto.meta_description_ar,
-    metaDescriptionKu: dto.meta_description_ku ?? null,
-    keywordsEn: dto.keywords_en,
-    keywordsAr: dto.keywords_ar,
-    keywordsKu: dto.keywords_ku ?? null,
-    ogImageUrl: dto.og_image_url,
-    isIndexed: dto.is_indexed ?? true,
-    createdAt: new Date(dto.created_at),
-    updatedAt: new Date(dto.updated_at),
+    id: String(enRow.id || `seo-${pageKey}`),
+    pageKey,
+    metaTitleEn: enRow.meta_title || `Rukn Al Assi — ${pageKey}`,
+    metaTitleAr: arRow.meta_title || `ركن العاصي — ${pageKey}`,
+    metaTitleKu: kuRow.meta_title || null,
+    metaDescriptionEn: enRow.meta_description || "",
+    metaDescriptionAr: arRow.meta_description || "",
+    metaDescriptionKu: kuRow.meta_description || null,
+    canonicalUrlEn: enRow.canonical_url || null,
+    canonicalUrlAr: arRow.canonical_url || null,
+    canonicalUrlKu: kuRow.canonical_url || null,
+    ogImageUrl: enRow.og_image_url || arRow.og_image_url || null,
+    schemaJson: (enRow.schema_json as any) || null,
+    isIndexed: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 }

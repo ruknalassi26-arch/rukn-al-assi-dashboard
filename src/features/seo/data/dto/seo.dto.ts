@@ -4,4 +4,4 @@
 // ==============================================================================
 import type { Tables } from "@core/types/database.types";
 
-export type SeoSettingDTO = Tables<"seo_settings">;
+export type SeoSettingDTO = Tables<"seo_meta">;

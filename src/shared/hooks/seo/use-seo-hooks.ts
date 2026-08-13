@@ -40,6 +40,7 @@ export function useUpdateSeoSetting() {
   return useMutation({
     mutationFn: (input: UpdateSeoSettingInput) => updateSeoSettingUseCase.execute(input),
     onSuccess: (updated) => {
+      queryClient.setQueryData(queryKeys.seo.byPage(updated.pageKey), updated);
       queryClient.invalidateQueries({ queryKey: queryKeys.seo.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.seo.byPage(updated.pageKey) });
       toast.success(`SEO metadata updated for ${updated.pageKey} page`);

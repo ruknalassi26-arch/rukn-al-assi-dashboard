@@ -51,9 +51,9 @@ const seoSchema = z.object({
   metaDescriptionEn: z.string().max(180, "Meta Description should be under 180 characters").optional().nullable(),
   metaDescriptionAr: z.string().max(180, "وصف SEO يجب ألا يتجاوز 180 حرفاً").optional().nullable(),
   metaDescriptionKu: z.string().optional().nullable(),
-  keywordsEn: z.string().optional().nullable(),
-  keywordsAr: z.string().optional().nullable(),
-  keywordsKu: z.string().optional().nullable(),
+  canonicalUrlEn: z.string().optional().nullable(),
+  canonicalUrlAr: z.string().optional().nullable(),
+  canonicalUrlKu: z.string().optional().nullable(),
   ogImageUrl: z.string().optional().nullable(),
   isIndexed: z.boolean(),
 });
@@ -76,9 +76,9 @@ export function SeoForm() {
       metaDescriptionEn: seoData?.metaDescriptionEn ?? "",
       metaDescriptionAr: seoData?.metaDescriptionAr ?? "",
       metaDescriptionKu: seoData?.metaDescriptionKu ?? "",
-      keywordsEn: seoData?.keywordsEn ?? "",
-      keywordsAr: seoData?.keywordsAr ?? "",
-      keywordsKu: seoData?.keywordsKu ?? "",
+      canonicalUrlEn: seoData?.canonicalUrlEn ?? "",
+      canonicalUrlAr: seoData?.canonicalUrlAr ?? "",
+      canonicalUrlKu: seoData?.canonicalUrlKu ?? "",
       ogImageUrl: seoData?.ogImageUrl ?? "",
       isIndexed: seoData?.isIndexed ?? true,
     },
@@ -216,13 +216,13 @@ export function SeoForm() {
                       {errors.metaDescriptionEn && <p className="text-xs font-semibold text-destructive">{errors.metaDescriptionEn.message}</p>}
                     </div>
 
-                    {/* Keywords En */}
+                    {/* Canonical URL En */}
                     <div className="space-y-2">
-                      <Label htmlFor="keywordsEn">Search Keywords (English)</Label>
+                      <Label htmlFor="canonicalUrlEn">Canonical URL (English)</Label>
                       <Input
-                        id="keywordsEn"
-                        placeholder="hydraulic systems, industrial pumps, machinery, Iraq"
-                        {...register("keywordsEn")}
+                        id="canonicalUrlEn"
+                        placeholder="https://ruknalassi.com/en/..."
+                        {...register("canonicalUrlEn")}
                       />
                     </div>
                   </div>
@@ -262,13 +262,13 @@ export function SeoForm() {
                       {errors.metaDescriptionAr && <p className="text-xs font-semibold text-destructive">{errors.metaDescriptionAr.message}</p>}
                     </div>
 
-                    {/* Keywords Ar */}
+                    {/* Canonical URL Ar */}
                     <div className="space-y-2">
-                      <Label htmlFor="keywordsAr">كلمات المفتاحية (بالعربية)</Label>
+                      <Label htmlFor="canonicalUrlAr">الرابط المرجعي (بالعربية)</Label>
                       <Input
-                        id="keywordsAr"
-                        placeholder="أنظمة هيدروليكية، مضخات صناعية، العراق، معدات ثقيلة"
-                        {...register("keywordsAr")}
+                        id="canonicalUrlAr"
+                        placeholder="https://ruknalassi.com/ar/..."
+                        {...register("canonicalUrlAr")}
                       />
                     </div>
                   </div>
@@ -296,13 +296,13 @@ export function SeoForm() {
                       />
                     </div>
 
-                    {/* Keywords Ku */}
+                    {/* Canonical URL Ku */}
                     <div className="space-y-2">
-                      <Label htmlFor="keywordsKu">وشە کلیلییەکان (بە کوردی)</Label>
+                      <Label htmlFor="canonicalUrlKu">ڕاوبەستی سەرەکی (بە کوردی)</Label>
                       <Input
-                        id="keywordsKu"
-                        placeholder="هایدرۆلیک، ئامێری پیشەسازی، عێراق"
-                        {...register("keywordsKu")}
+                        id="canonicalUrlKu"
+                        placeholder="https://ruknalassi.com/ckb/..."
+                        {...register("canonicalUrlKu")}
                       />
                     </div>
                   </div>

@@ -12,10 +12,11 @@ export interface UpdateSeoSettingInput {
   metaDescriptionEn?: string | null;
   metaDescriptionAr?: string | null;
   metaDescriptionKu?: string | null;
-  keywordsEn?: string | null;
-  keywordsAr?: string | null;
-  keywordsKu?: string | null;
+  canonicalUrlEn?: string | null;
+  canonicalUrlAr?: string | null;
+  canonicalUrlKu?: string | null;
   ogImageUrl?: string | null;
+  schemaJson?: Record<string, unknown> | unknown[] | null;
   isIndexed?: boolean;
 }
 
