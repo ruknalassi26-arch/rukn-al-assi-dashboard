@@ -6,23 +6,25 @@ import { ActivityLogEntity } from "../../domain/entities/activity-log.entity";
 import type { ActivityLogDTO } from "../dto/activity-log.dto";
 
 export function toActivityLogEntity(dto: ActivityLogDTO): ActivityLogEntity {
-  const metadata = dto.metadata ?? null;
-  const ipAddress = dto.ip_address ?? (metadata && "ip_address" in metadata ? String(metadata.ip_address) : null);
-  const oldValue = dto.old_value ?? (metadata && "old_value" in metadata ? metadata.old_value : null);
-  const newValue = dto.new_value ?? (metadata && "new_value" in metadata ? metadata.new_value : null);
+  const details = dto.details ?? null;
+  const profile = dto.admin_profiles;
+  const userName = profile?.full_name || (details?.user_full_name as string) || (details?.user_name as string) || "Administrator";
+  const userEmail = (details?.user_email as string) || null;
+  const userAvatarUrl = profile?.avatar_url || null;
+  const entityTitle = (details?.entity_title as string) || (details?.title as string) || (details?.name as string) || "System Activity";
 
   return new ActivityLogEntity({
     id: dto.id,
     action: dto.action,
     entityType: dto.entity_type,
     entityId: dto.entity_id ?? null,
-    entityTitle: dto.entity_title ?? null,
-    userId: dto.user_id ?? null,
-    userEmail: dto.user_email ?? null,
-    ipAddress: ipAddress ?? null,
-    oldValue: oldValue ?? null,
-    newValue: newValue ?? null,
-    metadata,
+    entityTitle,
+    userId: dto.admin_user_id ?? null,
+    userName,
+    userEmail,
+    userAvatarUrl,
+    ipAddress: dto.ip_address ?? null,
+    metadata: details,
     createdAt: new Date(dto.created_at),
   });
 }

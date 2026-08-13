@@ -19,11 +19,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
 } from "@shared/ui";
 import { useActivityLogStore } from "../stores/activity-log.store";
 import { useActivityLogsQuery } from "@shared/hooks/activity-log/use-activity-log-hooks";
 import { ErrorState } from "@shared/components/error-state";
-import { Activity, Eye, ChevronLeft, ChevronRight, ArrowUpDown, Clock, User, Globe, FileText } from "lucide-react";
+import { Activity, Eye, ChevronLeft, ChevronRight, ArrowUpDown, Clock, User, FileText } from "lucide-react";
 
 export function ActivityLogTable() {
   const t = useTranslations("activityLog");
@@ -132,14 +135,6 @@ export function ActivityLogTable() {
                   </button>
                 </TableHead>
 
-                {/* IP Address */}
-                <TableHead className="text-xs font-bold">
-                  <span className="flex items-center gap-1">
-                    <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-                    {t("table.ipAddress")}
-                  </span>
-                </TableHead>
-
                 {/* Timestamp Column */}
                 <TableHead className="text-end">
                   <button
@@ -161,7 +156,7 @@ export function ActivityLogTable() {
             <TableBody>
               {logs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Activity className="h-8 w-8 text-muted-foreground/40" />
                       <p className="text-xs font-semibold text-foreground">{t("table.emptyTitle")}</p>
@@ -176,7 +171,7 @@ export function ActivityLogTable() {
                   <TableRow key={item.id} className="hover:bg-muted/40 transition-colors">
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Badge variant={item.actionBadgeVariant} className="text-[10px] font-semibold uppercase">
+                        <Badge variant={item.actionBadgeVariant} className="text-[10px] font-semibold uppercase whitespace-nowrap px-2.5 py-0.5">
                           {item.actionFormattedLabel}
                         </Badge>
                       </div>
@@ -192,11 +187,20 @@ export function ActivityLogTable() {
                     </TableCell>
 
                     <TableCell>
-                      <span className="text-xs font-medium text-foreground">{item.userEmail || "—"}</span>
-                    </TableCell>
-
-                    <TableCell>
-                      <span className="text-xs font-mono text-muted-foreground">{item.ipAddress || "—"}</span>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-7 w-7">
+                          <AvatarImage src={item.userAvatarUrl ?? undefined} alt={item.userName ?? "User"} className="object-cover" />
+                          <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+                            {item.userInitials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-semibold text-foreground">{item.userName || "Administrator"}</span>
+                          {item.userEmail && (
+                            <span className="text-[10px] text-muted-foreground">{item.userEmail}</span>
+                          )}
+                        </div>
+                      </div>
                     </TableCell>
 
                     <TableCell className="text-end">

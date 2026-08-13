@@ -1122,7 +1122,15 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["activity_log"]["Insert"]>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "activity_log_admin_user_id_fkey";
+            columns: ["admin_user_id"];
+            isOneToOne: false;
+            referencedRelation: "admin_profiles";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       settings: {
         Row: {

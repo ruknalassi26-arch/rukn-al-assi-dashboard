@@ -28,14 +28,12 @@ export function ActivityLogDrawer() {
   return (
     <Dialog open={isDrawerOpen} onOpenChange={(open: boolean) => !open && closeDrawer()}>
       <DialogContent className="sm:max-w-xl w-full p-0 flex flex-col max-h-[85vh] bg-card overflow-hidden">
-        <DialogHeader className="p-6 border-b bg-card space-y-1">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-primary" />
-              <DialogTitle className="text-lg font-bold text-foreground">{t("title")}</DialogTitle>
-            </div>
+        <DialogHeader className="p-6 border-b bg-card space-y-1 relative">
+          <div className="flex items-center gap-2.5 pe-10 flex-wrap sm:flex-nowrap">
+            <Activity className="h-5 w-5 text-primary shrink-0" />
+            <DialogTitle className="text-lg font-bold text-foreground">{t("title")}</DialogTitle>
             {item && (
-              <Badge variant={item.actionBadgeVariant} className="text-xs uppercase font-semibold">
+              <Badge variant={item.actionBadgeVariant} className="text-xs uppercase font-semibold whitespace-nowrap px-2.5 py-0.5 shrink-0">
                 {item.actionFormattedLabel}
               </Badge>
             )}
@@ -60,7 +58,7 @@ export function ActivityLogDrawer() {
           ) : (
             <>
               {/* Metadata Cards */}
-              <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div className="p-3 border rounded-lg bg-muted/20 space-y-1">
                   <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
                     <Activity className="h-3.5 w-3.5 text-primary" /> {t("actionType")}
@@ -80,14 +78,10 @@ export function ActivityLogDrawer() {
                   <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
                     <User className="h-3.5 w-3.5 text-primary" /> {t("userAccount")}
                   </span>
-                  <p className="font-bold text-foreground truncate">{item.userEmail || "—"}</p>
-                </div>
-
-                <div className="p-3 border rounded-lg bg-muted/20 space-y-1">
-                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-                    <Globe className="h-3.5 w-3.5 text-primary" /> {t("ipAddress")}
-                  </span>
-                  <p className="font-mono font-bold text-foreground">{item.ipAddress || "—"}</p>
+                  <p className="font-bold text-foreground truncate">{item.userName || "Administrator"}</p>
+                  {item.userEmail && (
+                    <p className="text-[10px] text-muted-foreground truncate">{item.userEmail}</p>
+                  )}
                 </div>
               </div>
 
@@ -99,33 +93,16 @@ export function ActivityLogDrawer() {
                 <span className="font-mono font-bold text-primary">{item.formattedDate}</span>
               </div>
 
-              {/* JSON State Diff Inspector */}
-              {(item.oldValue || item.newValue) && (
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center gap-2">
-                    <ArrowRight className="h-4 w-4 text-primary" />
-                    <h4 className="text-xs font-bold text-foreground">{t("diffTitle")}</h4>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    {/* Old Value */}
-                    <div className="space-y-1.5">
-                      <span className="text-[11px] font-semibold text-destructive">{t("oldValue")}</span>
-                      <pre className="p-3 rounded-lg border bg-muted/40 font-mono text-[10px] overflow-x-auto max-h-60 leading-relaxed">
-                        {item.oldValue ? JSON.stringify(item.oldValue, null, 2) : tCommon("none")}
-                      </pre>
-                    </div>
-
-                    {/* New Value */}
-                    <div className="space-y-1.5">
-                      <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">{t("newValue")}</span>
-                      <pre className="p-3 rounded-lg border bg-muted/40 font-mono text-[10px] overflow-x-auto max-h-60 leading-relaxed">
-                        {item.newValue ? JSON.stringify(item.newValue, null, 2) : tCommon("none")}
-                      </pre>
-                    </div>
-                  </div>
+              {/* Activity Log Details JSON Inspector */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <h4 className="text-xs font-bold text-foreground">Payload & Details (JSON)</h4>
                 </div>
-              )}
+                <pre className="p-3.5 rounded-lg border bg-muted/40 font-mono text-[11px] overflow-x-auto max-h-64 leading-relaxed text-foreground">
+                  {item.metadata ? JSON.stringify(item.metadata, null, 2) : "No details recorded."}
+                </pre>
+              </div>
             </>
           )}
         </div>

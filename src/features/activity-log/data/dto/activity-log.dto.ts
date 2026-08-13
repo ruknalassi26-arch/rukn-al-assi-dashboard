@@ -5,15 +5,17 @@
 
 export interface ActivityLogDTO {
   id: string;
+  admin_user_id?: string | null;
   action: string;
   entity_type: string;
   entity_id?: string | null;
-  entity_title?: string | null;
-  user_id?: string | null;
-  user_email?: string | null;
+  details?: Record<string, unknown> | null;
   ip_address?: string | null;
-  old_value?: unknown;
-  new_value?: unknown;
-  metadata?: Record<string, unknown> | null;
+  user_agent?: string | null;
   created_at: string;
+  admin_profiles?: {
+    id?: string;
+    full_name?: string | null;
+    avatar_url?: string | null;
+  } | null;
 }

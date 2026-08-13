@@ -10,7 +10,9 @@ export interface ActivityLogProps {
   entityId?: string | null;
   entityTitle?: string | null;
   userId?: string | null;
+  userName?: string | null;
   userEmail?: string | null;
+  userAvatarUrl?: string | null;
   ipAddress?: string | null;
   oldValue?: unknown;
   newValue?: unknown;
@@ -25,7 +27,9 @@ export class ActivityLogEntity {
   public readonly entityId: string | null;
   public readonly entityTitle: string | null;
   public readonly userId: string | null;
+  public readonly userName: string | null;
   public readonly userEmail: string | null;
+  public readonly userAvatarUrl: string | null;
   public readonly ipAddress: string | null;
   public readonly oldValue: unknown;
   public readonly newValue: unknown;
@@ -39,12 +43,28 @@ export class ActivityLogEntity {
     this.entityId = props.entityId ?? null;
     this.entityTitle = props.entityTitle ?? null;
     this.userId = props.userId ?? null;
+    this.userName = props.userName ?? null;
     this.userEmail = props.userEmail ?? null;
+    this.userAvatarUrl = props.userAvatarUrl ?? null;
     this.ipAddress = props.ipAddress ?? null;
     this.oldValue = props.oldValue ?? null;
     this.newValue = props.newValue ?? null;
     this.metadata = props.metadata ?? null;
     this.createdAt = props.createdAt;
+  }
+
+  public get userInitials(): string {
+    if (this.userName) {
+      const parts = this.userName.trim().split(" ");
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return this.userName.substring(0, 2).toUpperCase();
+    }
+    if (this.userEmail) {
+      return this.userEmail.substring(0, 2).toUpperCase();
+    }
+    return "AD";
   }
 
   public get actionBadgeVariant(): "default" | "secondary" | "destructive" | "outline" {

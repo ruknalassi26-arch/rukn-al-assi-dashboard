@@ -65,7 +65,7 @@ export function ActivityLogFilters() {
         <span className="text-xs font-semibold text-foreground">{tCommon("filter")}</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 items-center">
         {/* Search */}
         <div className="relative">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -73,13 +73,13 @@ export function ActivityLogFilters() {
             placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="ps-9 text-xs h-9"
+            className="ps-9 text-xs h-9 w-full"
           />
         </div>
 
         {/* Action Select */}
         <Select value={action} onValueChange={setAction}>
-          <SelectTrigger className="text-xs h-9">
+          <SelectTrigger className="text-xs h-9 w-full">
             <SelectValue placeholder={t("allActions")} />
           </SelectTrigger>
           <SelectContent>
@@ -93,7 +93,7 @@ export function ActivityLogFilters() {
 
         {/* Entity Type Select */}
         <Select value={entityType} onValueChange={setEntityType}>
-          <SelectTrigger className="text-xs h-9">
+          <SelectTrigger className="text-xs h-9 w-full">
             <SelectValue placeholder={t("allEntities")} />
           </SelectTrigger>
           <SelectContent>
@@ -105,20 +105,25 @@ export function ActivityLogFilters() {
           </SelectContent>
         </Select>
 
-        {/* Date Range */}
-        <div className="flex items-center gap-1.5">
+        {/* Start Date */}
+        <div className="relative w-full">
           <Input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="text-xs h-9 px-2"
+            className="text-xs h-9 px-3 w-full"
+            aria-label="Start Date"
           />
-          <span className="text-xs text-muted-foreground">-</span>
+        </div>
+
+        {/* End Date */}
+        <div className="relative w-full">
           <Input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="text-xs h-9 px-2"
+            className="text-xs h-9 px-3 w-full"
+            aria-label="End Date"
           />
         </div>
       </div>
