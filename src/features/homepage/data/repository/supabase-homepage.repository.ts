@@ -880,10 +880,9 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   // ============================================================================
   async getFeaturedServices(): Promise<FeaturedServiceEntity[]> {
     try {
-      const { data, error } = await this.supabase
-        .from("services")
-        .select("*")
-        .eq("is_featured", true)
+      const { data, error } = await (this.supabase.from("services" as any) as any)
+        .select("*, service_translations(*)")
+        .is("deleted_at", null)
         .order("sort_order", { ascending: true });
 
       if (!error && data) {
@@ -910,10 +909,8 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   // ============================================================================
   async getFeaturedProducts(): Promise<FeaturedProductEntity[]> {
     try {
-      const { data, error } = await this.supabase
-        .from("products")
-        .select("*")
-        .eq("is_featured", true)
+      const { data, error } = await (this.supabase.from("products" as any) as any)
+        .select("*, product_translations(*)")
         .order("sort_order", { ascending: true });
 
       if (!error && data) {
@@ -940,10 +937,8 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   // ============================================================================
   async getFeaturedProjects(): Promise<FeaturedProjectEntity[]> {
     try {
-      const { data, error } = await this.supabase
-        .from("projects")
-        .select("*")
-        .eq("is_featured", true)
+      const { data, error } = await (this.supabase.from("projects" as any) as any)
+        .select("*, project_translations(*), project_images(*)")
         .order("sort_order", { ascending: true });
 
       if (!error && data) {

@@ -33,8 +33,8 @@ export function FeaturedServicesManager() {
     if (!services) return [];
     return services.filter(
       (s) =>
-        s.titleEn.toLowerCase().includes(search.toLowerCase()) ||
-        s.titleAr.includes(search)
+        (s.titleEn || "").toLowerCase().includes(search.toLowerCase()) ||
+        (s.titleAr || "").includes(search)
     );
   }, [services, search]);
 

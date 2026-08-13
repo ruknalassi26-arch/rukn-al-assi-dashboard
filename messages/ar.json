@@ -1496,6 +1496,18 @@
     "statValue": "قيمة الرقم الإحصائي",
     "statIcon": "أيقونة الإحصائية",
     "emptyStatsTitle": "لا توجد إحصائيات",
-    "emptyStatsDesc": "أضف أرقام وإنجازات الشركة لعرضها في الصفحة الرئيسية."
+    "emptyStatsDesc": "أضف أرقام وإنجازات الشركة لعرضها في الصفحة الرئيسية.",
+    "featuredServicesTitle": "الخدمات المميزة",
+    "featuredServicesSubtitle": "حدد وفّعل الخدمات المراد إبرازها في الصفحة الرئيسية.",
+    "searchServices": "البحث في الخدمات...",
+    "featuredProductsTitle": "المنتجات المميزة",
+    "featuredProductsSubtitle": "حدد وفّعل المنتجات المراد إبرازها في الصفحة الرئيسية.",
+    "searchProducts": "البحث في المنتجات...",
+    "featuredProjectsTitle": "المشاريع المميزة",
+    "featuredProjectsSubtitle": "حدد وفّعل المشاريع المعروضة في الصفحة الرئيسية.",
+    "searchProjects": "البحث في المشاريع...",
+    "clientsTitle": "العملاء والشركاء",
+    "clientsSubtitle": "إدارة شعارات العملاء وروابط الشركاء المعروضة في الصفحة الرئيسية.",
+    "searchClients": "البحث في العملاء والشركاء..."
   }
 }

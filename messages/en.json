@@ -1473,6 +1473,18 @@
     "statValue": "Metric Value",
     "statIcon": "Metric Icon",
     "emptyStatsTitle": "No Statistics Found",
-    "emptyStatsDesc": "Add company metrics and highlights to showcase achievements on the homepage."
+    "emptyStatsDesc": "Add company metrics and highlights to showcase achievements on the homepage.",
+    "featuredServicesTitle": "Featured Services",
+    "featuredServicesSubtitle": "Select and toggle services to highlight on the homepage.",
+    "searchServices": "Search services...",
+    "featuredProductsTitle": "Featured Products",
+    "featuredProductsSubtitle": "Select and toggle products to highlight on the homepage.",
+    "searchProducts": "Search products...",
+    "featuredProjectsTitle": "Featured Projects",
+    "featuredProjectsSubtitle": "Select and toggle projects to showcase on the homepage.",
+    "searchProjects": "Search projects...",
+    "clientsTitle": "Clients & Partners",
+    "clientsSubtitle": "Manage client logos and partner links displayed on the homepage.",
+    "searchClients": "Search clients & partners..."
   }
 }

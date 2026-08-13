@@ -110,34 +110,54 @@ export function toCompanyStatEntity(dto: CompanyStatDTO): CompanyStatEntity {
   });
 }
 
-export function toFeaturedServiceEntity(dto: FeaturedServiceDTO): FeaturedServiceEntity {
+export function toFeaturedServiceEntity(dto: FeaturedServiceDTO & { service_translations?: any[] }): FeaturedServiceEntity {
+  const transList = (dto as any).service_translations || [];
+  const en = transList.find((t: any) => t.language_code === "en") || ({} as any);
+  const ar = transList.find((t: any) => t.language_code === "ar") || ({} as any);
+
   return new FeaturedServiceEntity({
     id: dto.id,
-    titleEn: dto.title_en,
-    titleAr: dto.title_ar,
-    image: dto.image,
-    isFeatured: dto.is_featured ?? false,
-    sortOrder: dto.sort_order ?? 0,
+    titleEn: en.name || en.title || (dto as any).name_en || (dto as any).title_en || "",
+    titleAr: ar.name || ar.title || (dto as any).name_ar || (dto as any).title_ar || "",
+    image: (dto as any).hero_image_url || (dto as any).image_url || (dto as any).image || null,
+    isFeatured: (dto as any).is_featured ?? false,
+    sortOrder: (dto as any).sort_order ?? 0,
   });
 }
 
-export function toFeaturedProductEntity(dto: FeaturedProductDTO): FeaturedProductEntity {
+export function toFeaturedProductEntity(dto: any): FeaturedProductEntity {
+  const transList = dto.product_translations || [];
+  const en = transList.find((t: any) => t.language_code === "en") || ({} as any);
+  const ar = transList.find((t: any) => t.language_code === "ar") || ({} as any);
+
+  const titleEn = en.name || en.title || dto.name_en || dto.title_en || "";
+  const titleAr = ar.name || ar.title || dto.name_ar || dto.title_ar || "";
+  const image = dto.thumbnail || (dto.images && dto.images.length > 0 ? dto.images[0] : null) || dto.image_url || null;
+
   return new FeaturedProductEntity({
     id: dto.id,
-    titleEn: dto.name_en,
-    titleAr: dto.name_ar,
-    image: dto.images && dto.images.length > 0 ? dto.images[0] : null,
+    titleEn,
+    titleAr,
+    image,
     isFeatured: dto.is_featured ?? false,
     sortOrder: dto.sort_order ?? 0,
   });
 }
 
-export function toFeaturedProjectEntity(dto: FeaturedProjectDTO): FeaturedProjectEntity {
+export function toFeaturedProjectEntity(dto: any): FeaturedProjectEntity {
+  const transList = dto.project_translations || [];
+  const en = transList.find((t: any) => t.language_code === "en") || ({} as any);
+  const ar = transList.find((t: any) => t.language_code === "ar") || ({} as any);
+
+  const images = dto.project_images || [];
+  const mainImg = images.length > 0 ? (images[0].image_url || images[0].url) : null;
+  const image = mainImg || dto.thumbnail || (dto.images && dto.images.length > 0 ? dto.images[0] : null) || dto.image_url || null;
+
   return new FeaturedProjectEntity({
     id: dto.id,
-    titleEn: dto.title_en,
-    titleAr: dto.title_ar,
-    image: dto.images && dto.images.length > 0 ? dto.images[0] : null,
+    titleEn: en.title || en.name || dto.title_en || dto.name_en || "",
+    titleAr: ar.title || ar.name || dto.title_ar || dto.name_ar || "",
+    image,
     isFeatured: dto.is_featured ?? false,
     sortOrder: dto.sort_order ?? 0,
   });
@@ -146,14 +166,14 @@ export function toFeaturedProjectEntity(dto: FeaturedProjectDTO): FeaturedProjec
 export function toClientEntity(dto: ClientDTO): ClientEntity {
   return new ClientEntity({
     id: dto.id,
-    nameEn: dto.name_en,
-    nameAr: dto.name_ar,
-    logoUrl: dto.logo_url,
-    websiteUrl: dto.website_url,
+    nameEn: dto.name_en || "",
+    nameAr: dto.name_ar || "",
+    logoUrl: dto.logo_url || null,
+    websiteUrl: dto.website_url || null,
     sortOrder: dto.sort_order ?? 0,
-    status: dto.status,
-    createdAt: new Date(dto.created_at),
-    updatedAt: new Date(dto.updated_at),
+    status: dto.status || "active",
+    createdAt: new Date(dto.created_at || Date.now()),
+    updatedAt: new Date(dto.updated_at || Date.now()),
   });
 }
 
