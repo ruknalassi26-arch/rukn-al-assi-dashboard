@@ -612,6 +612,65 @@ export interface Database {
           }
         ];
       };
+      homepage_hero_slides: {
+        Row: {
+          id: string;
+          sort_order: number;
+          is_active: boolean;
+          overlay_opacity: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          sort_order?: number;
+          is_active?: boolean;
+          overlay_opacity?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["homepage_hero_slides"]["Insert"]>;
+        Relationships: [];
+      };
+      homepage_hero_slide_translations: {
+        Row: {
+          slide_id: string;
+          language_code: string;
+          title: string | null;
+          subtitle: string | null;
+          body: string | null;
+          image_url: string | null;
+          cta_label: string | null;
+          cta_url: string | null;
+        };
+        Insert: {
+          slide_id: string;
+          language_code: string;
+          title?: string | null;
+          subtitle?: string | null;
+          body?: string | null;
+          image_url?: string | null;
+          cta_label?: string | null;
+          cta_url?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["homepage_hero_slide_translations"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "homepage_hero_slide_translations_language_code_fkey";
+            columns: ["language_code"];
+            isOneToOne: false;
+            referencedRelation: "languages";
+            referencedColumns: ["code"];
+          },
+          {
+            foreignKeyName: "homepage_hero_slide_translations_slide_id_fkey";
+            columns: ["slide_id"];
+            isOneToOne: false;
+            referencedRelation: "homepage_hero_slides";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       homepage_about: {
         Row: {
           id: string;

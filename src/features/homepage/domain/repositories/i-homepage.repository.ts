@@ -17,6 +17,7 @@ import type {
 export interface IHomepageRepository {
   // ---------- Hero Section ----------
   getHeroSlides(): Promise<HeroSlideEntity[]>;
+  getHeroSlideById(id: string): Promise<HeroSlideEntity | null>;
   createHeroSlide(slide: Omit<HeroSlideEntity, "id" | "createdAt" | "updatedAt">): Promise<HeroSlideEntity>;
   updateHeroSlide(id: string, slide: Partial<HeroSlideEntity>): Promise<HeroSlideEntity>;
   deleteHeroSlide(id: string): Promise<void>;

@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // features/homepage/presentation/components/about-section-manager.tsx
-// Management form for Homepage About Preview Section with Bilingual Tabs
+// Management form for Homepage About Section with Trilingual Tabs
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -108,13 +108,13 @@ export function AboutSectionManager() {
     if (aboutData) {
       const data = aboutData as any;
       reset({
-        titleEn: data.titleEn,
-        titleAr: data.titleAr,
+        titleEn: data.titleEn ?? "",
+        titleAr: data.titleAr ?? "",
         titleKu: data.titleKu ?? "",
         descriptionEn: data.descriptionEn ?? "",
         descriptionAr: data.descriptionAr ?? "",
         descriptionKu: data.descriptionKu ?? "",
-        imageUrl: data.imageUrl,
+        imageUrl: data.imageUrl ?? null,
         buttonTextEn: data.buttonTextEn ?? "",
         buttonTextAr: data.buttonTextAr ?? "",
         buttonTextKu: data.buttonTextKu ?? "",
@@ -122,7 +122,7 @@ export function AboutSectionManager() {
         highlightsEn: (data.highlightsEn ?? []).map((h: string) => ({ value: h })),
         highlightsAr: (data.highlightsAr ?? []).map((h: string) => ({ value: h })),
         highlightsKu: (data.highlightsKu ?? []).map((h: string) => ({ value: h })),
-        status: data.status,
+        status: data.status ?? "active",
       });
     }
   }, [aboutData, reset]);
@@ -177,7 +177,7 @@ export function AboutSectionManager() {
 
         <CardContent className="space-y-6">
           <ImageUploader
-            label={t("featureImage")}
+            label={t("featuredImage")}
             value={imageUrl ?? null}
             onChange={(url) => setValue("imageUrl", url)}
             folder="about"
@@ -197,20 +197,20 @@ export function AboutSectionManager() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="buttonTextEn">Button Text (English)</Label>
+                    <Label htmlFor="buttonTextEn">{t("buttonText")}</Label>
                     <Input id="buttonTextEn" {...register("buttonTextEn")} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="buttonUrl">Button Link URL</Label>
+                    <Label htmlFor="buttonUrl">{t("buttonUrl")}</Label>
                     <Input id="buttonUrl" {...register("buttonUrl")} />
                   </div>
                 </div>
 
                 <div className="space-y-2 border p-3 rounded-lg bg-muted/10">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-semibold">Key Highlights (English)</Label>
+                    <Label className="text-xs font-semibold">{t("highlights")} (English)</Label>
                     <Button type="button" variant="outline" size="sm" onClick={() => appendEn({ value: "" })} className="gap-1 text-xs">
-                      <Plus className="h-3 w-3" /> Add Highlight
+                      <Plus className="h-3 w-3" /> {t("addHighlight")}
                     </Button>
                   </div>
                   {highlightsEnFields.map((field, index) => (
@@ -227,30 +227,30 @@ export function AboutSectionManager() {
             arabicFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleAr">العنوان (بالعربية) *</Label>
+                  <Label htmlFor="titleAr">{t("headingAr")} *</Label>
                   <Input id="titleAr" dir="rtl" {...register("titleAr")} />
                   {errors.titleAr && <span className="text-xs text-destructive">{errors.titleAr.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="descriptionAr">الفقرة الوصفية (بالعربية)</Label>
+                  <Label htmlFor="descriptionAr">{t("descAr")}</Label>
                   <Textarea id="descriptionAr" rows={4} dir="rtl" {...register("descriptionAr")} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="buttonTextAr">نص الزر (بالعربية)</Label>
+                    <Label htmlFor="buttonTextAr">{t("buttonText")} (بالعربية)</Label>
                     <Input id="buttonTextAr" dir="rtl" {...register("buttonTextAr")} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="buttonUrl">رابط الزر</Label>
+                    <Label htmlFor="buttonUrl">{t("buttonUrl")}</Label>
                     <Input id="buttonUrl" {...register("buttonUrl")} />
                   </div>
                 </div>
 
                 <div className="space-y-2 border p-3 rounded-lg bg-muted/10">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-semibold">أبرز النقاط (بالعربية)</Label>
+                    <Label className="text-xs font-semibold">{t("highlights")} (بالعربية)</Label>
                     <Button type="button" variant="outline" size="sm" onClick={() => appendAr({ value: "" })} className="gap-1 text-xs">
-                      <Plus className="h-3 w-3" /> إضافة نقطة
+                      <Plus className="h-3 w-3" /> {t("addHighlight")}
                     </Button>
                   </div>
                   {highlightsArFields.map((field, index) => (
@@ -267,25 +267,29 @@ export function AboutSectionManager() {
             kurdishFields={
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="titleKu">Section Heading (Kurdish)</Label>
+                  <Label htmlFor="titleKu">{t("headingKu")}</Label>
                   <Input id="titleKu" dir="rtl" {...register("titleKu")} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="descriptionKu">Description Paragraph (Kurdish)</Label>
+                  <Label htmlFor="descriptionKu">{t("descKu")}</Label>
                   <Textarea id="descriptionKu" rows={4} dir="rtl" {...register("descriptionKu")} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="buttonTextKu">Button Text (Kurdish)</Label>
+                    <Label htmlFor="buttonTextKu">{t("buttonText")} (کوردی)</Label>
                     <Input id="buttonTextKu" dir="rtl" {...register("buttonTextKu")} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="buttonUrl">{t("buttonUrl")}</Label>
+                    <Input id="buttonUrl" {...register("buttonUrl")} />
                   </div>
                 </div>
 
                 <div className="space-y-2 border p-3 rounded-lg bg-muted/10">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-semibold">Key Highlights (Kurdish)</Label>
+                    <Label className="text-xs font-semibold">{t("highlights")} (کوردی)</Label>
                     <Button type="button" variant="outline" size="sm" onClick={() => appendKu({ value: "" })} className="gap-1 text-xs">
-                      <Plus className="h-3 w-3" /> Add Highlight
+                      <Plus className="h-3 w-3" /> {t("addHighlight")}
                     </Button>
                   </div>
                   {highlightsKuFields.map((field, index) => (
@@ -302,7 +306,7 @@ export function AboutSectionManager() {
           />
 
           <div className="space-y-1.5 pt-2 border-t">
-            <Label>Status</Label>
+            <Label>{t("status")}</Label>
             <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>

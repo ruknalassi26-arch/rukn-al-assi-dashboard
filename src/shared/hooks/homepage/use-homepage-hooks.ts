@@ -69,6 +69,15 @@ export function useHeroSlides() {
   });
 }
 
+export function useHeroSlideById(id: string) {
+  return useQuery({
+    queryKey: [...queryKeys.homepage.hero(), id],
+    queryFn: () => getRepo().getHeroSlideById(id),
+    enabled: Boolean(id),
+    staleTime: 30 * 1000,
+  });
+}
+
 export function useCreateHeroSlide() {
   const queryClient = useQueryClient();
   return useMutation({

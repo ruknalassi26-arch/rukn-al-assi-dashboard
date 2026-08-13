@@ -2,6 +2,10 @@
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong",
+    "create": "Create",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
     "error500Title": "Internal Server Error",
     "error500Desc": "Our servers encountered an unhandled issue. Our engineering team has been notified.",
     "errorGlobalTitle": "Critical System Error",
@@ -1439,6 +1443,21 @@
     "overlayOpacity": "Overlay Opacity (%)",
     "sortOrder": "Sort Order",
     "noSlidesTitle": "No Hero Slides",
-    "noSlidesDescription": "Add your first hero banner slide to customize the homepage."
+    "noSlidesDescription": "Add your first hero banner slide to customize the homepage.",
+    "aboutTitle": "About Section",
+    "aboutSubtitle": "Manage About Preview section content, featured image, button links, and key highlights.",
+    "saveAbout": "Save About Section",
+    "featuredImage": "Featured Image",
+    "headingEn": "Section Title (English)",
+    "headingAr": "Section Title (Arabic)",
+    "headingKu": "Section Title (Kurdish)",
+    "descEn": "Description Paragraph (English)",
+    "descAr": "Description Paragraph (Arabic)",
+    "descKu": "Description Paragraph (Kurdish)",
+    "buttonText": "Button Text",
+    "buttonUrl": "Button Link URL",
+    "highlights": "Key Highlights",
+    "addHighlight": "Add Highlight",
+    "status": "Section Visibility Status"
   }
 }

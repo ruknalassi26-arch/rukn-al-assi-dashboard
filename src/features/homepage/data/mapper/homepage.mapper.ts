@@ -26,47 +26,67 @@ import type {
 } from "../dto/homepage.dto";
 
 export function toHeroSlideEntity(dto: HeroSlideDTO): HeroSlideEntity {
-  const transList = dto.homepage_section_translations || [];
+  const transList = dto.homepage_hero_slide_translations || [];
   const en = transList.find((t) => t.language_code === "en") || ({} as any);
   const ar = transList.find((t) => t.language_code === "ar") || ({} as any);
-  const settings = (dto.settings as Record<string, any>) || {};
+  const ku = transList.find((t) => t.language_code === "ku") || ({} as any);
 
   return new HeroSlideEntity({
     id: dto.id,
     titleEn: en.title || "Engineering & Industrial Hydraulic Solutions",
     titleAr: ar.title || "حلول الهيدروليك والهندسة الصناعية",
+    titleKu: ku.title || null,
     subtitleEn: en.subtitle || "",
     subtitleAr: ar.subtitle || "",
-    primaryButtonTextEn: en.cta_label || settings.primary_button_text_en || "Explore Products",
-    primaryButtonTextAr: settings.primary_button_text_ar || "استكشف المنتجات",
-    primaryButtonUrl: en.cta_url || settings.primary_button_url || "/products",
-    secondaryButtonTextEn: settings.secondary_button_text_en || "Contact Us",
-    secondaryButtonTextAr: settings.secondary_button_text_ar || "اتصل بنا",
-    secondaryButtonUrl: settings.secondary_button_url || "/contact",
-    backgroundImage: en.image_url || ar.image_url || settings.background_image || "/hero-banner.jpg",
-    overlayOpacity: settings.overlay_opacity ?? 40,
-    status: dto.is_visible ? "active" : "draft",
+    subtitleKu: ku.subtitle || null,
+    bodyEn: en.body || null,
+    bodyAr: ar.body || null,
+    bodyKu: ku.body || null,
+    primaryButtonTextEn: en.cta_label || "Explore Products",
+    primaryButtonTextAr: ar.cta_label || "استكشف المنتجات",
+    primaryButtonTextKu: ku.cta_label || null,
+    primaryButtonUrl: en.cta_url || ar.cta_url || ku.cta_url || "/products",
+    secondaryButtonTextEn: "Contact Us",
+    secondaryButtonTextAr: "اتصل بنا",
+    secondaryButtonUrl: "/contact",
+    backgroundImage: en.image_url || ar.image_url || ku.image_url || "/hero-banner.jpg",
+    overlayOpacity: dto.overlay_opacity ?? 40,
+    status: dto.is_active ? "active" : "draft",
     sortOrder: dto.sort_order ?? 0,
-    createdAt: new Date(dto.updated_at || Date.now()),
+    createdAt: new Date(dto.created_at || Date.now()),
     updatedAt: new Date(dto.updated_at || Date.now()),
   });
 }
 
 export function toAboutPreviewEntity(dto: AboutPreviewDTO): AboutPreviewEntity {
+  const transList = dto.homepage_section_translations || [];
+  const en = transList.find((t) => t.language_code === "en") || ({} as any);
+  const ar = transList.find((t) => t.language_code === "ar") || ({} as any);
+  const ku = transList.find((t) => t.language_code === "ku") || ({} as any);
+  const settings = (dto.settings as Record<string, any>) || {};
+  const highlights = settings.highlights || {};
+
   return new AboutPreviewEntity({
     id: dto.id,
-    titleEn: dto.title_en,
-    titleAr: dto.title_ar,
-    descriptionEn: dto.description_en,
-    descriptionAr: dto.description_ar,
-    imageUrl: dto.image_url,
-    buttonTextEn: dto.button_text_en,
-    buttonTextAr: dto.button_text_ar,
-    buttonUrl: dto.button_url,
-    highlightsEn: dto.highlights_en ?? [],
-    highlightsAr: dto.highlights_ar ?? [],
-    status: dto.status,
-    updatedAt: new Date(dto.updated_at),
+    titleEn: en.title || "About Rukn Al Assi",
+    titleAr: ar.title || "عن ركن العاصي",
+    titleKu: ku.title || null,
+    subtitleEn: en.subtitle || null,
+    subtitleAr: ar.subtitle || null,
+    subtitleKu: ku.subtitle || null,
+    descriptionEn: en.body || null,
+    descriptionAr: ar.body || null,
+    descriptionKu: ku.body || null,
+    imageUrl: en.image_url || ar.image_url || ku.image_url || null,
+    buttonTextEn: en.cta_label || null,
+    buttonTextAr: ar.cta_label || null,
+    buttonTextKu: ku.cta_label || null,
+    buttonUrl: en.cta_url || ar.cta_url || ku.cta_url || null,
+    highlightsEn: highlights.en || ["14+ Years Experience", "250+ Completed Projects", "99% Satisfaction"],
+    highlightsAr: highlights.ar || ["خبرة أكثر من 14 عاماً", "أكثر من 250 مشروع منجز", "نسبة رضا 99%"],
+    highlightsKu: highlights.ku || [],
+    status: dto.is_visible ? "active" : "draft",
+    updatedAt: new Date(dto.updated_at || Date.now()),
   });
 }
 

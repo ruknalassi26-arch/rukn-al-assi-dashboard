@@ -1,11 +1,12 @@
 "use client";
 // ==============================================================================
 // features/homepage/presentation/components/hero-section-manager.tsx
-// Hero Section management component (Create, Edit, Delete, Reorder, Preview)
+// Hero Section management component (Cards list, Navigation to Create/Edit pages)
 // ==============================================================================
 import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, Eye, ArrowUp, ArrowDown, ImageIcon } from "lucide-react";
 import {
   Card,
@@ -19,12 +20,9 @@ import {
 } from "@shared/ui";
 import {
   useHeroSlides,
-  useCreateHeroSlide,
-  useUpdateHeroSlide,
   useDeleteHeroSlide,
   useReorderHeroSlides,
 } from "@shared/hooks/homepage/use-homepage-hooks";
-import { HeroSlideDialog } from "@shared/dialogs/hero-slide-dialog";
 import { HeroPreviewDialog } from "@shared/dialogs/hero-preview-dialog";
 import { ConfirmDialog } from "@shared/dialogs/confirm-dialog";
 import { EmptyState } from "@shared/components/empty-state";
@@ -33,37 +31,20 @@ import type { HeroSlideEntity } from "../../domain/entities/homepage.entity";
 
 export function HeroSectionManager() {
   const t = useTranslations("homepageAdmin");
-  const tCommon = useTranslations("common");
+  const router = useRouter();
   const { data: slides, isLoading, error, refetch } = useHeroSlides();
-  const createMutation = useCreateHeroSlide();
-  const updateMutation = useUpdateHeroSlide();
   const deleteMutation = useDeleteHeroSlide();
   const reorderMutation = useReorderHeroSlides();
 
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingSlide, setEditingSlide] = useState<HeroSlideEntity | null>(null);
   const [previewSlide, setPreviewSlide] = useState<HeroSlideEntity | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleOpenCreate = () => {
-    setEditingSlide(null);
-    setIsFormOpen(true);
+    router.push("/admin/homepage/hero/create");
   };
 
   const handleOpenEdit = (slide: HeroSlideEntity) => {
-    setEditingSlide(slide);
-    setIsFormOpen(true);
-  };
-
-  const handleFormSubmit = async (values: Record<string, unknown>) => {
-    if (editingSlide) {
-      await updateMutation.mutateAsync({
-        id: editingSlide.id,
-        slide: values as Partial<HeroSlideEntity>,
-      });
-    } else {
-      await createMutation.mutateAsync(values as Omit<HeroSlideEntity, "id" | "createdAt" | "updatedAt">);
-    }
+    router.push(`/admin/homepage/hero/${slide.id}/edit`);
   };
 
   const handleConfirmDelete = async () => {
@@ -146,19 +127,21 @@ export function HeroSectionManager() {
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     {/* Thumbnail */}
-                    <div className="relative h-16 w-24 rounded-md overflow-hidden bg-muted shrink-0 border">
-                      {slide.backgroundImage ? (
-                        <Image
+                    <div className="relative h-16 w-24 rounded-md overflow-hidden bg-slate-900 shrink-0 border border-border/40 flex items-center justify-center">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground/60 p-1 text-[10px] text-center">
+                        <ImageIcon className="h-4 w-4 mb-0.5 opacity-50" />
+                        <span>No Image</span>
+                      </div>
+                      {slide.backgroundImage && (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
                           src={slide.backgroundImage}
                           alt={slide.titleEn}
-                          fill
-                          unoptimized
-                          className="object-cover"
+                          className="absolute inset-0 h-full w-full object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLElement).style.display = "none";
+                          }}
                         />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-muted-foreground text-xs">
-                          No Image
-                        </div>
                       )}
                     </div>
 
@@ -239,15 +222,6 @@ export function HeroSectionManager() {
           )}
         </CardContent>
       </Card>
-
-      {/* Form Dialog */}
-      <HeroSlideDialog
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleFormSubmit}
-        initialData={editingSlide}
-        isLoading={createMutation.isPending || updateMutation.isPending}
-      />
 
       {/* Live Preview Dialog */}
       <HeroPreviewDialog

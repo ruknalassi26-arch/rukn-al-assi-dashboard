@@ -64,7 +64,7 @@ export function HeroSlideDialog({
   isLoading = false,
 }: HeroSlideDialogProps) {
   const t = useTranslations("homepageAdmin");
-  const tCommon = useTranslations("common.dialogs");
+  const tCommon = useTranslations("common");
 
   const {
     register,

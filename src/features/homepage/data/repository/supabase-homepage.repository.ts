@@ -33,13 +33,13 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   constructor(private readonly supabase: SupabaseClient<Database>) {}
 
   // ============================================================================
-  // TAB 1: HERO SECTION (homepage_sections & homepage_section_translations)
+  // TAB 1: HERO SECTION (homepage_hero_slides & homepage_hero_slide_translations)
   // ============================================================================
   async getHeroSlides(): Promise<HeroSlideEntity[]> {
+    // 1. Try querying homepage_hero_slides
     try {
-      const { data, error } = await (this.supabase.from("homepage_sections" as any) as any)
-        .select("*, homepage_section_translations(*)")
-        .or("section_key.eq.hero,section_key.eq.hero_slide")
+      const { data, error } = await (this.supabase.from("homepage_hero_slides" as any) as any)
+        .select("*, homepage_hero_slide_translations(*)")
         .order("sort_order", { ascending: true });
 
       if (!error && data && data.length > 0) {
@@ -47,6 +47,51 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
       }
     } catch {}
 
+    // 2. Fallback to homepage_sections (section_key = 'hero') if homepage_hero_slides table does not exist
+    try {
+      const { data, error } = await (this.supabase.from("homepage_sections" as any) as any)
+        .select("*, homepage_section_translations(*)")
+        .or("section_key.eq.hero,section_key.eq.hero_slide")
+        .order("sort_order", { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        return data.map((dto: any) => {
+          const transList = dto.homepage_section_translations || [];
+          const en = transList.find((t: any) => t.language_code === "en") || {};
+          const ar = transList.find((t: any) => t.language_code === "ar") || {};
+          const ku = transList.find((t: any) => t.language_code === "ku") || {};
+          const settings = dto.settings || {};
+
+          return new HeroSlideEntity({
+            id: dto.id,
+            titleEn: en.title || "Engineering & Industrial Hydraulic Solutions",
+            titleAr: ar.title || "حلول الهيدروليك والهندسة الصناعية",
+            titleKu: ku.title || null,
+            subtitleEn: en.subtitle || null,
+            subtitleAr: ar.subtitle || null,
+            subtitleKu: ku.subtitle || null,
+            bodyEn: en.body || null,
+            bodyAr: ar.body || null,
+            bodyKu: ku.body || null,
+            primaryButtonTextEn: en.cta_label || settings.primary_button_text_en || "Explore Products",
+            primaryButtonTextAr: ar.cta_label || settings.primary_button_text_ar || "استكشف المنتجات",
+            primaryButtonTextKu: ku.cta_label || null,
+            primaryButtonUrl: en.cta_url || ar.cta_url || ku.cta_url || settings.primary_button_url || "/products",
+            secondaryButtonTextEn: settings.secondary_button_text_en || "Contact Us",
+            secondaryButtonTextAr: settings.secondary_button_text_ar || "اتصل بنا",
+            secondaryButtonUrl: settings.secondary_button_url || "/contact",
+            backgroundImage: en.image_url || ar.image_url || ku.image_url || settings.background_image || "/hero-banner.jpg",
+            overlayOpacity: settings.overlay_opacity ?? 40,
+            status: dto.is_visible ? "active" : "draft",
+            sortOrder: dto.sort_order ?? 0,
+            createdAt: new Date(dto.updated_at || Date.now()),
+            updatedAt: new Date(dto.updated_at || Date.now()),
+          });
+        });
+      }
+    } catch {}
+
+    // 3. Fallback mock if database table is completely empty
     return [
       new HeroSlideEntity({
         id: "hero-1",
@@ -70,7 +115,77 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
     ];
   }
 
+  async getHeroSlideById(id: string): Promise<HeroSlideEntity | null> {
+    try {
+      const { data, error } = await (this.supabase.from("homepage_hero_slides" as any) as any)
+        .select("*, homepage_hero_slide_translations(*)")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (!error && data) {
+        return toHeroSlideEntity(data);
+      }
+    } catch {}
+
+    const slides = await this.getHeroSlides();
+    return slides.find((s) => s.id === id) || null;
+  }
+
   async createHeroSlide(slide: Omit<HeroSlideEntity, "id" | "createdAt" | "updatedAt">): Promise<HeroSlideEntity> {
+    try {
+      const slidePayload: InsertTables<"homepage_hero_slides"> = {
+        is_active: slide.status === "active",
+        sort_order: slide.sortOrder ?? 0,
+        overlay_opacity: slide.overlayOpacity ?? 40,
+      };
+
+      const { data: row, error } = await (this.supabase.from("homepage_hero_slides" as any) as any)
+        .insert(slidePayload)
+        .select()
+        .single();
+
+      if (!error && row) {
+        const translationsPayload = [
+          {
+            slide_id: row.id,
+            language_code: "en",
+            title: slide.titleEn,
+            subtitle: slide.subtitleEn || null,
+            body: slide.bodyEn || null,
+            image_url: slide.backgroundImage || null,
+            cta_label: slide.primaryButtonTextEn || null,
+            cta_url: slide.primaryButtonUrl || null,
+          },
+          {
+            slide_id: row.id,
+            language_code: "ar",
+            title: slide.titleAr,
+            subtitle: slide.subtitleAr || null,
+            body: slide.bodyAr || null,
+            image_url: slide.backgroundImage || null,
+            cta_label: slide.primaryButtonTextAr || null,
+            cta_url: slide.primaryButtonUrl || null,
+          },
+          {
+            slide_id: row.id,
+            language_code: "ku",
+            title: slide.titleKu || null,
+            subtitle: slide.subtitleKu || null,
+            body: slide.bodyKu || null,
+            image_url: slide.backgroundImage || null,
+            cta_label: slide.primaryButtonTextKu || null,
+            cta_url: slide.primaryButtonUrl || null,
+          },
+        ];
+
+        await (this.supabase.from("homepage_hero_slide_translations" as any) as any).insert(translationsPayload);
+        await this.logActivity("created", "homepage_hero_slides", slide.titleEn);
+        const slides = await this.getHeroSlides();
+        return slides.find((s) => s.id === row.id) || slides[0];
+      }
+    } catch {}
+
+    // Fallback to homepage_sections if homepage_hero_slides table does not exist
     const settings = {
       primary_button_text_en: slide.primaryButtonTextEn || null,
       primary_button_text_ar: slide.primaryButtonTextAr || null,
@@ -89,55 +204,125 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
       settings: settings as any,
     };
 
-    const { data: row, error } = await (this.supabase.from("homepage_sections" as any) as any)
+    const { data: sectionRow, error: sectionErr } = await (this.supabase.from("homepage_sections" as any) as any)
       .insert(sectionPayload)
       .select()
       .single();
 
-    if (error || !row) {
-      throw new Error(error?.message ?? "Failed to create hero slide");
+    if (sectionErr || !sectionRow) {
+      throw new Error(sectionErr?.message ?? "Failed to create hero slide");
     }
 
     const translationsPayload = [
       {
-        section_id: row.id,
+        section_id: sectionRow.id,
         language_code: "en",
         title: slide.titleEn,
         subtitle: slide.subtitleEn || null,
+        body: slide.bodyEn || null,
         image_url: slide.backgroundImage || null,
         cta_label: slide.primaryButtonTextEn || null,
         cta_url: slide.primaryButtonUrl || null,
       },
       {
-        section_id: row.id,
+        section_id: sectionRow.id,
         language_code: "ar",
         title: slide.titleAr,
         subtitle: slide.subtitleAr || null,
+        body: slide.bodyAr || null,
         image_url: slide.backgroundImage || null,
         cta_label: slide.primaryButtonTextAr || null,
+        cta_url: slide.primaryButtonUrl || null,
+      },
+      {
+        section_id: sectionRow.id,
+        language_code: "ku",
+        title: slide.titleKu || null,
+        subtitle: slide.subtitleKu || null,
+        body: slide.bodyKu || null,
+        image_url: slide.backgroundImage || null,
+        cta_label: slide.primaryButtonTextKu || null,
         cta_url: slide.primaryButtonUrl || null,
       },
     ];
 
     await (this.supabase.from("homepage_section_translations" as any) as any).insert(translationsPayload);
-
     await this.logActivity("created", "homepage_sections", slide.titleEn);
     const slides = await this.getHeroSlides();
-    return slides.find((s) => s.id === row.id) || slides[0];
+    return slides.find((s) => s.id === sectionRow.id) || slides[0];
   }
 
   async updateHeroSlide(id: string, slide: Partial<HeroSlideEntity>): Promise<HeroSlideEntity> {
     const slides = await this.getHeroSlides();
     const existing = slides.find((s) => s.id === id);
 
+    const imageUrl = (slide.backgroundImage !== undefined && slide.backgroundImage !== "")
+      ? slide.backgroundImage
+      : (existing?.backgroundImage || null);
+
+    const ctaUrl = slide.primaryButtonUrl ?? existing?.primaryButtonUrl ?? null;
+
+    try {
+      const updatePayload: UpdateTables<"homepage_hero_slides"> = {};
+      if (slide.sortOrder !== undefined) updatePayload.sort_order = slide.sortOrder;
+      if (slide.status !== undefined) updatePayload.is_active = slide.status === "active";
+      if (slide.overlayOpacity !== undefined) updatePayload.overlay_opacity = slide.overlayOpacity;
+
+      if (Object.keys(updatePayload).length > 0) {
+        await (this.supabase.from("homepage_hero_slides" as any) as any)
+          .update(updatePayload)
+          .eq("id", id);
+      }
+
+      const transPayload: any[] = [
+        {
+          slide_id: id,
+          language_code: "en",
+          title: slide.titleEn ?? existing?.titleEn ?? "",
+          subtitle: slide.subtitleEn ?? existing?.subtitleEn ?? null,
+          body: slide.bodyEn ?? existing?.bodyEn ?? null,
+          image_url: imageUrl,
+          cta_label: slide.primaryButtonTextEn ?? existing?.primaryButtonTextEn ?? null,
+          cta_url: ctaUrl,
+        },
+        {
+          slide_id: id,
+          language_code: "ar",
+          title: slide.titleAr ?? existing?.titleAr ?? "",
+          subtitle: slide.subtitleAr ?? existing?.subtitleAr ?? null,
+          body: slide.bodyAr ?? existing?.bodyAr ?? null,
+          image_url: imageUrl,
+          cta_label: slide.primaryButtonTextAr ?? existing?.primaryButtonTextAr ?? null,
+          cta_url: ctaUrl,
+        },
+        {
+          slide_id: id,
+          language_code: "ku",
+          title: slide.titleKu ?? existing?.titleKu ?? null,
+          subtitle: slide.subtitleKu ?? existing?.subtitleKu ?? null,
+          body: slide.bodyKu ?? existing?.bodyKu ?? null,
+          image_url: imageUrl,
+          cta_label: slide.primaryButtonTextKu ?? existing?.primaryButtonTextKu ?? null,
+          cta_url: ctaUrl,
+        },
+      ];
+
+      const { error: transErr } = await (this.supabase.from("homepage_hero_slide_translations" as any) as any)
+        .upsert(transPayload, { onConflict: "slide_id,language_code" });
+
+      if (!transErr) {
+        await this.logActivity("updated", "homepage_hero_slides", slide.titleEn ?? existing?.titleEn);
+        const updatedList = await this.getHeroSlides();
+        return updatedList.find((s) => s.id === id) || updatedList[0];
+      }
+    } catch {}
+
+    // Fallback to homepage_sections
     const settings = {
       primary_button_text_en: slide.primaryButtonTextEn ?? existing?.primaryButtonTextEn ?? null,
       primary_button_text_ar: slide.primaryButtonTextAr ?? existing?.primaryButtonTextAr ?? null,
-      primary_button_url: slide.primaryButtonUrl ?? existing?.primaryButtonUrl ?? null,
-      secondary_button_text_en: slide.secondaryButtonTextEn ?? existing?.secondaryButtonTextEn ?? null,
-      secondary_button_text_ar: slide.secondaryButtonTextAr ?? existing?.secondaryButtonTextAr ?? null,
-      secondary_button_url: slide.secondaryButtonUrl ?? existing?.secondaryButtonUrl ?? null,
-      background_image: slide.backgroundImage ?? existing?.backgroundImage ?? null,
+      primary_button_url: ctaUrl,
+      background_image: imageUrl,
       overlay_opacity: slide.overlayOpacity ?? existing?.overlayOpacity ?? 40,
     };
 
@@ -145,41 +330,45 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
     if (slide.sortOrder !== undefined) updatePayload.sort_order = slide.sortOrder;
     if (slide.status !== undefined) updatePayload.is_visible = slide.status === "active";
 
-    if (Object.keys(updatePayload).length > 0) {
-      await (this.supabase.from("homepage_sections" as any) as any)
-        .update(updatePayload)
-        .eq("id", id);
-    }
+    await (this.supabase.from("homepage_sections" as any) as any)
+      .update(updatePayload)
+      .eq("id", id);
 
-    const transPayload: any[] = [];
-    if (slide.titleEn !== undefined || slide.subtitleEn !== undefined || slide.primaryButtonTextEn !== undefined || slide.backgroundImage !== undefined) {
-      transPayload.push({
+    const transPayload = [
+      {
         section_id: id,
         language_code: "en",
         title: slide.titleEn ?? existing?.titleEn ?? "",
         subtitle: slide.subtitleEn ?? existing?.subtitleEn ?? null,
-        image_url: slide.backgroundImage ?? existing?.backgroundImage ?? null,
+        body: slide.bodyEn ?? existing?.bodyEn ?? null,
+        image_url: imageUrl,
         cta_label: slide.primaryButtonTextEn ?? existing?.primaryButtonTextEn ?? null,
-        cta_url: slide.primaryButtonUrl ?? existing?.primaryButtonUrl ?? null,
-      });
-    }
-
-    if (slide.titleAr !== undefined || slide.subtitleAr !== undefined || slide.primaryButtonTextAr !== undefined || slide.backgroundImage !== undefined) {
-      transPayload.push({
+        cta_url: ctaUrl,
+      },
+      {
         section_id: id,
         language_code: "ar",
         title: slide.titleAr ?? existing?.titleAr ?? "",
         subtitle: slide.subtitleAr ?? existing?.subtitleAr ?? null,
-        image_url: slide.backgroundImage ?? existing?.backgroundImage ?? null,
+        body: slide.bodyAr ?? existing?.bodyAr ?? null,
+        image_url: imageUrl,
         cta_label: slide.primaryButtonTextAr ?? existing?.primaryButtonTextAr ?? null,
-        cta_url: slide.primaryButtonUrl ?? existing?.primaryButtonUrl ?? null,
-      });
-    }
+        cta_url: ctaUrl,
+      },
+      {
+        section_id: id,
+        language_code: "ku",
+        title: slide.titleKu ?? existing?.titleKu ?? null,
+        subtitle: slide.subtitleKu ?? existing?.subtitleKu ?? null,
+        body: slide.bodyKu ?? existing?.bodyKu ?? null,
+        image_url: imageUrl,
+        cta_label: slide.primaryButtonTextKu ?? existing?.primaryButtonTextKu ?? null,
+        cta_url: ctaUrl,
+      },
+    ];
 
-    if (transPayload.length > 0) {
-      await (this.supabase.from("homepage_section_translations" as any) as any)
-        .upsert(transPayload, { onConflict: "section_id,language_code" });
-    }
+    await (this.supabase.from("homepage_section_translations" as any) as any)
+      .upsert(transPayload, { onConflict: "section_id,language_code" });
 
     await this.logActivity("updated", "homepage_sections", slide.titleEn ?? existing?.titleEn);
     const updatedList = await this.getHeroSlides();
@@ -187,6 +376,14 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   async deleteHeroSlide(id: string): Promise<void> {
+    try {
+      await (this.supabase.from("homepage_hero_slides" as any) as any)
+        .delete()
+        .eq("id", id);
+      await this.logActivity("deleted", "homepage_hero_slides", id);
+      return;
+    } catch {}
+
     await (this.supabase.from("homepage_sections" as any) as any)
       .delete()
       .eq("id", id);
@@ -195,18 +392,28 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
 
   async reorderHeroSlides(orderedIds: string[]): Promise<void> {
     for (let i = 0; i < orderedIds.length; i++) {
-      await (this.supabase.from("homepage_sections" as any) as any)
-        .update({ sort_order: i + 1 })
-        .eq("id", orderedIds[i]);
+      try {
+        await (this.supabase.from("homepage_hero_slides" as any) as any)
+          .update({ sort_order: i + 1 })
+          .eq("id", orderedIds[i]);
+      } catch {
+        await (this.supabase.from("homepage_sections" as any) as any)
+          .update({ sort_order: i + 1 })
+          .eq("id", orderedIds[i]);
+      }
     }
   }
 
   // ============================================================================
-  // TAB 2: ABOUT PREVIEW (homepage_about)
+  // TAB 2: ABOUT PREVIEW (homepage_sections section_key = 'about')
   // ============================================================================
   async getAboutPreview(): Promise<AboutPreviewEntity | null> {
     try {
-      const { data, error } = await this.supabase.from("homepage_about").select("*").limit(1).maybeSingle();
+      const { data, error } = await (this.supabase.from("homepage_sections" as any) as any)
+        .select("*, homepage_section_translations(*)")
+        .eq("section_key", "about")
+        .maybeSingle();
+
       if (!error && data) {
         return toAboutPreviewEntity(data);
       }
@@ -216,14 +423,21 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
       id: "about-preview-1",
       titleEn: "About Rukn Al Assi",
       titleAr: "عن ركن العاصي",
-      descriptionEn: "Pioneering Hydraulic Excellence Since 2010. Rukn Al Assi is a trusted industrial leader delivering hydraulic systems.",
-      descriptionAr: "الريادة في التميز الهيدروليكي منذ 2010. شركة ركن العاصي رائدة في تقديم الأنظمة الهيدروليكية.",
+      titleKu: "دەربارەی ڕوکن ئەلعاسی",
+      subtitleEn: "Pioneering Hydraulic Excellence",
+      subtitleAr: "الريادة في التميز الهيدروليكي",
+      subtitleKu: "پێشەنگ لە هەڵبژاردنی هیدرۆلیکی",
+      descriptionEn: "Pioneering Hydraulic Excellence Since 2010. Rukn Al Assi is a trusted industrial leader delivering high-pressure hydraulic systems.",
+      descriptionAr: "الريادة في التميز الهيدروليكي منذ 2010. شركة ركن العاصي رائدة في تقديم الأنظمة الهيدروليكية ذات الضغط العالي.",
+      descriptionKu: "پێشەنگ لە هەڵبژاردنی هیدرۆلیکی لە ساڵی 2010ەوە. کۆمپانیای ڕوکن ئەلعاسی ڕابەرێکی باوەڕپێکراوی پیشەسازییە.",
       imageUrl: "/about-1.jpg",
       buttonTextEn: "Learn More",
       buttonTextAr: "اعرف المزيد",
+      buttonTextKu: "زیاتر بزانە",
       buttonUrl: "/about",
       highlightsEn: ["14+ Years Experience", "250+ Completed Projects", "99% Satisfaction"],
       highlightsAr: ["خبرة أكثر من 14 عاماً", "أكثر من 250 مشروع منجز", "نسبة رضا 99%"],
+      highlightsKu: ["زیاتر لە 14 ساڵ ئەزموون", "زیاتر لە 250 پرۆژەی تەواوکراو", "ڕێژەی ڕەزامەندی 99%"],
       status: "active",
       updatedAt: new Date(),
     });
@@ -231,56 +445,91 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
 
   async updateAboutPreview(data: Partial<AboutPreviewEntity>): Promise<AboutPreviewEntity> {
     const existing = await this.getAboutPreview();
-    const payload: UpdateTables<"homepage_about"> = {};
-    if (data.titleEn !== undefined) payload.title_en = data.titleEn;
-    if (data.titleAr !== undefined) payload.title_ar = data.titleAr;
-    if (data.descriptionEn !== undefined) payload.description_en = data.descriptionEn;
-    if (data.descriptionAr !== undefined) payload.description_ar = data.descriptionAr;
-    if (data.imageUrl !== undefined) payload.image_url = data.imageUrl;
-    if (data.buttonTextEn !== undefined) payload.button_text_en = data.buttonTextEn;
-    if (data.buttonTextAr !== undefined) payload.button_text_ar = data.buttonTextAr;
-    if (data.buttonUrl !== undefined) payload.button_url = data.buttonUrl;
-    if (data.highlightsEn !== undefined) payload.highlights_en = data.highlightsEn;
-    if (data.highlightsAr !== undefined) payload.highlights_ar = data.highlightsAr;
-    if (data.status !== undefined) payload.status = data.status;
 
-    if (existing?.id && existing.id !== "about-preview-1") {
-      const { data: updated, error } = await this.supabase
-        .from("homepage_about")
-        .update(payload)
-        .eq("id", existing.id)
-        .select()
-        .single();
-      if (!error && updated) {
-        await this.logActivity("updated", "homepage_about", updated.title_en);
-        return toAboutPreviewEntity(updated);
-      }
-    } else {
-      const insertPayload: InsertTables<"homepage_about"> = {
-        title_en: data.titleEn || "About Rukn Al Assi",
-        title_ar: data.titleAr || "عن ركن العاصي",
-        description_en: data.descriptionEn || null,
-        description_ar: data.descriptionAr || null,
-        image_url: data.imageUrl || null,
-        button_text_en: data.buttonTextEn || null,
-        button_text_ar: data.buttonTextAr || null,
-        button_url: data.buttonUrl || null,
-        highlights_en: data.highlightsEn || [],
-        highlights_ar: data.highlightsAr || [],
-        status: data.status || "active",
-      };
+    let sectionId = existing?.id && existing.id !== "about-preview-1" ? existing.id : null;
 
-      const { data: inserted, error } = await this.supabase
-        .from("homepage_about")
-        .insert(insertPayload)
-        .select()
-        .single();
-      if (!error && inserted) {
-        await this.logActivity("created", "homepage_about", inserted.title_en);
-        return toAboutPreviewEntity(inserted);
+    if (!sectionId) {
+      const { data: sectionRow } = await (this.supabase.from("homepage_sections" as any) as any)
+        .select("id")
+        .eq("section_key", "about")
+        .maybeSingle();
+      if (sectionRow?.id) {
+        sectionId = sectionRow.id;
       }
     }
 
+    const currentHighlights = {
+      en: data.highlightsEn ?? existing?.highlightsEn ?? ["14+ Years Experience", "250+ Completed Projects", "99% Satisfaction"],
+      ar: data.highlightsAr ?? existing?.highlightsAr ?? ["خبرة أكثر من 14 عاماً", "أكثر من 250 مشروع منجز", "نسبة رضا 99%"],
+      ku: data.highlightsKu ?? existing?.highlightsKu ?? ["زیاتر لە 14 ساڵ ئەزموون", "زیاتر لە 250 پرۆژەی تەواوکراو", "ڕێژەی ڕەزامەندی 99%"],
+    };
+
+    const sectionPayload: UpdateTables<"homepage_sections"> = {
+      settings: { highlights: currentHighlights } as any,
+    };
+    if (data.status !== undefined) sectionPayload.is_visible = data.status === "active";
+
+    if (sectionId) {
+      await (this.supabase.from("homepage_sections" as any) as any)
+        .update(sectionPayload)
+        .eq("id", sectionId);
+    } else {
+      const insertSectionPayload: InsertTables<"homepage_sections"> = {
+        section_key: "about",
+        is_visible: data.status === "active",
+        sort_order: 2,
+        settings: { highlights: currentHighlights } as any,
+      };
+
+      const { data: newSection, error: sectionErr } = await (this.supabase.from("homepage_sections" as any) as any)
+        .insert(insertSectionPayload)
+        .select()
+        .single();
+
+      if (sectionErr || !newSection) throw new Error(sectionErr?.message ?? "Failed to create about section");
+      sectionId = newSection.id;
+    }
+
+    const imageUrl = data.imageUrl ?? existing?.imageUrl ?? null;
+    const buttonUrl = data.buttonUrl ?? existing?.buttonUrl ?? null;
+
+    const translationsPayload = [
+      {
+        section_id: sectionId,
+        language_code: "en",
+        title: data.titleEn ?? existing?.titleEn ?? "About Rukn Al Assi",
+        subtitle: data.subtitleEn ?? existing?.subtitleEn ?? null,
+        body: data.descriptionEn ?? existing?.descriptionEn ?? null,
+        image_url: imageUrl,
+        cta_label: data.buttonTextEn ?? existing?.buttonTextEn ?? null,
+        cta_url: buttonUrl,
+      },
+      {
+        section_id: sectionId,
+        language_code: "ar",
+        title: data.titleAr ?? existing?.titleAr ?? "عن ركن العاصي",
+        subtitle: data.subtitleAr ?? existing?.subtitleAr ?? null,
+        body: data.descriptionAr ?? existing?.descriptionAr ?? null,
+        image_url: imageUrl,
+        cta_label: data.buttonTextAr ?? existing?.buttonTextAr ?? null,
+        cta_url: buttonUrl,
+      },
+      {
+        section_id: sectionId,
+        language_code: "ku",
+        title: data.titleKu ?? existing?.titleKu ?? null,
+        subtitle: data.subtitleKu ?? existing?.subtitleKu ?? null,
+        body: data.descriptionKu ?? existing?.descriptionKu ?? null,
+        image_url: imageUrl,
+        cta_label: data.buttonTextKu ?? existing?.buttonTextKu ?? null,
+        cta_url: buttonUrl,
+      },
+    ];
+
+    await (this.supabase.from("homepage_section_translations" as any) as any)
+      .upsert(translationsPayload, { onConflict: "section_id,language_code" });
+
+    await this.logActivity("updated", "homepage_sections", "About Section");
     return (await this.getAboutPreview())!;
   }
 
