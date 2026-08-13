@@ -25,7 +25,6 @@ import {
   FeaturedProductsManager,
   FeaturedProjectsManager,
   ClientsSectionManager,
-  CertificatesSectionManager,
   ContactCtaManager,
 } from "../components";
 
@@ -78,10 +77,6 @@ export function HomepageView() {
             <Building2 className="h-4 w-4 text-rose-600" />
             {t("tabs.clients")}
           </TabsTrigger>
-          <TabsTrigger value="certificates" className="gap-2 py-2 px-3 text-xs">
-            <Award className="h-4 w-4 text-teal-600" />
-            {t("tabs.certificates")}
-          </TabsTrigger>
           <TabsTrigger value="contact_cta" className="gap-2 py-2 px-3 text-xs">
             <PhoneCall className="h-4 w-4 text-indigo-600" />
             {t("tabs.contactCta")}
@@ -128,12 +123,6 @@ export function HomepageView() {
         <TabsContent value="clients">
           <ErrorBoundary>
             <ClientsSectionManager />
-          </ErrorBoundary>
-        </TabsContent>
-
-        <TabsContent value="certificates">
-          <ErrorBoundary>
-            <CertificatesSectionManager />
           </ErrorBoundary>
         </TabsContent>
 

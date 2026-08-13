@@ -12,7 +12,6 @@ export type HomepageTab =
   | "products"
   | "projects"
   | "clients"
-  | "certificates"
   | "contact_cta";
 
 interface HomepageStore {
