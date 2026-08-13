@@ -744,26 +744,7 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["clients"]["Insert"]>;
         Relationships: [];
       };
-      homepage_contact_cta: {
-        Row: {
-          id: string;
-          heading_en: string;
-          heading_ar: string;
-          description_en: string | null;
-          description_ar: string | null;
-          button_text_en: string | null;
-          button_text_ar: string | null;
-          button_url: string | null;
-          background_image: string | null;
-          updated_at: string;
-        };
-        Insert: Omit<Database["public"]["Tables"]["homepage_contact_cta"]["Row"], "id" | "updated_at"> & {
-          id?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["homepage_contact_cta"]["Insert"]>;
-        Relationships: [];
-      };
+
       website_settings: {
         Row: {
           id: string;

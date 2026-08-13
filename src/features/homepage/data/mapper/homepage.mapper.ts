@@ -172,16 +172,25 @@ export function toCertificateEntity(dto: CertificateDTO): CertificateEntity {
 }
 
 export function toContactCtaEntity(dto: ContactCtaDTO): ContactCtaEntity {
+  const transList = dto.homepage_section_translations || [];
+  const en = transList.find((t) => t.language_code === "en") || ({} as any);
+  const ar = transList.find((t) => t.language_code === "ar") || ({} as any);
+  const ku = transList.find((t) => t.language_code === "ku") || ({} as any);
+
   return new ContactCtaEntity({
     id: dto.id,
-    headingEn: dto.heading_en,
-    headingAr: dto.heading_ar,
-    descriptionEn: dto.description_en,
-    descriptionAr: dto.description_ar,
-    buttonTextEn: dto.button_text_en,
-    buttonTextAr: dto.button_text_ar,
-    buttonUrl: dto.button_url,
-    backgroundImage: dto.background_image,
-    updatedAt: new Date(dto.updated_at),
+    headingEn: en.title || "Ready to Upgrade Your Industrial Hydraulics?",
+    headingAr: ar.title || "هل أنت جاهز لتطوير أنظمتك الهيدروليكية الصناعية؟",
+    headingKu: ku.title || null,
+    descriptionEn: en.body || null,
+    descriptionAr: ar.body || null,
+    descriptionKu: ku.body || null,
+    buttonTextEn: en.cta_label || null,
+    buttonTextAr: ar.cta_label || null,
+    buttonTextKu: ku.cta_label || null,
+    buttonUrl: en.cta_url || ar.cta_url || ku.cta_url || null,
+    backgroundImage: en.image_url || ar.image_url || ku.image_url || null,
+    status: dto.is_visible ? "active" : "draft",
+    updatedAt: new Date(dto.updated_at || Date.now()),
   });
 }

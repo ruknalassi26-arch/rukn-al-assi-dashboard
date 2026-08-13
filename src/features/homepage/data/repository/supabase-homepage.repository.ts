@@ -1136,76 +1136,114 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   // ============================================================================
-  // TAB 9: CONTACT CTA BANNER (homepage_contact_cta)
+  // TAB 9: CONTACT CTA BANNER (homepage_sections & homepage_section_translations)
   // ============================================================================
   async getContactCta(): Promise<ContactCtaEntity | null> {
     try {
-      const { data, error } = await this.supabase.from("homepage_contact_cta").select("*").limit(1).maybeSingle();
+      const { data, error } = await (this.supabase.from("homepage_sections" as any) as any)
+        .select("*, homepage_section_translations(*)")
+        .eq("section_key", "contact_cta")
+        .maybeSingle();
+
       if (!error && data) {
         return toContactCtaEntity(data);
       }
     } catch {}
 
     return new ContactCtaEntity({
-      id: "cta-1",
+      id: "contact-cta-section",
       headingEn: "Ready to Upgrade Your Industrial Hydraulics?",
       headingAr: "هل أنت جاهز لتطوير أنظمتك الهيدروليكية الصناعية؟",
+      headingKu: null,
       descriptionEn: "Contact our technical engineering team for custom quotes and product specifications.",
       descriptionAr: "تواصل مع فريقنا الهندسي للحصول على عروض أسعار ومواصفات مخصصة.",
+      descriptionKu: null,
       buttonTextEn: "Request Quotation",
       buttonTextAr: "طلب عرض سعر",
+      buttonTextKu: null,
       buttonUrl: "/rfq",
       backgroundImage: "/cta-bg.jpg",
+      status: "active",
       updatedAt: new Date(),
     });
   }
 
   async updateContactCta(data: Partial<ContactCtaEntity>): Promise<ContactCtaEntity> {
     const existing = await this.getContactCta();
-    const payload: UpdateTables<"homepage_contact_cta"> = {};
-    if (data.headingEn !== undefined) payload.heading_en = data.headingEn;
-    if (data.headingAr !== undefined) payload.heading_ar = data.headingAr;
-    if (data.descriptionEn !== undefined) payload.description_en = data.descriptionEn;
-    if (data.descriptionAr !== undefined) payload.description_ar = data.descriptionAr;
-    if (data.buttonTextEn !== undefined) payload.button_text_en = data.buttonTextEn;
-    if (data.buttonTextAr !== undefined) payload.button_text_ar = data.buttonTextAr;
-    if (data.buttonUrl !== undefined) payload.button_url = data.buttonUrl;
-    if (data.backgroundImage !== undefined) payload.background_image = data.backgroundImage;
 
-    if (existing?.id && existing.id !== "cta-1") {
-      const { data: updated, error } = await this.supabase
-        .from("homepage_contact_cta")
-        .update(payload)
-        .eq("id", existing.id)
-        .select()
-        .single();
-      if (!error && updated) {
-        await this.logActivity("updated", "homepage_contact_cta", updated.heading_en);
-        return toContactCtaEntity(updated);
+    const { data: sectionRow } = await (this.supabase.from("homepage_sections" as any) as any)
+      .select("id")
+      .eq("section_key", "contact_cta")
+      .maybeSingle();
+
+    let sectionId = sectionRow?.id;
+
+    const sectionPayload: UpdateTables<"homepage_sections"> = {};
+    if (data.status !== undefined) sectionPayload.is_visible = data.status === "active";
+
+    if (sectionId) {
+      if (Object.keys(sectionPayload).length > 0) {
+        await (this.supabase.from("homepage_sections" as any) as any)
+          .update(sectionPayload)
+          .eq("id", sectionId);
       }
     } else {
-      const insertPayload: InsertTables<"homepage_contact_cta"> = {
-        heading_en: data.headingEn || "Ready to Upgrade Your Industrial Hydraulics?",
-        heading_ar: data.headingAr || "هل أنت جاهز لتطوير أنظمتك الهيدروليكية الصناعية؟",
-        description_en: data.descriptionEn || null,
-        description_ar: data.descriptionAr || null,
-        button_text_en: data.buttonTextEn || null,
-        button_text_ar: data.buttonTextAr || null,
-        button_url: data.buttonUrl || null,
-        background_image: data.backgroundImage || null,
+      const insertSectionPayload: InsertTables<"homepage_sections"> = {
+        section_key: "contact_cta",
+        is_visible: data.status !== "draft",
+        sort_order: 9,
+        settings: {},
       };
 
-      const { data: inserted, error } = await this.supabase
-        .from("homepage_contact_cta")
-        .insert(insertPayload)
+      const { data: newSection, error: sectionErr } = await (this.supabase.from("homepage_sections" as any) as any)
+        .insert(insertSectionPayload)
         .select()
         .single();
-      if (!error && inserted) {
-        await this.logActivity("created", "homepage_contact_cta", inserted.heading_en);
-        return toContactCtaEntity(inserted);
-      }
+
+      if (sectionErr || !newSection) throw new Error(sectionErr?.message ?? "Failed to create contact_cta section");
+      sectionId = newSection.id;
     }
 
+    const bgImage = data.backgroundImage !== undefined ? data.backgroundImage : existing?.backgroundImage ?? null;
+    const btnUrl = data.buttonUrl !== undefined ? data.buttonUrl : existing?.buttonUrl ?? null;
+
+    const translationsPayload = [
+      {
+        section_id: sectionId,
+        language_code: "en",
+        title: data.headingEn ?? existing?.headingEn ?? "Ready to Upgrade Your Industrial Hydraulics?",
+        subtitle: null,
+        body: data.descriptionEn !== undefined ? data.descriptionEn : existing?.descriptionEn ?? null,
+        image_url: bgImage,
+        cta_label: data.buttonTextEn !== undefined ? data.buttonTextEn : existing?.buttonTextEn ?? null,
+        cta_url: btnUrl,
+      },
+      {
+        section_id: sectionId,
+        language_code: "ar",
+        title: data.headingAr ?? existing?.headingAr ?? "هل أنت جاهز لتطوير أنظمتك الهيدروليكية الصناعية؟",
+        subtitle: null,
+        body: data.descriptionAr !== undefined ? data.descriptionAr : existing?.descriptionAr ?? null,
+        image_url: bgImage,
+        cta_label: data.buttonTextAr !== undefined ? data.buttonTextAr : existing?.buttonTextAr ?? null,
+        cta_url: btnUrl,
+      },
+      {
+        section_id: sectionId,
+        language_code: "ku",
+        title: data.headingKu !== undefined ? data.headingKu : existing?.headingKu ?? null,
+        subtitle: null,
+        body: data.descriptionKu !== undefined ? data.descriptionKu : existing?.descriptionKu ?? null,
+        image_url: bgImage,
+        cta_label: data.buttonTextKu !== undefined ? data.buttonTextKu : existing?.buttonTextKu ?? null,
+        cta_url: btnUrl,
+      },
+    ];
+
+    await (this.supabase.from("homepage_section_translations" as any) as any)
+      .upsert(translationsPayload, { onConflict: "section_id,language_code" });
+
+    await this.logActivity("updated", "homepage_sections", "Contact CTA");
     return (await this.getContactCta())!;
   }
 

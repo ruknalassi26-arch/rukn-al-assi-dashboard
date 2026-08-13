@@ -337,12 +337,16 @@ export interface ContactCtaProps {
   id: string;
   headingEn: string;
   headingAr: string;
+  headingKu?: string | null;
   descriptionEn: string | null;
   descriptionAr: string | null;
+  descriptionKu?: string | null;
   buttonTextEn: string | null;
   buttonTextAr: string | null;
+  buttonTextKu?: string | null;
   buttonUrl: string | null;
   backgroundImage: string | null;
+  status?: SlideStatus;
   updatedAt: Date;
 }
 
@@ -350,24 +354,32 @@ export class ContactCtaEntity {
   public readonly id: string;
   public readonly headingEn: string;
   public readonly headingAr: string;
+  public readonly headingKu?: string | null;
   public readonly descriptionEn: string | null;
   public readonly descriptionAr: string | null;
+  public readonly descriptionKu?: string | null;
   public readonly buttonTextEn: string | null;
   public readonly buttonTextAr: string | null;
+  public readonly buttonTextKu?: string | null;
   public readonly buttonUrl: string | null;
   public readonly backgroundImage: string | null;
+  public readonly status?: SlideStatus;
   public readonly updatedAt: Date;
 
   constructor(props: ContactCtaProps) {
     this.id = props.id;
     this.headingEn = props.headingEn;
     this.headingAr = props.headingAr;
+    this.headingKu = props.headingKu ?? null;
     this.descriptionEn = props.descriptionEn;
     this.descriptionAr = props.descriptionAr;
+    this.descriptionKu = props.descriptionKu ?? null;
     this.buttonTextEn = props.buttonTextEn;
     this.buttonTextAr = props.buttonTextAr;
+    this.buttonTextKu = props.buttonTextKu ?? null;
     this.buttonUrl = props.buttonUrl;
     this.backgroundImage = props.backgroundImage;
+    this.status = props.status ?? "active";
     this.updatedAt = props.updatedAt;
   }
 }

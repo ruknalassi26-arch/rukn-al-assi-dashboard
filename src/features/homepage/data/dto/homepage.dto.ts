@@ -18,7 +18,7 @@ export type CompanyStatDTO = Tables<"stats"> & {
 };
 export type ClientDTO = Tables<"clients">;
 export type CertificateDTO = Tables<"certificates">;
-export type ContactCtaDTO = Tables<"homepage_contact_cta">;
+export type ContactCtaDTO = HomepageSectionDTO & { homepage_section_translations?: HomepageSectionTranslationDTO[] };
 
 export type FeaturedServiceDTO = Tables<"services">;
 export type FeaturedProductDTO = Tables<"products">;
