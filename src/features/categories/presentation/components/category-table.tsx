@@ -238,7 +238,7 @@ export function CategoryTable() {
                       <TableCell>
                         {cat.image ? (
                           <div className="relative h-10 w-10 overflow-hidden rounded-md border bg-muted">
-                            <Image src={cat.image} alt={cat.nameEn} fill className="object-cover" />
+                            <Image src={cat.image} alt={cat.nameEn} fill unoptimized className="object-cover" />
                           </div>
                         ) : (
                           <div className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted text-muted-foreground">

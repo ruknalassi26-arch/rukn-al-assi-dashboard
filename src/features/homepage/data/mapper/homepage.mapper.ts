@@ -26,24 +26,29 @@ import type {
 } from "../dto/homepage.dto";
 
 export function toHeroSlideEntity(dto: HeroSlideDTO): HeroSlideEntity {
+  const transList = dto.homepage_section_translations || [];
+  const en = transList.find((t) => t.language_code === "en") || ({} as any);
+  const ar = transList.find((t) => t.language_code === "ar") || ({} as any);
+  const settings = (dto.settings as Record<string, any>) || {};
+
   return new HeroSlideEntity({
     id: dto.id,
-    titleEn: dto.title_en,
-    titleAr: dto.title_ar,
-    subtitleEn: dto.subtitle_en,
-    subtitleAr: dto.subtitle_ar,
-    primaryButtonTextEn: dto.primary_button_text_en,
-    primaryButtonTextAr: dto.primary_button_text_ar,
-    primaryButtonUrl: dto.primary_button_url,
-    secondaryButtonTextEn: dto.secondary_button_text_en,
-    secondaryButtonTextAr: dto.secondary_button_text_ar,
-    secondaryButtonUrl: dto.secondary_button_url,
-    backgroundImage: dto.background_image,
-    overlayOpacity: dto.overlay_opacity ?? 40,
-    status: dto.status,
+    titleEn: en.title || "Engineering & Industrial Hydraulic Solutions",
+    titleAr: ar.title || "حلول الهيدروليك والهندسة الصناعية",
+    subtitleEn: en.subtitle || "",
+    subtitleAr: ar.subtitle || "",
+    primaryButtonTextEn: en.cta_label || settings.primary_button_text_en || "Explore Products",
+    primaryButtonTextAr: settings.primary_button_text_ar || "استكشف المنتجات",
+    primaryButtonUrl: en.cta_url || settings.primary_button_url || "/products",
+    secondaryButtonTextEn: settings.secondary_button_text_en || "Contact Us",
+    secondaryButtonTextAr: settings.secondary_button_text_ar || "اتصل بنا",
+    secondaryButtonUrl: settings.secondary_button_url || "/contact",
+    backgroundImage: en.image_url || ar.image_url || settings.background_image || "/hero-banner.jpg",
+    overlayOpacity: settings.overlay_opacity ?? 40,
+    status: dto.is_visible ? "active" : "draft",
     sortOrder: dto.sort_order ?? 0,
-    createdAt: new Date(dto.created_at),
-    updatedAt: new Date(dto.updated_at),
+    createdAt: new Date(dto.updated_at || Date.now()),
+    updatedAt: new Date(dto.updated_at || Date.now()),
   });
 }
 

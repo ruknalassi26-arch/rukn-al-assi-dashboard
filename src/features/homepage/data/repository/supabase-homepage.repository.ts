@@ -1,10 +1,10 @@
 // ==============================================================================
 // features/homepage/data/repository/supabase-homepage.repository.ts
 // Concrete Supabase implementation of IHomepageRepository
-// Strictly matching official SQL Schema (homepage_sections, stats, clients, certifications)
+// Strictly matching official SQL Schema (homepage_sections, homepage_section_translations, etc.)
 // ==============================================================================
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@core/types/database.types";
+import type { Database, InsertTables, UpdateTables } from "@core/types/database.types";
 import type { IHomepageRepository } from "../../domain/repositories/i-homepage.repository";
 import {
   HeroSlideEntity,
@@ -17,50 +17,35 @@ import {
   CertificateEntity,
   ContactCtaEntity,
 } from "../../domain/entities/homepage.entity";
+import {
+  toHeroSlideEntity,
+  toAboutPreviewEntity,
+  toCompanyStatEntity,
+  toFeaturedServiceEntity,
+  toFeaturedProductEntity,
+  toFeaturedProjectEntity,
+  toClientEntity,
+  toCertificateEntity,
+  toContactCtaEntity,
+} from "../mapper/homepage.mapper";
 
 export class SupabaseHomepageRepository implements IHomepageRepository {
   constructor(private readonly supabase: SupabaseClient<Database>) {}
 
   // ============================================================================
-  // HERO SECTION (homepage_sections & homepage_section_translations)
+  // TAB 1: HERO SECTION (homepage_sections & homepage_section_translations)
   // ============================================================================
   async getHeroSlides(): Promise<HeroSlideEntity[]> {
     try {
       const { data, error } = await (this.supabase.from("homepage_sections" as any) as any)
         .select("*, homepage_section_translations(*)")
-        .eq("section_key", "hero")
-        .maybeSingle();
+        .or("section_key.eq.hero,section_key.eq.hero_slide")
+        .order("sort_order", { ascending: true });
 
-      if (!error && data) {
-        const transList: any[] = data.homepage_section_translations || [];
-        const en = transList.find((t: any) => t.language_code === "en") || {};
-        const ar = transList.find((t: any) => t.language_code === "ar") || {};
-
-        return [
-          new HeroSlideEntity({
-            id: data.id,
-            titleEn: en.title || "Engineering & Industrial Hydraulic Solutions",
-            titleAr: ar.title || "حلول الهيدروليك والهندسة الصناعية",
-            subtitleEn: en.subtitle || "Leading provider of high-pressure hydraulic equipment and spare parts across Iraq.",
-            subtitleAr: ar.subtitle || "المزود الرائد لمعدات الهيدروليك وقطع الغيار في العراق.",
-            primaryButtonTextEn: en.cta_label || "Explore Products",
-            primaryButtonTextAr: "استكشف المنتجات",
-            primaryButtonUrl: en.cta_url || "/products",
-            secondaryButtonTextEn: "Contact Us",
-            secondaryButtonTextAr: "اتصل بنا",
-            secondaryButtonUrl: "/contact",
-            backgroundImage: en.image_url || "/hero-banner.jpg",
-            overlayOpacity: 50,
-            status: "active",
-            sortOrder: 1,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          }),
-        ];
+      if (!error && data && data.length > 0) {
+        return data.map(toHeroSlideEntity);
       }
-    } catch {
-      // Return defaults
-    }
+    } catch {}
 
     return [
       new HeroSlideEntity({
@@ -86,22 +71,147 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   async createHeroSlide(slide: Omit<HeroSlideEntity, "id" | "createdAt" | "updatedAt">): Promise<HeroSlideEntity> {
-    const list = await this.getHeroSlides();
-    return list[0];
+    const settings = {
+      primary_button_text_en: slide.primaryButtonTextEn || null,
+      primary_button_text_ar: slide.primaryButtonTextAr || null,
+      primary_button_url: slide.primaryButtonUrl || null,
+      secondary_button_text_en: slide.secondaryButtonTextEn || null,
+      secondary_button_text_ar: slide.secondaryButtonTextAr || null,
+      secondary_button_url: slide.secondaryButtonUrl || null,
+      background_image: slide.backgroundImage || null,
+      overlay_opacity: slide.overlayOpacity ?? 40,
+    };
+
+    const sectionPayload: InsertTables<"homepage_sections"> = {
+      section_key: "hero",
+      is_visible: slide.status === "active",
+      sort_order: slide.sortOrder ?? 0,
+      settings: settings as any,
+    };
+
+    const { data: row, error } = await (this.supabase.from("homepage_sections" as any) as any)
+      .insert(sectionPayload)
+      .select()
+      .single();
+
+    if (error || !row) {
+      throw new Error(error?.message ?? "Failed to create hero slide");
+    }
+
+    const translationsPayload = [
+      {
+        section_id: row.id,
+        language_code: "en",
+        title: slide.titleEn,
+        subtitle: slide.subtitleEn || null,
+        image_url: slide.backgroundImage || null,
+        cta_label: slide.primaryButtonTextEn || null,
+        cta_url: slide.primaryButtonUrl || null,
+      },
+      {
+        section_id: row.id,
+        language_code: "ar",
+        title: slide.titleAr,
+        subtitle: slide.subtitleAr || null,
+        image_url: slide.backgroundImage || null,
+        cta_label: slide.primaryButtonTextAr || null,
+        cta_url: slide.primaryButtonUrl || null,
+      },
+    ];
+
+    await (this.supabase.from("homepage_section_translations" as any) as any).insert(translationsPayload);
+
+    await this.logActivity("created", "homepage_sections", slide.titleEn);
+    const slides = await this.getHeroSlides();
+    return slides.find((s) => s.id === row.id) || slides[0];
   }
 
   async updateHeroSlide(id: string, slide: Partial<HeroSlideEntity>): Promise<HeroSlideEntity> {
-    const list = await this.getHeroSlides();
-    return list[0];
+    const slides = await this.getHeroSlides();
+    const existing = slides.find((s) => s.id === id);
+
+    const settings = {
+      primary_button_text_en: slide.primaryButtonTextEn ?? existing?.primaryButtonTextEn ?? null,
+      primary_button_text_ar: slide.primaryButtonTextAr ?? existing?.primaryButtonTextAr ?? null,
+      primary_button_url: slide.primaryButtonUrl ?? existing?.primaryButtonUrl ?? null,
+      secondary_button_text_en: slide.secondaryButtonTextEn ?? existing?.secondaryButtonTextEn ?? null,
+      secondary_button_text_ar: slide.secondaryButtonTextAr ?? existing?.secondaryButtonTextAr ?? null,
+      secondary_button_url: slide.secondaryButtonUrl ?? existing?.secondaryButtonUrl ?? null,
+      background_image: slide.backgroundImage ?? existing?.backgroundImage ?? null,
+      overlay_opacity: slide.overlayOpacity ?? existing?.overlayOpacity ?? 40,
+    };
+
+    const updatePayload: UpdateTables<"homepage_sections"> = { settings: settings as any };
+    if (slide.sortOrder !== undefined) updatePayload.sort_order = slide.sortOrder;
+    if (slide.status !== undefined) updatePayload.is_visible = slide.status === "active";
+
+    if (Object.keys(updatePayload).length > 0) {
+      await (this.supabase.from("homepage_sections" as any) as any)
+        .update(updatePayload)
+        .eq("id", id);
+    }
+
+    const transPayload: any[] = [];
+    if (slide.titleEn !== undefined || slide.subtitleEn !== undefined || slide.primaryButtonTextEn !== undefined || slide.backgroundImage !== undefined) {
+      transPayload.push({
+        section_id: id,
+        language_code: "en",
+        title: slide.titleEn ?? existing?.titleEn ?? "",
+        subtitle: slide.subtitleEn ?? existing?.subtitleEn ?? null,
+        image_url: slide.backgroundImage ?? existing?.backgroundImage ?? null,
+        cta_label: slide.primaryButtonTextEn ?? existing?.primaryButtonTextEn ?? null,
+        cta_url: slide.primaryButtonUrl ?? existing?.primaryButtonUrl ?? null,
+      });
+    }
+
+    if (slide.titleAr !== undefined || slide.subtitleAr !== undefined || slide.primaryButtonTextAr !== undefined || slide.backgroundImage !== undefined) {
+      transPayload.push({
+        section_id: id,
+        language_code: "ar",
+        title: slide.titleAr ?? existing?.titleAr ?? "",
+        subtitle: slide.subtitleAr ?? existing?.subtitleAr ?? null,
+        image_url: slide.backgroundImage ?? existing?.backgroundImage ?? null,
+        cta_label: slide.primaryButtonTextAr ?? existing?.primaryButtonTextAr ?? null,
+        cta_url: slide.primaryButtonUrl ?? existing?.primaryButtonUrl ?? null,
+      });
+    }
+
+    if (transPayload.length > 0) {
+      await (this.supabase.from("homepage_section_translations" as any) as any)
+        .upsert(transPayload, { onConflict: "section_id,language_code" });
+    }
+
+    await this.logActivity("updated", "homepage_sections", slide.titleEn ?? existing?.titleEn);
+    const updatedList = await this.getHeroSlides();
+    return updatedList.find((s) => s.id === id) || updatedList[0];
   }
 
-  async deleteHeroSlide(id: string): Promise<void> {}
-  async reorderHeroSlides(orderedIds: string[]): Promise<void> {}
+  async deleteHeroSlide(id: string): Promise<void> {
+    await (this.supabase.from("homepage_sections" as any) as any)
+      .delete()
+      .eq("id", id);
+    await this.logActivity("deleted", "homepage_sections", id);
+  }
+
+  async reorderHeroSlides(orderedIds: string[]): Promise<void> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await (this.supabase.from("homepage_sections" as any) as any)
+        .update({ sort_order: i + 1 })
+        .eq("id", orderedIds[i]);
+    }
+  }
 
   // ============================================================================
-  // ABOUT PREVIEW SECTION
+  // TAB 2: ABOUT PREVIEW (homepage_about)
   // ============================================================================
   async getAboutPreview(): Promise<AboutPreviewEntity | null> {
+    try {
+      const { data, error } = await this.supabase.from("homepage_about").select("*").limit(1).maybeSingle();
+      if (!error && data) {
+        return toAboutPreviewEntity(data);
+      }
+    } catch {}
+
     return new AboutPreviewEntity({
       id: "about-preview-1",
       titleEn: "About Rukn Al Assi",
@@ -120,40 +230,74 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   async updateAboutPreview(data: Partial<AboutPreviewEntity>): Promise<AboutPreviewEntity> {
+    const existing = await this.getAboutPreview();
+    const payload: UpdateTables<"homepage_about"> = {};
+    if (data.titleEn !== undefined) payload.title_en = data.titleEn;
+    if (data.titleAr !== undefined) payload.title_ar = data.titleAr;
+    if (data.descriptionEn !== undefined) payload.description_en = data.descriptionEn;
+    if (data.descriptionAr !== undefined) payload.description_ar = data.descriptionAr;
+    if (data.imageUrl !== undefined) payload.image_url = data.imageUrl;
+    if (data.buttonTextEn !== undefined) payload.button_text_en = data.buttonTextEn;
+    if (data.buttonTextAr !== undefined) payload.button_text_ar = data.buttonTextAr;
+    if (data.buttonUrl !== undefined) payload.button_url = data.buttonUrl;
+    if (data.highlightsEn !== undefined) payload.highlights_en = data.highlightsEn;
+    if (data.highlightsAr !== undefined) payload.highlights_ar = data.highlightsAr;
+    if (data.status !== undefined) payload.status = data.status;
+
+    if (existing?.id && existing.id !== "about-preview-1") {
+      const { data: updated, error } = await this.supabase
+        .from("homepage_about")
+        .update(payload)
+        .eq("id", existing.id)
+        .select()
+        .single();
+      if (!error && updated) {
+        await this.logActivity("updated", "homepage_about", updated.title_en);
+        return toAboutPreviewEntity(updated);
+      }
+    } else {
+      const insertPayload: InsertTables<"homepage_about"> = {
+        title_en: data.titleEn || "About Rukn Al Assi",
+        title_ar: data.titleAr || "عن ركن العاصي",
+        description_en: data.descriptionEn || null,
+        description_ar: data.descriptionAr || null,
+        image_url: data.imageUrl || null,
+        button_text_en: data.buttonTextEn || null,
+        button_text_ar: data.buttonTextAr || null,
+        button_url: data.buttonUrl || null,
+        highlights_en: data.highlightsEn || [],
+        highlights_ar: data.highlightsAr || [],
+        status: data.status || "active",
+      };
+
+      const { data: inserted, error } = await this.supabase
+        .from("homepage_about")
+        .insert(insertPayload)
+        .select()
+        .single();
+      if (!error && inserted) {
+        await this.logActivity("created", "homepage_about", inserted.title_en);
+        return toAboutPreviewEntity(inserted);
+      }
+    }
+
     return (await this.getAboutPreview())!;
   }
 
   // ============================================================================
-  // COMPANY STATS (stats & stat_translations)
+  // TAB 3: COMPANY STATS (company_statistics)
   // ============================================================================
   async getCompanyStats(): Promise<CompanyStatEntity[]> {
     try {
-      const { data, error } = await (this.supabase.from("stats" as any) as any)
-        .select("*, stat_translations(*)")
-        .is("deleted_at", null)
+      const { data, error } = await this.supabase
+        .from("company_statistics")
+        .select("*")
         .order("sort_order", { ascending: true });
 
-      if (!error && data) {
-        return data.map((item: any) => {
-          const transList: any[] = item.stat_translations || [];
-          const en = transList.find((t: any) => t.language_code === "en") || {};
-          const ar = transList.find((t: any) => t.language_code === "ar") || {};
-          return new CompanyStatEntity({
-            id: item.id,
-            titleEn: en.label || "Stat",
-            titleAr: ar.label || "إحصائية",
-            value: item.number_value || "0",
-            icon: item.icon || "award",
-            sortOrder: item.sort_order ?? 0,
-            status: item.status === "published" ? "active" : "draft",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          });
-        });
+      if (!error && data && data.length > 0) {
+        return data.map(toCompanyStatEntity);
       }
-    } catch {
-      // Return defaults
-    }
+    } catch {}
 
     return [
       new CompanyStatEntity({ id: "stat-1", titleEn: "Projects Delivered", titleAr: "مشروع منجز", value: "250+", icon: "check-circle", sortOrder: 1, status: "active", createdAt: new Date(), updatedAt: new Date() }),
@@ -162,187 +306,342 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   async createCompanyStat(stat: Omit<CompanyStatEntity, "id" | "createdAt" | "updatedAt">): Promise<CompanyStatEntity> {
-    const { data, error } = await (this.supabase.from("stats" as any) as any)
-      .insert({ number_value: stat.value, icon: stat.icon, sort_order: stat.sortOrder, status: "published" })
+    const payload: InsertTables<"company_statistics"> = {
+      title_en: stat.titleEn,
+      title_ar: stat.titleAr,
+      value: stat.value,
+      icon: stat.icon || null,
+      sort_order: stat.sortOrder ?? 0,
+      status: stat.status ?? "active",
+    };
+
+    const { data, error } = await this.supabase
+      .from("company_statistics")
+      .insert(payload)
       .select()
       .single();
 
-    if (error || !data) throw new Error(error?.message ?? "Failed to create stat");
+    if (error || !data) throw new Error(error?.message ?? "Failed to create company statistic");
 
-    await (this.supabase.from("stat_translations" as any) as any).insert([
-      { stat_id: data.id, language_code: "en", label: stat.titleEn },
-      { stat_id: data.id, language_code: "ar", label: stat.titleAr },
-    ]);
-
-    return new CompanyStatEntity({ id: data.id, titleEn: stat.titleEn, titleAr: stat.titleAr, value: stat.value, icon: stat.icon, sortOrder: stat.sortOrder, status: stat.status, createdAt: new Date(), updatedAt: new Date() });
+    await this.logActivity("created", "company_statistics", stat.titleEn);
+    return toCompanyStatEntity(data);
   }
 
   async updateCompanyStat(id: string, stat: Partial<CompanyStatEntity>): Promise<CompanyStatEntity> {
-    const list = await this.getCompanyStats();
-    return list[0];
+    const payload: UpdateTables<"company_statistics"> = {};
+    if (stat.titleEn !== undefined) payload.title_en = stat.titleEn;
+    if (stat.titleAr !== undefined) payload.title_ar = stat.titleAr;
+    if (stat.value !== undefined) payload.value = stat.value;
+    if (stat.icon !== undefined) payload.icon = stat.icon;
+    if (stat.sortOrder !== undefined) payload.sort_order = stat.sortOrder;
+    if (stat.status !== undefined) payload.status = stat.status;
+
+    const { data, error } = await this.supabase
+      .from("company_statistics")
+      .update(payload)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !data) throw new Error(error?.message ?? "Failed to update company statistic");
+
+    await this.logActivity("updated", "company_statistics", data.title_en);
+    return toCompanyStatEntity(data);
   }
 
-  async deleteCompanyStat(id: string): Promise<void> {}
-  async reorderCompanyStats(orderedIds: string[]): Promise<void> {}
-  async bulkDeleteCompanyStats(ids: string[]): Promise<void> {}
-  async bulkUpdateCompanyStatsStatus(ids: string[], status: "active" | "draft"): Promise<void> {}
+  async deleteCompanyStat(id: string): Promise<void> {
+    const { error } = await this.supabase.from("company_statistics").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    await this.logActivity("deleted", "company_statistics", id);
+  }
+
+  async reorderCompanyStats(orderedIds: string[]): Promise<void> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await this.supabase.from("company_statistics").update({ sort_order: i + 1 }).eq("id", orderedIds[i]);
+    }
+  }
+
+  async bulkDeleteCompanyStats(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    await this.supabase.from("company_statistics").delete().in("id", ids);
+  }
+
+  async bulkUpdateCompanyStatsStatus(ids: string[], status: "active" | "draft"): Promise<void> {
+    if (ids.length === 0) return;
+    await this.supabase.from("company_statistics").update({ status }).in("id", ids);
+  }
 
   // ============================================================================
-  // FEATURED SERVICES
+  // TAB 4: FEATURED SERVICES (services)
   // ============================================================================
   async getFeaturedServices(): Promise<FeaturedServiceEntity[]> {
-    return [];
-  }
-
-  async toggleServiceFeatured(id: string, isFeatured: boolean, sortOrder?: number): Promise<void> {}
-  async reorderFeaturedServices(orderedIds: string[]): Promise<void> {}
-
-  // ============================================================================
-  // FEATURED PRODUCTS
-  // ============================================================================
-  async getFeaturedProducts(): Promise<FeaturedProductEntity[]> {
-    return [];
-  }
-
-  async toggleProductFeatured(id: string, isFeatured: boolean, sortOrder?: number): Promise<void> {}
-  async reorderFeaturedProducts(orderedIds: string[]): Promise<void> {}
-
-  // ============================================================================
-  // FEATURED PROJECTS
-  // ============================================================================
-  async getFeaturedProjects(): Promise<FeaturedProjectEntity[]> {
-    return [];
-  }
-
-  async toggleProjectFeatured(id: string, isFeatured: boolean, sortOrder?: number): Promise<void> {}
-  async reorderFeaturedProjects(orderedIds: string[]): Promise<void> {}
-
-  // ============================================================================
-  // CLIENT PARTNERS (clients & client_translations)
-  // ============================================================================
-  async getClients(): Promise<ClientEntity[]> {
     try {
-      const { data, error } = await (this.supabase.from("clients" as any) as any)
-        .select("*, client_translations(*)")
-        .is("deleted_at", null)
+      const { data, error } = await this.supabase
+        .from("services")
+        .select("*")
+        .eq("is_featured", true)
         .order("sort_order", { ascending: true });
 
       if (!error && data) {
-        return data.map((item: any) => {
-          const transList: any[] = item.client_translations || [];
-          const en = transList.find((t: any) => t.language_code === "en") || {};
-          const ar = transList.find((t: any) => t.language_code === "ar") || {};
-          return new ClientEntity({
-            id: item.id,
-            nameEn: en.name || "Client Partner",
-            nameAr: ar.name || "عميل شريك",
-            logoUrl: item.logo_url,
-            websiteUrl: item.website_url || null,
-            sortOrder: item.sort_order ?? 0,
-            status: item.status === "published" ? "active" : "draft",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          });
-        });
+        return data.map(toFeaturedServiceEntity);
       }
-    } catch {
-      // Return empty array
-    }
+    } catch {}
+    return [];
+  }
 
+  async toggleServiceFeatured(id: string, isFeatured: boolean, sortOrder?: number): Promise<void> {
+    const payload: UpdateTables<"services"> = { is_featured: isFeatured };
+    if (sortOrder !== undefined) payload.sort_order = sortOrder;
+    await this.supabase.from("services").update(payload).eq("id", id);
+  }
+
+  async reorderFeaturedServices(orderedIds: string[]): Promise<void> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await this.supabase.from("services").update({ sort_order: i + 1 }).eq("id", orderedIds[i]);
+    }
+  }
+
+  // ============================================================================
+  // TAB 5: FEATURED PRODUCTS (products)
+  // ============================================================================
+  async getFeaturedProducts(): Promise<FeaturedProductEntity[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from("products")
+        .select("*")
+        .eq("is_featured", true)
+        .order("sort_order", { ascending: true });
+
+      if (!error && data) {
+        return data.map(toFeaturedProductEntity);
+      }
+    } catch {}
+    return [];
+  }
+
+  async toggleProductFeatured(id: string, isFeatured: boolean, sortOrder?: number): Promise<void> {
+    const payload: UpdateTables<"products"> = { is_featured: isFeatured };
+    if (sortOrder !== undefined) payload.sort_order = sortOrder;
+    await this.supabase.from("products").update(payload).eq("id", id);
+  }
+
+  async reorderFeaturedProducts(orderedIds: string[]): Promise<void> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await this.supabase.from("products").update({ sort_order: i + 1 }).eq("id", orderedIds[i]);
+    }
+  }
+
+  // ============================================================================
+  // TAB 6: FEATURED PROJECTS (projects)
+  // ============================================================================
+  async getFeaturedProjects(): Promise<FeaturedProjectEntity[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from("projects")
+        .select("*")
+        .eq("is_featured", true)
+        .order("sort_order", { ascending: true });
+
+      if (!error && data) {
+        return data.map(toFeaturedProjectEntity);
+      }
+    } catch {}
+    return [];
+  }
+
+  async toggleProjectFeatured(id: string, isFeatured: boolean, sortOrder?: number): Promise<void> {
+    const payload: UpdateTables<"projects"> = { is_featured: isFeatured };
+    if (sortOrder !== undefined) payload.sort_order = sortOrder;
+    await this.supabase.from("projects").update(payload).eq("id", id);
+  }
+
+  async reorderFeaturedProjects(orderedIds: string[]): Promise<void> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await this.supabase.from("projects").update({ sort_order: i + 1 }).eq("id", orderedIds[i]);
+    }
+  }
+
+  // ============================================================================
+  // TAB 7: CLIENTS & PARTNERS (clients)
+  // ============================================================================
+  async getClients(): Promise<ClientEntity[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from("clients")
+        .select("*")
+        .order("sort_order", { ascending: true });
+
+      if (!error && data) {
+        return data.map(toClientEntity);
+      }
+    } catch {}
     return [];
   }
 
   async createClient(client: Omit<ClientEntity, "id" | "createdAt" | "updatedAt">): Promise<ClientEntity> {
-    const { data, error } = await (this.supabase.from("clients" as any) as any)
-      .insert({ logo_url: client.logoUrl, website_url: client.websiteUrl, sort_order: client.sortOrder, status: "published" })
+    const payload: InsertTables<"clients"> = {
+      name_en: client.nameEn,
+      name_ar: client.nameAr,
+      logo_url: client.logoUrl || null,
+      website_url: client.websiteUrl || null,
+      sort_order: client.sortOrder ?? 0,
+      status: client.status ?? "active",
+    };
+
+    const { data, error } = await this.supabase
+      .from("clients")
+      .insert(payload)
       .select()
       .single();
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create client");
 
-    await (this.supabase.from("client_translations" as any) as any).insert([
-      { client_id: data.id, language_code: "en", name: client.nameEn },
-      { client_id: data.id, language_code: "ar", name: client.nameAr },
-    ]);
-
-    return new ClientEntity({ id: data.id, nameEn: client.nameEn, nameAr: client.nameAr, logoUrl: client.logoUrl, websiteUrl: client.websiteUrl, sortOrder: client.sortOrder, status: client.status, createdAt: new Date(), updatedAt: new Date() });
+    await this.logActivity("created", "clients", client.nameEn);
+    return toClientEntity(data);
   }
 
   async updateClient(id: string, client: Partial<ClientEntity>): Promise<ClientEntity> {
-    const list = await this.getClients();
-    return list[0];
+    const payload: UpdateTables<"clients"> = {};
+    if (client.nameEn !== undefined) payload.name_en = client.nameEn;
+    if (client.nameAr !== undefined) payload.name_ar = client.nameAr;
+    if (client.logoUrl !== undefined) payload.logo_url = client.logoUrl;
+    if (client.websiteUrl !== undefined) payload.website_url = client.websiteUrl;
+    if (client.sortOrder !== undefined) payload.sort_order = client.sortOrder;
+    if (client.status !== undefined) payload.status = client.status;
+
+    const { data, error } = await this.supabase
+      .from("clients")
+      .update(payload)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !data) throw new Error(error?.message ?? "Failed to update client");
+
+    await this.logActivity("updated", "clients", data.name_en);
+    return toClientEntity(data);
   }
 
-  async deleteClient(id: string): Promise<void> {}
-  async reorderClients(orderedIds: string[]): Promise<void> {}
-  async bulkDeleteClients(ids: string[]): Promise<void> {}
-  async bulkUpdateClientsStatus(ids: string[], status: "active" | "draft"): Promise<void> {}
+  async deleteClient(id: string): Promise<void> {
+    const { error } = await this.supabase.from("clients").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    await this.logActivity("deleted", "clients", id);
+  }
+
+  async reorderClients(orderedIds: string[]): Promise<void> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await this.supabase.from("clients").update({ sort_order: i + 1 }).eq("id", orderedIds[i]);
+    }
+  }
+
+  async bulkDeleteClients(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    await this.supabase.from("clients").delete().in("id", ids);
+  }
+
+  async bulkUpdateClientsStatus(ids: string[], status: "active" | "draft"): Promise<void> {
+    if (ids.length === 0) return;
+    await this.supabase.from("clients").update({ status }).in("id", ids);
+  }
 
   // ============================================================================
-  // CERTIFICATES (certifications & certification_translations)
+  // TAB 8: CERTIFICATES (certificates)
   // ============================================================================
   async getCertificates(): Promise<CertificateEntity[]> {
     try {
-      const { data, error } = await (this.supabase.from("certifications" as any) as any)
-        .select("*, certification_translations(*)")
-        .is("deleted_at", null)
+      const { data, error } = await this.supabase
+        .from("certificates")
+        .select("*")
         .order("sort_order", { ascending: true });
 
       if (!error && data) {
-        return data.map((item: any) => {
-          const transList: any[] = item.certification_translations || [];
-          const en = transList.find((t: any) => t.language_code === "en") || {};
-          const ar = transList.find((t: any) => t.language_code === "ar") || {};
-          return new CertificateEntity({
-            id: item.id,
-            titleEn: en.title || "Certification",
-            titleAr: ar.title || "شهادة اعتمادات",
-            image: item.image_url || "",
-            issueDate: item.issued_date || "",
-            sortOrder: item.sort_order ?? 0,
-            status: item.status === "published" ? "active" : "draft",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          });
-        });
+        return data.map(toCertificateEntity);
       }
-    } catch {
-      // Return empty array
-    }
-
+    } catch {}
     return [];
   }
 
   async createCertificate(cert: Omit<CertificateEntity, "id" | "createdAt" | "updatedAt">): Promise<CertificateEntity> {
-    const { data, error } = await (this.supabase.from("certifications" as any) as any)
-      .insert({ image_url: cert.image, issued_date: cert.issueDate || null, sort_order: cert.sortOrder, status: "published" })
+    const payload: InsertTables<"certificates"> = {
+      title_en: cert.titleEn,
+      title_ar: cert.titleAr,
+      description_en: null,
+      description_ar: null,
+      image: cert.image || null,
+      issue_date: cert.issueDate || null,
+      expiry_date: null,
+      organization: null,
+      sort_order: cert.sortOrder ?? 0,
+      status: cert.status ?? "active",
+    };
+
+    const { data, error } = await this.supabase
+      .from("certificates")
+      .insert(payload)
       .select()
       .single();
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create certificate");
 
-    await (this.supabase.from("certification_translations" as any) as any).insert([
-      { certification_id: data.id, language_code: "en", title: cert.titleEn },
-      { certification_id: data.id, language_code: "ar", title: cert.titleAr },
-    ]);
-
-    return new CertificateEntity({ id: data.id, titleEn: cert.titleEn, titleAr: cert.titleAr, image: cert.image, issueDate: cert.issueDate, sortOrder: cert.sortOrder, status: cert.status, createdAt: new Date(), updatedAt: new Date() });
+    await this.logActivity("created", "certificates", cert.titleEn);
+    return toCertificateEntity(data);
   }
 
   async updateCertificate(id: string, cert: Partial<CertificateEntity>): Promise<CertificateEntity> {
-    const list = await this.getCertificates();
-    return list[0];
+    const payload: UpdateTables<"certificates"> = {};
+    if (cert.titleEn !== undefined) payload.title_en = cert.titleEn;
+    if (cert.titleAr !== undefined) payload.title_ar = cert.titleAr;
+    if (cert.image !== undefined) payload.image = cert.image;
+    if (cert.issueDate !== undefined) payload.issue_date = cert.issueDate;
+    if (cert.sortOrder !== undefined) payload.sort_order = cert.sortOrder;
+    if (cert.status !== undefined) payload.status = cert.status;
+
+    const { data, error } = await this.supabase
+      .from("certificates")
+      .update(payload)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !data) throw new Error(error?.message ?? "Failed to update certificate");
+
+    await this.logActivity("updated", "certificates", data.title_en);
+    return toCertificateEntity(data);
   }
 
-  async deleteCertificate(id: string): Promise<void> {}
-  async reorderCertificates(orderedIds: string[]): Promise<void> {}
-  async bulkDeleteCertificates(ids: string[]): Promise<void> {}
-  async bulkUpdateCertificatesStatus(ids: string[], status: "active" | "draft"): Promise<void> {}
+  async deleteCertificate(id: string): Promise<void> {
+    const { error } = await this.supabase.from("certificates").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    await this.logActivity("deleted", "certificates", id);
+  }
+
+  async reorderCertificates(orderedIds: string[]): Promise<void> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await this.supabase.from("certificates").update({ sort_order: i + 1 }).eq("id", orderedIds[i]);
+    }
+  }
+
+  async bulkDeleteCertificates(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    await this.supabase.from("certificates").delete().in("id", ids);
+  }
+
+  async bulkUpdateCertificatesStatus(ids: string[], status: "active" | "draft"): Promise<void> {
+    if (ids.length === 0) return;
+    await this.supabase.from("certificates").update({ status }).in("id", ids);
+  }
 
   // ============================================================================
-  // CONTACT CTA BANNER
+  // TAB 9: CONTACT CTA BANNER (homepage_contact_cta)
   // ============================================================================
   async getContactCta(): Promise<ContactCtaEntity | null> {
+    try {
+      const { data, error } = await this.supabase.from("homepage_contact_cta").select("*").limit(1).maybeSingle();
+      if (!error && data) {
+        return toContactCtaEntity(data);
+      }
+    } catch {}
+
     return new ContactCtaEntity({
       id: "cta-1",
       headingEn: "Ready to Upgrade Your Industrial Hydraulics?",
@@ -358,20 +657,68 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   async updateContactCta(data: Partial<ContactCtaEntity>): Promise<ContactCtaEntity> {
+    const existing = await this.getContactCta();
+    const payload: UpdateTables<"homepage_contact_cta"> = {};
+    if (data.headingEn !== undefined) payload.heading_en = data.headingEn;
+    if (data.headingAr !== undefined) payload.heading_ar = data.headingAr;
+    if (data.descriptionEn !== undefined) payload.description_en = data.descriptionEn;
+    if (data.descriptionAr !== undefined) payload.description_ar = data.descriptionAr;
+    if (data.buttonTextEn !== undefined) payload.button_text_en = data.buttonTextEn;
+    if (data.buttonTextAr !== undefined) payload.button_text_ar = data.buttonTextAr;
+    if (data.buttonUrl !== undefined) payload.button_url = data.buttonUrl;
+    if (data.backgroundImage !== undefined) payload.background_image = data.backgroundImage;
+
+    if (existing?.id && existing.id !== "cta-1") {
+      const { data: updated, error } = await this.supabase
+        .from("homepage_contact_cta")
+        .update(payload)
+        .eq("id", existing.id)
+        .select()
+        .single();
+      if (!error && updated) {
+        await this.logActivity("updated", "homepage_contact_cta", updated.heading_en);
+        return toContactCtaEntity(updated);
+      }
+    } else {
+      const insertPayload: InsertTables<"homepage_contact_cta"> = {
+        heading_en: data.headingEn || "Ready to Upgrade Your Industrial Hydraulics?",
+        heading_ar: data.headingAr || "هل أنت جاهز لتطوير أنظمتك الهيدروليكية الصناعية؟",
+        description_en: data.descriptionEn || null,
+        description_ar: data.descriptionAr || null,
+        button_text_en: data.buttonTextEn || null,
+        button_text_ar: data.buttonTextAr || null,
+        button_url: data.buttonUrl || null,
+        background_image: data.backgroundImage || null,
+      };
+
+      const { data: inserted, error } = await this.supabase
+        .from("homepage_contact_cta")
+        .insert(insertPayload)
+        .select()
+        .single();
+      if (!error && inserted) {
+        await this.logActivity("created", "homepage_contact_cta", inserted.heading_en);
+        return toContactCtaEntity(inserted);
+      }
+    }
+
     return (await this.getContactCta())!;
   }
 
   // ============================================================================
-  // ACTIVITY LOGGING (activity_log)
+  // ACTIVITY LOGGING (activity_logs)
   // ============================================================================
   async logActivity(action: string, entityType: string, entityTitle?: string, metadata?: Record<string, unknown>): Promise<void> {
     try {
       const user = (await this.supabase.auth.getUser()).data.user;
-      await (this.supabase.from("activity_log" as any) as any).insert({
-        action,
-        entity_type: entityType,
-        details: { entity_title: entityTitle, ...metadata },
-        admin_user_id: user?.id ?? null,
+      await (this.supabase.from("activity_logs" as any) as any).insert({
+        action: action as any,
+        entity_type: "homepage",
+        entity_id: null,
+        entity_title: entityTitle || null,
+        user_id: user?.id ?? null,
+        user_email: user?.email ?? null,
+        metadata: metadata || null,
       });
     } catch {}
   }

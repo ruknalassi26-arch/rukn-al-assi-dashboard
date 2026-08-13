@@ -20,6 +20,7 @@
     },
     "dialogs": {
       "cancel": "Cancel",
+      "save": "Save",
       "saveChanges": "Save Changes",
       "add": "Add",
       "edit": "Edit",
@@ -1405,5 +1406,39 @@
     "googleMapsUrl": "Google Maps URL",
     "latitude": "Latitude",
     "longitude": "Longitude"
+  },
+  "homepageAdmin": {
+    "title": "Homepage Management",
+    "subtitle": "Manage homepage hero slides, featured sections, services, products, clients, certificates, and CTA.",
+    "tabs": {
+      "hero": "Hero Section",
+      "about": "About Preview",
+      "stats": "Company Stats",
+      "services": "Featured Services",
+      "products": "Featured Products",
+      "projects": "Featured Projects",
+      "clients": "Clients & Partners",
+      "certificates": "Certificates",
+      "contactCta": "Contact CTA"
+    },
+    "heroTitle": "Hero Section Slides",
+    "heroSubtitle": "Manage main banner slides displayed on the homepage hero slider.",
+    "addHeroSlide": "Add Hero Slide",
+    "editHeroSlide": "Edit Hero Slide",
+    "bgImage": "Background Image",
+    "statTitleEn": "Title (English)",
+    "statTitleAr": "Title (Arabic)",
+    "statTitleKu": "Title (Kurdish)",
+    "buttonTextEn": "Subtitle (English)",
+    "buttonTextAr": "Subtitle (Arabic)",
+    "buttonTextKu": "Subtitle (Kurdish)",
+    "primaryBtnEn": "Primary Button Text (English)",
+    "secondaryBtnEn": "Secondary Button Text (English)",
+    "primaryBtnUrl": "Primary Button URL",
+    "secondaryBtnUrl": "Secondary Button URL",
+    "overlayOpacity": "Overlay Opacity (%)",
+    "sortOrder": "Sort Order",
+    "noSlidesTitle": "No Hero Slides",
+    "noSlidesDescription": "Add your first hero banner slide to customize the homepage."
   }
 }

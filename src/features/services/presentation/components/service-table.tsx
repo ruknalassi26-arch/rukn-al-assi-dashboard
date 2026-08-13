@@ -358,7 +358,7 @@ export function ServiceTable() {
                         <TableCell>
                           {service.image ? (
                             <div className="relative h-10 w-10 overflow-hidden rounded-md border bg-muted">
-                              <Image src={service.image} alt={service.titleEn} fill className="object-cover" />
+                              <Image src={service.image} alt={service.titleEn} fill unoptimized className="object-cover" />
                             </div>
                           ) : (
                             <div className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted text-muted-foreground">

@@ -359,7 +359,7 @@ export function ProductTable() {
                         <TableCell>
                           <div className="relative h-10 w-12 rounded overflow-hidden bg-muted border flex items-center justify-center">
                             {product.displayImage ? (
-                              <Image src={product.displayImage} alt={product.nameEn} fill className="object-cover" />
+                              <Image src={product.displayImage} alt={product.nameEn} fill unoptimized className="object-cover" />
                             ) : (
                               <Package className="h-4 w-4 text-muted-foreground" />
                             )}

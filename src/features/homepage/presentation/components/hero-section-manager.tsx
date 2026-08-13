@@ -152,6 +152,7 @@ export function HeroSectionManager() {
                           src={slide.backgroundImage}
                           alt={slide.titleEn}
                           fill
+                          unoptimized
                           className="object-cover"
                         />
                       ) : (

@@ -32,17 +32,13 @@ import type { HeroSlideEntity } from "@features/homepage/domain/entities/homepag
 const heroSlideSchema = z.object({
   titleEn: z.string().min(2, "English title is required"),
   titleAr: z.string().min(2, "Arabic title is required"),
-  titleKu: z.string().optional().nullable(),
   subtitleEn: z.string().optional().nullable(),
   subtitleAr: z.string().optional().nullable(),
-  subtitleKu: z.string().optional().nullable(),
   primaryButtonTextEn: z.string().optional().nullable(),
   primaryButtonTextAr: z.string().optional().nullable(),
-  primaryButtonTextKu: z.string().optional().nullable(),
   primaryButtonUrl: z.string().optional().nullable(),
   secondaryButtonTextEn: z.string().optional().nullable(),
   secondaryButtonTextAr: z.string().optional().nullable(),
-  secondaryButtonTextKu: z.string().optional().nullable(),
   secondaryButtonUrl: z.string().optional().nullable(),
   backgroundImage: z.string().optional().nullable(),
   overlayOpacity: z.number().min(0).max(100),
@@ -50,7 +46,7 @@ const heroSlideSchema = z.object({
   sortOrder: z.number().min(0),
 });
 
-type HeroSlideFormValues = z.infer<typeof heroSlideSchema>;
+export type HeroSlideFormValues = z.infer<typeof heroSlideSchema>;
 
 interface HeroSlideDialogProps {
   isOpen: boolean;
@@ -82,17 +78,13 @@ export function HeroSlideDialog({
     defaultValues: {
       titleEn: "",
       titleAr: "",
-      titleKu: "",
       subtitleEn: "",
       subtitleAr: "",
-      subtitleKu: "",
       primaryButtonTextEn: "",
       primaryButtonTextAr: "",
-      primaryButtonTextKu: "",
       primaryButtonUrl: "",
       secondaryButtonTextEn: "",
       secondaryButtonTextAr: "",
-      secondaryButtonTextKu: "",
       secondaryButtonUrl: "",
       backgroundImage: null,
       overlayOpacity: 40,
@@ -106,17 +98,13 @@ export function HeroSlideDialog({
       reset({
         titleEn: initialData.titleEn,
         titleAr: initialData.titleAr,
-        titleKu: ((initialData as unknown as Record<string, unknown>).titleKu as string) ?? "",
         subtitleEn: initialData.subtitleEn ?? "",
         subtitleAr: initialData.subtitleAr ?? "",
-        subtitleKu: ((initialData as unknown as Record<string, unknown>).subtitleKu as string) ?? "",
         primaryButtonTextEn: initialData.primaryButtonTextEn ?? "",
         primaryButtonTextAr: initialData.primaryButtonTextAr ?? "",
-        primaryButtonTextKu: ((initialData as unknown as Record<string, unknown>).primaryButtonTextKu as string) ?? "",
         primaryButtonUrl: initialData.primaryButtonUrl ?? "",
         secondaryButtonTextEn: initialData.secondaryButtonTextEn ?? "",
         secondaryButtonTextAr: initialData.secondaryButtonTextAr ?? "",
-        secondaryButtonTextKu: ((initialData as unknown as Record<string, unknown>).secondaryButtonTextKu as string) ?? "",
         secondaryButtonUrl: initialData.secondaryButtonUrl ?? "",
         backgroundImage: initialData.backgroundImage,
         overlayOpacity: initialData.overlayOpacity ?? 40,
@@ -127,17 +115,13 @@ export function HeroSlideDialog({
       reset({
         titleEn: "",
         titleAr: "",
-        titleKu: "",
         subtitleEn: "",
         subtitleAr: "",
-        subtitleKu: "",
         primaryButtonTextEn: "",
         primaryButtonTextAr: "",
-        primaryButtonTextKu: "",
         primaryButtonUrl: "",
         secondaryButtonTextEn: "",
         secondaryButtonTextAr: "",
-        secondaryButtonTextKu: "",
         secondaryButtonUrl: "",
         backgroundImage: null,
         overlayOpacity: 40,
@@ -219,28 +203,6 @@ export function HeroSlideDialog({
                 </div>
               </div>
             }
-            kurdishFields={
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="titleKu">{t("statTitleKu")} *</Label>
-                  <Input id="titleKu" dir="rtl" {...register("titleKu")} placeholder="کوالێتی بەرز لە بەرهەمەکاندا" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="subtitleKu">{t("buttonTextKu")}</Label>
-                  <Textarea id="subtitleKu" rows={2} dir="rtl" {...register("subtitleKu")} />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border p-3 rounded-lg bg-muted/20">
-                  <div>
-                    <Label className="text-xs">دوگمەی سەرەکی (کوردی)</Label>
-                    <Input dir="rtl" {...register("primaryButtonTextKu")} placeholder="بەرهەمەکانمان" />
-                  </div>
-                  <div>
-                    <Label className="text-xs">دوگمەی لاوەکی (کوردی)</Label>
-                    <Input dir="rtl" {...register("secondaryButtonTextKu")} placeholder="پەیوەندیمان پێوە بکە" />
-                  </div>
-                </div>
-              </div>
-            }
           />
 
           {/* Button URLs */}
@@ -255,40 +217,49 @@ export function HeroSlideDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <Label>{t("overlayOpacity")}</Label>
+              <Label htmlFor="overlayOpacity">{t("overlayOpacity")}</Label>
               <Input
+                id="overlayOpacity"
                 type="number"
+                min={0}
+                max={100}
                 {...register("overlayOpacity", { valueAsNumber: true })}
               />
             </div>
+
             <div className="space-y-1.5">
-              <Label>{tCommon("status")}</Label>
-              <Select value={status} onValueChange={(val: "active" | "draft") => setValue("status", val)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Label htmlFor="sortOrder">{tCommon("sortOrder")}</Label>
+              <Input
+                id="sortOrder"
+                type="number"
+                min={0}
+                {...register("sortOrder", { valueAsNumber: true })}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="status">{tCommon("status")}</Label>
+              <Select value={status} onValueChange={(val) => setValue("status", val as "active" | "draft")}>
+                <SelectTrigger id="status">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">{tCommon("active")}</SelectItem>
+                  <SelectItem value="active">{tCommon("published")}</SelectItem>
                   <SelectItem value="draft">{tCommon("draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label>{tCommon("sortOrder")}</Label>
-              <Input
-                type="number"
-                {...register("sortOrder", { valueAsNumber: true })}
-              />
-            </div>
           </div>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter className="pt-2">
             <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
               {tCommon("cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? tCommon("saveChanges") : t("addHeroSlide")}
+              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {tCommon("save")}
             </Button>
           </DialogFooter>
         </form>

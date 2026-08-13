@@ -4,7 +4,10 @@
 // ==============================================================================
 import type { Tables } from "@core/types/database.types";
 
-export type HeroSlideDTO = Tables<"homepage_hero">;
+export type HomepageSectionDTO = Tables<"homepage_sections">;
+export type HomepageSectionTranslationDTO = Tables<"homepage_section_translations">;
+export type HeroSlideDTO = HomepageSectionDTO & { homepage_section_translations?: HomepageSectionTranslationDTO[] };
+
 export type AboutPreviewDTO = Tables<"homepage_about">;
 export type CompanyStatDTO = Tables<"company_statistics">;
 export type ClientDTO = Tables<"clients">;

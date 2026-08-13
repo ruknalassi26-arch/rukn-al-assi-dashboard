@@ -534,33 +534,83 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["management_team"]["Insert"]>;
         Relationships: [];
       };
-      homepage_hero: {
+      homepage_sections: {
         Row: {
           id: string;
-          title_en: string;
-          title_ar: string;
-          subtitle_en: string | null;
-          subtitle_ar: string | null;
-          primary_button_text_en: string | null;
-          primary_button_text_ar: string | null;
-          primary_button_url: string | null;
-          secondary_button_text_en: string | null;
-          secondary_button_text_ar: string | null;
-          secondary_button_url: string | null;
-          background_image: string | null;
-          overlay_opacity: number;
-          status: "active" | "draft";
+          section_key: string;
+          is_visible: boolean;
           sort_order: number;
-          created_at: string;
+          settings: Json;
+          created_by: string | null;
+          updated_by: string | null;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["homepage_hero"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: {
           id?: string;
-          created_at?: string;
+          section_key: string;
+          is_visible?: boolean;
+          sort_order?: number;
+          settings?: Json;
+          created_by?: string | null;
+          updated_by?: string | null;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["homepage_hero"]["Insert"]>;
-        Relationships: [];
+        Update: Partial<Database["public"]["Tables"]["homepage_sections"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "homepage_sections_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "admin_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "homepage_sections_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "admin_profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      homepage_section_translations: {
+        Row: {
+          section_id: string;
+          language_code: string;
+          title: string | null;
+          subtitle: string | null;
+          body: string | null;
+          image_url: string | null;
+          cta_label: string | null;
+          cta_url: string | null;
+        };
+        Insert: {
+          section_id: string;
+          language_code: string;
+          title?: string | null;
+          subtitle?: string | null;
+          body?: string | null;
+          image_url?: string | null;
+          cta_label?: string | null;
+          cta_url?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["homepage_section_translations"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "homepage_section_translations_language_code_fkey";
+            columns: ["language_code"];
+            isOneToOne: false;
+            referencedRelation: "languages";
+            referencedColumns: ["code"];
+          },
+          {
+            foreignKeyName: "homepage_section_translations_section_id_fkey";
+            columns: ["section_id"];
+            isOneToOne: false;
+            referencedRelation: "homepage_sections";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       homepage_about: {
         Row: {

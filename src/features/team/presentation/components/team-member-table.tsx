@@ -296,7 +296,7 @@ export function TeamMemberTable() {
                         <TableCell>
                           {member.photo ? (
                             <div className="relative h-10 w-10 overflow-hidden rounded-full border bg-muted">
-                              <Image src={member.photo} alt={member.fullNameEn} fill className="object-cover" />
+                              <Image src={member.photo} alt={member.fullNameEn} fill unoptimized className="object-cover" />
                             </div>
                           ) : (
                             <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground font-bold text-xs">

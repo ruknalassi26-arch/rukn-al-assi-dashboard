@@ -308,7 +308,7 @@ export function CertificateTable() {
                         <TableCell>
                           {cert.image ? (
                             <div className="relative h-10 w-10 overflow-hidden rounded-md border bg-muted">
-                              <Image src={cert.image} alt={cert.titleEn} fill className="object-cover" />
+                              <Image src={cert.image} alt={cert.titleEn} fill unoptimized className="object-cover" />
                             </div>
                           ) : (
                             <div className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted text-muted-foreground">
