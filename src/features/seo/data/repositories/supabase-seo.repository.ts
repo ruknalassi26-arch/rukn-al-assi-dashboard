@@ -119,6 +119,40 @@ export class SupabaseSeoRepository implements ISeoRepository {
   }
 
   async getSeoSettingByPageKey(pageKey: SeoPageKey): Promise<SeoSettingEntity | null> {
+    try {
+      const { data, error } = await this.supabase
+        .from("seo_meta")
+        .select("*")
+        .eq("entity_type", pageKey)
+        .is("entity_id", null);
+
+      if (!error && data && data.length > 0) {
+        const rawRows = data as unknown as SeoMetaRowDTO[];
+        const enRow = rawRows.find((r) => r.language_code === "en") || {};
+        const arRow = rawRows.find((r) => r.language_code === "ar") || {};
+        const kuRow = rawRows.find((r) => r.language_code === "ku") || {};
+
+        return new SeoSettingEntity({
+          id: String(enRow.id || `seo-${pageKey}`),
+          pageKey,
+          metaTitleEn: enRow.meta_title || `Rukn Al Assi — ${pageKey}`,
+          metaTitleAr: arRow.meta_title || `ركن العاصي — ${pageKey}`,
+          metaTitleKu: kuRow.meta_title || null,
+          metaDescriptionEn: enRow.meta_description || "",
+          metaDescriptionAr: arRow.meta_description || "",
+          metaDescriptionKu: kuRow.meta_description || null,
+          canonicalUrlEn: enRow.canonical_url || null,
+          canonicalUrlAr: arRow.canonical_url || null,
+          canonicalUrlKu: kuRow.canonical_url || null,
+          ogImageUrl: enRow.og_image_url || arRow.og_image_url || null,
+          schemaJson: (enRow.schema_json as any) || null,
+          isIndexed: true,
+          createdAt: new Date(),
+          updatedAt: new Date(enRow.updated_at || Date.now()),
+        });
+      }
+    } catch {}
+
     const all = await this.getAllSeoSettings();
     return all.find((item) => item.pageKey === pageKey) || null;
   }
@@ -150,7 +184,7 @@ export class SupabaseSeoRepository implements ISeoRepository {
       });
     }
 
-    // 1. Primary path: Save multi-row entries for entity_type + language_code
+    // 1. Primary path: Update or Insert entries for (entity_type = pk, entity_id IS NULL, language_code)
     let primarySuccess = false;
     for (const lang of langRows) {
       const payload: any = {
@@ -165,25 +199,38 @@ export class SupabaseSeoRepository implements ISeoRepository {
       };
 
       try {
-        const { data: existing } = await (this.supabase.from("seo_meta" as any) as any)
+        const { data: existingRows } = await (this.supabase.from("seo_meta" as any) as any)
           .select("id")
           .eq("entity_type", pk)
+          .is("entity_id", null)
           .eq("language_code", lang.language_code)
-          .maybeSingle();
+          .order("id", { ascending: true });
 
-        let err = null;
-        if (existing?.id) {
-          const res = await (this.supabase.from("seo_meta" as any) as any)
+        if (existingRows && existingRows.length > 0) {
+          const canonicalId = existingRows[0].id;
+          const { error: updateErr } = await (this.supabase.from("seo_meta" as any) as any)
             .update(payload)
-            .eq("id", existing.id);
-          err = res.error;
-        } else {
-          const res = await (this.supabase.from("seo_meta" as any) as any)
-            .insert(payload);
-          err = res.error;
-        }
+            .eq("id", canonicalId);
 
-        if (!err) primarySuccess = true;
+          if (!updateErr) {
+            primarySuccess = true;
+
+            // Cleanup extra duplicate rows if previous runs created duplicates
+            if (existingRows.length > 1) {
+              const duplicateIds = existingRows.slice(1).map((r: any) => r.id);
+              await (this.supabase.from("seo_meta" as any) as any)
+                .delete()
+                .in("id", duplicateIds);
+            }
+          }
+        } else {
+          const { error: insertErr } = await (this.supabase.from("seo_meta" as any) as any)
+            .insert(payload);
+
+          if (!insertErr) {
+            primarySuccess = true;
+          }
+        }
       } catch {}
     }
 
