@@ -694,24 +694,34 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["homepage_about"]["Insert"]>;
         Relationships: [];
       };
-      company_statistics: {
+      stats: {
         Row: {
           id: string;
-          title_en: string;
-          title_ar: string;
-          value: string;
           icon: string | null;
+          number_value: string | null;
           sort_order: number;
-          status: "active" | "draft";
+          status: "published" | "draft" | "archived";
+          deleted_at: string | null;
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["company_statistics"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<Database["public"]["Tables"]["stats"]["Row"], "id" | "created_at" | "updated_at" | "deleted_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
+          deleted_at?: string | null;
         };
-        Update: Partial<Database["public"]["Tables"]["company_statistics"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["stats"]["Insert"]>;
+        Relationships: [];
+      };
+      stat_translations: {
+        Row: {
+          stat_id: string;
+          language_code: string;
+          label: string | null;
+        };
+        Insert: Database["public"]["Tables"]["stat_translations"]["Row"];
+        Update: Partial<Database["public"]["Tables"]["stat_translations"]["Insert"]>;
         Relationships: [];
       };
       clients: {

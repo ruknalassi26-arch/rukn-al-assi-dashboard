@@ -12,7 +12,10 @@ export type HomepageHeroSlideTranslationRowDTO = Tables<"homepage_hero_slide_tra
 export type HeroSlideDTO = HomepageHeroSlideRowDTO & { homepage_hero_slide_translations?: HomepageHeroSlideTranslationRowDTO[] };
 
 export type AboutPreviewDTO = HomepageSectionDTO & { homepage_section_translations?: HomepageSectionTranslationDTO[] };
-export type CompanyStatDTO = Tables<"company_statistics">;
+export type StatTranslationDTO = Tables<"stat_translations">;
+export type CompanyStatDTO = Tables<"stats"> & {
+  stat_translations?: StatTranslationDTO[];
+};
 export type ClientDTO = Tables<"clients">;
 export type CertificateDTO = Tables<"certificates">;
 export type ContactCtaDTO = Tables<"homepage_contact_cta">;

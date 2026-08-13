@@ -302,7 +302,7 @@ export function StatsSectionManager() {
                           </Badge>
                         </div>
                         <p className="text-xs text-muted-foreground truncate" dir="rtl">
-                          {stat.titleAr}
+                          {stat.titleAr} {stat.titleKu ? `• ${stat.titleKu}` : ""}
                         </p>
                       </div>
                     </div>

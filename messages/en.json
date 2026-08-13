@@ -6,6 +6,11 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
+    "allStatuses": "All Statuses",
+    "selected": "selected",
+    "setActive": "Set Active",
+    "setDraft": "Set Draft",
+    "deleteSelected": "Delete Selected",
     "error500Title": "Internal Server Error",
     "error500Desc": "Our servers encountered an unhandled issue. Our engineering team has been notified.",
     "errorGlobalTitle": "Critical System Error",
@@ -1458,6 +1463,16 @@
     "buttonUrl": "Button Link URL",
     "highlights": "Key Highlights",
     "addHighlight": "Add Highlight",
-    "status": "Section Visibility Status"
+    "status": "Section Visibility Status",
+    "statsTitle": "Company Statistics",
+    "statsSubtitle": "Manage key metric highlights displayed on the homepage.",
+    "addStat": "Add Metric",
+    "addStatTitle": "Add Company Statistic",
+    "editStat": "Edit Statistic",
+    "searchStats": "Search statistics...",
+    "statValue": "Metric Value",
+    "statIcon": "Metric Icon",
+    "emptyStatsTitle": "No Statistics Found",
+    "emptyStatsDesc": "Add company metrics and highlights to showcase achievements on the homepage."
   }
 }

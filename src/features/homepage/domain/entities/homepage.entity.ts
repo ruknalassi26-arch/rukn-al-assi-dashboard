@@ -163,6 +163,7 @@ export interface CompanyStatProps {
   id: string;
   titleEn: string;
   titleAr: string;
+  titleKu?: string | null;
   value: string;
   icon: string | null;
   sortOrder: number;
@@ -175,6 +176,7 @@ export class CompanyStatEntity {
   public readonly id: string;
   public readonly titleEn: string;
   public readonly titleAr: string;
+  public readonly titleKu?: string | null;
   public readonly value: string;
   public readonly icon: string | null;
   public readonly sortOrder: number;
@@ -186,6 +188,7 @@ export class CompanyStatEntity {
     this.id = props.id;
     this.titleEn = props.titleEn;
     this.titleAr = props.titleAr;
+    this.titleKu = props.titleKu ?? null;
     this.value = props.value;
     this.icon = props.icon;
     this.sortOrder = props.sortOrder;

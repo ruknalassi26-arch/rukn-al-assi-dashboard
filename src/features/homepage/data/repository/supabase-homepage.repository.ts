@@ -730,13 +730,13 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   // ============================================================================
-  // TAB 3: COMPANY STATS (company_statistics)
+  // TAB 3: COMPANY STATS (stats & stat_translations)
   // ============================================================================
   async getCompanyStats(): Promise<CompanyStatEntity[]> {
     try {
-      const { data, error } = await this.supabase
-        .from("company_statistics")
-        .select("*")
+      const { data, error } = await (this.supabase.from("stats" as any) as any)
+        .select("*, stat_translations(*)")
+        .is("deleted_at", null)
         .order("sort_order", { ascending: true });
 
       if (!error && data && data.length > 0) {
@@ -745,75 +745,134 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
     } catch {}
 
     return [
-      new CompanyStatEntity({ id: "stat-1", titleEn: "Projects Delivered", titleAr: "مشروع منجز", value: "250+", icon: "check-circle", sortOrder: 1, status: "active", createdAt: new Date(), updatedAt: new Date() }),
-      new CompanyStatEntity({ id: "stat-2", titleEn: "Happy Clients", titleAr: "عميل سعيد", value: "180+", icon: "users", sortOrder: 2, status: "active", createdAt: new Date(), updatedAt: new Date() }),
+      new CompanyStatEntity({ id: "stat-1", titleEn: "Projects Delivered", titleAr: "مشروع منجز", value: "250+", icon: "Building", sortOrder: 1, status: "active", createdAt: new Date(), updatedAt: new Date() }),
+      new CompanyStatEntity({ id: "stat-2", titleEn: "Happy Clients", titleAr: "عميل سعيد", value: "180+", icon: "Users", sortOrder: 2, status: "active", createdAt: new Date(), updatedAt: new Date() }),
     ];
   }
 
   async createCompanyStat(stat: Omit<CompanyStatEntity, "id" | "createdAt" | "updatedAt">): Promise<CompanyStatEntity> {
-    const payload: InsertTables<"company_statistics"> = {
-      title_en: stat.titleEn,
-      title_ar: stat.titleAr,
-      value: stat.value,
-      icon: stat.icon || null,
+    const dbStatus = stat.status === "active" ? "published" : "draft";
+
+    const statsPayload: InsertTables<"stats"> = {
+      number_value: stat.value,
+      icon: stat.icon || "Building",
       sort_order: stat.sortOrder ?? 0,
-      status: stat.status ?? "active",
+      status: dbStatus as any,
     };
 
-    const { data, error } = await this.supabase
-      .from("company_statistics")
-      .insert(payload)
+    const { data: row, error } = await (this.supabase.from("stats" as any) as any)
+      .insert(statsPayload)
       .select()
       .single();
 
-    if (error || !data) throw new Error(error?.message ?? "Failed to create company statistic");
+    if (error || !row) throw new Error(error?.message ?? "Failed to create statistic");
 
-    await this.logActivity("created", "company_statistics", stat.titleEn);
-    return toCompanyStatEntity(data);
+    const transPayload = [
+      {
+        stat_id: row.id,
+        language_code: "en",
+        label: stat.titleEn,
+      },
+      {
+        stat_id: row.id,
+        language_code: "ar",
+        label: stat.titleAr,
+      },
+      {
+        stat_id: row.id,
+        language_code: "ku",
+        label: stat.titleKu || null,
+      },
+    ];
+
+    await (this.supabase.from("stat_translations" as any) as any).insert(transPayload);
+    await this.logActivity("created", "stats", stat.titleEn);
+
+    const created = await this.getCompanyStats();
+    return created.find((s) => s.id === row.id) || created[0];
   }
 
   async updateCompanyStat(id: string, stat: Partial<CompanyStatEntity>): Promise<CompanyStatEntity> {
-    const payload: UpdateTables<"company_statistics"> = {};
-    if (stat.titleEn !== undefined) payload.title_en = stat.titleEn;
-    if (stat.titleAr !== undefined) payload.title_ar = stat.titleAr;
-    if (stat.value !== undefined) payload.value = stat.value;
-    if (stat.icon !== undefined) payload.icon = stat.icon;
-    if (stat.sortOrder !== undefined) payload.sort_order = stat.sortOrder;
-    if (stat.status !== undefined) payload.status = stat.status;
+    const existingList = await this.getCompanyStats();
+    const existing = existingList.find((s) => s.id === id);
 
-    const { data, error } = await this.supabase
-      .from("company_statistics")
-      .update(payload)
-      .eq("id", id)
-      .select()
-      .single();
+    const updatePayload: UpdateTables<"stats"> = {};
+    if (stat.value !== undefined) updatePayload.number_value = stat.value;
+    if (stat.icon !== undefined) updatePayload.icon = stat.icon;
+    if (stat.sortOrder !== undefined) updatePayload.sort_order = stat.sortOrder;
+    if (stat.status !== undefined) updatePayload.status = (stat.status === "active" ? "published" : "draft") as any;
 
-    if (error || !data) throw new Error(error?.message ?? "Failed to update company statistic");
+    if (Object.keys(updatePayload).length > 0) {
+      const { error } = await (this.supabase.from("stats" as any) as any)
+        .update(updatePayload)
+        .eq("id", id);
+      if (error) throw new Error(error.message);
+    }
 
-    await this.logActivity("updated", "company_statistics", data.title_en);
-    return toCompanyStatEntity(data);
+    const transPayload = [
+      {
+        stat_id: id,
+        language_code: "en",
+        label: stat.titleEn ?? existing?.titleEn ?? "",
+      },
+      {
+        stat_id: id,
+        language_code: "ar",
+        label: stat.titleAr ?? existing?.titleAr ?? "",
+      },
+      {
+        stat_id: id,
+        language_code: "ku",
+        label: stat.titleKu ?? existing?.titleKu ?? null,
+      },
+    ];
+
+    await (this.supabase.from("stat_translations" as any) as any)
+      .upsert(transPayload, { onConflict: "stat_id,language_code" });
+
+    await this.logActivity("updated", "stats", stat.titleEn ?? existing?.titleEn);
+    const updatedList = await this.getCompanyStats();
+    return updatedList.find((s) => s.id === id) || updatedList[0];
   }
 
   async deleteCompanyStat(id: string): Promise<void> {
-    const { error } = await this.supabase.from("company_statistics").delete().eq("id", id);
+    await (this.supabase.from("stat_translations" as any) as any)
+      .delete()
+      .eq("stat_id", id);
+
+    const { error } = await (this.supabase.from("stats" as any) as any)
+      .delete()
+      .eq("id", id);
+
     if (error) throw new Error(error.message);
-    await this.logActivity("deleted", "company_statistics", id);
+    await this.logActivity("deleted", "stats", id);
   }
 
   async reorderCompanyStats(orderedIds: string[]): Promise<void> {
     for (let i = 0; i < orderedIds.length; i++) {
-      await this.supabase.from("company_statistics").update({ sort_order: i + 1 }).eq("id", orderedIds[i]);
+      await (this.supabase.from("stats" as any) as any)
+        .update({ sort_order: i + 1 })
+        .eq("id", orderedIds[i]);
     }
   }
 
   async bulkDeleteCompanyStats(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
-    await this.supabase.from("company_statistics").delete().in("id", ids);
+    await (this.supabase.from("stat_translations" as any) as any)
+      .delete()
+      .in("stat_id", ids);
+
+    await (this.supabase.from("stats" as any) as any)
+      .delete()
+      .in("id", ids);
   }
 
   async bulkUpdateCompanyStatsStatus(ids: string[], status: "active" | "draft"): Promise<void> {
     if (ids.length === 0) return;
-    await this.supabase.from("company_statistics").update({ status }).in("id", ids);
+    const dbStatus = status === "active" ? "published" : "draft";
+    await (this.supabase.from("stats" as any) as any)
+      .update({ status: dbStatus })
+      .in("id", ids);
   }
 
   // ============================================================================

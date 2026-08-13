@@ -91,14 +91,20 @@ export function toAboutPreviewEntity(dto: AboutPreviewDTO): AboutPreviewEntity {
 }
 
 export function toCompanyStatEntity(dto: CompanyStatDTO): CompanyStatEntity {
+  const transList = dto.stat_translations || [];
+  const en = transList.find((t) => t.language_code === "en");
+  const ar = transList.find((t) => t.language_code === "ar");
+  const ku = transList.find((t) => t.language_code === "ku");
+
   return new CompanyStatEntity({
     id: dto.id,
-    titleEn: dto.title_en,
-    titleAr: dto.title_ar,
-    value: dto.value,
+    titleEn: en?.label || "",
+    titleAr: ar?.label || "",
+    titleKu: ku?.label || null,
+    value: dto.number_value || "",
     icon: dto.icon,
     sortOrder: dto.sort_order ?? 0,
-    status: dto.status,
+    status: dto.status === "published" ? "active" : "draft",
     createdAt: new Date(dto.created_at),
     updatedAt: new Date(dto.updated_at),
   });
