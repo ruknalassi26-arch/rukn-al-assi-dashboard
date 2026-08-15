@@ -40,14 +40,15 @@ export async function GET() {
     }
 
     // 3. Merge real auth.users email into profiles
-    const mergedProfiles = (profileData ?? []).map((prof: any) => ({
+    const mergedProfiles = (profileData ?? []).map((prof: Record<string, unknown>) => ({
       ...prof,
-      email: emailMap.get(prof.id) || prof.email || "",
+      email: (typeof prof.id === "string" ? emailMap.get(prof.id) : null) || prof.email || "",
     }));
 
     return NextResponse.json({ users: mergedProfiles });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to fetch users." }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to fetch users.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -163,9 +164,10 @@ export async function POST(request: Request) {
       success: true,
       user: { id: userId, email, fullName, roleId },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error during user creation.";
     return NextResponse.json(
-      { error: error.message || "Internal server error during user creation." },
+      { error: message },
       { status: 500 }
     );
   }

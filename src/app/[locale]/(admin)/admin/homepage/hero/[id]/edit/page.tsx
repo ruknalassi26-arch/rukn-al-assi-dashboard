@@ -9,6 +9,7 @@ import { HeroSlideForm, HeroSlideFormValues } from "@shared/forms/hero-slide-for
 import { useHeroSlideById, useUpdateHeroSlide } from "@shared/hooks/homepage/use-homepage-hooks";
 import { Skeleton, Card, CardHeader, CardContent } from "@shared/ui";
 import { ErrorState } from "@shared/components/error-state";
+import type { HeroSlideEntity } from "@features/homepage/domain/entities/homepage.entity";
 
 interface EditHeroSlidePageProps {
   params: Promise<{ id: string }>;
@@ -41,7 +42,7 @@ export default function EditHeroSlidePage({ params }: EditHeroSlidePageProps) {
         overlayOpacity: values.overlayOpacity,
         status: values.status,
         sortOrder: values.sortOrder,
-      } as any,
+      } as Partial<HeroSlideEntity>,
     });
 
     router.push("/admin/homepage");

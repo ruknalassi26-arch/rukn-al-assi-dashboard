@@ -6,6 +6,7 @@
 import { useRouter } from "next/navigation";
 import { HeroSlideForm, HeroSlideFormValues } from "@shared/forms/hero-slide-form";
 import { useCreateHeroSlide } from "@shared/hooks/homepage/use-homepage-hooks";
+import type { HeroSlideEntity } from "@features/homepage/domain/entities/homepage.entity";
 
 export default function CreateHeroSlidePage() {
   const router = useRouter();
@@ -26,11 +27,15 @@ export default function CreateHeroSlidePage() {
       primaryButtonTextAr: values.primaryButtonTextAr ?? null,
       primaryButtonTextKu: values.primaryButtonTextKu ?? null,
       primaryButtonUrl: values.primaryButtonUrl ?? null,
+      secondaryButtonTextEn: null,
+      secondaryButtonTextAr: null,
+      secondaryButtonTextKu: null,
+      secondaryButtonUrl: null,
       backgroundImage: values.backgroundImage,
       overlayOpacity: values.overlayOpacity,
       status: values.status,
       sortOrder: values.sortOrder,
-    } as any);
+    } as Omit<HeroSlideEntity, "id" | "createdAt" | "updatedAt">);
 
     router.push("/admin/homepage");
   };
