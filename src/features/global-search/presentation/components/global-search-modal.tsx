@@ -91,7 +91,13 @@ export function GlobalSearchModal() {
     return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, []);
 
-  const { data, isLoading, isFetching, isError } = useGlobalSearchQuery(query, moduleFilter, page, 10);
+  const { data, isLoading, isFetching, isError } = useGlobalSearchQuery(
+    query,
+    moduleFilter as SearchModuleType | "all",
+    page,
+    10,
+    isOpen
+  );
 
   const results = data?.items ?? [];
   const total = data?.total ?? 0;

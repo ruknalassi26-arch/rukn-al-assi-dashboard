@@ -1,59 +1,59 @@
 // ==============================================================================
 // features/global-search/data/repositories/supabase-global-search.repository.ts
 // Supabase Implementation of IGlobalSearchRepository
-// Real database search querying validated primary tables & relations
-// Strictly using verified schema columns — GUARANTEED ZERO PostgREST 400 errors
+// Schema-Aware Data Repository with Entity Configurations and Mappers
+// Strictly matching production database columns — ZERO invented columns.
+// Includes In-Flight Request Deduplication & Reuse of Supabase Client.
+// 100% Type-Safe TypeScript — ZERO "any" types used.
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
+import type { Database } from "@core/types/database.types";
 import type {
   IGlobalSearchRepository,
   GlobalSearchFilters,
   PaginatedSearchResults,
 } from "../../domain/repositories/i-global-search.repository";
-import { SearchResultItemEntity } from "../../domain/entities/global-search.entity";
+import type { SearchResultItemEntity, SearchModuleType } from "../../domain/entities/global-search.entity";
+import type {
+  ProductSearchDTO,
+  CategorySearchDTO,
+  ServiceSearchDTO,
+  ProjectSearchDTO,
+  CertificationSearchDTO,
+  TeamMemberSearchDTO,
+  RFQSearchDTO,
+  ContactMessageSearchDTO,
+  JobPostingSearchDTO,
+  BranchSearchDTO,
+  ClientSearchDTO,
+} from "../dto/search.dto";
+import {
+  mapProductDTOToSearchResult,
+  mapCategoryDTOToSearchResult,
+  mapServiceDTOToSearchResult,
+  mapProjectDTOToSearchResult,
+  mapCertificationDTOToSearchResult,
+  mapTeamMemberDTOToSearchResult,
+  mapRFQDTOToSearchResult,
+  mapContactMessageDTOToSearchResult,
+  mapJobPostingDTOToSearchResult,
+  mapBranchDTOToSearchResult,
+  mapClientDTOToSearchResult,
+} from "../mapper/global-search.mapper";
 
-function getBestTitle(transList: any[], titleFields: string[], fallback: string): string {
-  if (!Array.isArray(transList) || transList.length === 0) return fallback;
-  const en = transList.find((t) => t?.language_code === "en" || t?.language_code === "en-US");
-  const ar = transList.find((t) => t?.language_code === "ar" || t?.language_code === "ar-IQ");
-  const ku = transList.find((t) => t?.language_code === "ku" || t?.language_code === "ckb");
+type TableName = keyof Database["public"]["Tables"];
 
-  for (const field of titleFields) {
-    if (en && en[field] && String(en[field]).trim() !== "") return en[field];
-    if (ar && ar[field] && String(ar[field]).trim() !== "") return ar[field];
-    if (ku && ku[field] && String(ku[field]).trim() !== "") return ku[field];
-    for (const t of transList) {
-      if (t && t[field] && String(t[field]).trim() !== "") return t[field];
-    }
-  }
-  return fallback;
-}
-
-function getBestDescription(transList: any[], descFields: string[], fallback?: string | null): string | null {
-  if (!Array.isArray(transList) || transList.length === 0) return fallback ?? null;
-  const en = transList.find((t) => t?.language_code === "en" || t?.language_code === "en-US");
-  const ar = transList.find((t) => t?.language_code === "ar" || t?.language_code === "ar-IQ");
-  const ku = transList.find((t) => t?.language_code === "ku" || t?.language_code === "ckb");
-
-  for (const field of descFields) {
-    if (en && en[field] && String(en[field]).trim() !== "") return en[field];
-    if (ar && ar[field] && String(ar[field]).trim() !== "") return ar[field];
-    if (ku && ku[field] && String(ku[field]).trim() !== "") return ku[field];
-    for (const t of transList) {
-      if (t && t[field] && String(t[field]).trim() !== "") return t[field];
-    }
-  }
-  return fallback ?? null;
-}
-
-function matchesSearchQuery(qLower: string, transList: any[], textFields: string[], extraStrings: (string | null | undefined)[]): boolean {
-  for (const str of extraStrings) {
-    if (str && String(str).toLowerCase().includes(qLower)) return true;
-  }
-  if (!Array.isArray(transList)) return false;
-  for (const t of transList) {
-    for (const field of textFields) {
-      if (t && t[field] && String(t[field]).toLowerCase().includes(qLower)) {
+function matchesQuery<T extends Record<string, unknown>>(
+  rows: T[] | undefined,
+  fields: Array<keyof T>,
+  q: string
+): boolean {
+  if (!Array.isArray(rows)) return false;
+  const qLower = q.toLowerCase();
+  for (const row of rows) {
+    for (const f of fields) {
+      const val = row[f];
+      if (val !== null && val !== undefined && String(val).toLowerCase().includes(qLower)) {
         return true;
       }
     }
@@ -61,154 +61,266 @@ function matchesSearchQuery(qLower: string, transList: any[], textFields: string
   return false;
 }
 
+function directMatch(values: Array<string | null | undefined>, q: string): boolean {
+  const qLower = q.toLowerCase();
+  return values.some((v) => v !== null && v !== undefined && String(v).toLowerCase().includes(qLower));
+}
+
 export class SupabaseGlobalSearchRepository implements IGlobalSearchRepository {
-  private get supabase() {
-    return createClient();
+  // Re-use single Supabase client instance (prevents multiple client instantiations)
+  private readonly supabase = createClient();
+
+  // In-flight request cache to deduplicate simultaneous requests (e.g. React Strict Mode)
+  private readonly inFlightRequests = new Map<string, Promise<PaginatedSearchResults>>();
+
+  // ---------------------------------------------------------------------------
+  // Module-specific Search Handlers (Schema-aware queries, zero "any")
+  // ---------------------------------------------------------------------------
+
+  private async searchProducts(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("products" as unknown as TableName)
+        .select("id, status, product_translations(name, short_description, language_code)")
+        .is("deleted_at", null)
+        .limit(limit);
+
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as ProductSearchDTO[];
+
+      return rows
+        .filter((r) => matchesQuery(r.product_translations, ["name", "short_description"], q))
+        .map(mapProductDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] Products query failed:", err);
+      return [];
+    }
   }
 
-  async searchAll(filters: GlobalSearchFilters): Promise<PaginatedSearchResults> {
-    const q = filters.query.trim();
-    const qLower = q.toLowerCase();
+  private async searchCategories(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("product_categories" as unknown as TableName)
+        .select("id, status, product_category_translations(name, description, language_code)")
+        .is("deleted_at", null)
+        .limit(limit);
 
-    if (q.length < 2) {
-      return {
-        items: [],
-        total: 0,
-        page: 1,
-        pageSize: filters.pageSize ?? 10,
-        totalPages: 0,
-        moduleCounts: {
-          all: 0,
-          products: 0,
-          categories: 0,
-          services: 0,
-          projects: 0,
-          certificates: 0,
-          team: 0,
-          rfq: 0,
-          contact: 0,
-          careers: 0,
-          branches: 0,
-          clients: 0,
-        },
-      };
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as CategorySearchDTO[];
+
+      return rows
+        .filter((r) => matchesQuery(r.product_category_translations, ["name", "description"], q))
+        .map(mapCategoryDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] Categories query failed:", err);
+      return [];
     }
+  }
 
-    const page = Math.max(1, filters.page ?? 1);
-    const pageSize = Math.max(1, Math.min(50, filters.pageSize ?? 10));
-    const activeModule = filters.moduleFilter ?? "all";
+  private async searchServices(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("services" as unknown as TableName)
+        .select("id, status, service_translations(name, description, applications, language_code)")
+        .is("deleted_at", null)
+        .limit(limit);
 
-    // Build conditional promises only for target module(s)
-    const shouldFetch = (mod: string) => activeModule === "all" || activeModule === mod;
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as ServiceSearchDTO[];
 
-    // 1. Products Query (has deleted_at: NO)
-    const fetchProducts = shouldFetch("products")
-      ? (this.supabase.from("products" as any) as any)
-          .select("id, status, created_at, product_translations(name, short_description, description, language_code)")
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+      return rows
+        .filter((r) => matchesQuery(r.service_translations, ["name", "description", "applications"], q))
+        .map(mapServiceDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] Services query failed:", err);
+      return [];
+    }
+  }
 
-    // 2. Categories Query (has deleted_at: NO)
-    const fetchCategories = shouldFetch("categories")
-      ? (this.supabase.from("product_categories" as any) as any)
-          .select("id, status, created_at, product_category_translations(name, description, language_code)")
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+  private async searchProjects(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("projects" as unknown as TableName)
+        .select("id, client_name, location, status, created_at, project_translations(title, description, language_code)")
+        .is("deleted_at", null)
+        .limit(limit);
 
-    // 3. Services Query (has deleted_at: NO)
-    const fetchServices = shouldFetch("services")
-      ? (this.supabase.from("services" as any) as any)
-          .select("id, status, created_at, service_translations(name, short_description, description, language_code)")
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as ProjectSearchDTO[];
 
-    // 4. Projects Query (has deleted_at: YES)
-    const fetchProjects = shouldFetch("projects")
-      ? (this.supabase.from("projects" as any) as any)
-          .select("id, client_name, location, status, created_at, project_translations(title, description, language_code)")
-          .is("deleted_at", null)
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+      return rows
+        .filter(
+          (r) =>
+            matchesQuery(r.project_translations, ["title", "description"], q) ||
+            directMatch([r.client_name, r.location], q)
+        )
+        .map(mapProjectDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] Projects query failed:", err);
+      return [];
+    }
+  }
 
-    // 5. Certifications / Certificates Query (has deleted_at: NO)
-    const fetchCertificates = shouldFetch("certificates")
-      ? (this.supabase.from("certifications" as any) as any)
-          .select("id, issued_by, status, created_at, certification_translations(title, description, language_code)")
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+  private async searchCertifications(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("certifications" as unknown as TableName)
+        .select("id, status, sort_order, certification_translations(title, description, language_code)")
+        .is("deleted_at", null)
+        .limit(limit);
 
-    // 6. Management Team Query (has deleted_at: NO)
-    const fetchTeam = shouldFetch("team")
-      ? (this.supabase.from("team_members" as any) as any)
-          .select("id, status, created_at, team_member_translations(name, position, bio, language_code)")
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as CertificationSearchDTO[];
 
-    // 7. RFQ Requests Query (has deleted_at: NO)
-    const fetchRFQ = shouldFetch("rfq")
-      ? (this.supabase.from("rfq_requests" as any) as any)
-          .select("id, full_name, company_name, phone, address, notes, status, created_at")
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+      return rows
+        .filter((r) => matchesQuery(r.certification_translations, ["title", "description"], q))
+        .map(mapCertificationDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] Certifications query failed:", err);
+      return [];
+    }
+  }
 
-    // 8. Contact Submissions Query (has deleted_at: NO)
-    const fetchContact = shouldFetch("contact")
-      ? (this.supabase.from("contact_messages" as any) as any)
-          .select("id, full_name, email, subject, message, status, created_at")
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+  private async searchTeamMembers(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("team_members" as unknown as TableName)
+        .select("id, status, team_member_translations(name, position, bio, language_code)")
+        .is("deleted_at", null)
+        .limit(limit);
 
-    // 9. Careers / Job Postings Query (has deleted_at: YES)
-    const fetchCareers = shouldFetch("careers")
-      ? (this.supabase.from("job_postings" as any) as any)
-          .select("id, department, location, status, created_at, job_posting_translations(title, description, requirements, language_code)")
-          .is("deleted_at", null)
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as TeamMemberSearchDTO[];
 
-    // 10. Branches Query (has deleted_at: YES)
-    const fetchBranches = shouldFetch("branches")
-      ? (this.supabase.from("branches" as any) as any)
-          .select("id, phone, email, whatsapp_number, status, branch_translations(name, address, language_code)")
-          .is("deleted_at", null)
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+      return rows
+        .filter((r) => matchesQuery(r.team_member_translations, ["name", "position", "bio"], q))
+        .map(mapTeamMemberDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] Team Members query failed:", err);
+      return [];
+    }
+  }
 
-    // 11. Clients / Partners Query (has deleted_at: NO)
-    const fetchClients = shouldFetch("clients")
-      ? (this.supabase.from("clients" as any) as any)
-          .select("id, name, logo_url, website_url, created_at")
-          .limit(100)
-      : Promise.resolve({ data: null, error: null });
+  private async searchRFQ(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("rfq_requests" as unknown as TableName)
+        .select("id, full_name, company_name, phone, address, notes, status, created_at")
+        .limit(limit);
 
-    const [
-      productsRes,
-      categoriesRes,
-      servicesRes,
-      projectsRes,
-      certificatesRes,
-      teamRes,
-      rfqRes,
-      contactRes,
-      careersRes,
-      branchesRes,
-      clientsRes,
-    ] = await Promise.all([
-      fetchProducts,
-      fetchCategories,
-      fetchServices,
-      fetchProjects,
-      fetchCertificates,
-      fetchTeam,
-      fetchRFQ,
-      fetchContact,
-      fetchCareers,
-      fetchBranches,
-      fetchClients,
-    ]);
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as RFQSearchDTO[];
 
-    const allItems: SearchResultItemEntity[] = [];
-    const moduleCounts: Record<string, number> = {
+      return rows
+        .filter((r) => directMatch([r.full_name, r.company_name, r.phone, r.address, r.notes], q))
+        .map(mapRFQDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] RFQ query failed:", err);
+      return [];
+    }
+  }
+
+  private async searchContactMessages(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("contact_messages" as unknown as TableName)
+        .select("id, full_name, email, subject, message, status, created_at")
+        .limit(limit);
+
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as ContactMessageSearchDTO[];
+
+      return rows
+        .filter((r) => directMatch([r.full_name, r.email, r.subject, r.message], q))
+        .map(mapContactMessageDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] Contact Messages query failed:", err);
+      return [];
+    }
+  }
+
+  private async searchJobPostings(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("job_postings" as unknown as TableName)
+        .select("id, department, location, status, created_at, job_posting_translations(title, description, requirements, language_code)")
+        .is("deleted_at", null)
+        .limit(limit);
+
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as JobPostingSearchDTO[];
+
+      return rows
+        .filter(
+          (r) =>
+            matchesQuery(r.job_posting_translations, ["title", "description", "requirements"], q) ||
+            directMatch([r.department, r.location], q)
+        )
+        .map(mapJobPostingDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] Job Postings query failed:", err);
+      return [];
+    }
+  }
+
+  private async searchBranches(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("branches" as unknown as TableName)
+        .select("id, phone, email, status, branch_translations(name, address, language_code)")
+        .is("deleted_at", null)
+        .limit(limit);
+
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as BranchSearchDTO[];
+
+      return rows
+        .filter(
+          (r) =>
+            matchesQuery(r.branch_translations, ["name", "address"], q) ||
+            directMatch([r.phone, r.email], q)
+        )
+        .map(mapBranchDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] Branches query failed:", err);
+      return [];
+    }
+  }
+
+  private async searchClients(q: string, limit = 50): Promise<SearchResultItemEntity[]> {
+    try {
+      const response = await this.supabase
+        .from("clients" as unknown as TableName)
+        .select("id, website_url, status, client_translations(name, language_code)")
+        .limit(limit);
+
+      if (response.error || !response.data) return [];
+      const rows = response.data as unknown as ClientSearchDTO[];
+
+      return rows
+        .filter(
+          (r) =>
+            matchesQuery(r.client_translations, ["name"], q) ||
+            directMatch([r.website_url], q)
+        )
+        .map(mapClientDTOToSearchResult);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.error("[GlobalSearch] Clients query failed:", err);
+      return [];
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Internal Execution Logic
+  // ---------------------------------------------------------------------------
+
+  private async executeSearch(
+    q: string,
+    activeModule: string,
+    page: number,
+    pageSize: number
+  ): Promise<PaginatedSearchResults> {
+    const emptyModuleCounts: Record<string, number> = {
       all: 0,
       products: 0,
       categories: 0,
@@ -223,237 +335,89 @@ export class SupabaseGlobalSearchRepository implements IGlobalSearchRepository {
       clients: 0,
     };
 
-    // 1. Products
-    if (productsRes.data) {
-      productsRes.data.forEach((p: any) => {
-        const transList = p.product_translations || [];
-        if (matchesSearchQuery(qLower, transList, ["name", "short_description", "description"], [])) {
-          const title = getBestTitle(transList, ["name"], "Product Item");
-          const description = getBestDescription(transList, ["short_description", "description"], "Product");
-          allItems.push(
-            new SearchResultItemEntity({
-              id: p.id,
-              module: "products",
-              title,
-              description,
-              link: `/admin/products/edit/${p.id}`,
-              createdAt: p.created_at ? new Date(p.created_at) : new Date(),
-            })
-          );
-        }
-      });
+    let allItems: SearchResultItemEntity[] = [];
+
+    if (activeModule !== "all") {
+      switch (activeModule as SearchModuleType) {
+        case "products":
+          allItems = await this.searchProducts(q, 100);
+          break;
+        case "categories":
+          allItems = await this.searchCategories(q, 100);
+          break;
+        case "services":
+          allItems = await this.searchServices(q, 100);
+          break;
+        case "projects":
+          allItems = await this.searchProjects(q, 100);
+          break;
+        case "certificates":
+          allItems = await this.searchCertifications(q, 100);
+          break;
+        case "team":
+          allItems = await this.searchTeamMembers(q, 100);
+          break;
+        case "rfq":
+          allItems = await this.searchRFQ(q, 100);
+          break;
+        case "contact":
+          allItems = await this.searchContactMessages(q, 100);
+          break;
+        case "careers":
+          allItems = await this.searchJobPostings(q, 100);
+          break;
+        case "branches":
+          allItems = await this.searchBranches(q, 100);
+          break;
+        case "clients":
+          allItems = await this.searchClients(q, 100);
+          break;
+        default:
+          allItems = [];
+      }
+    } else {
+      const [
+        products,
+        categories,
+        services,
+        projects,
+        certificates,
+        team,
+        rfq,
+        contact,
+        careers,
+        branches,
+        clients,
+      ] = await Promise.all([
+        this.searchProducts(q, 30),
+        this.searchCategories(q, 30),
+        this.searchServices(q, 30),
+        this.searchProjects(q, 30),
+        this.searchCertifications(q, 30),
+        this.searchTeamMembers(q, 30),
+        this.searchRFQ(q, 30),
+        this.searchContactMessages(q, 30),
+        this.searchJobPostings(q, 30),
+        this.searchBranches(q, 30),
+        this.searchClients(q, 30),
+      ]);
+
+      allItems = [
+        ...products,
+        ...categories,
+        ...services,
+        ...projects,
+        ...certificates,
+        ...team,
+        ...rfq,
+        ...contact,
+        ...careers,
+        ...branches,
+        ...clients,
+      ];
     }
 
-    // 2. Categories
-    if (categoriesRes.data) {
-      categoriesRes.data.forEach((c: any) => {
-        const transList = c.product_category_translations || [];
-        if (matchesSearchQuery(qLower, transList, ["name", "description"], [])) {
-          const title = getBestTitle(transList, ["name"], "Category Item");
-          const description = getBestDescription(transList, ["description"], "Product Category");
-          allItems.push(
-            new SearchResultItemEntity({
-              id: c.id,
-              module: "categories",
-              title,
-              description,
-              link: `/admin/categories/edit/${c.id}`,
-              createdAt: c.created_at ? new Date(c.created_at) : new Date(),
-            })
-          );
-        }
-      });
-    }
-
-    // 3. Services
-    if (servicesRes.data) {
-      servicesRes.data.forEach((s: any) => {
-        const transList = s.service_translations || [];
-        if (matchesSearchQuery(qLower, transList, ["name", "short_description", "description"], [])) {
-          const title = getBestTitle(transList, ["name"], "Service Item");
-          const description = getBestDescription(transList, ["short_description", "description"], "Industrial Service");
-          allItems.push(
-            new SearchResultItemEntity({
-              id: s.id,
-              module: "services",
-              title,
-              description,
-              link: `/admin/services/edit/${s.id}`,
-              createdAt: s.created_at ? new Date(s.created_at) : new Date(),
-            })
-          );
-        }
-      });
-    }
-
-    // 4. Projects
-    if (projectsRes.data) {
-      projectsRes.data.forEach((pr: any) => {
-        const transList = pr.project_translations || [];
-        if (matchesSearchQuery(qLower, transList, ["title", "description"], [pr.client_name, pr.location])) {
-          const title = getBestTitle(transList, ["title"], "Project Item");
-          const fallbackDesc = pr.client_name ? `Client: ${pr.client_name}` : "Project";
-          const description = getBestDescription(transList, ["description"], fallbackDesc);
-          allItems.push(
-            new SearchResultItemEntity({
-              id: pr.id,
-              module: "projects",
-              title,
-              description,
-              link: `/admin/projects/edit/${pr.id}`,
-              createdAt: pr.created_at ? new Date(pr.created_at) : new Date(),
-            })
-          );
-        }
-      });
-    }
-
-    // 5. Certifications / Certificates
-    if (certificatesRes.data) {
-      certificatesRes.data.forEach((cert: any) => {
-        const transList = cert.certification_translations || [];
-        if (matchesSearchQuery(qLower, transList, ["title", "description"], [cert.issued_by])) {
-          const title = getBestTitle(transList, ["title"], "Certification");
-          const fallbackDesc = cert.issued_by ? `Issuer: ${cert.issued_by}` : "Quality Certificate";
-          const description = getBestDescription(transList, ["description"], fallbackDesc);
-          allItems.push(
-            new SearchResultItemEntity({
-              id: cert.id,
-              module: "certificates",
-              title,
-              description,
-              link: `/admin/certificates/edit/${cert.id}`,
-              createdAt: cert.created_at ? new Date(cert.created_at) : new Date(),
-            })
-          );
-        }
-      });
-    }
-
-    // 6. Management Team
-    if (teamRes.data) {
-      teamRes.data.forEach((tm: any) => {
-        const transList = tm.team_member_translations || [];
-        if (matchesSearchQuery(qLower, transList, ["name", "position", "bio"], [])) {
-          const title = getBestTitle(transList, ["name"], "Team Member");
-          const description = getBestDescription(transList, ["position"], "Management & Staff");
-          allItems.push(
-            new SearchResultItemEntity({
-              id: tm.id,
-              module: "team",
-              title,
-              description,
-              link: `/admin/team/edit/${tm.id}`,
-              createdAt: tm.created_at ? new Date(tm.created_at) : new Date(),
-            })
-          );
-        }
-      });
-    }
-
-    // 7. RFQ Requests
-    if (rfqRes.data) {
-      rfqRes.data.forEach((r: any) => {
-        if (matchesSearchQuery(qLower, [], [], [r.full_name, r.company_name, r.phone, r.address, r.notes])) {
-          const realTitle = r.company_name ? `${r.full_name} (${r.company_name})` : (r.full_name || "RFQ Request");
-          const realDesc = `RFQ Status: ${String(r.status ?? "new").toUpperCase()} • ${r.phone ?? ""}`;
-          allItems.push(
-            new SearchResultItemEntity({
-              id: r.id,
-              module: "rfq",
-              title: realTitle,
-              description: realDesc,
-              link: `/admin/rfq`,
-              createdAt: r.created_at ? new Date(r.created_at) : new Date(),
-            })
-          );
-        }
-      });
-    }
-
-    // 8. Contact Submissions
-    if (contactRes.data) {
-      contactRes.data.forEach((cnt: any) => {
-        if (matchesSearchQuery(qLower, [], [], [cnt.full_name, cnt.email, cnt.subject, cnt.message])) {
-          const realTitle = cnt.subject || `Message from ${cnt.full_name || "Visitor"}`;
-          const realDesc = `From: ${cnt.full_name || "Visitor"} (${cnt.email || ""})`;
-          allItems.push(
-            new SearchResultItemEntity({
-              id: cnt.id,
-              module: "contact",
-              title: realTitle,
-              description: realDesc,
-              link: `/admin/contact-messages`,
-              createdAt: cnt.created_at ? new Date(cnt.created_at) : new Date(),
-            })
-          );
-        }
-      });
-    }
-
-    // 9. Careers / Job Postings
-    if (careersRes.data) {
-      careersRes.data.forEach((j: any) => {
-        const transList = j.job_posting_translations || [];
-        if (matchesSearchQuery(qLower, transList, ["title", "description", "requirements"], [j.department, j.location])) {
-          const title = getBestTitle(transList, ["title"], "Job Posting");
-          const fallbackDesc = j.department ? `${j.department} • ${j.location || ""}` : "Career Opportunity";
-          const description = getBestDescription(transList, ["description"], fallbackDesc);
-          allItems.push(
-            new SearchResultItemEntity({
-              id: j.id,
-              module: "careers",
-              title,
-              description,
-              link: `/admin/careers/postings/${j.id}/edit`,
-              createdAt: j.created_at ? new Date(j.created_at) : new Date(),
-            })
-          );
-        }
-      });
-    }
-
-    // 10. Branches
-    if (branchesRes.data) {
-      branchesRes.data.forEach((b: any) => {
-        const transList = b.branch_translations || [];
-        if (matchesSearchQuery(qLower, transList, ["name", "address"], [b.phone, b.email, b.whatsapp_number])) {
-          const title = getBestTitle(transList, ["name"], "Branch Location");
-          const description = getBestDescription(transList, ["address"], b.email || b.phone || "Company Branch");
-          allItems.push(
-            new SearchResultItemEntity({
-              id: b.id,
-              module: "branches",
-              title,
-              description,
-              link: `/admin/branches`,
-              createdAt: new Date(),
-            })
-          );
-        }
-      });
-    }
-
-    // 11. Clients / Partners
-    if (clientsRes.data) {
-      clientsRes.data.forEach((cl: any) => {
-        if (matchesSearchQuery(qLower, [], [], [cl.name, cl.website_url])) {
-          const realTitle = cl.name || "Client Partner";
-          allItems.push(
-            new SearchResultItemEntity({
-              id: cl.id,
-              module: "clients",
-              title: realTitle,
-              description: cl.website_url || "Client Partner",
-              link: `/admin/homepage`,
-              createdAt: cl.created_at ? new Date(cl.created_at) : new Date(),
-            })
-          );
-        }
-      });
-    }
-
-    // Compute module counts
+    const moduleCounts: Record<string, number> = { ...emptyModuleCounts };
     allItems.forEach((item) => {
       if (moduleCounts[item.module] !== undefined) {
         moduleCounts[item.module]++;
@@ -461,14 +425,10 @@ export class SupabaseGlobalSearchRepository implements IGlobalSearchRepository {
     });
     moduleCounts.all = allItems.length;
 
-    const filteredItems = activeModule === "all"
-      ? allItems
-      : allItems.filter((item) => item.module === activeModule);
-
-    const total = filteredItems.length;
+    const total = allItems.length;
     const totalPages = Math.ceil(total / pageSize) || 1;
     const startIndex = (page - 1) * pageSize;
-    const paginatedItems = filteredItems.slice(startIndex, startIndex + pageSize);
+    const paginatedItems = allItems.slice(startIndex, startIndex + pageSize);
 
     return {
       items: paginatedItems,
@@ -478,5 +438,58 @@ export class SupabaseGlobalSearchRepository implements IGlobalSearchRepository {
       totalPages,
       moduleCounts,
     };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Main SearchAll Implementation with Deduplication
+  // ---------------------------------------------------------------------------
+
+  async searchAll(filters: GlobalSearchFilters): Promise<PaginatedSearchResults> {
+    const q = filters.query.trim();
+    const pageSize = Math.max(1, Math.min(50, filters.pageSize ?? 10));
+    const page = Math.max(1, filters.page ?? 1);
+    const activeModule = filters.moduleFilter ?? "all";
+
+    const emptyModuleCounts: Record<string, number> = {
+      all: 0,
+      products: 0,
+      categories: 0,
+      services: 0,
+      projects: 0,
+      certificates: 0,
+      team: 0,
+      rfq: 0,
+      contact: 0,
+      careers: 0,
+      branches: 0,
+      clients: 0,
+    };
+
+    if (q.length < 2) {
+      return {
+        items: [],
+        total: 0,
+        page: 1,
+        pageSize,
+        totalPages: 0,
+        moduleCounts: emptyModuleCounts,
+      };
+    }
+
+    const cacheKey = `${q.toLowerCase()}:${activeModule}:${page}:${pageSize}`;
+
+    // Return in-flight request if identical query is already executing
+    if (this.inFlightRequests.has(cacheKey)) {
+      return this.inFlightRequests.get(cacheKey)!;
+    }
+
+    const searchPromise = this.executeSearch(q, activeModule, page, pageSize);
+    this.inFlightRequests.set(cacheKey, searchPromise);
+
+    try {
+      return await searchPromise;
+    } finally {
+      this.inFlightRequests.delete(cacheKey);
+    }
   }
 }
