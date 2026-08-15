@@ -39,18 +39,6 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   // TAB 1: HERO SECTION (homepage_hero_slides & homepage_hero_slide_translations)
   // ============================================================================
   async getHeroSlides(): Promise<HeroSlideEntity[]> {
-    // 1. Try querying homepage_hero_slides
-    try {
-      const { data, error } = await (this.supabase.from("homepage_hero_slides" as any) as any)
-        .select("*, homepage_hero_slide_translations(*)")
-        .order("sort_order", { ascending: true });
-
-      if (!error && data && data.length > 0) {
-        return data.map(toHeroSlideEntity);
-      }
-    } catch {}
-
-    // 2. Fallback to homepage_sections (section_key = 'hero') if homepage_hero_slides table does not exist
     try {
       const { data: heroSection } = await (this.supabase.from("homepage_sections" as any) as any)
         .select("*, homepage_section_translations(*)")
@@ -60,7 +48,6 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
       if (heroSection) {
         const settings = heroSection.settings || {};
 
-        // If settings.slides array exists, map all items in settings.slides
         if (Array.isArray(settings.slides) && settings.slides.length > 0) {
           return settings.slides
             .map((s: any) => new HeroSlideEntity({
@@ -91,7 +78,6 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
             .sort((a: HeroSlideEntity, b: HeroSlideEntity) => a.sortOrder - b.sortOrder);
         }
 
-        // Fallback for single section row when settings.slides does not exist yet
         const transList = heroSection.homepage_section_translations || [];
         const en = transList.find((t: any) => t.language_code === "en") || {};
         const ar = transList.find((t: any) => t.language_code === "ar") || {};
@@ -127,7 +113,6 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
       }
     } catch {}
 
-    // 3. Fallback mock if database table is completely empty
     return [
       new HeroSlideEntity({
         id: "hero-1",
@@ -142,7 +127,7 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
         secondaryButtonTextAr: "اتصل بنا",
         secondaryButtonUrl: "/contact",
         backgroundImage: "/hero-banner.jpg",
-        overlayOpacity: 50,
+        overlayOpacity: 40,
         status: "active",
         sortOrder: 1,
         createdAt: new Date(),
@@ -152,85 +137,11 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   async getHeroSlideById(id: string): Promise<HeroSlideEntity | null> {
-    try {
-      const { data, error } = await (this.supabase.from("homepage_hero_slides" as any) as any)
-        .select("*, homepage_hero_slide_translations(*)")
-        .eq("id", id)
-        .maybeSingle();
-
-      if (!error && data) {
-        return toHeroSlideEntity(data);
-      }
-    } catch {}
-
     const slides = await this.getHeroSlides();
     return slides.find((s) => s.id === id) || null;
   }
 
   async createHeroSlide(slide: Omit<HeroSlideEntity, "id" | "createdAt" | "updatedAt">): Promise<HeroSlideEntity> {
-    // 1. Try inserting into homepage_hero_slides
-    try {
-      const slidePayload: InsertTables<"homepage_hero_slides"> = {
-        is_active: slide.status === "active",
-        sort_order: slide.sortOrder ?? 0,
-        overlay_opacity: slide.overlayOpacity ?? 40,
-      };
-
-      const { data: row, error } = await (this.supabase.from("homepage_hero_slides" as any) as any)
-        .insert(slidePayload)
-        .select()
-        .single();
-
-      if (!error && row) {
-        const translationsPayload = [
-          {
-            slide_id: row.id,
-            language_code: "en",
-            title: slide.titleEn,
-            subtitle: slide.subtitleEn || null,
-            body: slide.bodyEn || null,
-            image_url: slide.backgroundImage || null,
-            cta_label: slide.primaryButtonTextEn || null,
-            cta_url: slide.primaryButtonUrl || null,
-          },
-          {
-            slide_id: row.id,
-            language_code: "ar",
-            title: slide.titleAr,
-            subtitle: slide.subtitleAr || null,
-            body: slide.bodyAr || null,
-            image_url: slide.backgroundImage || null,
-            cta_label: slide.primaryButtonTextAr || null,
-            cta_url: slide.primaryButtonUrl || null,
-          },
-          {
-            slide_id: row.id,
-            language_code: "ku",
-            title: slide.titleKu || null,
-            subtitle: slide.subtitleKu || null,
-            body: slide.bodyKu || null,
-            image_url: slide.backgroundImage || null,
-            cta_label: slide.primaryButtonTextKu || null,
-            cta_url: slide.primaryButtonUrl || null,
-          },
-        ];
-
-        await (this.supabase.from("homepage_hero_slide_translations" as any) as any).insert(translationsPayload);
-        await this.logActivity("created", "homepage_hero_slides", slide.titleEn);
-        const slides = await this.getHeroSlides();
-        return slides.find((s) => s.id === row.id) || slides[0];
-      }
-
-      if (error && error.code !== "PGRST205" && error.code !== "42P01" && !error.message?.includes("homepage_hero_slides")) {
-        throw new Error(error.message);
-      }
-    } catch (e: any) {
-      if (e?.message && !e.message.includes("homepage_hero_slides")) {
-        throw e;
-      }
-    }
-
-    // 2. Fallback to homepage_sections (store multiple slides in settings.slides array)
     const existingSlides = await this.getHeroSlides();
     const newSlideId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `hero-slide-${Date.now()}`;
 
@@ -341,66 +252,6 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
 
     const ctaUrl = slide.primaryButtonUrl ?? existing?.primaryButtonUrl ?? null;
 
-    try {
-      const updatePayload: UpdateTables<"homepage_hero_slides"> = {};
-      if (slide.sortOrder !== undefined) updatePayload.sort_order = slide.sortOrder;
-      if (slide.status !== undefined) updatePayload.is_active = slide.status === "active";
-      if (slide.overlayOpacity !== undefined) updatePayload.overlay_opacity = slide.overlayOpacity;
-
-      let slideErr: any = null;
-      if (Object.keys(updatePayload).length > 0) {
-        const { error } = await (this.supabase.from("homepage_hero_slides" as any) as any)
-          .update(updatePayload)
-          .eq("id", id);
-        slideErr = error;
-      }
-
-      if (!slideErr || (slideErr.code !== "PGRST205" && slideErr.code !== "42P01")) {
-        const transPayload: any[] = [
-          {
-            slide_id: id,
-            language_code: "en",
-            title: slide.titleEn ?? existing?.titleEn ?? "",
-            subtitle: slide.subtitleEn ?? existing?.subtitleEn ?? null,
-            body: slide.bodyEn ?? existing?.bodyEn ?? null,
-            image_url: imageUrl,
-            cta_label: slide.primaryButtonTextEn ?? existing?.primaryButtonTextEn ?? null,
-            cta_url: ctaUrl,
-          },
-          {
-            slide_id: id,
-            language_code: "ar",
-            title: slide.titleAr ?? existing?.titleAr ?? "",
-            subtitle: slide.subtitleAr ?? existing?.subtitleAr ?? null,
-            body: slide.bodyAr ?? existing?.bodyAr ?? null,
-            image_url: imageUrl,
-            cta_label: slide.primaryButtonTextAr ?? existing?.primaryButtonTextAr ?? null,
-            cta_url: ctaUrl,
-          },
-          {
-            slide_id: id,
-            language_code: "ku",
-            title: slide.titleKu ?? existing?.titleKu ?? null,
-            subtitle: slide.subtitleKu ?? existing?.subtitleKu ?? null,
-            body: slide.bodyKu ?? existing?.bodyKu ?? null,
-            image_url: imageUrl,
-            cta_label: slide.primaryButtonTextKu ?? existing?.primaryButtonTextKu ?? null,
-            cta_url: ctaUrl,
-          },
-        ];
-
-        const { error: transErr } = await (this.supabase.from("homepage_hero_slide_translations" as any) as any)
-          .upsert(transPayload, { onConflict: "slide_id,language_code" });
-
-        if (!transErr) {
-          await this.logActivity("updated", "homepage_hero_slides", slide.titleEn ?? existing?.titleEn);
-          const updatedList = await this.getHeroSlides();
-          return updatedList.find((s) => s.id === id) || updatedList[0];
-        }
-      }
-    } catch {}
-
-    // Fallback to homepage_sections (update selected slide inside settings.slides array)
     const existingSlidesList = await this.getHeroSlides();
     const updatedSlideObjects = existingSlidesList.map((s) => {
       if (s.id !== id) {
@@ -481,16 +332,6 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   async deleteHeroSlide(id: string): Promise<void> {
-    try {
-      const { error } = await (this.supabase.from("homepage_hero_slides" as any) as any)
-        .delete()
-        .eq("id", id);
-      if (!error) {
-        await this.logActivity("deleted", "homepage_hero_slides", id);
-        return;
-      }
-    } catch {}
-
     const existingSlidesList = await this.getHeroSlides();
     const remainingSlideObjects = existingSlidesList
       .filter((s) => s.id !== id)
@@ -540,20 +381,6 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   async reorderHeroSlides(orderedIds: string[]): Promise<void> {
-    try {
-      let isHeroSlidesTable = true;
-      for (let i = 0; i < orderedIds.length; i++) {
-        const { error } = await (this.supabase.from("homepage_hero_slides" as any) as any)
-          .update({ sort_order: i + 1 })
-          .eq("id", orderedIds[i]);
-        if (error) {
-          isHeroSlidesTable = false;
-          break;
-        }
-      }
-      if (isHeroSlidesTable) return;
-    } catch {}
-
     const existingSlidesList = await this.getHeroSlides();
     const idToOrder = new Map(orderedIds.map((id, index) => [id, index + 1]));
 

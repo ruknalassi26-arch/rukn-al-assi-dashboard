@@ -956,6 +956,7 @@
     "editCertificate": "Edit Certificate",
     "refresh": "Refresh",
     "allStatuses": "All Statuses",
+    "searchPlaceholder": "Search by title or organization...",
     "emptyTitle": "No certificates found",
     "emptyDescription": "Try adjusting search criteria or add your first organization quality certificate.",
     "table": {
@@ -1166,6 +1167,7 @@
     "editCertificate": "Edit Certificate",
     "refresh": "Refresh",
     "allStatuses": "All Statuses",
+    "searchPlaceholder": "Search by title or organization...",
     "emptyTitle": "No certificates found",
     "emptyDescription": "Try adjusting search criteria or add your first organization quality certificate.",
     "table": {
