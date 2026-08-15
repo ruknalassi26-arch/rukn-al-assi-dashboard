@@ -41,6 +41,12 @@ export function useCurrentUser() {
   const query = useQuery({
     queryKey: ["auth", "current-user"],
     queryFn: async () => {
+      const storedUser = useAuthStore.getState().user;
+      if (storedUser) {
+        // Ensure store state is consistent
+        setUser(storedUser);
+        return storedUser;
+      }
       const user = await getCurrentUserUseCase.execute();
       if (user) {
         setUser(user);

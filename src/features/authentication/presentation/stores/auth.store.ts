@@ -1,6 +1,7 @@
 // ==============================================================================
 // features/authentication/presentation/stores/auth.store.ts
 // Zustand Store for Admin Authentication UI State & User Session
+// Persists User Profile & Auth status in localStorage for instant page refresh hydration
 // ==============================================================================
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
@@ -26,7 +27,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
-      isLoading: true,
+      isLoading: false,
       rememberMe: true,
       changePasswordModalOpen: false,
 
@@ -40,7 +41,11 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "rukn_admin_auth_state",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ rememberMe: state.rememberMe }),
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        rememberMe: state.rememberMe,
+      }),
     }
   )
 );

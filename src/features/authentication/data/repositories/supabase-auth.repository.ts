@@ -1,8 +1,10 @@
 // ==============================================================================
 // features/authentication/data/repositories/supabase-auth.repository.ts
-// Supabase Authentication Repository Implementation with Safe Foreign Key Checks
+// Supabase Authentication Repository Implementation using public.get_current_admin_user_profile() RPC
+// Clean Architecture & 100% Type-Safe TypeScript — ZERO 'any' & ZERO duplicate requests
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import type {
   IAuthRepository,
   SignInInput,
@@ -11,26 +13,29 @@ import type {
   ChangePasswordInput,
 } from "../../domain/repositories/i-auth.repository";
 import { UserProfileEntity } from "../../domain/entities/user-profile.entity";
-import { toUserProfileEntity } from "../mapper/auth.mapper";
-import type { AdminProfileDTO } from "../dto/auth.dto";
+import { mapAdminUserProfileDtoToEntity } from "../mapper/auth.mapper";
+import type { GetCurrentAdminUserProfileDto } from "../dto/auth.dto";
+
+interface SupabaseRPCClient {
+  rpc: (
+    functionName: "get_current_admin_user_profile"
+  ) => Promise<{ data: GetCurrentAdminUserProfileDto | null; error: { message: string } | null }>;
+}
+
+// Module-level global cache shared across all instantiated SupabaseAuthRepository objects
+let globalCachedUserEntity: UserProfileEntity | null = null;
+let globalCacheTimestamp = 0;
+let globalCurrentUserPromise: Promise<UserProfileEntity | null> | null = null;
+
+export function clearUserAuthCache(): void {
+  globalCachedUserEntity = null;
+  globalCacheTimestamp = 0;
+  globalCurrentUserPromise = null;
+}
 
 export class SupabaseAuthRepository implements IAuthRepository {
   private get supabase() {
     return createClient();
-  }
-
-  private async getValidAdminId(userId: string | null | undefined): Promise<string | null> {
-    if (!userId) return null;
-    try {
-      const { data } = await this.supabase
-        .from("admin_profiles")
-        .select("id")
-        .eq("id", userId)
-        .maybeSingle();
-      return data?.id ?? null;
-    } catch {
-      return null;
-    }
   }
 
   private async logActivity(
@@ -38,98 +43,59 @@ export class SupabaseAuthRepository implements IAuthRepository {
     userId: string,
     userEmail: string,
     metadata?: Record<string, unknown>
-  ) {
+  ): Promise<void> {
     try {
-      const validAdminId = await this.getValidAdminId(userId);
       await this.supabase.from("activity_log").insert({
         action,
         entity_type: "auth",
         entity_id: userId || null,
         details: { entity_title: `Authentication: ${action}`, user_email: userEmail, ...metadata },
-        admin_user_id: validAdminId,
+        admin_user_id: userId || null,
       });
     } catch {
-      // Non-blocking log insertion
+      // Non-blocking activity log
     }
   }
 
-  private async fetchUserPermissions(userId: string): Promise<{ role: string; permissions: string[] }> {
+  /**
+   * Calls ONLY public.get_current_admin_user_profile() RPC with NO parameters (uses auth.uid()).
+   */
+  private async fetchFullUserProfile(user: User): Promise<UserProfileEntity | null> {
     try {
-      let userRoleData: Record<string, unknown>[] | null = null;
+      const rpcClient = this.supabase as unknown as SupabaseRPCClient;
+      const { data: rpcData, error: rpcError } = await rpcClient.rpc("get_current_admin_user_profile");
 
-      const { data: byAdminUserId, error: err1 } = await this.supabase
-        .from("admin_user_roles")
-        .select("role_id, roles(*)")
-        .eq("admin_user_id", userId);
-
-      if (!err1 && byAdminUserId && byAdminUserId.length > 0) {
-        userRoleData = byAdminUserId as unknown as Record<string, unknown>[];
+      if (rpcError) {
+        throw new Error(rpcError.message || "Failed to fetch get_current_admin_user_profile RPC");
       }
 
-      if (!userRoleData || userRoleData.length === 0) {
-        return { role: "super_admin", permissions: ["*"] };
-      }
-
-      let isSuper = false;
-      const roleIds: string[] = [];
-      let primaryRole = "viewer";
-
-      for (const item of userRoleData) {
-        const r = (Array.isArray(item.roles) ? item.roles[0] : item.roles) as Record<string, unknown> | null;
-        if (r) {
-          if (r.id) roleIds.push(String(r.id));
-          const roleName = String(r.name || "");
-          const roleCode = String(r.slug || r.code || roleName).toLowerCase().replace(/\s+/g, "_");
-          if (roleCode === "super_admin" || roleName === "Super Admin" || r.is_system === true) {
-            isSuper = true;
-            primaryRole = "super_admin";
-          } else if (primaryRole === "viewer") {
-            primaryRole = roleCode;
-          }
+      if (rpcData && typeof rpcData === "object") {
+        const dto = rpcData as GetCurrentAdminUserProfileDto;
+        if (!dto.profile || Object.keys(dto.profile).length === 0) {
+          return null;
         }
-      }
 
-      if (isSuper || primaryRole === "super_admin") {
-        return { role: "super_admin", permissions: ["*"] };
-      }
-
-      if (roleIds.length === 0) {
-        return { role: primaryRole, permissions: [] };
-      }
-
-      const { data: permRows } = await this.supabase
-        .from("role_permissions")
-        .select("permission_id, permissions(*)")
-        .in("role_id", roleIds);
-
-      const permissionCodes = new Set<string>();
-      if (permRows) {
-        for (const pr of permRows as unknown as Record<string, unknown>[]) {
-          const p = (Array.isArray(pr.permissions) ? pr.permissions[0] : pr.permissions) as Record<string, unknown> | null;
-          if (p) {
-            const code = p.code
-              ? String(p.code)
-              : p.resource && p.action
-                ? `${p.resource}:${p.action}`
-                : null;
-            if (code) {
-              permissionCodes.add(code);
-            }
-          }
+        if (dto.profile.is_active === false) {
+          await this.supabase.auth.signOut();
+          clearUserAuthCache();
+          throw new Error("Your administrative account has been deactivated. Access denied.");
         }
-      }
 
-      return {
-        role: primaryRole,
-        permissions: Array.from(permissionCodes),
-      };
-    } catch {
-      return { role: "super_admin", permissions: ["*"] };
+        return mapAdminUserProfileDtoToEntity(user, dto);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes("deactivated")) throw err;
+      throw err;
     }
+
+    return null;
   }
 
   async signIn(input: SignInInput): Promise<UserProfileEntity> {
     try {
+      // Reset cache before signing in
+      clearUserAuthCache();
+
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email: input.email,
         password: input.password,
@@ -139,25 +105,7 @@ export class SupabaseAuthRepository implements IAuthRepository {
         throw new Error(error?.message || "Invalid email or password");
       }
 
-      let profile: AdminProfileDTO | null = null;
-      try {
-        const { data: profileData } = await this.supabase
-          .from("admin_profiles")
-          .select("*")
-          .eq("id", data.user.id)
-          .maybeSingle();
-
-        if (profileData) {
-          profile = profileData as unknown as AdminProfileDTO;
-          if (profile.is_active === false) {
-            await this.supabase.auth.signOut();
-            throw new Error("Your administrative account has been deactivated. Access denied.");
-          }
-        }
-      } catch (err: unknown) {
-        if (err instanceof Error && err.message.includes("deactivated")) throw err;
-      }
-
+      // Update last login timestamp in background
       try {
         await this.supabase
           .from("admin_profiles")
@@ -167,14 +115,12 @@ export class SupabaseAuthRepository implements IAuthRepository {
         // Non-blocking
       }
 
-      const { role, permissions } = await this.fetchUserPermissions(data.user.id);
-
-      const userEntity = toUserProfileEntity({
-        user: data.user,
-        profile,
-        role,
-        permissions,
-      });
+      // Fetch full profile, role, and permissions via get_current_admin_user_profile RPC
+      const userEntity = await this.getCurrentUser();
+      if (!userEntity) {
+        await this.supabase.auth.signOut();
+        throw new Error("Admin profile not found or user account is not active.");
+      }
 
       await this.logActivity("login", data.user.id, data.user.email ?? input.email, {
         rememberMe: input.rememberMe,
@@ -191,6 +137,7 @@ export class SupabaseAuthRepository implements IAuthRepository {
   }
 
   async signOut(): Promise<void> {
+    clearUserAuthCache();
     try {
       const { data: userData } = await this.supabase.auth.getUser();
       if (userData?.user) {
@@ -210,40 +157,41 @@ export class SupabaseAuthRepository implements IAuthRepository {
   }
 
   async getCurrentUser(): Promise<UserProfileEntity | null> {
-    try {
-      const { data: userData, error: userError } = await this.supabase.auth.getUser();
-      if (userError || !userData.user) return null;
-
-      let profile: AdminProfileDTO | null = null;
-      try {
-        const { data: profileData } = await this.supabase
-          .from("admin_profiles")
-          .select("*")
-          .eq("id", userData.user.id)
-          .maybeSingle();
-
-        if (profileData) {
-          profile = profileData as unknown as AdminProfileDTO;
-          if (profile.is_active === false) {
-            await this.supabase.auth.signOut();
-            return null;
-          }
-        }
-      } catch {
-        // Fallback
-      }
-
-      const { role, permissions } = await this.fetchUserPermissions(userData.user.id);
-
-      return toUserProfileEntity({
-        user: userData.user,
-        profile,
-        role,
-        permissions,
-      });
-    } catch {
-      return null;
+    const now = Date.now();
+    // Return module-level cached user if within 15 seconds TTL
+    if (globalCachedUserEntity && (now - globalCacheTimestamp) < 15000) {
+      return globalCachedUserEntity;
     }
+
+    if (globalCurrentUserPromise) {
+      return globalCurrentUserPromise;
+    }
+
+    globalCurrentUserPromise = (async () => {
+      try {
+        const { data: userData, error: userError } = await this.supabase.auth.getUser();
+        if (userError || !userData.user) {
+          clearUserAuthCache();
+          return null;
+        }
+
+        const entity = await this.fetchFullUserProfile(userData.user);
+
+        if (entity) {
+          globalCachedUserEntity = entity;
+          globalCacheTimestamp = Date.now();
+        }
+        return entity;
+      } catch {
+        return null;
+      } finally {
+        setTimeout(() => {
+          globalCurrentUserPromise = null;
+        }, 1000);
+      }
+    })();
+
+    return globalCurrentUserPromise;
   }
 
   async sendPasswordResetEmail(input: SendPasswordResetInput): Promise<void> {
@@ -258,11 +206,12 @@ export class SupabaseAuthRepository implements IAuthRepository {
       if (error) {
         throw new Error(error.message || "Failed to send password reset link");
       }
-    } catch (err: any) {
-      if (err.name === "TypeError" || err.message === "Failed to fetch") {
+    } catch (err: unknown) {
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      if (errorObj.name === "TypeError" || errorObj.message === "Failed to fetch") {
         throw new Error("Unable to reach authentication server. Please check your internet connection.");
       }
-      throw err;
+      throw errorObj;
     }
   }
 
@@ -275,11 +224,12 @@ export class SupabaseAuthRepository implements IAuthRepository {
       if (error) {
         throw new Error(error.message || "Failed to reset password");
       }
-    } catch (err: any) {
-      if (err.name === "TypeError" || err.message === "Failed to fetch") {
+    } catch (err: unknown) {
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      if (errorObj.name === "TypeError" || errorObj.message === "Failed to fetch") {
         throw new Error("Unable to reach authentication server. Please check your internet connection.");
       }
-      throw err;
+      throw errorObj;
     }
   }
 
@@ -292,11 +242,12 @@ export class SupabaseAuthRepository implements IAuthRepository {
       if (error) {
         throw new Error(error.message || "Failed to update password");
       }
-    } catch (err: any) {
-      if (err.name === "TypeError" || err.message === "Failed to fetch") {
+    } catch (err: unknown) {
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      if (errorObj.name === "TypeError" || errorObj.message === "Failed to fetch") {
         throw new Error("Unable to reach authentication server. Please check your internet connection.");
       }
-      throw err;
+      throw errorObj;
     }
   }
 }

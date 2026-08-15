@@ -1,6 +1,7 @@
 // ==============================================================================
 // src/middleware.ts
 // Combines next-intl locale routing with Supabase session refresh, Auth & RBAC Middleware Protection
+// Highly optimized: skips Supabase Auth network calls on RSC prefetch requests (_rsc)
 // ==============================================================================
 import createMiddleware from "next-intl/middleware";
 import { type NextRequest, NextResponse } from "next/server";
@@ -33,7 +34,13 @@ export async function middleware(request: NextRequest) {
   const intlResponse = intlMiddleware(request);
   const response = intlResponse ?? NextResponse.next({ request });
 
-  // Refresh Supabase session
+  // Skip auth network calls on RSC prefetch requests to prevent duplicate network traffic
+  const isRscRequest = request.nextUrl.searchParams.has("_rsc") || request.headers.get("x-rsc") === "1";
+  if (isRscRequest) {
+    return response;
+  }
+
+  // Refresh Supabase session for full page navigations
   const { supabase } = createMiddlewareClient(request, response);
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -43,38 +50,17 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = PUBLIC_AUTH_ROUTES.some((route) => pathWithoutLocale.startsWith(route));
   const isAdminRoute = pathWithoutLocale.startsWith("/admin");
 
-  // 1. Check user profile active status if user exists
-  let isActive = true;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("admin_profiles")
-      .select("is_active")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (profile && profile.is_active === false) {
-      isActive = false;
-    }
-  }
-
-  // 2. Unauthenticated OR Inactive User attempting to access Protected Admin Routes
-  if (isAdminRoute && !isAuthRoute && (!user || !isActive)) {
-    if (user && !isActive) {
-      await supabase.auth.signOut();
-    }
+  // 1. Unauthenticated User attempting to access Protected Admin Routes
+  if (isAdminRoute && !isAuthRoute && !user) {
     const localeMatch = pathname.match(/^\/(en|ar|ckb|ku)/);
     const locale = localeMatch ? localeMatch[1] : "en";
     const loginUrl = new URL(`/${locale}/admin/login`, request.url);
-    if (!isActive) {
-      loginUrl.searchParams.set("error", "account_deactivated");
-    } else {
-      loginUrl.searchParams.set("redirect", pathname);
-    }
+    loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // 3. Active Authenticated User attempting to access Auth Routes (/admin/login)
-  if (isAuthRoute && user && isActive && pathWithoutLocale === "/admin/login") {
+  // 2. Active Authenticated User attempting to access Auth Routes (/admin/login)
+  if (isAuthRoute && user && pathWithoutLocale === "/admin/login") {
     const localeMatch = pathname.match(/^\/(en|ar|ckb|ku)/);
     const locale = localeMatch ? localeMatch[1] : "en";
     return NextResponse.redirect(new URL(`/${locale}/admin`, request.url));

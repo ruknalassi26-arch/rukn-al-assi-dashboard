@@ -2,15 +2,28 @@
 // ==============================================================================
 // features/roles-permissions/presentation/hooks/use-permission.ts
 // Reusable React Hook for RBAC Permission Guards with "manage implies view" logic
+// Safe string normalization for user role
 // ==============================================================================
 import { useAuthStore } from "@features/authentication/presentation/stores/auth.store";
 import { ALL_PERMISSIONS, ROLE_PERMISSION_MATRIX } from "../../domain/entities/role-permission.matrix";
 import type { PermissionAction, PermissionCode, ResourceCode } from "../../domain/entities/role.enums";
 
+function normalizeRoleString(roleRaw: unknown): string {
+  if (typeof roleRaw === "string" && roleRaw.trim()) {
+    return roleRaw.trim().toLowerCase().replace(/\s+/g, "_");
+  }
+  if (roleRaw && typeof roleRaw === "object") {
+    const obj = roleRaw as Record<string, unknown>;
+    const val = obj.slug || obj.name;
+    if (val) return String(val).trim().toLowerCase().replace(/\s+/g, "_");
+  }
+  return "viewer";
+}
+
 export function usePermission() {
   const { user, isLoading } = useAuthStore();
 
-  const userRole = (user?.role?.toLowerCase().replace(/\s+/g, "_") ?? "viewer");
+  const userRole = normalizeRoleString(user?.role);
   const userPermissions = (user?.permissions as string[]) ?? [];
 
   const isSuperAdmin =

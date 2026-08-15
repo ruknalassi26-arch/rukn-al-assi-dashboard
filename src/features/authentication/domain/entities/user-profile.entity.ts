@@ -1,6 +1,6 @@
 // ==============================================================================
 // features/authentication/domain/entities/user-profile.entity.ts
-// User Profile Domain Entity Class
+// User Profile Domain Entity Class (Clean Architecture)
 // ==============================================================================
 
 export interface UserProfileProps {
@@ -10,7 +10,9 @@ export interface UserProfileProps {
   phone?: string | null;
   avatarUrl?: string | null;
   role: string;
+  roles?: string[];
   permissions: string[];
+  isSuperAdmin?: boolean;
   isActive: boolean;
   lastLoginAt?: Date | null;
   createdAt: Date;
@@ -23,7 +25,9 @@ export class UserProfileEntity {
   public readonly phone: string | null;
   public readonly avatarUrl: string | null;
   public readonly role: string;
+  public readonly roles: string[];
   public readonly permissions: string[];
+  public readonly isSuperAdmin: boolean;
   public readonly isActive: boolean;
   public readonly lastLoginAt: Date | null;
   public readonly createdAt: Date;
@@ -35,18 +39,16 @@ export class UserProfileEntity {
     this.phone = props.phone ?? null;
     this.avatarUrl = props.avatarUrl ?? null;
     this.role = props.role;
+    this.roles = props.roles ?? [props.role];
     this.permissions = props.permissions;
+    this.isSuperAdmin = props.isSuperAdmin ?? (props.role === "super_admin" || props.role === "Super Admin");
     this.isActive = props.isActive;
     this.lastLoginAt = props.lastLoginAt ?? null;
     this.createdAt = props.createdAt;
   }
 
-  public get isSuperAdmin(): boolean {
-    return this.role === "super_admin" || this.role === "Super Admin";
-  }
-
   public hasPermission(permission: string): boolean {
-    if (this.isSuperAdmin) return true;
+    if (this.isSuperAdmin || this.permissions.includes("*")) return true;
     return this.permissions.includes(permission);
   }
 

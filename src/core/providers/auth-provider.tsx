@@ -2,6 +2,7 @@
 // ==============================================================================
 // core/providers/auth-provider.tsx
 // Supabase Auth session & profile hydration provider
+// Optimized to prevent duplicate profile re-fetching on login and auth state changes
 // ==============================================================================
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, AuthChangeEvent } from "@supabase/supabase-js";
@@ -67,14 +68,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(currentSession);
 
         if (currentSession?.user) {
-          const userEntity = await getCurrentUserUseCase.execute();
-          if (isMounted) {
-            if (userEntity) {
-              setProfileUser(userEntity);
-              setUser(userEntity);
-            } else {
-              setProfileUser(null);
-              clearUser();
+          const storeUser = useAuthStore.getState().user;
+          // If we already have the user in the store (e.g., after login redirect), reuse it
+          if (storeUser && storeUser.id === currentSession.user.id) {
+            if (isMounted) {
+              setProfileUser(storeUser);
+            }
+          } else {
+            // Otherwise fetch fresh user data (will use in‑memory cache if recent)
+            const userEntity = await getCurrentUserUseCase.execute();
+            if (isMounted) {
+              if (userEntity) {
+                setProfileUser(userEntity);
+                setUser(userEntity);
+              } else {
+                setProfileUser(null);
+                clearUser();
+              }
             }
           }
         } else {
@@ -112,6 +122,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
         if (newSession?.user) {
+          const storeUser = useAuthStore.getState().user;
+          if (storeUser && storeUser.id === newSession.user.id) {
+            if (isMounted) {
+              setProfileUser(storeUser);
+              setIsLoading(false);
+              setStoreLoading(false);
+            }
+            return;
+          }
+
           try {
             const userEntity = await getCurrentUserUseCase.execute();
             if (isMounted) {
