@@ -2,6 +2,7 @@
 // ==============================================================================
 // shared/hooks/dashboard/use-dashboard-hooks.ts
 // Centralized React Query hooks for Dashboard feature
+// Uses Singleton SupabaseDashboardRepository instance to deduplicate network requests
 // ==============================================================================
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@core/constants/query-keys";
@@ -15,9 +16,14 @@ import {
   GetRecentActivityUseCase,
 } from "@features/dashboard/domain/usecases";
 
-function getRepo() {
-  const supabase = createClient();
-  return new SupabaseDashboardRepository(supabase);
+let repositoryInstance: SupabaseDashboardRepository | null = null;
+
+function getRepo(): SupabaseDashboardRepository {
+  if (!repositoryInstance) {
+    const supabase = createClient();
+    repositoryInstance = new SupabaseDashboardRepository(supabase);
+  }
+  return repositoryInstance;
 }
 
 export function useDashboardStats() {

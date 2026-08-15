@@ -47,8 +47,8 @@ export function DashboardCharts() {
   const rfqData = chartData?.rfqTrend ?? [];
   const contactData = chartData?.contactTrend ?? [];
 
-  const isRfqEmpty = rfqData.length === 0 || rfqData.every((d) => d.count === 0);
-  const isContactEmpty = contactData.length === 0 || contactData.every((d) => d.count === 0);
+  const isRfqEmpty = rfqData.length === 0;
+  const isContactEmpty = contactData.length === 0;
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
