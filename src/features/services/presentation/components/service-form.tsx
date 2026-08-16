@@ -368,7 +368,7 @@ export function ServiceForm({ initialData }: ServiceFormProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>{tForm("settingsTitle")}</CardTitle>
+              <CardTitle>{tForm("publishingTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Slug */}

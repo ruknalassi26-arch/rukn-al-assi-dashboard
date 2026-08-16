@@ -3,7 +3,9 @@
 // ==============================================================================
 // features/analytics/presentation/components/website-analytics-section.tsx
 // Website Analytics Dashboard UI powered strictly by public.page_views RPC
+// Fully Multilingual — English, Arabic, Kurdish via next-intl
 // ==============================================================================
+import { useTranslations } from "next-intl";
 import { useWebsiteAnalytics, type DateRangePreset } from "../hooks/use-website-analytics";
 import {
   Card,
@@ -50,10 +52,11 @@ import {
   RotateCw,
   TrendingUp,
   FileText,
-  PieChart,
 } from "lucide-react";
 
 export function WebsiteAnalyticsSection() {
+  const t = useTranslations("dashboard.analytics");
+
   const {
     preset,
     setPreset,
@@ -79,11 +82,11 @@ export function WebsiteAnalyticsSection() {
       <Card className="border border-red-200 bg-red-50/50 dark:bg-red-950/20 dark:border-red-900/50">
         <CardContent className="flex flex-col items-center justify-center p-6 text-center">
           <p className="text-sm font-medium text-red-600 dark:text-red-400">
-            Failed to load website traffic analytics.
+            {t("errorTitle")}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">{error.message}</p>
           <Button variant="outline" size="sm" onClick={refetch} className="mt-4 gap-2">
-            <RotateCw className="h-3.5 w-3.5" /> Retry
+            <RotateCw className="h-3.5 w-3.5" /> {t("retry")}
           </Button>
         </CardContent>
       </Card>
@@ -97,10 +100,10 @@ export function WebsiteAnalyticsSection() {
         <div>
           <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
             <Eye className="h-5 w-5 text-primary" />
-            Website Traffic & Visitors
+            {t("title")}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Aggregated page views and estimated unique sessions from website visitors.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -109,10 +112,10 @@ export function WebsiteAnalyticsSection() {
           <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1 text-xs font-medium">
             {(
               [
-                { key: "today", label: "Today" },
-                { key: "7d", label: "7 Days" },
-                { key: "30d", label: "30 Days" },
-                { key: "90d", label: "90 Days" },
+                { key: "today", label: t("today") },
+                { key: "7d", label: t("days7") },
+                { key: "30d", label: t("days30") },
+                { key: "90d", label: t("days90") },
               ] as { key: DateRangePreset; label: string }[]
             ).map((item) => (
               <button
@@ -131,15 +134,15 @@ export function WebsiteAnalyticsSection() {
 
           {/* Language Filter */}
           <Select value={languageCode} onValueChange={setLanguageCode}>
-            <SelectTrigger className="h-8 w-32 text-xs">
+            <SelectTrigger className="h-8 w-36 text-xs">
               <Globe2 className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-              <SelectValue placeholder="Language" />
+              <SelectValue placeholder={t("allLanguages")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Languages</SelectItem>
-              <SelectItem value="en">English (EN)</SelectItem>
-              <SelectItem value="ar">Arabic (AR)</SelectItem>
-              <SelectItem value="ku">Kurdish (KU)</SelectItem>
+              <SelectItem value="all">{t("allLanguages")}</SelectItem>
+              <SelectItem value="en">{t("english")}</SelectItem>
+              <SelectItem value="ar">{t("arabic")}</SelectItem>
+              <SelectItem value="ku">{t("kurdish")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -150,7 +153,7 @@ export function WebsiteAnalyticsSection() {
             onClick={refetch}
             disabled={isLoading}
             className="h-8 px-2.5"
-            title="Refresh analytics data"
+            title={t("refresh")}
           >
             <RotateCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
           </Button>
@@ -163,7 +166,7 @@ export function WebsiteAnalyticsSection() {
         <Card className="border shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Total Page Views</span>
+              <span className="text-xs font-medium text-muted-foreground">{t("totalPageViews")}</span>
               <div className="rounded-full bg-primary/10 p-2 text-primary">
                 <Eye className="h-4 w-4" />
               </div>
@@ -192,7 +195,7 @@ export function WebsiteAnalyticsSection() {
               </div>
             )}
             <p className="text-[11px] text-muted-foreground mt-1">
-              Total page requests in selected range
+              {t("totalPageViewsDesc")}
             </p>
           </CardContent>
         </Card>
@@ -202,7 +205,7 @@ export function WebsiteAnalyticsSection() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-muted-foreground">
-                Estimated Unique Sessions
+                {t("uniqueSessions")}
               </span>
               <div className="rounded-full bg-blue-500/10 p-2 text-blue-500">
                 <Users className="h-4 w-4" />
@@ -218,7 +221,7 @@ export function WebsiteAnalyticsSection() {
               </div>
             )}
             <p className="text-[11px] text-muted-foreground mt-1">
-              Distinct visitor sessions (session_id)
+              {t("uniqueSessionsDesc")}
             </p>
           </CardContent>
         </Card>
@@ -227,7 +230,7 @@ export function WebsiteAnalyticsSection() {
         <Card className="border shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Views Today</span>
+              <span className="text-xs font-medium text-muted-foreground">{t("viewsToday")}</span>
               <div className="rounded-full bg-amber-500/10 p-2 text-amber-500">
                 <Calendar className="h-4 w-4" />
               </div>
@@ -242,7 +245,7 @@ export function WebsiteAnalyticsSection() {
               </div>
             )}
             <p className="text-[11px] text-muted-foreground mt-1">
-              Traffic recorded since midnight (00:00)
+              {t("viewsTodayDesc")}
             </p>
           </CardContent>
         </Card>
@@ -251,7 +254,7 @@ export function WebsiteAnalyticsSection() {
         <Card className="border shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Previous Period</span>
+              <span className="text-xs font-medium text-muted-foreground">{t("previousPeriod")}</span>
               <div className="rounded-full bg-purple-500/10 p-2 text-purple-500">
                 <TrendingUp className="h-4 w-4" />
               </div>
@@ -266,7 +269,7 @@ export function WebsiteAnalyticsSection() {
               </div>
             )}
             <p className="text-[11px] text-muted-foreground mt-1">
-              Page views in prior equivalent period
+              {t("previousPeriodDesc")}
             </p>
           </CardContent>
         </Card>
@@ -278,14 +281,14 @@ export function WebsiteAnalyticsSection() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-emerald-500" />
-              Traffic Trend (Views Over Time)
+              {t("trafficTrend")}
             </CardTitle>
             <Badge variant="outline" className="text-xs font-normal">
-              {preset === "today" ? "24 Hours" : preset}
+              {preset === "today" ? t("today") : preset}
             </Badge>
           </div>
           <CardDescription className="text-xs text-muted-foreground">
-            Daily distribution of page views and unique sessions over the selected timeframe.
+            {t("trafficTrendDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent className="h-72 pt-4">
@@ -295,7 +298,7 @@ export function WebsiteAnalyticsSection() {
             <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-muted/20 rounded-lg border border-dashed">
               <Eye className="h-8 w-8 text-muted-foreground/50 mb-2" />
               <p className="text-xs font-semibold text-muted-foreground">
-                No traffic data recorded for this period yet.
+                {t("noTrafficData")}
               </p>
             </div>
           ) : (
@@ -318,7 +321,7 @@ export function WebsiteAnalyticsSection() {
                 <Area
                   type="monotone"
                   dataKey="pageViews"
-                  name="Page Views"
+                  name={t("pageViews")}
                   stroke="#10b981"
                   strokeWidth={2}
                   fillOpacity={1}
@@ -327,7 +330,7 @@ export function WebsiteAnalyticsSection() {
                 <Area
                   type="monotone"
                   dataKey="uniqueSessions"
-                  name="Unique Sessions"
+                  name={t("uniqueSessions")}
                   stroke="#3b82f6"
                   strokeWidth={2}
                   fillOpacity={1}
@@ -346,10 +349,10 @@ export function WebsiteAnalyticsSection() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <FileText className="h-4 w-4 text-blue-500" />
-              Most Visited Pages
+              {t("mostVisitedPages")}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
-              Top requested URL paths ranked by total view volume.
+              {t("mostVisitedPagesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
@@ -361,15 +364,15 @@ export function WebsiteAnalyticsSection() {
               </div>
             ) : topPages.length === 0 ? (
               <div className="p-6 text-center text-xs text-muted-foreground">
-                No page views recorded in this period.
+                {t("noPagesRecorded")}
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30">
-                    <TableHead className="text-xs">Page Path</TableHead>
-                    <TableHead className="text-xs text-right">Page Views</TableHead>
-                    <TableHead className="text-xs text-right">Unique Sessions</TableHead>
+                    <TableHead className="text-xs">{t("pagePath")}</TableHead>
+                    <TableHead className="text-xs text-right">{t("pageViews")}</TableHead>
+                    <TableHead className="text-xs text-right">{t("uniqueSessions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -397,10 +400,10 @@ export function WebsiteAnalyticsSection() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <Smartphone className="h-4 w-4 text-purple-500" />
-              Devices
+              {t("devices")}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
-              Visitor distribution by device type.
+              {t("devicesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="h-64 pt-2">
@@ -408,7 +411,7 @@ export function WebsiteAnalyticsSection() {
               <Skeleton className="h-full w-full rounded-lg" />
             ) : devices.length === 0 ? (
               <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
-                No device data available.
+                {t("noDeviceData")}
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -417,7 +420,7 @@ export function WebsiteAnalyticsSection() {
                   <XAxis type="number" tick={{ fontSize: 11 }} />
                   <YAxis dataKey="deviceType" type="category" width={80} tick={{ fontSize: 11 }} />
                   <Tooltip />
-                  <Bar dataKey="pageViews" name="Views" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="pageViews" name={t("pageViews")} fill="#8b5cf6" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -432,10 +435,10 @@ export function WebsiteAnalyticsSection() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <Globe2 className="h-4 w-4 text-amber-500" />
-              Traffic by Country
+              {t("trafficByCountry")}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
-              Geographic breakdown of page views.
+              {t("trafficByCountryDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
@@ -446,15 +449,15 @@ export function WebsiteAnalyticsSection() {
               </div>
             ) : countries.length === 0 ? (
               <div className="p-6 text-center text-xs text-muted-foreground">
-                No country location data available.
+                {t("noCountryData")}
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30">
-                    <TableHead className="text-xs">Country</TableHead>
-                    <TableHead className="text-xs text-right">Page Views</TableHead>
-                    <TableHead className="text-xs text-right">Sessions</TableHead>
+                    <TableHead className="text-xs">{t("country")}</TableHead>
+                    <TableHead className="text-xs text-right">{t("pageViews")}</TableHead>
+                    <TableHead className="text-xs text-right">{t("uniqueSessions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -482,10 +485,10 @@ export function WebsiteAnalyticsSection() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <Laptop className="h-4 w-4 text-indigo-500" />
-              Browsers & Referrers
+              {t("browsersAndReferrers")}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
-              Top web browsers and traffic referral sources.
+              {t("browsersAndReferrersDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
@@ -498,9 +501,9 @@ export function WebsiteAnalyticsSection() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30">
-                    <TableHead className="text-xs">Browser / Referrer</TableHead>
-                    <TableHead className="text-xs text-right">Views</TableHead>
-                    <TableHead className="text-xs text-right">Sessions</TableHead>
+                    <TableHead className="text-xs">{t("browserOrReferrer")}</TableHead>
+                    <TableHead className="text-xs text-right">{t("pageViews")}</TableHead>
+                    <TableHead className="text-xs text-right">{t("uniqueSessions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -508,7 +511,7 @@ export function WebsiteAnalyticsSection() {
                     <TableRow key={`b-${idx}`}>
                       <TableCell className="text-xs font-medium flex items-center gap-2">
                         <Badge variant="secondary" className="text-[10px] py-0">
-                          Browser
+                          {t("browser")}
                         </Badge>
                         <span>{row.browser}</span>
                       </TableCell>
@@ -524,7 +527,7 @@ export function WebsiteAnalyticsSection() {
                     <TableRow key={`r-${idx}`}>
                       <TableCell className="text-xs font-medium flex items-center gap-2">
                         <Badge variant="outline" className="text-[10px] py-0">
-                          Referrer
+                          {t("referrer")}
                         </Badge>
                         <span className="font-mono truncate max-w-[180px]">{row.referrer}</span>
                       </TableCell>
@@ -549,21 +552,21 @@ export function WebsiteAnalyticsSection() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <Compass className="h-4 w-4 text-emerald-500" />
-              UTM Campaign Statistics
+              {t("utmCampaignStats")}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
-              Performance by campaign, medium, and traffic source tags.
+              {t("utmCampaignStatsDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30">
-                  <TableHead className="text-xs">UTM Source</TableHead>
-                  <TableHead className="text-xs">UTM Medium</TableHead>
-                  <TableHead className="text-xs">UTM Campaign</TableHead>
-                  <TableHead className="text-xs text-right">Page Views</TableHead>
-                  <TableHead className="text-xs text-right">Sessions</TableHead>
+                  <TableHead className="text-xs">{t("utmSource")}</TableHead>
+                  <TableHead className="text-xs">{t("utmMedium")}</TableHead>
+                  <TableHead className="text-xs">{t("utmCampaign")}</TableHead>
+                  <TableHead className="text-xs text-right">{t("pageViews")}</TableHead>
+                  <TableHead className="text-xs text-right">{t("uniqueSessions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
