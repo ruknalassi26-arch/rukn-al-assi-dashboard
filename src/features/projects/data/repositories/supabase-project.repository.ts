@@ -4,6 +4,7 @@
 // Strictly matching SQL Schema (projects, project_translations, project_images, project_categories, project_category_translations)
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
+import { logSystemActivity } from "@core/services/activity-logger.service";
 import type {
   IProjectRepository,
   ProjectFilters,
@@ -130,18 +131,10 @@ export class SupabaseProjectRepository implements IProjectRepository {
     entityTitle: string | null,
     metadata?: Record<string, unknown>
   ) {
-    try {
-      const { data: userData } = await this.supabase.auth.getUser();
-      await (this.supabase.from("activity_log" as any) as any).insert({
-        action,
-        entity_type: "projects",
-        entity_id: entityId,
-        details: { entity_title: entityTitle, ...metadata },
-        admin_user_id: userData.user?.id ?? null,
-      });
-    } catch {
-      // Non-blocking activity log
-    }
+    await logSystemActivity(this.supabase, action, "project", entityId, {
+      entity_title: entityTitle,
+      ...metadata,
+    });
   }
 
   async getProjects(filters: ProjectFilters = {}): Promise<PaginatedProjects> {

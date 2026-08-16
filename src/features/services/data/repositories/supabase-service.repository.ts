@@ -5,6 +5,7 @@
 // Without querying invalid seo_meta foreign-key relationship
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
+import { logSystemActivity } from "@core/services/activity-logger.service";
 import type {
   IServiceRepository,
   ServiceFilterParams,
@@ -52,18 +53,10 @@ export class SupabaseServiceRepository implements IServiceRepository {
     entityTitle: string | null,
     metadata?: Record<string, unknown>
   ) {
-    try {
-      const { data: userData } = await this.supabase.auth.getUser();
-      await (this.supabase.from("activity_log" as any) as any).insert({
-        action,
-        entity_type: "services",
-        entity_id: entityId,
-        details: { entity_title: entityTitle, ...metadata },
-        admin_user_id: userData.user?.id ?? null,
-      });
-    } catch {
-      // Non-blocking activity log
-    }
+    await logSystemActivity(this.supabase, action, "service", entityId, {
+      entity_title: entityTitle,
+      ...metadata,
+    });
   }
 
   async getServices(params?: ServiceFilterParams): Promise<PaginatedServices> {

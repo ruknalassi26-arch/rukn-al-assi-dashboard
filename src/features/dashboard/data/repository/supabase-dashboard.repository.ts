@@ -54,7 +54,9 @@ interface DashboardSummaryDto {
     admin_user_id: string | null;
     action: string;
     entity_type: string;
-    details: { entity_title?: string; [key: string]: unknown } | null;
+    details: { entity_title?: string; user_email?: string; user_name?: string; user_full_name?: string; [key: string]: unknown } | null;
+    user_full_name?: string | null;
+    user_avatar_url?: string | null;
     created_at: string;
   }>;
 }
@@ -204,19 +206,29 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
     const summary = await this.fetchSummary();
     if (!summary?.recentActivity) return [];
 
-    return summary.recentActivity.slice(0, limit).map(
-      (item) =>
-        new ActivityLogEntity({
-          id: item.id,
-          action: item.action || "updated",
-          entityType: item.entity_type || "system",
-          entityTitle: item.details?.entity_title || "System Activity",
-          userId: item.admin_user_id || null,
-          userEmail: "admin@ruknalassi.com",
-          metadata: (item.details as Record<string, unknown>) || null,
-          createdAt: item.created_at ? new Date(item.created_at) : new Date(),
-        })
-    );
+    return summary.recentActivity.slice(0, limit).map((item) => {
+      const adminUserId = item.admin_user_id || null;
+      const detailsObj = (item.details as Record<string, unknown>) || null;
+
+      // Robust resolution chain matching activity log page
+      const resolvedName =
+        (item.user_full_name && item.user_full_name.trim().length > 0 ? item.user_full_name : null) ||
+        (detailsObj?.user_full_name as string) ||
+        (detailsObj?.user_name as string) ||
+        (detailsObj?.user_email as string) ||
+        (adminUserId ? "Admin User" : "System / Unknown User");
+
+      return new ActivityLogEntity({
+        id: item.id,
+        action: item.action || "updated",
+        entityType: item.entity_type || "system",
+        entityTitle: (detailsObj?.entity_title as string) || "System Activity",
+        userId: adminUserId,
+        userEmail: resolvedName,
+        metadata: detailsObj,
+        createdAt: item.created_at ? new Date(item.created_at) : new Date(),
+      });
+    });
   }
 
   private getFallbackStats(): DashboardStatsEntity {

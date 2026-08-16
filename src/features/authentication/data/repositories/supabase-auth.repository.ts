@@ -5,6 +5,7 @@
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { logSystemActivity } from "@core/services/activity-logger.service";
 import type {
   IAuthRepository,
   SignInInput,
@@ -44,17 +45,11 @@ export class SupabaseAuthRepository implements IAuthRepository {
     userEmail: string,
     metadata?: Record<string, unknown>
   ): Promise<void> {
-    try {
-      await this.supabase.from("activity_log").insert({
-        action,
-        entity_type: "auth",
-        entity_id: userId || null,
-        details: { entity_title: `Authentication: ${action}`, user_email: userEmail, ...metadata },
-        admin_user_id: userId || null,
-      });
-    } catch {
-      // Non-blocking activity log
-    }
+    await logSystemActivity(this.supabase, action, "auth", userId || null, {
+      entity_title: `Authentication: ${action}`,
+      user_email: userEmail,
+      ...metadata,
+    });
   }
 
   /**
