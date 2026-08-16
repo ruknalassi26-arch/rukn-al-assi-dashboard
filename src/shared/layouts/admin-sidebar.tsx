@@ -31,6 +31,8 @@ import {
   FileQuestion,
   Layers,
   UserCheck,
+  Calendar,
+  CalendarCheck,
 } from "lucide-react";
 import { cn } from "@core/utils/cn";
 import { useRTL } from "@core/hooks/use-rtl";
@@ -56,6 +58,8 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin", labelKey: "dashboard", icon: LayoutDashboard, resource: "dashboard" },
+  { href: "/admin/leave", labelKey: "myLeave", icon: Calendar },
+  { href: "/admin/leave-management", labelKey: "leaveManagement", icon: CalendarCheck, resource: "leave" },
   { href: "/admin/about", labelKey: "about", icon: Info, resource: "about" },
   { href: "/admin/products", labelKey: "products", icon: Package, resource: "products" },
   { href: "/admin/categories", labelKey: "categories", icon: Layers, resource: "products" },

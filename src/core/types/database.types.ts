@@ -1196,6 +1196,144 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["languages"]["Insert"]>;
         Relationships: [];
       };
+      employee_profiles: {
+        Row: {
+          id: string;
+          auth_user_id: string | null;
+          full_name: string;
+          email: string;
+          phone: string | null;
+          department: string | null;
+          job_title: string | null;
+          employment_start_date: string | null;
+          is_active: boolean;
+        };
+        Insert: {
+          id?: string;
+          auth_user_id?: string | null;
+          full_name: string;
+          email: string;
+          phone?: string | null;
+          department?: string | null;
+          job_title?: string | null;
+          employment_start_date?: string | null;
+          is_active?: boolean;
+        };
+        Update: Partial<Database["public"]["Tables"]["employee_profiles"]["Insert"]>;
+        Relationships: [];
+      };
+      leave_types: {
+        Row: {
+          id: string;
+          code: string;
+          name: string;
+          description: string | null;
+          unit: string;
+          is_paid: boolean;
+          is_active: boolean;
+          sort_order: number;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          description?: string | null;
+          unit?: string;
+          is_paid?: boolean;
+          is_active?: boolean;
+          sort_order?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["leave_types"]["Insert"]>;
+        Relationships: [];
+      };
+      leave_policies: {
+        Row: {
+          id: string;
+          leave_type_id: string;
+          allocation_amount: number;
+          allocation_unit: string;
+          period_months: number;
+          hours_per_day: number;
+          is_active: boolean;
+        };
+        Insert: {
+          id?: string;
+          leave_type_id: string;
+          allocation_amount: number;
+          allocation_unit?: string;
+          period_months?: number;
+          hours_per_day?: number;
+          is_active?: boolean;
+        };
+        Update: Partial<Database["public"]["Tables"]["leave_policies"]["Insert"]>;
+        Relationships: [];
+      };
+      leave_balances: {
+        Row: {
+          id: string;
+          employee_id: string;
+          leave_type_id: string;
+          period_start: string;
+          period_end: string;
+          allocated_amount: number;
+          used_amount: number;
+          pending_amount: number;
+        };
+        Insert: {
+          id?: string;
+          employee_id: string;
+          leave_type_id: string;
+          period_start: string;
+          period_end: string;
+          allocated_amount?: number;
+          used_amount?: number;
+          pending_amount?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["leave_balances"]["Insert"]>;
+        Relationships: [];
+      };
+      leave_requests: {
+        Row: {
+          id: string;
+          employee_id: string;
+          leave_type_id: string;
+          alternative_employee_id: string | null;
+          request_unit: string;
+          requested_days: number | null;
+          requested_hours: number | null;
+          from_date: string;
+          to_date: string;
+          return_to_work_date: string;
+          note: string | null;
+          status: string;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          reviewer_note: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          employee_id: string;
+          leave_type_id: string;
+          alternative_employee_id?: string | null;
+          request_unit: string;
+          requested_days?: number | null;
+          requested_hours?: number | null;
+          from_date: string;
+          to_date: string;
+          return_to_work_date: string;
+          note?: string | null;
+          status?: string;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          reviewer_note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["leave_requests"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
