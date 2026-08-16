@@ -54,17 +54,21 @@ export function RoleListTable() {
   const t = useTranslations("rolesAdmin");
   const tCommon = useTranslations("common");
   const { hasPermission, isLoading: isAuthLoading } = usePermission();
+  const canViewRoles = hasPermission("roles", "view");
   const canManageRoles = hasPermission("roles", "manage");
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const { data, isLoading: isRolesLoading, isError, refetch } = useAdminRoles({
-    search,
-    page,
-    pageSize,
-  });
+  const { data, isLoading: isRolesLoading, isError, refetch } = useAdminRoles(
+    {
+      search,
+      page,
+      pageSize,
+    },
+    { enabled: !isAuthLoading && canViewRoles }
+  );
 
   const isLoading = isAuthLoading || isRolesLoading;
 
@@ -92,6 +96,18 @@ export function RoleListTable() {
   };
 
   const totalPages = data?.totalPages ?? 1;
+
+  if (!isAuthLoading && !canViewRoles) {
+    return (
+      <div className="rounded-md border bg-card p-12 text-center shadow-sm">
+        <Shield className="mx-auto h-12 w-12 text-amber-500 mb-3" />
+        <h3 className="text-base font-bold text-foreground">Access Restricted</h3>
+        <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+          You do not have permission to view security roles. Please contact an administrator.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

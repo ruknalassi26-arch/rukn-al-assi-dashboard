@@ -2,9 +2,9 @@
 // ==============================================================================
 // features/roles-permissions/presentation/components/permission-checkbox-group.tsx
 // Matrix Selector for RBAC Permissions by Resource (View & Manage Checkboxes)
-// Enforces "Manage implies View" automatically & supports Resource Name selection.
+// Guaranteed interactive clicking, ID & Code matching, and "Manage implies View".
 // ==============================================================================
-import { Checkbox, Label, Badge } from "@shared/ui";
+import { Checkbox, Label } from "@shared/ui";
 import { ALL_RESOURCES, type ResourceCode } from "../../domain/entities/role.enums";
 import type { PermissionEntity } from "../../domain/entities/permission.entity";
 
@@ -19,39 +19,70 @@ export function PermissionCheckboxGroup({
   selectedPermissionIds,
   onChange,
 }: PermissionCheckboxGroupProps) {
-  // Find permission ID by resource & action or code
-  const getPermissionId = (resource: string, action: "view" | "manage"): string | undefined => {
-    const codeStr = `${resource}:${action}`;
-    const found = allPermissions.find(
-      (p) =>
-        p.code === codeStr ||
-        (p.module === resource && p.name?.toLowerCase().includes(action))
-    );
-    return found?.id;
+  // Find permission ID by resource & action or fallback to code
+  const getPermissionId = (resource: string, action: "view" | "manage"): string => {
+    const resLower = resource.toLowerCase().trim();
+    const actLower = action.toLowerCase().trim();
+    const codeStr = `${resLower}:${actLower}`;
+
+    const found = allPermissions.find((p) => {
+      const pCode = (p.code || "").toLowerCase().trim();
+      const pMod = (p.module || "").toLowerCase().trim();
+      const pName = (p.name || "").toLowerCase().trim();
+
+      return (
+        pCode === codeStr ||
+        pCode === `${resource}:${action}` ||
+        (pMod === resLower && (pCode.endsWith(actLower) || pName.includes(actLower))) ||
+        (pName.includes(resLower) && pName.includes(actLower))
+      );
+    });
+
+    return found?.id || codeStr;
+  };
+
+  const isItemChecked = (resource: string, action: "view" | "manage"): boolean => {
+    const permId = getPermissionId(resource, action);
+    const codeStr = `${resource.toLowerCase()}:${action.toLowerCase()}`;
+
+    if (selectedPermissionIds.includes(permId)) return true;
+    if (selectedPermissionIds.includes(codeStr)) return true;
+
+    // Check if any selected item is the matching entity in allPermissions
+    const matchingPerm = allPermissions.find((p) => p.id === permId || p.code === codeStr);
+    if (matchingPerm) {
+      if (selectedPermissionIds.includes(matchingPerm.id)) return true;
+      if (selectedPermissionIds.includes(matchingPerm.code)) return true;
+    }
+
+    return false;
   };
 
   const handleToggleAction = (resource: ResourceCode, action: "view" | "manage", checked: boolean) => {
     const viewId = getPermissionId(resource, "view");
+    const viewCode = `${resource.toLowerCase()}:view`;
     const manageId = getPermissionId(resource, "manage");
+    const manageCode = `${resource.toLowerCase()}:manage`;
 
     let updated = [...selectedPermissionIds];
 
     if (action === "manage") {
       if (checked) {
         // Checking manage automatically checks view
-        if (manageId && !updated.includes(manageId)) updated.push(manageId);
-        if (viewId && !updated.includes(viewId)) updated.push(viewId);
+        if (!updated.includes(manageId)) updated.push(manageId);
+        if (!updated.includes(viewId)) updated.push(viewId);
       } else {
         // Unchecking manage removes manage
-        if (manageId) updated = updated.filter((id) => id !== manageId);
+        updated = updated.filter((id) => id !== manageId && id !== manageCode);
       }
     } else if (action === "view") {
       if (checked) {
-        if (viewId && !updated.includes(viewId)) updated.push(viewId);
+        if (!updated.includes(viewId)) updated.push(viewId);
       } else {
         // Unchecking view automatically unchecks manage too
-        if (viewId) updated = updated.filter((id) => id !== viewId);
-        if (manageId) updated = updated.filter((id) => id !== manageId);
+        updated = updated.filter(
+          (id) => id !== viewId && id !== viewCode && id !== manageId && id !== manageCode
+        );
       }
     }
 
@@ -60,28 +91,31 @@ export function PermissionCheckboxGroup({
 
   const handleSelectAllResource = (resource: ResourceCode, toggleState?: boolean) => {
     const viewId = getPermissionId(resource, "view");
+    const viewCode = `${resource.toLowerCase()}:view`;
     const manageId = getPermissionId(resource, "manage");
-    let updated = [...selectedPermissionIds];
+    const manageCode = `${resource.toLowerCase()}:manage`;
 
-    const hasView = Boolean(viewId && updated.includes(viewId));
-    const hasManage = Boolean(manageId && updated.includes(manageId));
+    const hasView = isItemChecked(resource, "view");
+    const hasManage = isItemChecked(resource, "manage");
     const isAnySelected = hasView || hasManage;
 
     const shouldSelect = toggleState !== undefined ? toggleState : !isAnySelected;
+    let updated = [...selectedPermissionIds];
 
     if (shouldSelect) {
-      if (viewId && !updated.includes(viewId)) updated.push(viewId);
-      if (manageId && !updated.includes(manageId)) updated.push(manageId);
+      if (!updated.includes(viewId)) updated.push(viewId);
+      if (!updated.includes(manageId)) updated.push(manageId);
     } else {
-      if (viewId) updated = updated.filter((id) => id !== viewId);
-      if (manageId) updated = updated.filter((id) => id !== manageId);
+      updated = updated.filter(
+        (id) => id !== viewId && id !== viewCode && id !== manageId && id !== manageCode
+      );
     }
 
     onChange(updated);
   };
 
   return (
-    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 border rounded-lg p-3.5 bg-card shadow-inner">
+    <div className="space-y-3 max-h-[320px] overflow-y-auto pr-2 border rounded-lg p-3.5 bg-card shadow-inner">
       <div className="flex items-center justify-between border-b pb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         <span>Resource Module</span>
         <div className="flex items-center gap-8 pr-4">
@@ -91,11 +125,8 @@ export function PermissionCheckboxGroup({
       </div>
 
       {ALL_RESOURCES.map((resource) => {
-        const viewId = getPermissionId(resource, "view");
-        const manageId = getPermissionId(resource, "manage");
-
-        const hasView = Boolean(viewId && selectedPermissionIds.includes(viewId));
-        const hasManage = Boolean(manageId && selectedPermissionIds.includes(manageId));
+        const hasView = isItemChecked(resource, "view");
+        const hasManage = isItemChecked(resource, "manage");
         const allChecked = hasView && hasManage;
         const someChecked = (hasView || hasManage) && !allChecked;
 

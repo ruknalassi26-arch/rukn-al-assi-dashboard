@@ -95,10 +95,11 @@ export function useToggleUserActiveStatus() {
 
 // --- Role & Permission Hooks ---
 
-export function useAdminRoles(params?: GetRolesFilterParams) {
+export function useAdminRoles(params?: GetRolesFilterParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: USER_ROLE_QUERY_KEYS.roles(params),
     queryFn: () => roleUseCases.getRoles(params),
+    enabled: options?.enabled !== undefined ? options.enabled : true,
   });
 }
 

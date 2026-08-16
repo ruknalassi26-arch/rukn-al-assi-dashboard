@@ -77,12 +77,36 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
   });
 
   useEffect(() => {
+    if (!isOpen) return;
+
     if (role) {
       const activeRole = roleDetail || role;
+      let pIds = (activeRole as { permissionIds?: string[] }).permissionIds ?? role.permissionIds ?? [];
+
+      // If this role has no explicit permission IDs in DB, pre-select from its template
+      if (pIds.length === 0 && allPermissions.length > 0) {
+        const roleSlug = (role.code || role.name.toLowerCase().replace(/\s+/g, "_")).toLowerCase();
+        const template = ROLE_TEMPLATES.find((t) => t.slug === roleSlug);
+        if (template) {
+          const templateIds: string[] = [];
+          allPermissions.forEach((p) => {
+            const pCode = (p.code || `${p.module}:${p.name}`).toLowerCase();
+            if (
+              template.permissions.includes("*" as PermissionCode) ||
+              template.permissions.includes("*:*" as PermissionCode) ||
+              template.permissions.some((tp) => tp.toLowerCase() === pCode)
+            ) {
+              templateIds.push(p.id);
+            }
+          });
+          if (templateIds.length > 0) pIds = templateIds;
+        }
+      }
+
       reset({
         name: activeRole.name,
         description: activeRole.description ?? "",
-        permissionIds: (activeRole as { permissionIds?: string[] }).permissionIds ?? role.permissionIds ?? [],
+        permissionIds: pIds,
       });
     } else {
       reset({
@@ -91,7 +115,7 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
         permissionIds: [],
       });
     }
-  }, [role, roleDetail, reset]);
+  }, [isOpen, role, roleDetail, allPermissions, reset]);
 
   const selectedPermissionIds = watch("permissionIds");
   const isPending = createMutation.isPending || updateMutation.isPending;
@@ -108,8 +132,12 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
     // Map template permission codes to IDs in database
     const templateIds: string[] = [];
     allPermissions.forEach((p) => {
-      const pCode = p.code || `${p.module}:${p.name}`;
-      if (template.permissions.includes(pCode as PermissionCode)) {
+      const pCode = (p.code || `${p.module}:${p.name}`).toLowerCase();
+      if (
+        template.permissions.includes("*" as PermissionCode) ||
+        template.permissions.includes("*:*" as PermissionCode) ||
+        template.permissions.some((tp) => tp.toLowerCase() === pCode)
+      ) {
         templateIds.push(p.id);
       }
     });
