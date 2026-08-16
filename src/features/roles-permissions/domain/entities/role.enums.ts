@@ -21,10 +21,13 @@ export type ResourceCode =
   | "messages"
   | "notifications"
   | "rfq"
+  | "leave"
   | "users"
   | "roles"
   | "settings"
-  | "activity_log";
+  | "activity_log"
+  | "audit"
+  | string;
 
 export type ModuleCode = ResourceCode;
 
@@ -48,6 +51,7 @@ export const ALL_RESOURCES: ResourceCode[] = [
   "messages",
   "notifications",
   "rfq",
+  "leave",
   "users",
   "roles",
   "settings",

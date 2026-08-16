@@ -2,7 +2,7 @@
 // ==============================================================================
 // features/roles-permissions/presentation/components/role-dialog.tsx
 // Dialog for Creating & Editing Security Roles with Predefined Templates & Matrix
-// Compact Layout without Extra Whitespace
+// Handles Full Access visualization for Super Admin and real DB permissions for normal roles
 // ==============================================================================
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -55,10 +55,15 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
   const isEditing = !!role;
   const createMutation = useCreateAdminRole();
   const updateMutation = useUpdateAdminRole();
-  const { data: permissionsData } = useAllPermissions();
+  const { data: permissionsData, isLoading: isLoadingPermissions } = useAllPermissions();
   const { data: roleDetail, isLoading: isLoadingDetail } = useAdminRoleById(role?.id ?? "");
 
   const allPermissions = permissionsData ?? [];
+  const isSuperAdminRole = Boolean(
+    role?.code === "super_admin" ||
+      role?.isSuperAdmin === true ||
+      role?.name?.toLowerCase().includes("super admin")
+  );
 
   const {
     register,
@@ -81,27 +86,7 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
 
     if (role) {
       const activeRole = roleDetail || role;
-      let pIds = (activeRole as { permissionIds?: string[] }).permissionIds ?? role.permissionIds ?? [];
-
-      // If this role has no explicit permission IDs in DB, pre-select from its template
-      if (pIds.length === 0 && allPermissions.length > 0) {
-        const roleSlug = (role.code || role.name.toLowerCase().replace(/\s+/g, "_")).toLowerCase();
-        const template = ROLE_TEMPLATES.find((t) => t.slug === roleSlug);
-        if (template) {
-          const templateIds: string[] = [];
-          allPermissions.forEach((p) => {
-            const pCode = (p.code || `${p.module}:${p.name}`).toLowerCase();
-            if (
-              template.permissions.includes("*" as PermissionCode) ||
-              template.permissions.includes("*:*" as PermissionCode) ||
-              template.permissions.some((tp) => tp.toLowerCase() === pCode)
-            ) {
-              templateIds.push(p.id);
-            }
-          });
-          if (templateIds.length > 0) pIds = templateIds;
-        }
-      }
+      const pIds = (activeRole as { permissionIds?: string[] }).permissionIds ?? role.permissionIds ?? [];
 
       reset({
         name: activeRole.name,
@@ -115,7 +100,7 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
         permissionIds: [],
       });
     }
-  }, [isOpen, role, roleDetail, allPermissions, reset]);
+  }, [isOpen, role, roleDetail, reset]);
 
   const selectedPermissionIds = watch("permissionIds");
   const isPending = createMutation.isPending || updateMutation.isPending;
@@ -129,10 +114,10 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
     }
     setValue("description", template.description);
 
-    // Map template permission codes to IDs in database
+    // Map template permission codes to real IDs in database
     const templateIds: string[] = [];
     allPermissions.forEach((p) => {
-      const pCode = (p.code || `${p.module}:${p.name}`).toLowerCase();
+      const pCode = (p.code || "").toLowerCase();
       if (
         template.permissions.includes("*" as PermissionCode) ||
         template.permissions.includes("*:*" as PermissionCode) ||
@@ -142,7 +127,7 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
       }
     });
 
-    setValue("permissionIds", templateIds);
+    setValue("permissionIds", templateIds, { shouldValidate: true, shouldDirty: true });
   };
 
   const onSubmit = async (values: RoleFormValues) => {
@@ -150,9 +135,9 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
       await updateMutation.mutateAsync({
         id: role.id,
         input: {
-          name: values.name,
+          name: isSuperAdminRole ? role.name : values.name,
           description: values.description,
-          permissionIds: values.permissionIds,
+          permissionIds: isSuperAdminRole ? undefined : values.permissionIds,
         },
       });
     } else {
@@ -203,10 +188,10 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
             )}
 
             <div className="space-y-1.5">
-              <Label htmlFor="name">{t("form.roleName")} *</Label>
+              <Label htmlFor="name">{t("form.roleName")}</Label>
               <Input
                 id="name"
-                disabled={role?.code === "super_admin" || role?.isSystemRole}
+                disabled={isSuperAdminRole || role?.isSystemRole}
                 {...register("name")}
                 placeholder="e.g. Content Editor"
               />
@@ -226,15 +211,30 @@ export function RoleDialog({ isOpen, onClose, role }: RoleDialogProps) {
             <div className="space-y-1.5 pt-2">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-semibold">{t("form.permissionsHeader")}</Label>
-                <Badge variant="secondary" className="text-xs font-mono">
-                  {selectedPermissionIds.length} permissions granted
-                </Badge>
+                {isSuperAdminRole ? (
+                  <Badge variant="default" className="text-xs bg-emerald-600 hover:bg-emerald-600 text-white font-semibold">
+                    Full Access (Super Admin)
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-xs font-mono">
+                    {selectedPermissionIds.length} permissions granted
+                  </Badge>
+                )}
               </div>
-              <PermissionCheckboxGroup
-                allPermissions={allPermissions}
-                selectedPermissionIds={selectedPermissionIds}
-                onChange={(ids) => setValue("permissionIds", ids)}
-              />
+
+              {isLoadingPermissions || (isEditing && isLoadingDetail) ? (
+                <div className="flex items-center justify-center p-8 border rounded-lg bg-card">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <PermissionCheckboxGroup
+                  allPermissions={allPermissions}
+                  selectedPermissionIds={selectedPermissionIds}
+                  onChange={(ids) => setValue("permissionIds", ids, { shouldValidate: true, shouldDirty: true })}
+                  isFullAccess={isSuperAdminRole}
+                  disabled={isSuperAdminRole}
+                />
+              )}
             </div>
           </div>
 

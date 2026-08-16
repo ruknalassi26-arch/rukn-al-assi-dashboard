@@ -78,7 +78,11 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
     },
   });
 
+  const firstRoleId = roles[0]?.id ?? "";
+
   useEffect(() => {
+    if (!isOpen) return;
+
     if (user) {
       reset({
         fullName: user.fullName,
@@ -92,11 +96,11 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
         fullName: "",
         email: "",
         password: "",
-        roleId: roles[0]?.id ?? "",
+        roleId: firstRoleId,
         isActive: true,
       });
     }
-  }, [user, roles, reset]);
+  }, [isOpen, user, firstRoleId, reset]);
 
   const roleIdValue = watch("roleId");
   const isActiveValue = watch("isActive");

@@ -4,6 +4,7 @@
 // ==============================================================================
 
 import { createClient } from "@core/lib/supabase/client";
+import { logSystemActivity } from "@core/services/activity-logger.service";
 import type { Database, UpdateTables } from "@core/types/database.types";
 import type {
   IUserRepository,
@@ -72,18 +73,10 @@ export class SupabaseUserRepository implements IUserRepository {
     entityTitle: string | null,
     metadata?: Record<string, unknown>
   ): Promise<void> {
-    try {
-      const { data: userData } = await this.supabase.auth.getUser();
-      await this.supabase.from("activity_log").insert({
-        action,
-        entity_type: "auth",
-        entity_id: entityId,
-        details: { entity_title: entityTitle, ...metadata },
-        admin_user_id: userData.user?.id ?? null,
-      });
-    } catch {
-      // Non-blocking activity log
-    }
+    await logSystemActivity(this.supabase, action, "users", entityId, {
+      entity_title: entityTitle,
+      ...metadata,
+    });
   }
 
   async getUsers(params?: GetUsersFilterParams): Promise<PaginatedUsers> {

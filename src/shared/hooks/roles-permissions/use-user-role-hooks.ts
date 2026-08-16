@@ -124,6 +124,7 @@ export function useCreateAdminRole() {
     mutationFn: (input: CreateRoleInput) => roleUseCases.createRole(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-roles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-role-detail"] });
       toast.success("Role created successfully!");
     },
     onError: (error: Error) => {
@@ -139,6 +140,7 @@ export function useUpdateAdminRole() {
       roleUseCases.updateRole(id, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-roles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-role-detail"] });
       toast.success("Role updated successfully!");
     },
     onError: (error: Error) => {
@@ -153,6 +155,7 @@ export function useDeleteAdminRole() {
     mutationFn: (id: string) => roleUseCases.deleteRole(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-roles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-role-detail"] });
       toast.success("Role deleted.");
     },
     onError: (error: Error) => {
