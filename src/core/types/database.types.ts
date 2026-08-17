@@ -4,7 +4,13 @@
 // Run: npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/core/types/database.types.ts
 // ==============================================================================
 
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 /**
  * Type stub for the Supabase database schema.
@@ -98,12 +104,17 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["product_categories"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["product_categories"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["product_categories"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["product_categories"]["Insert"]
+        >;
         Relationships: [];
       };
       services: {
@@ -134,7 +145,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["services"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["services"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
@@ -168,7 +182,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["projects"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["projects"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
@@ -245,7 +262,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "services";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       rfq_attachments: {
@@ -267,7 +284,9 @@ export interface Database {
           file_size_kb?: number | null;
           created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["rfq_attachments"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["rfq_attachments"]["Insert"]
+        >;
         Relationships: [
           {
             foreignKeyName: "rfq_attachments_rfq_id_fkey";
@@ -275,7 +294,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "rfq_requests";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       contact_submissions: {
@@ -291,18 +310,39 @@ export interface Database {
           notes?: string | null;
           created_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["contact_submissions"]["Row"], "id" | "created_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["contact_submissions"]["Row"],
+          "id" | "created_at"
+        > & {
           id?: string;
           created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["contact_submissions"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["contact_submissions"]["Insert"]
+        >;
         Relationships: [];
       };
       activity_logs: {
         Row: {
           id: string;
-          action: "created" | "updated" | "deleted" | "login" | "logout" | "settings_updated" | "seo_updated";
-          entity_type: "product" | "service" | "project" | "rfq" | "contact" | "homepage" | "settings" | "seo" | "auth";
+          action:
+            | "created"
+            | "updated"
+            | "deleted"
+            | "login"
+            | "logout"
+            | "settings_updated"
+            | "seo_updated";
+          entity_type:
+            | "product"
+            | "service"
+            | "project"
+            | "rfq"
+            | "contact"
+            | "homepage"
+            | "settings"
+            | "seo"
+            | "auth";
           entity_id: string | null;
           entity_title: string | null;
           user_id: string | null;
@@ -313,17 +353,27 @@ export interface Database {
           metadata: Record<string, unknown> | null;
           created_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["activity_logs"]["Row"], "id" | "created_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["activity_logs"]["Row"],
+          "id" | "created_at"
+        > & {
           id?: string;
           created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["activity_logs"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["activity_logs"]["Insert"]
+        >;
         Relationships: [];
       };
       notifications: {
         Row: {
           id: string;
-          type: "rfq_new" | "contact_new" | "system" | "email_failure" | "admin_login";
+          type:
+            | "rfq_new"
+            | "contact_new"
+            | "system"
+            | "email_failure"
+            | "admin_login";
           title: string;
           message: string;
           link: string | null;
@@ -332,11 +382,16 @@ export interface Database {
           metadata: Record<string, unknown> | null;
           created_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["notifications"]["Row"], "id" | "created_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["notifications"]["Row"],
+          "id" | "created_at"
+        > & {
           id?: string;
           created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["notifications"]["Insert"]
+        >;
         Relationships: [];
       };
       certifications: {
@@ -354,7 +409,9 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["certifications"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["certifications"]["Insert"]
+        >;
         Relationships: [];
       };
       company_profile: {
@@ -368,7 +425,9 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["company_profile"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["company_profile"]["Insert"]
+        >;
         Relationships: [];
       };
       certificates: {
@@ -391,7 +450,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["certificates"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["certificates"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
@@ -416,7 +478,10 @@ export interface Database {
           status: "active" | "draft";
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["company_info"]["Row"], "id" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["company_info"]["Row"],
+          "id" | "updated_at"
+        > & {
           id?: string;
           updated_at?: string;
         };
@@ -434,11 +499,16 @@ export interface Database {
           status: "active" | "draft";
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["company_mission"]["Row"], "id" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["company_mission"]["Row"],
+          "id" | "updated_at"
+        > & {
           id?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["company_mission"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["company_mission"]["Insert"]
+        >;
         Relationships: [];
       };
       company_vision: {
@@ -452,11 +522,16 @@ export interface Database {
           status: "active" | "draft";
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["company_vision"]["Row"], "id" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["company_vision"]["Row"],
+          "id" | "updated_at"
+        > & {
           id?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["company_vision"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["company_vision"]["Insert"]
+        >;
         Relationships: [];
       };
       core_values: {
@@ -472,7 +547,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["core_values"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["core_values"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
@@ -494,12 +572,17 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["company_timeline"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["company_timeline"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["company_timeline"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["company_timeline"]["Insert"]
+        >;
         Relationships: [];
       };
       management_team: {
@@ -526,12 +609,17 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["management_team"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["management_team"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["management_team"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["management_team"]["Insert"]
+        >;
         Relationships: [];
       };
       homepage_sections: {
@@ -555,7 +643,9 @@ export interface Database {
           updated_by?: string | null;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["homepage_sections"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["homepage_sections"]["Insert"]
+        >;
         Relationships: [
           {
             foreignKeyName: "homepage_sections_created_by_fkey";
@@ -570,7 +660,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "admin_profiles";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       homepage_section_translations: {
@@ -594,7 +684,9 @@ export interface Database {
           cta_label?: string | null;
           cta_url?: string | null;
         };
-        Update: Partial<Database["public"]["Tables"]["homepage_section_translations"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["homepage_section_translations"]["Insert"]
+        >;
         Relationships: [
           {
             foreignKeyName: "homepage_section_translations_language_code_fkey";
@@ -609,7 +701,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "homepage_sections";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       homepage_hero_slides: {
@@ -629,7 +721,9 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["homepage_hero_slides"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["homepage_hero_slides"]["Insert"]
+        >;
         Relationships: [];
       };
       homepage_hero_slide_translations: {
@@ -653,7 +747,9 @@ export interface Database {
           cta_label?: string | null;
           cta_url?: string | null;
         };
-        Update: Partial<Database["public"]["Tables"]["homepage_hero_slide_translations"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["homepage_hero_slide_translations"]["Insert"]
+        >;
         Relationships: [
           {
             foreignKeyName: "homepage_hero_slide_translations_language_code_fkey";
@@ -668,7 +764,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "homepage_hero_slides";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       homepage_about: {
@@ -687,11 +783,16 @@ export interface Database {
           status: "active" | "draft";
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["homepage_about"]["Row"], "id" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["homepage_about"]["Row"],
+          "id" | "updated_at"
+        > & {
           id?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["homepage_about"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["homepage_about"]["Insert"]
+        >;
         Relationships: [];
       };
       stats: {
@@ -705,7 +806,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["stats"]["Row"], "id" | "created_at" | "updated_at" | "deleted_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["stats"]["Row"],
+          "id" | "created_at" | "updated_at" | "deleted_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
@@ -721,7 +825,9 @@ export interface Database {
           label: string | null;
         };
         Insert: Database["public"]["Tables"]["stat_translations"]["Row"];
-        Update: Partial<Database["public"]["Tables"]["stat_translations"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["stat_translations"]["Insert"]
+        >;
         Relationships: [];
       };
       clients: {
@@ -791,11 +897,16 @@ export interface Database {
           seo_description_ku?: string | null;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["website_settings"]["Row"], "id" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["website_settings"]["Row"],
+          "id" | "updated_at"
+        > & {
           id?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["website_settings"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["website_settings"]["Insert"]
+        >;
         Relationships: [];
       };
       branches: {
@@ -837,7 +948,9 @@ export interface Database {
           name: string;
           address?: string | null;
         };
-        Update: Partial<Database["public"]["Tables"]["branch_translations"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["branch_translations"]["Insert"]
+        >;
         Relationships: [
           {
             foreignKeyName: "branch_translations_branch_id_fkey";
@@ -845,13 +958,22 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "branches";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       seo_settings: {
         Row: {
           id: string;
-          page_key: "home" | "about" | "products" | "categories" | "services" | "projects" | "certificates" | "contact" | "careers";
+          page_key:
+            | "home"
+            | "about"
+            | "products"
+            | "categories"
+            | "services"
+            | "projects"
+            | "certificates"
+            | "contact"
+            | "careers";
           meta_title_en: string | null;
           meta_title_ar: string | null;
           meta_title_ku?: string | null;
@@ -866,7 +988,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["seo_settings"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["seo_settings"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
@@ -878,7 +1003,8 @@ export interface Database {
         Row: {
           id: string;
           department: string | null;
-          employment_type: "full_time" | "part_time" | "contract" | "internship";
+          employment_type:
+            "full_time" | "part_time" | "contract" | "internship";
           location: string | null;
           closes_at: string | null;
           sort_order: number;
@@ -889,7 +1015,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["job_postings"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["job_postings"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
@@ -907,7 +1036,9 @@ export interface Database {
           requirements: string | null;
         };
         Insert: Database["public"]["Tables"]["job_posting_translations"]["Row"];
-        Update: Partial<Database["public"]["Tables"]["job_posting_translations"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["job_posting_translations"]["Insert"]
+        >;
         Relationships: [];
       };
       career_applications: {
@@ -935,7 +1066,9 @@ export interface Database {
           status?: "new" | "reviewed" | "shortlisted" | "rejected" | "hired";
           created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["career_applications"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["career_applications"]["Insert"]
+        >;
         Relationships: [
           {
             foreignKeyName: "career_applications_job_posting_id_fkey";
@@ -943,7 +1076,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "job_postings";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       admin_profiles: {
@@ -963,7 +1096,9 @@ export interface Database {
           last_login_at?: string | null;
           created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["admin_profiles"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["admin_profiles"]["Insert"]
+        >;
         Relationships: [];
       };
       team_members: {
@@ -1005,7 +1140,9 @@ export interface Database {
           position?: string | null;
           bio?: string | null;
         };
-        Update: Partial<Database["public"]["Tables"]["team_member_translations"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["team_member_translations"]["Insert"]
+        >;
         Relationships: [];
       };
       contact_messages: {
@@ -1031,7 +1168,9 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["contact_messages"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["contact_messages"]["Insert"]
+        >;
         Relationships: [];
       };
       roles: {
@@ -1083,7 +1222,9 @@ export interface Database {
           role_id: string;
           permission_id: string;
         };
-        Update: Partial<Database["public"]["Tables"]["role_permissions"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["role_permissions"]["Insert"]
+        >;
         Relationships: [];
       };
       admin_user_roles: {
@@ -1095,7 +1236,9 @@ export interface Database {
           admin_user_id: string;
           role_id: string;
         };
-        Update: Partial<Database["public"]["Tables"]["admin_user_roles"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["admin_user_roles"]["Insert"]
+        >;
         Relationships: [];
       };
       activity_log: {
@@ -1129,7 +1272,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "admin_profiles";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       settings: {
@@ -1219,119 +1362,9 @@ export interface Database {
           employment_start_date?: string | null;
           is_active?: boolean;
         };
-        Update: Partial<Database["public"]["Tables"]["employee_profiles"]["Insert"]>;
-        Relationships: [];
-      };
-      leave_types: {
-        Row: {
-          id: string;
-          code: string;
-          name: string;
-          description: string | null;
-          unit: string;
-          is_paid: boolean;
-          is_active: boolean;
-          sort_order: number;
-        };
-        Insert: {
-          id?: string;
-          code: string;
-          name: string;
-          description?: string | null;
-          unit?: string;
-          is_paid?: boolean;
-          is_active?: boolean;
-          sort_order?: number;
-        };
-        Update: Partial<Database["public"]["Tables"]["leave_types"]["Insert"]>;
-        Relationships: [];
-      };
-      leave_policies: {
-        Row: {
-          id: string;
-          leave_type_id: string;
-          allocation_amount: number;
-          allocation_unit: string;
-          period_months: number;
-          hours_per_day: number;
-          is_active: boolean;
-        };
-        Insert: {
-          id?: string;
-          leave_type_id: string;
-          allocation_amount: number;
-          allocation_unit?: string;
-          period_months?: number;
-          hours_per_day?: number;
-          is_active?: boolean;
-        };
-        Update: Partial<Database["public"]["Tables"]["leave_policies"]["Insert"]>;
-        Relationships: [];
-      };
-      leave_balances: {
-        Row: {
-          id: string;
-          employee_id: string;
-          leave_type_id: string;
-          period_start: string;
-          period_end: string;
-          allocated_amount: number;
-          used_amount: number;
-          pending_amount: number;
-        };
-        Insert: {
-          id?: string;
-          employee_id: string;
-          leave_type_id: string;
-          period_start: string;
-          period_end: string;
-          allocated_amount?: number;
-          used_amount?: number;
-          pending_amount?: number;
-        };
-        Update: Partial<Database["public"]["Tables"]["leave_balances"]["Insert"]>;
-        Relationships: [];
-      };
-      leave_requests: {
-        Row: {
-          id: string;
-          employee_id: string;
-          leave_type_id: string;
-          alternative_employee_id: string | null;
-          request_unit: string;
-          requested_days: number | null;
-          requested_hours: number | null;
-          from_date: string;
-          to_date: string;
-          return_to_work_date: string;
-          note: string | null;
-          status: string;
-          reviewed_by: string | null;
-          reviewed_at: string | null;
-          reviewer_note: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          employee_id: string;
-          leave_type_id: string;
-          alternative_employee_id?: string | null;
-          request_unit: string;
-          requested_days?: number | null;
-          requested_hours?: number | null;
-          from_date: string;
-          to_date: string;
-          return_to_work_date: string;
-          note?: string | null;
-          status?: string;
-          reviewed_by?: string | null;
-          reviewed_at?: string | null;
-          reviewer_note?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["leave_requests"]["Insert"]>;
+        Update: Partial<
+          Database["public"]["Tables"]["employee_profiles"]["Insert"]
+        >;
         Relationships: [];
       };
     };
@@ -1342,12 +1375,30 @@ export interface Database {
       service_status: "active" | "draft";
       rfq_status: "pending" | "reviewed" | "quoted" | "closed";
       contact_status: "new" | "read" | "replied";
-      activity_action: "created" | "updated" | "deleted" | "login" | "logout" | "settings_updated" | "seo_updated";
-      activity_entity_type: "product" | "service" | "project" | "rfq" | "contact" | "homepage" | "settings" | "seo" | "auth" | "career";
+      activity_action:
+        | "created"
+        | "updated"
+        | "deleted"
+        | "login"
+        | "logout"
+        | "settings_updated"
+        | "seo_updated";
+      activity_entity_type:
+        | "product"
+        | "service"
+        | "project"
+        | "rfq"
+        | "contact"
+        | "homepage"
+        | "settings"
+        | "seo"
+        | "auth"
+        | "career";
       certificate_status: "active" | "draft";
       employment_type: "full_time" | "part_time" | "contract" | "internship";
       job_posting_status: "draft" | "published" | "archived";
-      career_application_status: "new" | "reviewed" | "shortlisted" | "rejected" | "hired";
+      career_application_status:
+        "new" | "reviewed" | "shortlisted" | "rejected" | "hired";
     };
   };
 }

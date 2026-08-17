@@ -54,28 +54,103 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/admin", labelKey: "dashboard", icon: LayoutDashboard, resource: "dashboard" },
-  { href: "/admin/leave", labelKey: "myLeave", icon: Calendar },
+  {
+    href: "/admin",
+    labelKey: "dashboard",
+    icon: LayoutDashboard,
+    resource: "dashboard",
+  },
+
   { href: "/admin/about", labelKey: "about", icon: Info, resource: "about" },
-  { href: "/admin/products", labelKey: "products", icon: Package, resource: "products" },
-  { href: "/admin/categories", labelKey: "categories", icon: Layers, resource: "products" },
-  { href: "/admin/services", labelKey: "services", icon: Wrench, resource: "services" },
-  { href: "/admin/certificates", labelKey: "certificates", icon: Shield, resource: "about" },
+  {
+    href: "/admin/products",
+    labelKey: "products",
+    icon: Package,
+    resource: "products",
+  },
+  {
+    href: "/admin/categories",
+    labelKey: "categories",
+    icon: Layers,
+    resource: "products",
+  },
+  {
+    href: "/admin/services",
+    labelKey: "services",
+    icon: Wrench,
+    resource: "services",
+  },
+  {
+    href: "/admin/certificates",
+    labelKey: "certificates",
+    icon: Shield,
+    resource: "about",
+  },
   { href: "/admin/team", labelKey: "team", icon: Users, resource: "about" },
-  { href: "/admin/projects", labelKey: "projects", icon: FolderKanban, resource: "projects" },
-  { href: "/admin/careers/postings", labelKey: "jobPostings", icon: Briefcase, resource: "careers" },
-  { href: "/admin/careers/applications", labelKey: "careerApplications", icon: FileCheck, resource: "careers" },
+  {
+    href: "/admin/projects",
+    labelKey: "projects",
+    icon: FolderKanban,
+    resource: "projects",
+  },
+  {
+    href: "/admin/careers/postings",
+    labelKey: "jobPostings",
+    icon: Briefcase,
+    resource: "careers",
+  },
+  {
+    href: "/admin/careers/applications",
+    labelKey: "careerApplications",
+    icon: FileCheck,
+    resource: "careers",
+  },
   { href: "/admin/rfq", labelKey: "rfq", icon: FileQuestion, resource: "rfq" },
-  { href: "/admin/branches", labelKey: "branches", icon: Building2, resource: "branches" },
-  { href: "/admin/contact-messages", labelKey: "contactMessages", icon: Mail, resource: "messages" },
-  { href: "/admin/homepage", labelKey: "homepage", icon: Home, resource: "homepage" },
+  {
+    href: "/admin/branches",
+    labelKey: "branches",
+    icon: Building2,
+    resource: "branches",
+  },
+  {
+    href: "/admin/contact-messages",
+    labelKey: "contactMessages",
+    icon: Mail,
+    resource: "messages",
+  },
+  {
+    href: "/admin/homepage",
+    labelKey: "homepage",
+    icon: Home,
+    resource: "homepage",
+  },
   { href: "/admin/seo", labelKey: "seo", icon: Search, resource: "seo" },
-  { href: "/admin/users", labelKey: "users", icon: UserCheck, resource: "users" },
+  {
+    href: "/admin/users",
+    labelKey: "users",
+    icon: UserCheck,
+    resource: "users",
+  },
   { href: "/admin/roles", labelKey: "roles", icon: Shield, resource: "roles" },
   { href: "/admin/profile", labelKey: "profile", icon: User },
-  { href: "/admin/activity-log", labelKey: "activityLog", icon: Activity, resource: "activity_log" },
-  { href: "/admin/notifications", labelKey: "notifications", icon: Bell, resource: "notifications" },
-  { href: "/admin/settings", labelKey: "settings", icon: Settings, resource: "settings" },
+  {
+    href: "/admin/activity-log",
+    labelKey: "activityLog",
+    icon: Activity,
+    resource: "activity_log",
+  },
+  {
+    href: "/admin/notifications",
+    labelKey: "notifications",
+    icon: Bell,
+    resource: "notifications",
+  },
+  {
+    href: "/admin/settings",
+    labelKey: "settings",
+    icon: Settings,
+    resource: "settings",
+  },
 ];
 
 interface AdminSidebarProps {
@@ -91,7 +166,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
   const { hasPermission } = usePermission();
 
   const filteredNavItems = NAV_ITEMS.filter(
-    (item) => !item.resource || hasPermission(item.resource, "view")
+    (item) => !item.resource || hasPermission(item.resource, "view"),
   );
 
   const isActive = (href: string) => {
@@ -103,8 +178,12 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
   };
 
   const CollapseIcon = isRtl
-    ? collapsed ? ChevronLeft : ChevronRight
-    : collapsed ? ChevronRight : ChevronLeft;
+    ? collapsed
+      ? ChevronLeft
+      : ChevronRight
+    : collapsed
+      ? ChevronRight
+      : ChevronLeft;
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -113,7 +192,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
         className={cn(
           "relative flex h-screen flex-col border-e bg-card transition-all duration-300",
           collapsed ? "w-[68px]" : "w-[270px]",
-          className
+          className,
         )}
       >
         {/* Floating Collapse/Expand Button beside sidebar */}
@@ -122,7 +201,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
             "absolute top-5 z-40 flex h-6 w-6 items-center justify-center rounded-full border bg-card text-muted-foreground shadow-md transition-all hover:bg-accent hover:text-foreground hover:scale-110 active:scale-95",
-            isRtl ? "-left-3" : "-right-3"
+            isRtl ? "-left-3" : "-right-3",
           )}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
@@ -133,7 +212,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
         <div
           className={cn(
             "flex h-16 items-center border-b px-4 transition-all",
-            collapsed ? "justify-center" : "justify-start"
+            collapsed ? "justify-center" : "justify-start",
           )}
         >
           <Link
@@ -161,7 +240,11 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
 
         {/* Navigation items */}
         <ScrollArea className="flex-1 px-3.5 py-4">
-          <nav className="flex flex-col gap-1" role="navigation" aria-label="Admin navigation">
+          <nav
+            className="flex flex-col gap-1"
+            role="navigation"
+            aria-label="Admin navigation"
+          >
             {filteredNavItems.map((item) => {
               const active = isActive(item.href);
               const Icon = item.icon;
@@ -176,7 +259,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                     active
                       ? "bg-primary/10 text-primary shadow-sm"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    collapsed && "justify-center px-2"
+                    collapsed && "justify-center px-2",
                   )}
                   aria-current={active ? "page" : undefined}
                 >
@@ -185,7 +268,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                       "h-5 w-5 shrink-0 transition-colors",
                       active
                         ? "text-primary"
-                        : "text-muted-foreground group-hover:text-accent-foreground"
+                        : "text-muted-foreground group-hover:text-accent-foreground",
                     )}
                   />
                   {!collapsed && (
@@ -203,7 +286,10 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                 return (
                   <Tooltip key={item.href}>
                     <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
-                    <TooltipContent side={isRtl ? "left" : "right"} sideOffset={8}>
+                    <TooltipContent
+                      side={isRtl ? "left" : "right"}
+                      sideOffset={8}
+                    >
                       {label}
                     </TooltipContent>
                   </Tooltip>
