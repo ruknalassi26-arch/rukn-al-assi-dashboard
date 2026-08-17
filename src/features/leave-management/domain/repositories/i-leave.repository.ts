@@ -1,16 +1,15 @@
 // ==============================================================================
 // features/leave-management/domain/repositories/i-leave.repository.ts
-// Repository interface for leave requests, types, balances, policies, and dashboard
+// Repository interface for employee vacation & leave operations
 // ==============================================================================
 
 import type {
   LeaveTypeEntity,
   LeavePolicyEntity,
-  LeaveBalanceEntity,
   LeaveRequestEntity,
   LeaveDashboardEntity,
 } from "../entities";
-import type { LeaveReviewDecision, LeaveUnit } from "../enums/leave.enums";
+import type { LeaveUnit } from "../enums/leave.enums";
 
 export interface CreateLeaveRequestInput {
   leaveTypeId: string;
@@ -22,20 +21,6 @@ export interface CreateLeaveRequestInput {
   toDate: string;
   returnToWorkDate: string;
   note?: string | null;
-}
-
-export interface AdminReviewLeaveRequestInput {
-  requestId: string;
-  decision: LeaveReviewDecision;
-  reviewerNote?: string | null;
-}
-
-export interface GetAdminLeaveRequestsFilter {
-  search?: string;
-  status?: string;
-  leaveTypeId?: string;
-  fromDate?: string;
-  toDate?: string;
 }
 
 export interface ILeaveRepository {
@@ -71,21 +56,4 @@ export interface ILeaveRepository {
    * Get all active leave policies
    */
   getActiveLeavePolicies(): Promise<LeavePolicyEntity[]>;
-
-  /**
-   * Admin: Get all leave requests across the company with optional filters
-   * Calls admin_get_leave_requests() RPC
-   */
-  adminGetLeaveRequests(filter?: GetAdminLeaveRequestsFilter): Promise<LeaveRequestEntity[]>;
-
-  /**
-   * Admin: Review (approve / reject) a leave request
-   * Calls admin_review_leave_request() RPC
-   */
-  adminReviewLeaveRequest(input: AdminReviewLeaveRequestInput): Promise<void>;
-
-  /**
-   * Admin: Get all leave balances
-   */
-  adminGetLeaveBalances(): Promise<LeaveBalanceEntity[]>;
 }

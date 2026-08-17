@@ -47,6 +47,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { LeaveStatusBadge } from "../shared/leave-status-badge";
+import { NoEmployeeProfileAlert } from "../shared/no-employee-profile-alert";
 import { useMyLeaveHistory, useCancelMyLeaveRequest } from "../../hooks/use-leave";
 import type { LeaveRequestEntity } from "../../../domain/entities";
 
@@ -159,6 +160,13 @@ export function LeaveHistoryTable() {
               {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
+            </div>
+          ) : error &&
+            (error.message.toLowerCase().includes("employee profile not found") ||
+              error.message.toLowerCase().includes("profile not found") ||
+              error.message.toLowerCase().includes("no employee")) ? (
+            <div className="p-6">
+              <NoEmployeeProfileAlert message={error.message} />
             </div>
           ) : error ? (
             <div className="p-8 text-center space-y-3">

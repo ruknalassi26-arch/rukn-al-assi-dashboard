@@ -1,17 +1,13 @@
 // ==============================================================================
 // features/leave-management/presentation/hooks/use-leave.ts
-// React Query Hooks for Leave Management (Employee & Admin)
+// React Query Hooks for Employee Vacation & Leave
 // ==============================================================================
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@core/utils/toast";
 import { SupabaseLeaveRepository } from "../../data/repositories/supabase-leave.repository";
 import { SupabaseEmployeeRepository } from "../../data/repositories/supabase-employee.repository";
-import type {
-  CreateLeaveRequestInput,
-  AdminReviewLeaveRequestInput,
-  GetAdminLeaveRequestsFilter,
-} from "../../domain/repositories/i-leave.repository";
+import type { CreateLeaveRequestInput } from "../../domain/repositories/i-leave.repository";
 
 const leaveRepo = new SupabaseLeaveRepository();
 const employeeRepo = new SupabaseEmployeeRepository();
@@ -23,11 +19,9 @@ export const LEAVE_QUERY_KEYS = {
   policies: () => ["leave-policies"],
   activeEmployees: () => ["active-employees"],
   currentEmployeeId: () => ["current-employee-id"],
-  adminRequests: (filter?: GetAdminLeaveRequestsFilter) => ["admin-leave-requests", filter],
-  adminBalances: () => ["admin-leave-balances"],
 };
 
-// --- Employee Hooks ---
+// --- Employee Vacation Hooks ---
 
 /**
  * Fetch employee leave dashboard summary, balances & recent requests
@@ -106,7 +100,6 @@ export function useCreateLeaveRequest() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: LEAVE_QUERY_KEYS.dashboard() });
       queryClient.invalidateQueries({ queryKey: LEAVE_QUERY_KEYS.history() });
-      queryClient.invalidateQueries({ queryKey: ["admin-leave-requests"] });
       toast.success("Leave request submitted successfully!");
     },
     onError: (error: Error) => {
@@ -126,54 +119,10 @@ export function useCancelMyLeaveRequest() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: LEAVE_QUERY_KEYS.dashboard() });
       queryClient.invalidateQueries({ queryKey: LEAVE_QUERY_KEYS.history() });
-      queryClient.invalidateQueries({ queryKey: ["admin-leave-requests"] });
       toast.success("Leave request cancelled successfully.");
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to cancel leave request.");
     },
-  });
-}
-
-// --- Admin Hooks ---
-
-/**
- * Admin: Fetch all company leave requests with filter support
- */
-export function useAdminLeaveRequests(filter?: GetAdminLeaveRequestsFilter) {
-  return useQuery({
-    queryKey: LEAVE_QUERY_KEYS.adminRequests(filter),
-    queryFn: () => leaveRepo.adminGetLeaveRequests(filter),
-  });
-}
-
-/**
- * Admin: Review (approve or reject) a leave request
- */
-export function useAdminReviewLeaveRequest() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (input: AdminReviewLeaveRequestInput) => leaveRepo.adminReviewLeaveRequest(input),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["admin-leave-requests"] });
-      queryClient.invalidateQueries({ queryKey: LEAVE_QUERY_KEYS.dashboard() });
-      queryClient.invalidateQueries({ queryKey: LEAVE_QUERY_KEYS.history() });
-      toast.success(`Leave request ${variables.decision} successfully.`);
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to review leave request.");
-    },
-  });
-}
-
-/**
- * Admin: Fetch all employee leave balances
- */
-export function useAdminLeaveBalances() {
-  return useQuery({
-    queryKey: LEAVE_QUERY_KEYS.adminBalances(),
-    queryFn: () => leaveRepo.adminGetLeaveBalances(),
-    staleTime: 1000 * 60 * 2,
   });
 }

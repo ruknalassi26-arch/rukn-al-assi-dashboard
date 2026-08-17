@@ -45,7 +45,9 @@ import {
   useActiveEmployees,
   useCurrentEmployeeId,
   useCreateLeaveRequest,
+  useMyLeaveDashboard,
 } from "../../hooks/use-leave";
+import { NoEmployeeProfileAlert } from "../shared/no-employee-profile-alert";
 import type { LeaveTypeEntity } from "../../../domain/entities";
 
 const formSchema = z
@@ -90,6 +92,7 @@ export function LeaveApplyForm() {
   const router = useRouter();
   const locale = useLocale();
 
+  const { error: dashboardError } = useMyLeaveDashboard();
   const { data: leaveTypes = [], isLoading: isLoadingTypes } = useActiveLeaveTypes();
   const { data: policies = [], isLoading: isLoadingPolicies } = useActiveLeavePolicies();
   const { data: employees = [], isLoading: isLoadingEmployees } = useActiveEmployees();
@@ -195,6 +198,16 @@ export function LeaveApplyForm() {
 
     router.push(`/${locale}/admin/leave/history`);
   };
+
+  const isProfileMissing =
+    dashboardError &&
+    (dashboardError.message.toLowerCase().includes("employee profile not found") ||
+      dashboardError.message.toLowerCase().includes("profile not found") ||
+      dashboardError.message.toLowerCase().includes("no employee"));
+
+  if (isProfileMissing) {
+    return <NoEmployeeProfileAlert message={dashboardError.message} />;
+  }
 
   const isPageLoading = isLoadingTypes || isLoadingPolicies || isLoadingEmployees;
 

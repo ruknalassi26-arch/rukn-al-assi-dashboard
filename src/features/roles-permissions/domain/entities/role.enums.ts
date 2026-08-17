@@ -21,7 +21,6 @@ export type ResourceCode =
   | "messages"
   | "notifications"
   | "rfq"
-  | "leave"
   | "users"
   | "roles"
   | "settings"
@@ -51,7 +50,6 @@ export const ALL_RESOURCES: ResourceCode[] = [
   "messages",
   "notifications",
   "rfq",
-  "leave",
   "users",
   "roles",
   "settings",
