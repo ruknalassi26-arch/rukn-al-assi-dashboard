@@ -1614,6 +1614,7 @@
       "pendingRequests": "Pending Requests",
       "vacationHistory": "Vacation History",
       "approvedLeaves": "Approved Leaves",
+      "pendingApproval": "Pending Approval",
       "addVacation": "Add Vacation on Behalf",
       "close": "Close",
       "department": "Department",
@@ -1624,6 +1625,12 @@
       "registered": "Registered",
       "noPendingRequests": "No pending vacation requests.",
       "noHistoryFound": "No vacation history found for this employee."
+    },
+    "tabs": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
     }
   },
   "vacation": {
@@ -1667,6 +1674,23 @@
       "approve": "Approve",
       "approvedSuccess": "Vacation request approved successfully",
       "rejectedSuccess": "Vacation request rejected successfully"
+    },
+    "create": {
+      "title": "Record Vacation on Behalf of Employee",
+      "selectEmployee": "Select Employee",
+      "chooseEmployee": "Choose employee...",
+      "leaveType": "Leave Type",
+      "chooseLeaveType": "Choose leave type...",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "returnToWorkDate": "Return to Work Date",
+      "coveringColleague": "Covering Colleague (Optional)",
+      "selectCoveringColleague": "Select covering colleague...",
+      "note": "Note / Reason (Optional)",
+      "notePlaceholder": "e.g. Annual leave pre-approved by management",
+      "cancel": "Cancel",
+      "submit": "Record Vacation",
+      "recording": "Recording..."
     },
     "employeePortal": {
       "title": "My Vacation & Leave",

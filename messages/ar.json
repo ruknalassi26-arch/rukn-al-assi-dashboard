@@ -1634,6 +1634,7 @@
       "pendingRequests": "الطلبات المعلقة",
       "vacationHistory": "سجل الإجازات",
       "approvedLeaves": "الإجازات المعتمدة",
+      "pendingApproval": "قيد المراجعة",
       "addVacation": "تقديم إجازة نيابة عن الموظف",
       "close": "إغلاق",
       "department": "القسم",
@@ -1644,6 +1645,12 @@
       "registered": "تاريخ التسجيل",
       "noPendingRequests": "لا توجد طلبات إجازة معلقة.",
       "noHistoryFound": "لا يوجد سجل إجازات لهذا الموظف."
+    },
+    "tabs": {
+      "all": "الكل",
+      "pending": "قيد المراجعة",
+      "approved": "معتمدة",
+      "rejected": "مرفوضة"
     }
   },
   "vacation": {
@@ -1687,6 +1694,23 @@
       "approve": "اعتماد",
       "approvedSuccess": "تم اعتماد طلب الإجازة بنجاح",
       "rejectedSuccess": "تم رفض طلب الإجازة بنجاح"
+    },
+    "create": {
+      "title": "تسجيل إجازة بالنيابة عن الموظف",
+      "selectEmployee": "اختر الموظف",
+      "chooseEmployee": "اختر الموظف...",
+      "leaveType": "نوع الإجازة",
+      "chooseLeaveType": "اختر نوع الإجازة...",
+      "fromDate": "من تاريخ",
+      "toDate": "إلى تاريخ",
+      "returnToWorkDate": "تاريخ العودة للعمل",
+      "coveringColleague": "الموظف البديل (اختياري)",
+      "selectCoveringColleague": "اختر الموظف البديل...",
+      "note": "ملاحظة / السبب (اختياري)",
+      "notePlaceholder": "مثال: إجازة سنوية معتمدة مسبقاً من الإدارة",
+      "cancel": "إلغاء",
+      "submit": "تسجيل الإجازة",
+      "recording": "جارٍ التسجيل..."
     },
     "employeePortal": {
       "title": "إجازاتي ومغادراتي",

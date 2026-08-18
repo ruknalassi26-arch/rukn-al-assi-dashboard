@@ -123,7 +123,6 @@ export function AdminVacationTable({
     { label: t("tabs.pending"), value: "pending" },
     { label: t("tabs.approved"), value: "approved" },
     { label: t("tabs.rejected"), value: "rejected" },
-    { label: t("tabs.cancelled"), value: "cancelled" },
   ];
 
   return (

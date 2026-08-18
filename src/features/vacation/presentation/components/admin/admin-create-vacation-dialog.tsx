@@ -1,6 +1,7 @@
+"use client";
 // ==============================================================================
 // features/vacation/presentation/components/admin/admin-create-vacation-dialog.tsx
-// Dialog for Admin to create/record vacation on behalf of an employee
+// Dialog for Admin to create/record vacation on behalf of an employee with i18n
 // ==============================================================================
 
 import { useState } from "react";
@@ -20,7 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui";
-import { PlusCircle, Calendar, UserCheck } from "lucide-react";
+import { PlusCircle, UserCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   useAdminEmployees,
   useVacationTypes,
@@ -39,6 +41,7 @@ export function AdminCreateVacationDialog({
   onClose,
   initialEmployeeId,
 }: AdminCreateVacationDialogProps) {
+  const t = useTranslations("vacation.create");
   const { data: employees = [], isLoading: isLoadingEmployees } = useAdminEmployees();
   const { data: vacationTypes = [], isLoading: isLoadingTypes } = useVacationTypes();
   const createMutation = useAdminCreateVacationRequest();
@@ -135,26 +138,26 @@ export function AdminCreateVacationDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             <PlusCircle className="h-5 w-5 text-primary" />
-            Record Vacation on Behalf of Employee
+            {t("title")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
           {/* Select Employee */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">Select Employee *</Label>
+            <Label className="text-xs font-semibold">{t("selectEmployee")} *</Label>
             <Select value={employeeId} onValueChange={setEmployeeId}>
               <SelectTrigger className="text-xs">
                 <SelectValue
                   placeholder={
-                    isLoadingEmployees ? "Loading employees..." : "Choose employee..."
+                    isLoadingEmployees ? "..." : t("chooseEmployee")
                   }
                 />
               </SelectTrigger>
               <SelectContent>
                 {employees.map((emp) => (
                   <SelectItem key={emp.id} value={emp.id} className="text-xs">
-                    {emp.fullName} ({emp.department || "No Department"})
+                    {emp.fullName} ({emp.department || "General"})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -163,7 +166,7 @@ export function AdminCreateVacationDialog({
 
           {/* Select Vacation Type */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">Leave Type *</Label>
+            <Label className="text-xs font-semibold">{t("leaveType")} *</Label>
             <Select
               value={vacationTypeId || vacationTypes[0]?.id || ""}
               onValueChange={setVacationTypeId}
@@ -171,14 +174,14 @@ export function AdminCreateVacationDialog({
               <SelectTrigger className="text-xs">
                 <SelectValue
                   placeholder={
-                    isLoadingTypes ? "Loading leave types..." : "Choose leave type..."
+                    isLoadingTypes ? "..." : t("chooseLeaveType")
                   }
                 />
               </SelectTrigger>
               <SelectContent>
-                {vacationTypes.map((t) => (
-                  <SelectItem key={t.id} value={t.id} className="text-xs">
-                    {t.name}
+                {vacationTypes.map((type) => (
+                  <SelectItem key={type.id} value={type.id} className="text-xs">
+                    {type.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -188,7 +191,7 @@ export function AdminCreateVacationDialog({
           {/* Dates Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">From Date *</Label>
+              <Label className="text-xs font-semibold">{t("fromDate")} *</Label>
               <Input
                 type="date"
                 value={fromDate}
@@ -199,7 +202,7 @@ export function AdminCreateVacationDialog({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">To Date *</Label>
+              <Label className="text-xs font-semibold">{t("toDate")} *</Label>
               <Input
                 type="date"
                 value={toDate}
@@ -212,7 +215,7 @@ export function AdminCreateVacationDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">Return to Work Date *</Label>
+            <Label className="text-xs font-semibold">{t("returnToWorkDate")} *</Label>
             <Input
               type="date"
               value={returnToWorkDate}
@@ -226,14 +229,14 @@ export function AdminCreateVacationDialog({
           {/* Covering / Alternative Employee */}
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">
-              Covering Colleague (Optional)
+              {t("coveringColleague")}
             </Label>
             <Select
               value={alternativeEmployeeId}
               onValueChange={setAlternativeEmployeeId}
             >
               <SelectTrigger className="text-xs">
-                <SelectValue placeholder="Select covering colleague..." />
+                <SelectValue placeholder={t("selectCoveringColleague")} />
               </SelectTrigger>
               <SelectContent>
                 {availableColleagues.map((colleague) => (
@@ -247,9 +250,9 @@ export function AdminCreateVacationDialog({
 
           {/* Admin Note */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">Note / Reason (Optional)</Label>
+            <Label className="text-xs font-semibold">{t("note")}</Label>
             <Textarea
-              placeholder="e.g. Annual leave pre-approved by management"
+              placeholder={t("notePlaceholder")}
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="text-xs resize-none"
@@ -265,7 +268,7 @@ export function AdminCreateVacationDialog({
               onClick={onClose}
               disabled={createMutation.isPending}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               type="submit"
@@ -274,7 +277,7 @@ export function AdminCreateVacationDialog({
               disabled={createMutation.isPending}
             >
               <UserCheck className="h-4 w-4 mr-1.5" />
-              Record & Approve Leave
+              {createMutation.isPending ? t("recording") : t("submit")}
             </Button>
           </DialogFooter>
         </form>

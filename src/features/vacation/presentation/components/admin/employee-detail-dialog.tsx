@@ -158,7 +158,7 @@ export function EmployeeDetailDialog({
                   <p className="text-xl font-bold text-primary mt-1">{approvedRequests.length}</p>
                 </div>
                 <div className="border rounded-lg p-3 bg-card shadow-sm text-center">
-                  <span className="text-xs text-muted-foreground">{t("tabs.pending")}</span>
+                  <span className="text-xs text-muted-foreground">{t("dialog.pendingApproval")}</span>
                   <p className="text-xl font-bold text-amber-500 mt-1">{pendingRequests.length}</p>
                 </div>
               </div>
