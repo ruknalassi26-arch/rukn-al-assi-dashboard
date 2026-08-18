@@ -1665,6 +1665,7 @@
       "duration": "Duration",
       "days": "Days",
       "returnToWork": "Return to Work",
+      "coveringColleague": "Covering Colleague",
       "employeeNote": "Employee Note",
       "currentStatus": "Current Status",
       "reviewerNote": "Reviewer Note / Feedback (Optional)",

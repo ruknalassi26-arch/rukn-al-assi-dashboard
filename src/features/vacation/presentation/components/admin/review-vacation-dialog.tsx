@@ -16,10 +16,13 @@ import {
   Label,
   Badge,
 } from "@shared/ui";
-import { CheckCircle2, XCircle, Calendar, User } from "lucide-react";
+import { CheckCircle2, XCircle, Calendar, User, UserCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { VacationRequestEntity } from "../../../domain/entities/vacation.entity";
-import { useAdminReviewVacationRequest } from "../../hooks/use-vacation";
+import {
+  useAdminReviewVacationRequest,
+  useAdminEmployees,
+} from "../../hooks/use-vacation";
 
 interface ReviewVacationDialogProps {
   isOpen: boolean;
@@ -35,8 +38,13 @@ export function ReviewVacationDialog({
   const t = useTranslations("vacation.review");
   const [reviewerNote, setReviewerNote] = useState("");
   const reviewMutation = useAdminReviewVacationRequest();
+  const { data: employees = [] } = useAdminEmployees();
 
   if (!request) return null;
+
+  const coveringColleague = request.alternativeEmployeeId
+    ? employees.find((e) => e.id === request.alternativeEmployeeId)
+    : null;
 
   const handleReview = async (decision: "approved" | "rejected") => {
     try {
@@ -105,6 +113,21 @@ export function ReviewVacationDialog({
                 {request.returnToWorkDate}
               </span>
             </div>
+
+            {coveringColleague && (
+              <div className="pt-1 text-xs flex items-center gap-1.5 bg-background/50 p-2 rounded border">
+                <UserCheck className="h-3.5 w-3.5 text-primary" />
+                <div>
+                  <span className="text-muted-foreground text-[11px] block">
+                    {t("coveringColleague")}:
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    {coveringColleague.fullName}
+                    {coveringColleague.department ? ` (${coveringColleague.department})` : ""}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {request.note && (
               <div className="pt-2 border-t text-xs">
