@@ -60,7 +60,7 @@ export class UploadService {
     if (b === "certificates" || f.includes("cert")) {
       return "certificates";
     }
-    if (b === "branding" || f.includes("logo") || f.includes("favicon") || f.includes("brand")) {
+    if (b === "branding" || f.includes("logo") || f.includes("favicon") || f.includes("brand") || f.includes("video") || f.includes("hero")) {
       return "branding";
     }
     if (b === "rfq-attachments" || b === "rfq" || f.includes("rfq")) {

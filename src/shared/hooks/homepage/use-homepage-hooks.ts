@@ -8,11 +8,8 @@ import { queryKeys } from "@core/constants/query-keys";
 import { createClient } from "@core/lib/supabase/client";
 import { SupabaseHomepageRepository } from "@features/homepage/data/repository/supabase-homepage.repository";
 import {
-  GetHeroSlidesUseCase,
-  CreateHeroSlideUseCase,
-  UpdateHeroSlideUseCase,
-  DeleteHeroSlideUseCase,
-  ReorderHeroSlidesUseCase,
+  GetHeroSectionUseCase,
+  UpdateHeroSectionUseCase,
   GetAboutPreviewUseCase,
   UpdateAboutPreviewUseCase,
   GetCompanyStatsUseCase,
@@ -46,7 +43,7 @@ import {
   UpdateContactCtaUseCase,
 } from "@features/homepage/domain/usecases";
 import type {
-  HeroSlideEntity,
+  HeroSectionEntity,
   AboutPreviewEntity,
   CompanyStatEntity,
   ClientEntity,
@@ -61,65 +58,25 @@ function getRepo() {
 }
 
 // ---------- Hero Section ----------
-export function useHeroSlides() {
+export function useHeroSection() {
   return useQuery({
     queryKey: queryKeys.homepage.hero(),
-    queryFn: () => new GetHeroSlidesUseCase(getRepo()).execute(),
+    queryFn: () => new GetHeroSectionUseCase(getRepo()).execute(),
     staleTime: 30 * 1000,
   });
 }
 
-export function useHeroSlideById(id: string) {
-  return useQuery({
-    queryKey: [...queryKeys.homepage.hero(), id],
-    queryFn: () => getRepo().getHeroSlideById(id),
-    enabled: Boolean(id),
-    staleTime: 30 * 1000,
-  });
-}
-
-export function useCreateHeroSlide() {
+export function useUpdateHeroSection() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (slide: Omit<HeroSlideEntity, "id" | "createdAt" | "updatedAt">) =>
-      new CreateHeroSlideUseCase(getRepo()).execute(slide),
+    mutationFn: (data: Partial<HeroSectionEntity>) =>
+      new UpdateHeroSectionUseCase(getRepo()).execute(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.homepage.hero() });
-      toast.success("Hero slide created successfully");
+      toast.success("Hero section updated successfully");
     },
-  });
-}
-
-export function useUpdateHeroSlide() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, slide }: { id: string; slide: Partial<HeroSlideEntity> }) =>
-      new UpdateHeroSlideUseCase(getRepo()).execute(id, slide),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.homepage.hero() });
-      toast.success("Hero slide updated successfully");
-    },
-  });
-}
-
-export function useDeleteHeroSlide() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => new DeleteHeroSlideUseCase(getRepo()).execute(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.homepage.hero() });
-      toast.success("Hero slide deleted successfully");
-    },
-  });
-}
-
-export function useReorderHeroSlides() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (orderedIds: string[]) => new ReorderHeroSlidesUseCase(getRepo()).execute(orderedIds),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.homepage.hero() });
-      toast.success("Hero slides reordered successfully");
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update hero section");
     },
   });
 }

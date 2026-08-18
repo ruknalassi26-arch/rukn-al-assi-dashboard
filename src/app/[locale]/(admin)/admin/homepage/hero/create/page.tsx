@@ -1,52 +1,22 @@
 "use client";
 // ==============================================================================
 // app/[locale]/(admin)/admin/homepage/hero/create/page.tsx
-// Dedicated Create Hero Slide Page
+// Deprecated Slide Route: Redirects to Homepage Manager
 // ==============================================================================
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { HeroSlideForm, HeroSlideFormValues } from "@shared/forms/hero-slide-form";
-import { useCreateHeroSlide } from "@shared/hooks/homepage/use-homepage-hooks";
-import type { HeroSlideEntity } from "@features/homepage/domain/entities/homepage.entity";
+import { Loader2 } from "lucide-react";
 
 export default function CreateHeroSlidePage() {
   const router = useRouter();
-  const createMutation = useCreateHeroSlide();
 
-  const handleSubmit = async (values: HeroSlideFormValues) => {
-    await createMutation.mutateAsync({
-      titleEn: values.titleEn,
-      titleAr: values.titleAr,
-      titleKu: values.titleKu ?? null,
-      subtitleEn: values.subtitleEn ?? null,
-      subtitleAr: values.subtitleAr ?? null,
-      subtitleKu: values.subtitleKu ?? null,
-      bodyEn: values.bodyEn ?? null,
-      bodyAr: values.bodyAr ?? null,
-      bodyKu: values.bodyKu ?? null,
-      primaryButtonTextEn: values.primaryButtonTextEn ?? null,
-      primaryButtonTextAr: values.primaryButtonTextAr ?? null,
-      primaryButtonTextKu: values.primaryButtonTextKu ?? null,
-      primaryButtonUrl: values.primaryButtonUrl ?? null,
-      secondaryButtonTextEn: null,
-      secondaryButtonTextAr: null,
-      secondaryButtonTextKu: null,
-      secondaryButtonUrl: null,
-      backgroundImage: values.backgroundImage,
-      overlayOpacity: values.overlayOpacity,
-      status: values.status,
-      sortOrder: values.sortOrder,
-    } as Omit<HeroSlideEntity, "id" | "createdAt" | "updatedAt">);
-
-    router.push("/admin/homepage");
-  };
+  useEffect(() => {
+    router.replace("/admin/homepage");
+  }, [router]);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <HeroSlideForm
-        onSubmit={handleSubmit}
-        isLoading={createMutation.isPending}
-        isEditing={false}
-      />
+    <div className="flex min-h-[400px] items-center justify-center">
+      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
     </div>
   );
 }

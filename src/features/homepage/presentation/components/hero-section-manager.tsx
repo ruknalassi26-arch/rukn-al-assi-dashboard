@@ -1,13 +1,30 @@
 "use client";
 // ==============================================================================
 // features/homepage/presentation/components/hero-section-manager.tsx
-// Hero Section management component (Cards list, Navigation to Create/Edit pages)
+// Comprehensive single-section Hero Editor matching database structure
+// Features: Video/Image media settings, Trilingual tabs (EN, AR, KU),
+// live responsive preview with autoplay video, overlay opacity, and CTA links.
 // ==============================================================================
-import { useState } from "react";
-import Image from "next/image";
-import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, Eye, ArrowUp, ArrowDown, ImageIcon } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Video,
+  Image as ImageIcon,
+  Save,
+  Loader2,
+  Eye,
+  Sliders,
+  Sparkles,
+  Link as LinkIcon,
+  Monitor,
+  Smartphone,
+  CheckCircle2,
+  Film,
+  Layers,
+  Globe2,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -15,231 +32,938 @@ import {
   CardTitle,
   CardDescription,
   Button,
+  Input,
+  Label,
+  Textarea,
+  Switch,
   Badge,
   Skeleton,
 } from "@shared/ui";
-import {
-  useHeroSlides,
-  useDeleteHeroSlide,
-  useReorderHeroSlides,
-} from "@shared/hooks/homepage/use-homepage-hooks";
-import { HeroPreviewDialog } from "@shared/dialogs/hero-preview-dialog";
-import { ConfirmDialog } from "@shared/dialogs/confirm-dialog";
-import { EmptyState } from "@shared/components/empty-state";
+import { MultilingualTabs } from "@shared/components/multilingual-tabs";
+import { ImageUploader } from "@shared/upload/image-uploader";
+import { VideoUploader } from "@shared/upload/video-uploader";
 import { ErrorState } from "@shared/components/error-state";
-import type { HeroSlideEntity } from "../../domain/entities/homepage.entity";
+import { useHeroSection, useUpdateHeroSection } from "../hooks/use-homepage-hero";
+import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
+
+const heroSchema = z.object({
+  mediaType: z.enum(["video", "image"]),
+  videoUrl: z.string().optional().nullable(),
+  videoPosterUrl: z.string().optional().nullable(),
+  videoMobileUrl: z.string().optional().nullable(),
+  overlayOpacity: z.number().min(0).max(100),
+  titleEn: z.string().min(2, "English title is required"),
+  titleAr: z.string().min(2, "Arabic title is required"),
+  titleKu: z.string().optional().nullable(),
+  subtitleEn: z.string().optional().nullable(),
+  subtitleAr: z.string().optional().nullable(),
+  subtitleKu: z.string().optional().nullable(),
+  bodyEn: z.string().optional().nullable(),
+  bodyAr: z.string().optional().nullable(),
+  bodyKu: z.string().optional().nullable(),
+  primaryButtonTextEn: z.string().optional().nullable(),
+  primaryButtonTextAr: z.string().optional().nullable(),
+  primaryButtonTextKu: z.string().optional().nullable(),
+  primaryButtonUrl: z.string().optional().nullable(),
+  secondaryButtonTextEn: z.string().optional().nullable(),
+  secondaryButtonTextAr: z.string().optional().nullable(),
+  secondaryButtonTextKu: z.string().optional().nullable(),
+  secondaryButtonUrl: z.string().optional().nullable(),
+  isVisible: z.boolean(),
+});
+
+type HeroFormValues = z.infer<typeof heroSchema>;
 
 export function HeroSectionManager() {
-  const t = useTranslations("homepageAdmin");
-  const router = useRouter();
-  const { data: slides, isLoading, error, refetch } = useHeroSlides();
-  const deleteMutation = useDeleteHeroSlide();
-  const reorderMutation = useReorderHeroSlides();
+  const { hasPermission } = usePermission();
+  const canManage = hasPermission("homepage", "manage") || hasPermission("homepage", "edit");
 
-  const [previewSlide, setPreviewSlide] = useState<HeroSlideEntity | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { data: heroData, isLoading, error, refetch } = useHeroSection();
+  const updateMutation = useUpdateHeroSection();
 
-  const handleOpenCreate = () => {
-    router.push("/admin/homepage/hero/create");
-  };
+  const [previewLanguage, setPreviewLanguage] = useState<"en" | "ar" | "ku">("en");
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
+  const [videoLoadError, setVideoLoadError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  const handleOpenEdit = (slide: HeroSlideEntity) => {
-    router.push(`/admin/homepage/hero/${slide.id}/edit`);
-  };
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<HeroFormValues>({
+    resolver: zodResolver(heroSchema),
+    defaultValues: {
+      mediaType: "video",
+      videoUrl: "",
+      videoPosterUrl: "",
+      videoMobileUrl: "",
+      overlayOpacity: 40,
+      titleEn: "",
+      titleAr: "",
+      titleKu: "",
+      subtitleEn: "",
+      subtitleAr: "",
+      subtitleKu: "",
+      bodyEn: "",
+      bodyAr: "",
+      bodyKu: "",
+      primaryButtonTextEn: "",
+      primaryButtonTextAr: "",
+      primaryButtonTextKu: "",
+      primaryButtonUrl: "",
+      secondaryButtonTextEn: "",
+      secondaryButtonTextAr: "",
+      secondaryButtonTextKu: "",
+      secondaryButtonUrl: "",
+      isVisible: true,
+    },
+  });
 
-  const handleConfirmDelete = async () => {
-    if (!deletingId) return;
-    await deleteMutation.mutateAsync(deletingId);
-    setDeletingId(null);
-  };
+  // Populate form when data loads
+  useEffect(() => {
+    if (heroData) {
+      reset({
+        mediaType: heroData.mediaType || "video",
+        videoUrl: heroData.videoUrl || "",
+        videoPosterUrl: heroData.videoPosterUrl || "",
+        videoMobileUrl: heroData.videoMobileUrl || "",
+        overlayOpacity: heroData.overlayOpacity ?? 40,
+        titleEn: heroData.titleEn || "",
+        titleAr: heroData.titleAr || "",
+        titleKu: heroData.titleKu || "",
+        subtitleEn: heroData.subtitleEn || "",
+        subtitleAr: heroData.subtitleAr || "",
+        subtitleKu: heroData.subtitleKu || "",
+        bodyEn: heroData.bodyEn || "",
+        bodyAr: heroData.bodyAr || "",
+        bodyKu: heroData.bodyKu || "",
+        primaryButtonTextEn: heroData.primaryButtonTextEn || "",
+        primaryButtonTextAr: heroData.primaryButtonTextAr || "",
+        primaryButtonTextKu: heroData.primaryButtonTextKu || "",
+        primaryButtonUrl: heroData.primaryButtonUrl || "",
+        secondaryButtonTextEn: heroData.secondaryButtonTextEn || "",
+        secondaryButtonTextAr: heroData.secondaryButtonTextAr || "",
+        secondaryButtonTextKu: heroData.secondaryButtonTextKu || "",
+        secondaryButtonUrl: heroData.secondaryButtonUrl || "",
+        isVisible: heroData.isVisible,
+      });
+      setVideoLoadError(false);
+    }
+  }, [heroData, reset]);
 
-  const handleMove = async (index: number, direction: "up" | "down") => {
-    if (!slides) return;
-    const newSlides = [...slides];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= newSlides.length) return;
+  // Watched values for dynamic UI and live preview
+  const watchedMediaType = watch("mediaType");
+  const watchedVideoUrl = watch("videoUrl");
+  const watchedPosterUrl = watch("videoPosterUrl");
+  const watchedMobileVideoUrl = watch("videoMobileUrl");
+  const watchedOverlayOpacity = watch("overlayOpacity");
+  const watchedIsVisible = watch("isVisible");
 
-    const [moved] = newSlides.splice(index, 1);
-    newSlides.splice(targetIndex, 0, moved);
+  const watchedTitleEn = watch("titleEn");
+  const watchedTitleAr = watch("titleAr");
+  const watchedTitleKu = watch("titleKu");
 
-    await reorderMutation.mutateAsync(newSlides.map((s) => s.id));
+  const watchedSubtitleEn = watch("subtitleEn");
+  const watchedSubtitleAr = watch("subtitleAr");
+  const watchedSubtitleKu = watch("subtitleKu");
+
+  const watchedBodyEn = watch("bodyEn");
+  const watchedBodyAr = watch("bodyAr");
+  const watchedBodyKu = watch("bodyKu");
+
+  const watchedPrimaryTextEn = watch("primaryButtonTextEn");
+  const watchedPrimaryTextAr = watch("primaryButtonTextAr");
+  const watchedPrimaryTextKu = watch("primaryButtonTextKu");
+
+  const watchedSecondaryTextEn = watch("secondaryButtonTextEn");
+  const watchedSecondaryTextAr = watch("secondaryButtonTextAr");
+  const watchedSecondaryTextKu = watch("secondaryButtonTextKu");
+
+  // Reset video load error when URL changes
+  useEffect(() => {
+    setVideoLoadError(false);
+  }, [watchedVideoUrl]);
+
+  const onSubmit = async (values: HeroFormValues) => {
+    await updateMutation.mutateAsync({
+      mediaType: values.mediaType,
+      videoUrl: values.videoUrl?.trim() || null,
+      videoPosterUrl: values.videoPosterUrl?.trim() || null,
+      videoMobileUrl: values.videoMobileUrl?.trim() || null,
+      overlayOpacity: Number(values.overlayOpacity),
+      titleEn: values.titleEn,
+      titleAr: values.titleAr,
+      titleKu: values.titleKu?.trim() || null,
+      subtitleEn: values.subtitleEn?.trim() || null,
+      subtitleAr: values.subtitleAr?.trim() || null,
+      subtitleKu: values.subtitleKu?.trim() || null,
+      bodyEn: values.bodyEn?.trim() || null,
+      bodyAr: values.bodyAr?.trim() || null,
+      bodyKu: values.bodyKu?.trim() || null,
+      primaryButtonTextEn: values.primaryButtonTextEn?.trim() || null,
+      primaryButtonTextAr: values.primaryButtonTextAr?.trim() || null,
+      primaryButtonTextKu: values.primaryButtonTextKu?.trim() || null,
+      primaryButtonUrl: values.primaryButtonUrl?.trim() || null,
+      secondaryButtonTextEn: values.secondaryButtonTextEn?.trim() || null,
+      secondaryButtonTextAr: values.secondaryButtonTextAr?.trim() || null,
+      secondaryButtonTextKu: values.secondaryButtonTextKu?.trim() || null,
+      secondaryButtonUrl: values.secondaryButtonUrl?.trim() || null,
+      isVisible: values.isVisible,
+    });
   };
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-72" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-lg" />
-          ))}
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-7 space-y-6">
+          <Card>
+            <CardHeader className="space-y-2">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-96" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-40 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="lg:col-span-5">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-5 w-36" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-72 w-full rounded-xl" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
       <ErrorState
-        title="Failed to load hero slides"
+        title="Failed to load hero section"
         error={error}
         onRetry={() => refetch()}
       />
     );
   }
 
+  // Determine active preview texts based on previewLanguage
+  const activeTitle =
+    previewLanguage === "en"
+      ? watchedTitleEn || "Engineering & Industrial Hydraulic Solutions"
+      : previewLanguage === "ar"
+      ? watchedTitleAr || "حلول الهيدروليك والهندسة الصناعية"
+      : watchedTitleKu || "چارەسەرەکانی هایدرۆلیکی و ئەندازیاری پیشەسازی";
+
+  const activeSubtitle =
+    previewLanguage === "en"
+      ? watchedSubtitleEn
+      : previewLanguage === "ar"
+      ? watchedSubtitleAr
+      : watchedSubtitleKu;
+
+  const activeBody =
+    previewLanguage === "en"
+      ? watchedBodyEn
+      : previewLanguage === "ar"
+      ? watchedBodyAr
+      : watchedBodyKu;
+
+  const activePrimaryText =
+    previewLanguage === "en"
+      ? watchedPrimaryTextEn
+      : previewLanguage === "ar"
+      ? watchedPrimaryTextAr
+      : watchedPrimaryTextKu;
+
+  const activeSecondaryText =
+    previewLanguage === "en"
+      ? watchedSecondaryTextEn
+      : previewLanguage === "ar"
+      ? watchedSecondaryTextAr
+      : watchedSecondaryTextKu;
+
+  const isRtlPreview = previewLanguage === "ar" || previewLanguage === "ku";
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>{t("heroTitle")}</CardTitle>
-            <CardDescription>
-              {t("heroSubtitle")}
-            </CardDescription>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Top Header Card */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border bg-card/60 backdrop-blur-sm shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
+            <Film className="h-5 w-5" />
           </div>
-          <Button onClick={handleOpenCreate} className="gap-2">
-            <Plus className="h-4 w-4" /> {t("addHeroSlide")}
-          </Button>
-        </CardHeader>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-foreground tracking-tight">Homepage Hero Banner</h2>
+              <Badge variant={watchedIsVisible ? "default" : "secondary"}>
+                {watchedIsVisible ? "Publicly Visible" : "Hidden"}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Configure main Hero section media (Video/Image), trilingual headlines, and call-to-action buttons.
+            </p>
+          </div>
+        </div>
 
-        <CardContent>
-          {!slides || slides.length === 0 ? (
-            <EmptyState
-              icon={ImageIcon}
-              title={t("noSlidesTitle")}
-              description={t("noSlidesDescription")}
-              action={
-                <Button onClick={handleOpenCreate} size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" /> {t("addHeroSlide")}
-                </Button>
-              }
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-muted/40 text-xs">
+            <Label htmlFor="hero-visibility" className="text-xs font-medium cursor-pointer">
+              Visibility
+            </Label>
+            <Switch
+              id="hero-visibility"
+              checked={watchedIsVisible}
+              onCheckedChange={(checked) => setValue("isVisible", checked, { shouldDirty: true })}
+              disabled={!canManage}
             />
-          ) : (
-            <div className="space-y-4">
-              {slides.map((slide, index) => (
-                <div
-                  key={slide.id}
-                  className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 rounded-lg border bg-card hover:shadow-sm transition-all gap-4"
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    {/* Thumbnail */}
-                    <div className="relative h-16 w-24 rounded-md overflow-hidden bg-slate-900 shrink-0 border border-border/40 flex items-center justify-center">
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground/60 p-1 text-[10px] text-center">
-                        <ImageIcon className="h-4 w-4 mb-0.5 opacity-50" />
-                        <span>No Image</span>
-                      </div>
-                      {slide.backgroundImage && (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img
-                          src={slide.backgroundImage}
-                          alt={slide.titleEn}
-                          className="absolute inset-0 h-full w-full object-cover"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLElement).style.display = "none";
-                          }}
-                        />
-                      )}
-                    </div>
+          </div>
 
-                    {/* Titles */}
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-sm text-foreground truncate">
-                          {slide.titleEn}
-                        </h4>
-                        <Badge variant={slide.status === "active" ? "default" : "secondary"}>
-                          {slide.status}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate" dir="rtl">
-                        {slide.titleAr}
-                      </p>
-                      {slide.subtitleEn && (
-                        <p className="text-xs text-muted-foreground/80 truncate max-w-md">
-                          {slide.subtitleEn}
-                        </p>
-                      )}
-                    </div>
+          <Button
+            type="submit"
+            disabled={!canManage || updateMutation.isPending}
+            className="gap-2 shadow-xs min-w-[130px]"
+          >
+            {updateMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            Save Changes
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Form Editor (7 cols) */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Card 1: Media Configuration */}
+          <Card className="border-border/60 shadow-xs">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-2">
+                <Layers className="h-4 w-4 text-blue-600" />
+                <CardTitle className="text-base">Media & Background Configuration</CardTitle>
+              </div>
+              <CardDescription>
+                Choose between a high-definition background video loop or a static banner image.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-5">
+              {/* Media Type Selector */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Media Type
+                </Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setValue("mediaType", "video", { shouldDirty: true })}
+                    className={`flex items-center justify-center gap-2.5 p-3 rounded-lg border text-sm font-medium transition-all ${
+                      watchedMediaType === "video"
+                        ? "border-blue-600 bg-blue-50/50 dark:bg-blue-950/30 text-blue-600 shadow-xs"
+                        : "border-border/60 hover:bg-muted/50 text-muted-foreground"
+                    }`}
+                  >
+                    <Video className="h-4 w-4" />
+                    <span>Background Video</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setValue("mediaType", "image", { shouldDirty: true })}
+                    className={`flex items-center justify-center gap-2.5 p-3 rounded-lg border text-sm font-medium transition-all ${
+                      watchedMediaType === "image"
+                        ? "border-blue-600 bg-blue-50/50 dark:bg-blue-950/30 text-blue-600 shadow-xs"
+                        : "border-border/60 hover:bg-muted/50 text-muted-foreground"
+                    }`}
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                    <span>Static Image</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Dynamic Media Fields */}
+              {watchedMediaType === "video" ? (
+                <div className="space-y-5 pt-2 border-t border-border/40">
+                  {/* Main Desktop / Hero Background Video */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold flex items-center justify-between">
+                      <span>Desktop / Main Background Video</span>
+                      <span className="text-[11px] font-normal text-muted-foreground">Upload from local device</span>
+                    </Label>
+                    <VideoUploader
+                      value={watchedVideoUrl || null}
+                      onChange={(url) => setValue("videoUrl", url, { shouldDirty: true })}
+                      bucket="branding"
+                      folder="hero-videos"
+                      description="Upload full-quality local video (MP4, WebM, MOV - 4K/HD allowed)"
+                      maxSizeMB={1024}
+                      disabled={!canManage}
+                    />
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
-                    {/* Reorder Buttons */}
-                    <div className="flex items-center me-2 border rounded-md">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        disabled={index === 0 || reorderMutation.isPending}
-                        onClick={() => handleMove(index, "up")}
-                      >
-                        <ArrowUp className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        disabled={index === slides.length - 1 || reorderMutation.isPending}
-                        onClick={() => handleMove(index, "down")}
-                      >
-                        <ArrowDown className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
+                  {/* Video Poster / Fallback Image */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="videoPosterUrl" className="text-xs font-semibold flex items-center justify-between">
+                      <span>Video Poster / Fallback Image</span>
+                      <span className="text-[11px] font-normal text-muted-foreground">Shown while video loads or on fallback</span>
+                    </Label>
+                    <ImageUploader
+                      value={watchedPosterUrl || null}
+                      onChange={(url) => setValue("videoPosterUrl", url, { shouldDirty: true })}
+                      bucket="branding"
+                      folder="hero-posters"
+                      hintText="Upload full-quality poster image from local device (JPG, PNG, WebP)"
+                    />
+                  </div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPreviewSlide(slide)}
-                      className="gap-1.5"
-                    >
-                      <Eye className="h-3.5 w-3.5 text-cyan-600" /> Preview
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleOpenEdit(slide)}
-                      className="gap-1.5"
-                    >
-                      <Pencil className="h-3.5 w-3.5" /> Edit
-                    </Button>
-
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => setDeletingId(slide.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                  {/* Mobile Video */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold flex items-center justify-between">
+                      <span>Mobile Video (Optional)</span>
+                      <span className="text-[11px] font-normal text-muted-foreground">Vertical video for mobile screens</span>
+                    </Label>
+                    <VideoUploader
+                      value={watchedMobileVideoUrl || null}
+                      onChange={(url) => setValue("videoMobileUrl", url, { shouldDirty: true })}
+                      bucket="branding"
+                      folder="hero-videos"
+                      description="Optional full-quality mobile video (MP4, WebM, MOV)"
+                      maxSizeMB={1024}
+                      disabled={!canManage}
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              ) : (
+                <div className="space-y-4 pt-2 border-t border-border/40">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold flex items-center justify-between">
+                      <span>Hero Banner Image</span>
+                      <span className="text-[11px] font-normal text-muted-foreground">Upload from local device</span>
+                    </Label>
+                    <ImageUploader
+                      value={watchedPosterUrl || null}
+                      onChange={(url) => setValue("videoPosterUrl", url, { shouldDirty: true })}
+                      bucket="branding"
+                      folder="hero-banners"
+                      hintText="High-resolution image (1920x1080) for hero banner"
+                    />
+                  </div>
+                </div>
+              )}
 
-      {/* Live Preview Dialog */}
-      <HeroPreviewDialog
-        isOpen={!!previewSlide}
-        onClose={() => setPreviewSlide(null)}
-        slides={previewSlide ? [previewSlide] : slides ?? []}
-      />
+              {/* Overlay Opacity Slider */}
+              <div className="space-y-2 pt-3 border-t border-border/40">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="overlay-opacity-range" className="text-xs font-semibold flex items-center gap-1.5">
+                    <Sliders className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>Dark Overlay Opacity</span>
+                  </Label>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-muted font-mono">
+                    {watchedOverlayOpacity}%
+                  </span>
+                </div>
+                <input
+                  id="overlay-opacity-range"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={watchedOverlayOpacity ?? 40}
+                  onChange={(e) => setValue("overlayOpacity", Number(e.target.value), { shouldDirty: true })}
+                  disabled={!canManage}
+                  className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Adjusts the dark tint overlay over the media to guarantee high contrast for text readability.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Confirm Delete Dialog */}
-      <ConfirmDialog
-        isOpen={!!deletingId}
-        onClose={() => setDeletingId(null)}
-        onConfirm={handleConfirmDelete}
-        title="Delete Hero Slide"
-        description="Are you sure you want to delete this hero slide? This action cannot be undone."
-        confirmText="Delete Slide"
-        isLoading={deleteMutation.isPending}
-      />
-    </div>
+          {/* Card 2: Trilingual Content */}
+          <Card className="border-border/60 shadow-xs">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Globe2 className="h-4 w-4 text-emerald-600" />
+                <CardTitle className="text-base">Hero Localized Content</CardTitle>
+              </div>
+              <CardDescription>
+                Provide tailored headlines, subtitles, and descriptions in English, Arabic, and Kurdish Sorani.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <MultilingualTabs
+                defaultLanguage="en"
+                englishFields={
+                  <div className="space-y-4 pt-1">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="titleEn" className="text-xs font-semibold">
+                        Main Title (English) <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="titleEn"
+                        placeholder="e.g., Engineering & Industrial Hydraulic Solutions"
+                        {...register("titleEn")}
+                        disabled={!canManage}
+                        className={errors.titleEn ? "border-red-500" : ""}
+                      />
+                      {errors.titleEn && (
+                        <p className="text-xs text-red-500">{errors.titleEn.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="subtitleEn" className="text-xs font-semibold">
+                        Subtitle / Tagline (English)
+                      </Label>
+                      <Input
+                        id="subtitleEn"
+                        placeholder="e.g., Leading provider of high-pressure hydraulic equipment across Iraq"
+                        {...register("subtitleEn")}
+                        disabled={!canManage}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="bodyEn" className="text-xs font-semibold">
+                        Body Text / Paragraph (English)
+                      </Label>
+                      <Textarea
+                        id="bodyEn"
+                        rows={3}
+                        placeholder="e.g., Delivering world-class heavy industrial machinery, hydraulic cylinders, pumps, valves, and precision turnkey automation."
+                        {...register("bodyEn")}
+                        disabled={!canManage}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="primaryButtonTextEn" className="text-xs font-semibold">
+                          Primary Button Label (EN)
+                        </Label>
+                        <Input
+                          id="primaryButtonTextEn"
+                          placeholder="e.g., Explore Products"
+                          {...register("primaryButtonTextEn")}
+                          disabled={!canManage}
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="secondaryButtonTextEn" className="text-xs font-semibold">
+                          Secondary Button Label (EN)
+                        </Label>
+                        <Input
+                          id="secondaryButtonTextEn"
+                          placeholder="e.g., Contact Us"
+                          {...register("secondaryButtonTextEn")}
+                          disabled={!canManage}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                }
+                arabicFields={
+                  <div className="space-y-4 pt-1" dir="rtl">
+                    <div className="space-y-1.5 text-right">
+                      <Label htmlFor="titleAr" className="text-xs font-semibold">
+                        العنوان الرئيسي (العربية) <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="titleAr"
+                        placeholder="مثال: حلول الهيدروليك والهندسة الصناعية"
+                        {...register("titleAr")}
+                        disabled={!canManage}
+                        dir="rtl"
+                        className={errors.titleAr ? "border-red-500 text-right" : "text-right"}
+                      />
+                      {errors.titleAr && (
+                        <p className="text-xs text-red-500 text-right">{errors.titleAr.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5 text-right">
+                      <Label htmlFor="subtitleAr" className="text-xs font-semibold">
+                        العنوان الفرعي (العربية)
+                      </Label>
+                      <Input
+                        id="subtitleAr"
+                        placeholder="مثال: المزود الرائد لمعدات الهيدروليك وقطع الغيار في العراق"
+                        {...register("subtitleAr")}
+                        disabled={!canManage}
+                        dir="rtl"
+                        className="text-right"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 text-right">
+                      <Label htmlFor="bodyAr" className="text-xs font-semibold">
+                        النص الوصفي (العربية)
+                      </Label>
+                      <Textarea
+                        id="bodyAr"
+                        rows={3}
+                        placeholder="مثال: نقدم أحدث الآلات والمعدات الهيدروليكية الثقيلة، والاسطوانات، والمضخات، وحلول الأتمتة المتقدمة."
+                        {...register("bodyAr")}
+                        disabled={!canManage}
+                        dir="rtl"
+                        className="text-right"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      <div className="space-y-1.5 text-right">
+                        <Label htmlFor="primaryButtonTextAr" className="text-xs font-semibold">
+                          نص الزر الرئيسي (العربية)
+                        </Label>
+                        <Input
+                          id="primaryButtonTextAr"
+                          placeholder="مثال: استكشف المنتجات"
+                          {...register("primaryButtonTextAr")}
+                          disabled={!canManage}
+                          dir="rtl"
+                          className="text-right"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 text-right">
+                        <Label htmlFor="secondaryButtonTextAr" className="text-xs font-semibold">
+                          نص الزر الثانوي (العربية)
+                        </Label>
+                        <Input
+                          id="secondaryButtonTextAr"
+                          placeholder="مثال: اتصل بنا"
+                          {...register("secondaryButtonTextAr")}
+                          disabled={!canManage}
+                          dir="rtl"
+                          className="text-right"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                }
+                kurdishFields={
+                  <div className="space-y-4 pt-1" dir="rtl">
+                    <div className="space-y-1.5 text-right">
+                      <Label htmlFor="titleKu" className="text-xs font-semibold">
+                        ناونیشانی سەرەکی (کوردی)
+                      </Label>
+                      <Input
+                        id="titleKu"
+                        placeholder="نموونە: چارەسەرەکانی هایدرۆلیکی و ئەندازیاری پیشەسازی"
+                        {...register("titleKu")}
+                        disabled={!canManage}
+                        dir="rtl"
+                        className="text-right"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 text-right">
+                      <Label htmlFor="subtitleKu" className="text-xs font-semibold">
+                        ناونیشانی لاوەکی (کوردی)
+                      </Label>
+                      <Input
+                        id="subtitleKu"
+                        placeholder="نموونە: پێشەنگ لە دابینکردنی کەرەستە و پارچەی یەدەگی هایدرۆلیکی لە عێراق"
+                        {...register("subtitleKu")}
+                        disabled={!canManage}
+                        dir="rtl"
+                        className="text-right"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 text-right">
+                      <Label htmlFor="bodyKu" className="text-xs font-semibold">
+                        دەقی باسکردن (کوردی)
+                      </Label>
+                      <Textarea
+                        id="bodyKu"
+                        rows={3}
+                        placeholder="نموونە: پێشکەشکردنی ئامێر و کەرەستەی پیشەسازی قورس و سلندەر و پەمپ و ڤاڵڤ و سیستەمی ئۆتۆمەیشنی پێشکەوتوو."
+                        {...register("bodyKu")}
+                        disabled={!canManage}
+                        dir="rtl"
+                        className="text-right"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      <div className="space-y-1.5 text-right">
+                        <Label htmlFor="primaryButtonTextKu" className="text-xs font-semibold">
+                          دەقی دوگمەی سەرەکی (کوردی)
+                        </Label>
+                        <Input
+                          id="primaryButtonTextKu"
+                          placeholder="نموونە: بڕوانە بەرهەمەکان"
+                          {...register("primaryButtonTextKu")}
+                          disabled={!canManage}
+                          dir="rtl"
+                          className="text-right"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 text-right">
+                        <Label htmlFor="secondaryButtonTextKu" className="text-xs font-semibold">
+                          دەقی دوگمەی لاوەکی (کوردی)
+                        </Label>
+                        <Input
+                          id="secondaryButtonTextKu"
+                          placeholder="نموونە: پەیوەندیمان پێوە بکە"
+                          {...register("secondaryButtonTextKu")}
+                          disabled={!canManage}
+                          dir="rtl"
+                          className="text-right"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                }
+              />
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Action Links / Destination URLs */}
+          <Card className="border-border/60 shadow-xs">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <LinkIcon className="h-4 w-4 text-cyan-600" />
+                <CardTitle className="text-base">Call-to-Action Link URLs</CardTitle>
+              </div>
+              <CardDescription>
+                Configure the destination pages for the primary and secondary CTA buttons.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="primaryButtonUrl" className="text-xs font-semibold">
+                  Primary Button Target URL
+                </Label>
+                <Input
+                  id="primaryButtonUrl"
+                  placeholder="/products or https://..."
+                  {...register("primaryButtonUrl")}
+                  disabled={!canManage}
+                  className="font-mono text-xs"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="secondaryButtonUrl" className="text-xs font-semibold">
+                  Secondary Button Target URL (Optional)
+                </Label>
+                <Input
+                  id="secondaryButtonUrl"
+                  placeholder="/contact or https://..."
+                  {...register("secondaryButtonUrl")}
+                  disabled={!canManage}
+                  className="font-mono text-xs"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column: Live Responsive Preview (5 cols, sticky) */}
+        <div className="lg:col-span-5 lg:sticky lg:top-6 space-y-4">
+          <Card className="border-border/60 shadow-md overflow-hidden bg-card">
+            <CardHeader className="p-4 pb-3 border-b bg-muted/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Eye className="h-4 w-4 text-blue-600" />
+                  <CardTitle className="text-sm font-semibold">Live Hero Preview</CardTitle>
+                </div>
+
+                {/* Device & Language Switchers */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center border rounded-md p-0.5 bg-background">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewLanguage("en")}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                        previewLanguage === "en" ? "bg-blue-600 text-white" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      EN
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewLanguage("ar")}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                        previewLanguage === "ar" ? "bg-blue-600 text-white" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      عربي
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewLanguage("ku")}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                        previewLanguage === "ku" ? "bg-blue-600 text-white" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      کوردی
+                    </button>
+                  </div>
+
+                  <div className="flex items-center border rounded-md p-0.5 bg-background">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDevice("desktop")}
+                      className={`p-1 rounded transition-all ${
+                        previewDevice === "desktop" ? "bg-muted text-foreground" : "text-muted-foreground"
+                      }`}
+                      title="Desktop view"
+                    >
+                      <Monitor className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDevice("mobile")}
+                      className={`p-1 rounded transition-all ${
+                        previewDevice === "mobile" ? "bg-muted text-foreground" : "text-muted-foreground"
+                      }`}
+                      title="Mobile view"
+                    >
+                      <Smartphone className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-4 flex flex-col items-center justify-center bg-slate-950/5 dark:bg-black/40">
+              {/* Preview Container Frame */}
+              <div
+                className={`relative rounded-xl overflow-hidden border border-border/80 shadow-xl transition-all duration-300 ${
+                  previewDevice === "desktop"
+                    ? "w-full aspect-[16/10] min-h-[360px]"
+                    : "w-[240px] aspect-[9/16] min-h-[420px]"
+                }`}
+              >
+                {/* Media Layer */}
+                <div className="absolute inset-0 bg-slate-900 overflow-hidden flex items-center justify-center">
+                  {watchedMediaType === "video" && (previewDevice === "mobile" ? (watchedMobileVideoUrl || watchedVideoUrl) : watchedVideoUrl) && !videoLoadError ? (
+                    <video
+                      ref={videoRef}
+                      key={previewDevice === "mobile" && watchedMobileVideoUrl ? watchedMobileVideoUrl : watchedVideoUrl}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      poster={watchedPosterUrl || undefined}
+                      onError={() => setVideoLoadError(true)}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    >
+                      <source
+                        src={
+                          (previewDevice === "mobile" && watchedMobileVideoUrl
+                            ? watchedMobileVideoUrl
+                            : watchedVideoUrl) || ""
+                        }
+                      />
+                    </video>
+                  ) : watchedPosterUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={watchedPosterUrl}
+                      alt="Hero banner preview"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex flex-col items-center justify-center text-slate-500 p-4 text-center">
+                      <Film className="h-8 w-8 mb-2 opacity-40 animate-pulse" />
+                      <span className="text-xs">No media source configured</span>
+                    </div>
+                  )}
+
+                  {/* Dark Tint Opacity Overlay */}
+                  <div
+                    className="absolute inset-0 bg-black transition-opacity duration-150"
+                    style={{ opacity: (watchedOverlayOpacity ?? 40) / 100 }}
+                  />
+
+                  {/* Gradient Accents */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+                </div>
+
+                {/* Content Overlay */}
+                <div
+                  className={`absolute inset-0 p-5 flex flex-col justify-end text-white pointer-events-none ${
+                    isRtlPreview ? "text-right items-end" : "text-left items-start"
+                  }`}
+                  dir={isRtlPreview ? "rtl" : "ltr"}
+                >
+                  {/* Subtitle Pill */}
+                  {activeSubtitle && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/30 border border-blue-400/40 text-blue-200 text-[10px] font-medium backdrop-blur-md mb-2 shadow-xs max-w-full truncate">
+                      <Sparkles className="h-2.5 w-2.5 shrink-0" />
+                      <span className="truncate">{activeSubtitle}</span>
+                    </div>
+                  )}
+
+                  {/* Headline Title */}
+                  <h3
+                    className={`font-extrabold text-white leading-tight drop-shadow-md mb-2 ${
+                      previewDevice === "desktop" ? "text-base sm:text-lg max-w-[85%]" : "text-xs max-w-full"
+                    }`}
+                  >
+                    {activeTitle}
+                  </h3>
+
+                  {/* Body Paragraph */}
+                  {activeBody && (
+                    <p
+                      className={`text-slate-300/90 leading-relaxed drop-shadow line-clamp-3 mb-3 ${
+                        previewDevice === "desktop" ? "text-[11px] max-w-[80%]" : "text-[9px]"
+                      }`}
+                    >
+                      {activeBody}
+                    </p>
+                  )}
+
+                  {/* Buttons */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    {activePrimaryText && (
+                      <div className="px-3 py-1.5 rounded-md bg-blue-600 text-white font-semibold text-[10px] shadow-sm flex items-center gap-1">
+                        <span>{activePrimaryText}</span>
+                      </div>
+                    )}
+
+                    {activeSecondaryText && (
+                      <div className="px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium text-[10px] backdrop-blur-sm">
+                        <span>{activeSecondaryText}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Note */}
+              <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                <span>Live real-time preview matches public home banner layout</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </form>
   );
 }

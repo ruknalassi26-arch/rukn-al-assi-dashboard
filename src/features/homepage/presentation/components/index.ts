@@ -3,8 +3,6 @@
 // ==============================================================================
 export { ImageUploader } from "./image-uploader";
 export { HeroSectionManager } from "./hero-section-manager";
-export { HeroSlideDialog } from "./hero-slide-dialog";
-export { HeroPreviewDialog } from "./hero-preview-dialog";
 export { AboutSectionManager } from "./about-section-manager";
 export { StatsSectionManager } from "./stats-section-manager";
 export { StatDialog } from "./stat-dialog";

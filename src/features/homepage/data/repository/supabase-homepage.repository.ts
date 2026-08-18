@@ -7,7 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, InsertTables, UpdateTables } from "@core/types/database.types";
 import type { IHomepageRepository } from "../../domain/repositories/i-homepage.repository";
 import {
-  HeroSlideEntity,
+  HeroSectionEntity,
   AboutPreviewEntity,
   CompanyStatEntity,
   FeaturedServiceEntity,
@@ -18,7 +18,7 @@ import {
   ContactCtaEntity,
 } from "../../domain/entities/homepage.entity";
 import {
-  toHeroSlideEntity,
+  toHeroSectionEntity,
   toAboutPreviewEntity,
   toCompanyStatEntity,
   toFeaturedServiceEntity,
@@ -28,403 +28,132 @@ import {
   toCertificateEntity,
   toContactCtaEntity,
 } from "../mapper/homepage.mapper";
+import type { HeroSettingsDTO } from "../dto/homepage.dto";
 
 export class SupabaseHomepageRepository implements IHomepageRepository {
   constructor(private readonly supabase: SupabaseClient<Database>) {}
 
   // ============================================================================
-  // TAB 1: HERO SECTION (homepage_hero_slides & homepage_hero_slide_translations)
+  // TAB 1: HERO SECTION (homepage_sections where section_key = 'hero')
   // ============================================================================
-  // ============================================================================
-  // TAB 1: HERO SECTION (homepage_hero_slides & homepage_hero_slide_translations)
-  // ============================================================================
-  async getHeroSlides(): Promise<HeroSlideEntity[]> {
+  async getHeroSection(): Promise<HeroSectionEntity> {
     try {
-      const { data: heroSection } = await (this.supabase.from("homepage_sections" as any) as any)
-        .select("*, homepage_section_translations(*)")
+      const { data, error } = await (this.supabase.from("homepage_sections" as any) as any)
+        .select("*")
         .eq("section_key", "hero")
         .maybeSingle();
 
-      if (heroSection) {
-        const settings = heroSection.settings || {};
-
-        if (Array.isArray(settings.slides) && settings.slides.length > 0) {
-          return settings.slides
-            .map((s: any) => new HeroSlideEntity({
-              id: s.id || heroSection.id,
-              titleEn: s.title_en || "",
-              titleAr: s.title_ar || "",
-              titleKu: s.title_ku || null,
-              subtitleEn: s.subtitle_en || null,
-              subtitleAr: s.subtitle_ar || null,
-              subtitleKu: s.subtitle_ku || null,
-              bodyEn: s.body_en || null,
-              bodyAr: s.body_ar || null,
-              bodyKu: s.body_ku || null,
-              primaryButtonTextEn: s.primary_button_text_en || "Explore Products",
-              primaryButtonTextAr: s.primary_button_text_ar || "استكشف المنتجات",
-              primaryButtonTextKu: s.primary_button_text_ku || null,
-              primaryButtonUrl: s.primary_button_url || "/products",
-              secondaryButtonTextEn: s.secondary_button_text_en || "Contact Us",
-              secondaryButtonTextAr: s.secondary_button_text_ar || "اتصل بنا",
-              secondaryButtonUrl: s.secondary_button_url || "/contact",
-              backgroundImage: s.background_image || "/hero-banner.jpg",
-              overlayOpacity: s.overlay_opacity ?? 40,
-              status: s.is_active !== false ? "active" : "draft",
-              sortOrder: s.sort_order ?? 1,
-              createdAt: new Date(s.created_at || heroSection.updated_at || Date.now()),
-              updatedAt: new Date(s.updated_at || heroSection.updated_at || Date.now()),
-            }))
-            .sort((a: HeroSlideEntity, b: HeroSlideEntity) => a.sortOrder - b.sortOrder);
-        }
-
-        const transList = heroSection.homepage_section_translations || [];
-        const en = transList.find((t: any) => t.language_code === "en") || {};
-        const ar = transList.find((t: any) => t.language_code === "ar") || {};
-        const ku = transList.find((t: any) => t.language_code === "ku") || {};
-
-        return [
-          new HeroSlideEntity({
-            id: heroSection.id,
-            titleEn: en.title || "Engineering & Industrial Hydraulic Solutions",
-            titleAr: ar.title || "حلول الهيدروليك والهندسة الصناعية",
-            titleKu: ku.title || null,
-            subtitleEn: en.subtitle || null,
-            subtitleAr: ar.subtitle || null,
-            subtitleKu: ku.subtitle || null,
-            bodyEn: en.body || null,
-            bodyAr: ar.body || null,
-            bodyKu: ku.body || null,
-            primaryButtonTextEn: en.cta_label || settings.primary_button_text_en || "Explore Products",
-            primaryButtonTextAr: ar.cta_label || settings.primary_button_text_ar || "استكشف المنتجات",
-            primaryButtonTextKu: ku.cta_label || null,
-            primaryButtonUrl: en.cta_url || ar.cta_url || ku.cta_url || settings.primary_button_url || "/products",
-            secondaryButtonTextEn: settings.secondary_button_text_en || "Contact Us",
-            secondaryButtonTextAr: settings.secondary_button_text_ar || "اتصل بنا",
-            secondaryButtonUrl: settings.secondary_button_url || "/contact",
-            backgroundImage: en.image_url || ar.image_url || ku.image_url || settings.background_image || "/hero-banner.jpg",
-            overlayOpacity: settings.overlay_opacity ?? 40,
-            status: heroSection.is_visible ? "active" : "draft",
-            sortOrder: heroSection.sort_order ?? 1,
-            createdAt: new Date(heroSection.updated_at || Date.now()),
-            updatedAt: new Date(heroSection.updated_at || Date.now()),
-          }),
-        ];
+      if (!error && data) {
+        return toHeroSectionEntity(data);
       }
     } catch {}
 
-    return [
-      new HeroSlideEntity({
-        id: "hero-1",
-        titleEn: "Engineering & Industrial Hydraulic Solutions",
-        titleAr: "حلول الهيدروليك والهندسة الصناعية",
-        subtitleEn: "Leading provider of high-pressure hydraulic equipment and spare parts across Iraq.",
-        subtitleAr: "المزود الرائد لمعدات الهيدروليك وقطع الغيار في العراق.",
-        primaryButtonTextEn: "Explore Products",
-        primaryButtonTextAr: "استكشف المنتجات",
-        primaryButtonUrl: "/products",
-        secondaryButtonTextEn: "Contact Us",
-        secondaryButtonTextAr: "اتصل بنا",
-        secondaryButtonUrl: "/contact",
-        backgroundImage: "/hero-banner.jpg",
-        overlayOpacity: 40,
-        status: "active",
-        sortOrder: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }),
-    ];
+    // Sensible fallback matching schema
+    return new HeroSectionEntity({
+      id: "hero-1",
+      sectionKey: "hero",
+      isVisible: true,
+      mediaType: "video",
+      videoUrl: null,
+      videoPosterUrl: null,
+      videoMobileUrl: null,
+      overlayOpacity: 40,
+      titleEn: "Engineering & Industrial Hydraulic Solutions",
+      titleAr: "حلول الهيدروليك والهندسة الصناعية",
+      titleKu: "چارەسەرەکانی هایدرۆلیکی و ئەندازیاری پیشەسازی",
+      subtitleEn: "Leading provider of high-pressure hydraulic equipment and spare parts across Iraq.",
+      subtitleAr: "المزود الرائد لمعدات الهيدروليك وقطع الغيار في العراق.",
+      subtitleKu: "پێشەنگ لە دابینکردنی کەرەستە و پارچەی یەدەگی هایدرۆلیکی لە سەرانسەری عێراق.",
+      bodyEn: "Delivering world-class heavy industrial machinery, hydraulic cylinders, pumps, valves, and precision turnkey automation.",
+      bodyAr: "نقدم أحدث الآلات والمعدات الهيدروليكية الثقيلة، والاسطوانات، والمضخات، والصمامات، وحلول الأتمتة المتقدمة.",
+      bodyKu: "پێشکەشکردنی ئامێر و کەرەستەی پیشەسازی قورس و سلندەر و پەمپ و ڤاڵڤ و سیستەمی ئۆتۆمەیشنی پێشکەوتوو.",
+      primaryButtonTextEn: "Explore Products",
+      primaryButtonTextAr: "استكشف المنتجات",
+      primaryButtonTextKu: "بڕوانە بەرهەمەکان",
+      primaryButtonUrl: "/products",
+      secondaryButtonTextEn: "Contact Us",
+      secondaryButtonTextAr: "اتصل بنا",
+      secondaryButtonTextKu: "پەیوەندیمان پێوە بکە",
+      secondaryButtonUrl: "/contact",
+      updatedAt: new Date(),
+    });
   }
 
-  async getHeroSlideById(id: string): Promise<HeroSlideEntity | null> {
-    const slides = await this.getHeroSlides();
-    return slides.find((s) => s.id === id) || null;
-  }
+  async updateHeroSection(data: Partial<HeroSectionEntity>): Promise<HeroSectionEntity> {
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser();
 
-  async createHeroSlide(slide: Omit<HeroSlideEntity, "id" | "createdAt" | "updatedAt">): Promise<HeroSlideEntity> {
-    const existingSlides = await this.getHeroSlides();
-    const newSlideId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `hero-slide-${Date.now()}`;
-
-    const newSlideObj = {
-      id: newSlideId,
-      title_en: slide.titleEn,
-      title_ar: slide.titleAr,
-      title_ku: slide.titleKu || null,
-      subtitle_en: slide.subtitleEn || null,
-      subtitle_ar: slide.subtitleAr || null,
-      subtitle_ku: slide.subtitleKu || null,
-      body_en: slide.bodyEn || null,
-      body_ar: slide.bodyAr || null,
-      body_ku: slide.bodyKu || null,
-      primary_button_text_en: slide.primaryButtonTextEn || null,
-      primary_button_text_ar: slide.primaryButtonTextAr || null,
-      primary_button_text_ku: slide.primaryButtonTextKu || null,
-      primary_button_url: slide.primaryButtonUrl || null,
-      secondary_button_text_en: slide.secondaryButtonTextEn || null,
-      secondary_button_text_ar: slide.secondaryButtonTextAr || null,
-      secondary_button_text_ku: slide.secondaryButtonTextKu || null,
-      secondary_button_url: slide.secondaryButtonUrl || null,
-      background_image: slide.backgroundImage || null,
-      overlay_opacity: slide.overlayOpacity ?? 40,
-      is_active: slide.status === "active",
-      sort_order: slide.sortOrder ?? (existingSlides.length + 1),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    const existingSlideObjects = existingSlides.map((s) => ({
-      id: s.id,
-      title_en: s.titleEn,
-      title_ar: s.titleAr,
-      title_ku: s.titleKu || null,
-      subtitle_en: s.subtitleEn || null,
-      subtitle_ar: s.subtitleAr || null,
-      subtitle_ku: s.subtitleKu || null,
-      body_en: s.bodyEn || null,
-      body_ar: s.bodyAr || null,
-      body_ku: s.bodyKu || null,
-      primary_button_text_en: s.primaryButtonTextEn || null,
-      primary_button_text_ar: s.primaryButtonTextAr || null,
-      primary_button_text_ku: s.primaryButtonTextKu || null,
-      primary_button_url: s.primaryButtonUrl || null,
-      secondary_button_text_en: s.secondaryButtonTextEn || null,
-      secondary_button_text_ar: s.secondaryButtonTextAr || null,
-      secondary_button_text_ku: s.secondaryButtonTextKu || null,
-      secondary_button_url: s.secondaryButtonUrl || null,
-      background_image: s.backgroundImage || null,
-      overlay_opacity: s.overlayOpacity ?? 40,
-      is_active: s.status === "active",
-      sort_order: s.sortOrder ?? 1,
-      created_at: s.createdAt?.toISOString() || new Date().toISOString(),
-      updated_at: s.updatedAt?.toISOString() || new Date().toISOString(),
-    }));
-
-    const allSlideObjects = [...existingSlideObjects, newSlideObj];
-
-    const { data: existingHeroSection } = await (this.supabase.from("homepage_sections" as any) as any)
+    const { data: existingRow } = await (this.supabase.from("homepage_sections" as any) as any)
       .select("*")
       .eq("section_key", "hero")
       .maybeSingle();
 
-    let sectionId: string;
-    const currentSettings = existingHeroSection?.settings || {};
-    const updatedSettings = { ...currentSettings, slides: allSlideObjects };
+    const currentSettings = (existingRow?.settings || {}) as Partial<HeroSettingsDTO>;
+    const updatedSettings: HeroSettingsDTO = {
+      media_type: data.mediaType ?? currentSettings.media_type ?? "video",
+      video_url: data.videoUrl !== undefined ? data.videoUrl : (currentSettings.video_url ?? null),
+      video_poster_url: data.videoPosterUrl !== undefined ? data.videoPosterUrl : (currentSettings.video_poster_url ?? null),
+      video_mobile_url: data.videoMobileUrl !== undefined ? data.videoMobileUrl : (currentSettings.video_mobile_url ?? null),
+      overlay_opacity: typeof data.overlayOpacity === "number" ? data.overlayOpacity : (currentSettings.overlay_opacity ?? 40),
 
-    if (existingHeroSection?.id) {
-      sectionId = existingHeroSection.id;
-      await (this.supabase.from("homepage_sections" as any) as any)
-        .update({
-          settings: updatedSettings,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", sectionId);
-    } else {
-      const sectionPayload: InsertTables<"homepage_sections"> = {
-        section_key: "hero",
-        is_visible: true,
-        sort_order: 0,
-        settings: updatedSettings as any,
-      };
+      title_en: data.titleEn !== undefined ? data.titleEn : (currentSettings.title_en ?? ""),
+      title_ar: data.titleAr !== undefined ? data.titleAr : (currentSettings.title_ar ?? ""),
+      title_ku: data.titleKu !== undefined ? (data.titleKu ?? "") : (currentSettings.title_ku ?? ""),
 
-      const { data: sectionRow, error: sectionErr } = await (this.supabase.from("homepage_sections" as any) as any)
-        .insert(sectionPayload)
-        .select()
-        .single();
+      subtitle_en: data.subtitleEn !== undefined ? (data.subtitleEn ?? "") : (currentSettings.subtitle_en ?? ""),
+      subtitle_ar: data.subtitleAr !== undefined ? (data.subtitleAr ?? "") : (currentSettings.subtitle_ar ?? ""),
+      subtitle_ku: data.subtitleKu !== undefined ? (data.subtitleKu ?? "") : (currentSettings.subtitle_ku ?? ""),
 
-      if (sectionErr || !sectionRow) {
-        throw new Error(sectionErr?.message ?? "Failed to create hero slide");
-      }
-      sectionId = sectionRow.id;
-    }
+      body_en: data.bodyEn !== undefined ? (data.bodyEn ?? "") : (currentSettings.body_en ?? ""),
+      body_ar: data.bodyAr !== undefined ? (data.bodyAr ?? "") : (currentSettings.body_ar ?? ""),
+      body_ku: data.bodyKu !== undefined ? (data.bodyKu ?? "") : (currentSettings.body_ku ?? ""),
 
-    await this.logActivity("created", "homepage_sections", slide.titleEn);
-    const updatedSlidesList = await this.getHeroSlides();
-    return updatedSlidesList.find((s) => s.id === newSlideId) || updatedSlidesList[updatedSlidesList.length - 1];
-  }
+      primary_button_text_en: data.primaryButtonTextEn !== undefined ? (data.primaryButtonTextEn ?? "") : (currentSettings.primary_button_text_en ?? ""),
+      primary_button_text_ar: data.primaryButtonTextAr !== undefined ? (data.primaryButtonTextAr ?? "") : (currentSettings.primary_button_text_ar ?? ""),
+      primary_button_text_ku: data.primaryButtonTextKu !== undefined ? (data.primaryButtonTextKu ?? "") : (currentSettings.primary_button_text_ku ?? ""),
+      primary_button_url: data.primaryButtonUrl !== undefined ? (data.primaryButtonUrl ?? "") : (currentSettings.primary_button_url ?? ""),
 
-  async updateHeroSlide(id: string, slide: Partial<HeroSlideEntity>): Promise<HeroSlideEntity> {
-    const slides = await this.getHeroSlides();
-    const existing = slides.find((s) => s.id === id);
+      secondary_button_text_en: data.secondaryButtonTextEn !== undefined ? (data.secondaryButtonTextEn ?? "") : (currentSettings.secondary_button_text_en ?? ""),
+      secondary_button_text_ar: data.secondaryButtonTextAr !== undefined ? (data.secondaryButtonTextAr ?? "") : (currentSettings.secondary_button_text_ar ?? ""),
+      secondary_button_text_ku: data.secondaryButtonTextKu !== undefined ? (data.secondaryButtonTextKu ?? "") : (currentSettings.secondary_button_text_ku ?? ""),
+      secondary_button_url: data.secondaryButtonUrl !== undefined ? data.secondaryButtonUrl : (currentSettings.secondary_button_url ?? null),
+    };
 
-    const imageUrl = (slide.backgroundImage !== undefined && slide.backgroundImage !== "")
-      ? slide.backgroundImage
-      : (existing?.backgroundImage || null);
-
-    const ctaUrl = slide.primaryButtonUrl ?? existing?.primaryButtonUrl ?? null;
-
-    const existingSlidesList = await this.getHeroSlides();
-    const updatedSlideObjects = existingSlidesList.map((s) => {
-      if (s.id !== id) {
-        return {
-          id: s.id,
-          title_en: s.titleEn,
-          title_ar: s.titleAr,
-          title_ku: s.titleKu || null,
-          subtitle_en: s.subtitleEn || null,
-          subtitle_ar: s.subtitleAr || null,
-          subtitle_ku: s.subtitleKu || null,
-          body_en: s.bodyEn || null,
-          body_ar: s.bodyAr || null,
-          body_ku: s.bodyKu || null,
-          primary_button_text_en: s.primaryButtonTextEn || null,
-          primary_button_text_ar: s.primaryButtonTextAr || null,
-          primary_button_text_ku: s.primaryButtonTextKu || null,
-          primary_button_url: s.primaryButtonUrl || null,
-          secondary_button_text_en: s.secondaryButtonTextEn || null,
-          secondary_button_text_ar: s.secondaryButtonTextAr || null,
-          secondary_button_text_ku: s.secondaryButtonTextKu || null,
-          secondary_button_url: s.secondaryButtonUrl || null,
-          background_image: s.backgroundImage || null,
-          overlay_opacity: s.overlayOpacity ?? 40,
-          is_active: s.status === "active",
-          sort_order: s.sortOrder ?? 1,
-          created_at: s.createdAt?.toISOString() || new Date().toISOString(),
-          updated_at: s.updatedAt?.toISOString() || new Date().toISOString(),
-        };
-      }
-
-      return {
-        id: s.id,
-        title_en: slide.titleEn ?? s.titleEn,
-        title_ar: slide.titleAr ?? s.titleAr,
-        title_ku: slide.titleKu !== undefined ? slide.titleKu : (s.titleKu || null),
-        subtitle_en: slide.subtitleEn !== undefined ? slide.subtitleEn : (s.subtitleEn || null),
-        subtitle_ar: slide.subtitleAr !== undefined ? slide.subtitleAr : (s.subtitleAr || null),
-        subtitle_ku: slide.subtitleKu !== undefined ? slide.subtitleKu : (s.subtitleKu || null),
-        body_en: slide.bodyEn !== undefined ? slide.bodyEn : (s.bodyEn || null),
-        body_ar: slide.bodyAr !== undefined ? slide.bodyAr : (s.bodyAr || null),
-        body_ku: slide.bodyKu !== undefined ? slide.bodyKu : (s.bodyKu || null),
-        primary_button_text_en: slide.primaryButtonTextEn ?? s.primaryButtonTextEn ?? null,
-        primary_button_text_ar: slide.primaryButtonTextAr ?? s.primaryButtonTextAr ?? null,
-        primary_button_text_ku: slide.primaryButtonTextKu !== undefined ? slide.primaryButtonTextKu : (s.primaryButtonTextKu || null),
-        primary_button_url: ctaUrl,
-        secondary_button_text_en: slide.secondaryButtonTextEn ?? s.secondaryButtonTextEn ?? null,
-        secondary_button_text_ar: slide.secondaryButtonTextAr ?? s.secondaryButtonTextAr ?? null,
-        secondary_button_text_ku: slide.secondaryButtonTextKu !== undefined ? slide.secondaryButtonTextKu : (s.secondaryButtonTextKu || null),
-        secondary_button_url: slide.secondaryButtonUrl ?? s.secondaryButtonUrl ?? null,
-        background_image: imageUrl,
-        overlay_opacity: slide.overlayOpacity ?? s.overlayOpacity ?? 40,
-        is_active: slide.status !== undefined ? slide.status === "active" : s.status === "active",
-        sort_order: slide.sortOrder ?? s.sortOrder ?? 1,
-        created_at: s.createdAt?.toISOString() || new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-    });
-
-    const { data: existingHeroSection } = await (this.supabase.from("homepage_sections" as any) as any)
-      .select("id, settings")
-      .eq("section_key", "hero")
-      .maybeSingle();
-
-    if (existingHeroSection?.id) {
-      const currentSettings = existingHeroSection.settings || {};
-      await (this.supabase.from("homepage_sections" as any) as any)
-        .update({
-          settings: { ...currentSettings, slides: updatedSlideObjects },
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existingHeroSection.id);
-    }
-
-    await this.logActivity("updated", "homepage_sections", slide.titleEn ?? existing?.titleEn);
-    const updatedList = await this.getHeroSlides();
-    return updatedList.find((s) => s.id === id) || updatedList[0];
-  }
-
-  async deleteHeroSlide(id: string): Promise<void> {
-    const existingSlidesList = await this.getHeroSlides();
-    const remainingSlideObjects = existingSlidesList
-      .filter((s) => s.id !== id)
-      .map((s) => ({
-        id: s.id,
-        title_en: s.titleEn,
-        title_ar: s.titleAr,
-        title_ku: s.titleKu || null,
-        subtitle_en: s.subtitleEn || null,
-        subtitle_ar: s.subtitleAr || null,
-        subtitle_ku: s.subtitleKu || null,
-        body_en: s.bodyEn || null,
-        body_ar: s.bodyAr || null,
-        body_ku: s.bodyKu || null,
-        primary_button_text_en: s.primaryButtonTextEn || null,
-        primary_button_text_ar: s.primaryButtonTextAr || null,
-        primary_button_text_ku: s.primaryButtonTextKu || null,
-        primary_button_url: s.primaryButtonUrl || null,
-        secondary_button_text_en: s.secondaryButtonTextEn || null,
-        secondary_button_text_ar: s.secondaryButtonTextAr || null,
-        secondary_button_text_ku: s.secondaryButtonTextKu || null,
-        secondary_button_url: s.secondaryButtonUrl || null,
-        background_image: s.backgroundImage || null,
-        overlay_opacity: s.overlayOpacity ?? 40,
-        is_active: s.status === "active",
-        sort_order: s.sortOrder ?? 1,
-        created_at: s.createdAt?.toISOString() || new Date().toISOString(),
-        updated_at: s.updatedAt?.toISOString() || new Date().toISOString(),
-      }));
-
-    const { data: existingHeroSection } = await (this.supabase.from("homepage_sections" as any) as any)
-      .select("id, settings")
-      .eq("section_key", "hero")
-      .maybeSingle();
-
-    if (existingHeroSection?.id) {
-      const currentSettings = existingHeroSection.settings || {};
-      await (this.supabase.from("homepage_sections" as any) as any)
-        .update({
-          settings: { ...currentSettings, slides: remainingSlideObjects },
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existingHeroSection.id);
-    }
-
-    await this.logActivity("deleted", "homepage_sections", id);
-  }
-
-  async reorderHeroSlides(orderedIds: string[]): Promise<void> {
-    const existingSlidesList = await this.getHeroSlides();
-    const idToOrder = new Map(orderedIds.map((id, index) => [id, index + 1]));
-
-    const reorderedSlideObjects = existingSlidesList.map((s) => ({
-      id: s.id,
-      title_en: s.titleEn,
-      title_ar: s.titleAr,
-      title_ku: s.titleKu || null,
-      subtitle_en: s.subtitleEn || null,
-      subtitle_ar: s.subtitleAr || null,
-      subtitle_ku: s.subtitleKu || null,
-      body_en: s.bodyEn || null,
-      body_ar: s.bodyAr || null,
-      body_ku: s.bodyKu || null,
-      primary_button_text_en: s.primaryButtonTextEn || null,
-      primary_button_text_ar: s.primaryButtonTextAr || null,
-      primary_button_text_ku: s.primaryButtonTextKu || null,
-      primary_button_url: s.primaryButtonUrl || null,
-      secondary_button_text_en: s.secondaryButtonTextEn || null,
-      secondary_button_text_ar: s.secondaryButtonTextAr || null,
-      secondary_button_text_ku: s.secondaryButtonTextKu || null,
-      secondary_button_url: s.secondaryButtonUrl || null,
-      background_image: s.backgroundImage || null,
-      overlay_opacity: s.overlayOpacity ?? 40,
-      is_active: s.status === "active",
-      sort_order: idToOrder.get(s.id) ?? s.sortOrder ?? 1,
-      created_at: s.createdAt?.toISOString() || new Date().toISOString(),
+    const updatePayload: Record<string, any> = {
+      settings: updatedSettings,
+      updated_by: user?.id ?? null,
       updated_at: new Date().toISOString(),
-    })).sort((a, b) => a.sort_order - b.sort_order);
+    };
 
-    const { data: existingHeroSection } = await (this.supabase.from("homepage_sections" as any) as any)
-      .select("id, settings")
-      .eq("section_key", "hero")
-      .maybeSingle();
-
-    if (existingHeroSection?.id) {
-      const currentSettings = existingHeroSection.settings || {};
-      await (this.supabase.from("homepage_sections" as any) as any)
-        .update({
-          settings: { ...currentSettings, slides: reorderedSlideObjects },
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existingHeroSection.id);
+    if (data.isVisible !== undefined) {
+      updatePayload.is_visible = data.isVisible;
     }
+
+    if (existingRow?.id) {
+      const { error } = await (this.supabase.from("homepage_sections" as any) as any)
+        .update(updatePayload)
+        .eq("section_key", "hero");
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    } else {
+      const { error } = await (this.supabase.from("homepage_sections" as any) as any)
+        .insert({
+          section_key: "hero",
+          is_visible: data.isVisible ?? true,
+          sort_order: 0,
+          ...updatePayload,
+        });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    await this.logActivity("updated", "homepage_sections", `Hero Section: ${data.titleEn ?? "Hero"}`);
+    return this.getHeroSection();
   }
 
   // ============================================================================

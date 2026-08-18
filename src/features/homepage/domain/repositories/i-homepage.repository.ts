@@ -3,7 +3,7 @@
 // Repository CONTRACT (interface) for Homepage Management
 // ==============================================================================
 import type {
-  HeroSlideEntity,
+  HeroSectionEntity,
   AboutPreviewEntity,
   CompanyStatEntity,
   FeaturedServiceEntity,
@@ -16,12 +16,8 @@ import type {
 
 export interface IHomepageRepository {
   // ---------- Hero Section ----------
-  getHeroSlides(): Promise<HeroSlideEntity[]>;
-  getHeroSlideById(id: string): Promise<HeroSlideEntity | null>;
-  createHeroSlide(slide: Omit<HeroSlideEntity, "id" | "createdAt" | "updatedAt">): Promise<HeroSlideEntity>;
-  updateHeroSlide(id: string, slide: Partial<HeroSlideEntity>): Promise<HeroSlideEntity>;
-  deleteHeroSlide(id: string): Promise<void>;
-  reorderHeroSlides(orderedIds: string[]): Promise<void>;
+  getHeroSection(): Promise<HeroSectionEntity>;
+  updateHeroSection(data: Partial<HeroSectionEntity>): Promise<HeroSectionEntity>;
 
   // ---------- About Section ----------
   getAboutPreview(): Promise<AboutPreviewEntity | null>;

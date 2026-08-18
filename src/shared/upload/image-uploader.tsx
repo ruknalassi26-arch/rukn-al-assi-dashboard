@@ -50,8 +50,8 @@ export function ImageUploader({
         toast.error("Please select a valid PDF file");
         return;
       }
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error("PDF file size should not exceed 10MB");
+      if (file.size > 100 * 1024 * 1024) {
+        toast.error("PDF file size should not exceed 100MB");
         return;
       }
     } else if (fileType === "image") {
@@ -59,8 +59,8 @@ export function ImageUploader({
         toast.error("Please select a valid image file (JPEG, PNG, WebP, SVG)");
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image file size should not exceed 5MB");
+      if (file.size > 100 * 1024 * 1024) {
+        toast.error("Image file size should not exceed 100MB");
         return;
       }
     }

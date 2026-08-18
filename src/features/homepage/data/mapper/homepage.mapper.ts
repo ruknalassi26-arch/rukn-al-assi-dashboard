@@ -3,7 +3,7 @@
 // Mappers converting DTOs to Homepage Entity Classes
 // ==============================================================================
 import {
-  HeroSlideEntity,
+  HeroSectionEntity,
   AboutPreviewEntity,
   CompanyStatEntity,
   FeaturedServiceEntity,
@@ -14,7 +14,8 @@ import {
   ContactCtaEntity,
 } from "../../domain/entities/homepage.entity";
 import type {
-  HeroSlideDTO,
+  HomepageSectionDTO,
+  HeroSettingsDTO,
   AboutPreviewDTO,
   CompanyStatDTO,
   FeaturedServiceDTO,
@@ -25,37 +26,64 @@ import type {
   ContactCtaDTO,
 } from "../dto/homepage.dto";
 
-export function toHeroSlideEntity(dto: HeroSlideDTO): HeroSlideEntity {
-  const transList = dto.homepage_hero_slide_translations || [];
-  const en = transList.find((t) => t.language_code === "en") || ({} as any);
-  const ar = transList.find((t) => t.language_code === "ar") || ({} as any);
-  const ku = transList.find((t) => t.language_code === "ku") || ({} as any);
-
-  return new HeroSlideEntity({
+export function toHeroSectionEntity(dto: HomepageSectionDTO): HeroSectionEntity {
+  const settings = (dto.settings || {}) as Partial<HeroSettingsDTO>;
+  return new HeroSectionEntity({
     id: dto.id,
-    titleEn: en.title || "Engineering & Industrial Hydraulic Solutions",
-    titleAr: ar.title || "حلول الهيدروليك والهندسة الصناعية",
-    titleKu: ku.title || null,
-    subtitleEn: en.subtitle || "",
-    subtitleAr: ar.subtitle || "",
-    subtitleKu: ku.subtitle || null,
-    bodyEn: en.body || null,
-    bodyAr: ar.body || null,
-    bodyKu: ku.body || null,
-    primaryButtonTextEn: en.cta_label || "Explore Products",
-    primaryButtonTextAr: ar.cta_label || "استكشف المنتجات",
-    primaryButtonTextKu: ku.cta_label || null,
-    primaryButtonUrl: en.cta_url || ar.cta_url || ku.cta_url || "/products",
-    secondaryButtonTextEn: "Contact Us",
-    secondaryButtonTextAr: "اتصل بنا",
-    secondaryButtonUrl: "/contact",
-    backgroundImage: en.image_url || ar.image_url || ku.image_url || "/hero-banner.jpg",
-    overlayOpacity: dto.overlay_opacity ?? 40,
-    status: dto.is_active ? "active" : "draft",
-    sortOrder: dto.sort_order ?? 0,
-    createdAt: new Date(dto.created_at || Date.now()),
-    updatedAt: new Date(dto.updated_at || Date.now()),
+    sectionKey: dto.section_key ?? "hero",
+    isVisible: dto.is_visible ?? true,
+    mediaType: settings.media_type === "image" ? "image" : "video",
+    videoUrl: settings.video_url ?? null,
+    videoPosterUrl: settings.video_poster_url ?? null,
+    videoMobileUrl: settings.video_mobile_url ?? null,
+    overlayOpacity: typeof settings.overlay_opacity === "number" ? settings.overlay_opacity : 40,
+    titleEn: settings.title_en ?? "",
+    titleAr: settings.title_ar ?? "",
+    titleKu: settings.title_ku ?? null,
+    subtitleEn: settings.subtitle_en ?? null,
+    subtitleAr: settings.subtitle_ar ?? null,
+    subtitleKu: settings.subtitle_ku ?? null,
+    bodyEn: settings.body_en ?? null,
+    bodyAr: settings.body_ar ?? null,
+    bodyKu: settings.body_ku ?? null,
+    primaryButtonTextEn: settings.primary_button_text_en ?? null,
+    primaryButtonTextAr: settings.primary_button_text_ar ?? null,
+    primaryButtonTextKu: settings.primary_button_text_ku ?? null,
+    primaryButtonUrl: settings.primary_button_url ?? null,
+    secondaryButtonTextEn: settings.secondary_button_text_en ?? null,
+    secondaryButtonTextAr: settings.secondary_button_text_ar ?? null,
+    secondaryButtonTextKu: settings.secondary_button_text_ku ?? null,
+    secondaryButtonUrl: settings.secondary_button_url ?? null,
+    updatedBy: dto.updated_by ?? null,
+    updatedAt: dto.updated_at ? new Date(dto.updated_at) : new Date(),
   });
+}
+
+export function toHeroSettingsDto(entity: Partial<HeroSectionEntity>): HeroSettingsDTO {
+  return {
+    media_type: entity.mediaType === "image" ? "image" : "video",
+    video_url: entity.videoUrl ?? null,
+    video_poster_url: entity.videoPosterUrl ?? null,
+    video_mobile_url: entity.videoMobileUrl ?? null,
+    overlay_opacity: entity.overlayOpacity ?? 40,
+    title_en: entity.titleEn ?? "",
+    title_ar: entity.titleAr ?? "",
+    title_ku: entity.titleKu ?? "",
+    subtitle_en: entity.subtitleEn ?? "",
+    subtitle_ar: entity.subtitleAr ?? "",
+    subtitle_ku: entity.subtitleKu ?? "",
+    body_en: entity.bodyEn ?? "",
+    body_ar: entity.bodyAr ?? "",
+    body_ku: entity.bodyKu ?? "",
+    primary_button_text_en: entity.primaryButtonTextEn ?? "",
+    primary_button_text_ar: entity.primaryButtonTextAr ?? "",
+    primary_button_text_ku: entity.primaryButtonTextKu ?? "",
+    primary_button_url: entity.primaryButtonUrl ?? "",
+    secondary_button_text_en: entity.secondaryButtonTextEn ?? "",
+    secondary_button_text_ar: entity.secondaryButtonTextAr ?? "",
+    secondary_button_text_ku: entity.secondaryButtonTextKu ?? "",
+    secondary_button_url: entity.secondaryButtonUrl ?? null,
+  };
 }
 
 export function toAboutPreviewEntity(dto: AboutPreviewDTO): AboutPreviewEntity {

@@ -3,10 +3,18 @@
 // Domain Entity Classes for Homepage Management
 // ==============================================================================
 
+export type HeroMediaType = "video" | "image";
 export type SlideStatus = "active" | "draft";
 
-export interface HeroSlideProps {
+export interface HeroSectionProps {
   id: string;
+  sectionKey?: string;
+  isVisible: boolean;
+  mediaType: HeroMediaType;
+  videoUrl: string | null;
+  videoPosterUrl: string | null;
+  videoMobileUrl: string | null;
+  overlayOpacity: number;
   titleEn: string;
   titleAr: string;
   titleKu?: string | null;
@@ -24,16 +32,19 @@ export interface HeroSlideProps {
   secondaryButtonTextAr?: string | null;
   secondaryButtonTextKu?: string | null;
   secondaryButtonUrl?: string | null;
-  backgroundImage: string | null;
-  overlayOpacity: number;
-  status: SlideStatus;
-  sortOrder: number;
-  createdAt: Date;
-  updatedAt: Date;
+  updatedBy?: string | null;
+  updatedAt?: Date;
 }
 
-export class HeroSlideEntity {
+export class HeroSectionEntity {
   public readonly id: string;
+  public readonly sectionKey: string;
+  public readonly isVisible: boolean;
+  public readonly mediaType: HeroMediaType;
+  public readonly videoUrl: string | null;
+  public readonly videoPosterUrl: string | null;
+  public readonly videoMobileUrl: string | null;
+  public readonly overlayOpacity: number;
   public readonly titleEn: string;
   public readonly titleAr: string;
   public readonly titleKu: string | null;
@@ -51,15 +62,18 @@ export class HeroSlideEntity {
   public readonly secondaryButtonTextAr: string | null;
   public readonly secondaryButtonTextKu: string | null;
   public readonly secondaryButtonUrl: string | null;
-  public readonly backgroundImage: string | null;
-  public readonly overlayOpacity: number;
-  public readonly status: SlideStatus;
-  public readonly sortOrder: number;
-  public readonly createdAt: Date;
+  public readonly updatedBy: string | null;
   public readonly updatedAt: Date;
 
-  constructor(props: HeroSlideProps) {
+  constructor(props: HeroSectionProps) {
     this.id = props.id;
+    this.sectionKey = props.sectionKey ?? "hero";
+    this.isVisible = props.isVisible ?? true;
+    this.mediaType = props.mediaType ?? "video";
+    this.videoUrl = props.videoUrl ?? null;
+    this.videoPosterUrl = props.videoPosterUrl ?? null;
+    this.videoMobileUrl = props.videoMobileUrl ?? null;
+    this.overlayOpacity = props.overlayOpacity ?? 40;
     this.titleEn = props.titleEn;
     this.titleAr = props.titleAr;
     this.titleKu = props.titleKu ?? null;
@@ -69,24 +83,20 @@ export class HeroSlideEntity {
     this.bodyEn = props.bodyEn ?? null;
     this.bodyAr = props.bodyAr ?? null;
     this.bodyKu = props.bodyKu ?? null;
-    this.primaryButtonTextEn = props.primaryButtonTextEn;
-    this.primaryButtonTextAr = props.primaryButtonTextAr;
+    this.primaryButtonTextEn = props.primaryButtonTextEn ?? null;
+    this.primaryButtonTextAr = props.primaryButtonTextAr ?? null;
     this.primaryButtonTextKu = props.primaryButtonTextKu ?? null;
-    this.primaryButtonUrl = props.primaryButtonUrl;
+    this.primaryButtonUrl = props.primaryButtonUrl ?? null;
     this.secondaryButtonTextEn = props.secondaryButtonTextEn ?? null;
     this.secondaryButtonTextAr = props.secondaryButtonTextAr ?? null;
     this.secondaryButtonTextKu = props.secondaryButtonTextKu ?? null;
     this.secondaryButtonUrl = props.secondaryButtonUrl ?? null;
-    this.backgroundImage = props.backgroundImage;
-    this.overlayOpacity = props.overlayOpacity;
-    this.status = props.status;
-    this.sortOrder = props.sortOrder;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+    this.updatedBy = props.updatedBy ?? null;
+    this.updatedAt = props.updatedAt ?? new Date();
   }
 
   public get isActive(): boolean {
-    return this.status === "active";
+    return this.isVisible;
   }
 }
 
