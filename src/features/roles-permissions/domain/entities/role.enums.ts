@@ -26,6 +26,8 @@ export type ResourceCode =
   | "settings"
   | "activity_log"
   | "audit"
+  | "employees"
+  | "vacation"
   | string;
 
 export type ModuleCode = ResourceCode;
@@ -54,4 +56,6 @@ export const ALL_RESOURCES: ResourceCode[] = [
   "roles",
   "settings",
   "activity_log",
+  "employees",
+  "vacation",
 ];

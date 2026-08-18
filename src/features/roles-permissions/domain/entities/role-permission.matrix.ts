@@ -53,9 +53,11 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
   {
     name: "HR Manager",
     slug: "hr_manager",
-    description: "Can manage dashboard and career applications, view analytics. Cannot access roles, users, or settings.",
+    description: "Can manage dashboard, employees, vacations, and career applications, view analytics. Cannot access roles, users, or settings.",
     permissions: [
       "dashboard:view", "dashboard:manage",
+      "employees:view", "employees:manage",
+      "vacation:view", "vacation:manage",
       "careers:view", "careers:manage",
       "analytics:view",
     ],
