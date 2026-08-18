@@ -33,16 +33,16 @@ export async function POST(request: Request) {
       password,
     } = body;
 
-    if (!email || !fullName) {
+    if (!email || !fullName || !password || password.trim().length < 6) {
       return NextResponse.json(
-        { error: "Full Name and Email are required." },
+        { error: "Full Name, Email, and Password (at least 6 characters) are required." },
         { status: 400 }
       );
     }
 
     // 1. Create or invite user in Supabase Auth
     let authUserId: string | null = null;
-    const userPassword = password && password.trim().length >= 6 ? password.trim() : `Emp_${Math.random().toString(36).slice(-8)}!Aa1`;
+    const userPassword = password.trim();
 
     const { data: authUser, error: createAuthError } = await adminSupabase.auth.admin.createUser({
       email: email.trim().toLowerCase(),

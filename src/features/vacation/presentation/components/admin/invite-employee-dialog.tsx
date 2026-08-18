@@ -25,12 +25,12 @@ import {
 
 const inviteSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
   phone: z.string().optional(),
   department: z.string().optional(),
   jobTitle: z.string().optional(),
   employmentStartDate: z.string().optional(),
-  password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type InviteFormValues = z.infer<typeof inviteSchema>;
@@ -176,11 +176,11 @@ export function InviteEmployeeDialog({
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="password" className="text-xs font-medium">{tForm("initialPassword")}</Label>
+            <Label htmlFor="password" className="text-xs font-medium">{tForm("initialPassword")} *</Label>
             <Input
               id="password"
               type="password"
-              placeholder="Leave blank to generate automatically"
+              placeholder="••••••••"
               {...register("password")}
             />
             {errors.password && (

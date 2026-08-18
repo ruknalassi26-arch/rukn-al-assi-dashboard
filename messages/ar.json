@@ -1623,7 +1623,7 @@
       "department": "القسم",
       "jobTitle": "المسمى الوظيفي",
       "employmentStartDate": "تاريخ بدء العمل",
-      "initialPassword": "كلمة المرور الأولية",
+      "initialPassword": "كلمة المرور",
       "registerButton": "تسجيل الموظف",
       "registering": "جارٍ تسجيل الموظف...",
       "successMessage": "تم إنشاء ملف الموظف بنجاح",

@@ -1603,7 +1603,7 @@
       "department": "Department",
       "jobTitle": "Job Title",
       "employmentStartDate": "Employment Start Date",
-      "initialPassword": "Initial Password",
+      "initialPassword": "Password",
       "registerButton": "Register Employee",
       "registering": "Registering Employee...",
       "successMessage": "Employee profile created successfully",
