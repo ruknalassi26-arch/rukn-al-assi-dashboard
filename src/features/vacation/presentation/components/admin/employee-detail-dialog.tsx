@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // features/vacation/presentation/components/admin/employee-detail-dialog.tsx
-// Dialog showing Employee Profile, Vacation History, Pending Requests & Action
+// Dialog showing Employee Profile, Vacation History, Pending Requests & Action with i18n
 // ==============================================================================
 import { useState } from "react";
 import {
@@ -27,6 +27,7 @@ import {
   TabsContent,
   ScrollArea,
 } from "@shared/ui";
+import { useTranslations } from "next-intl";
 import type { EmployeeProfileEntity } from "../../../domain/entities/employee.entity";
 import type { VacationRequestEntity } from "../../../domain/entities/vacation.entity";
 import { useAdminVacationRequests } from "../../hooks/use-vacation";
@@ -53,6 +54,8 @@ export function EmployeeDetailDialog({
   onClose,
   employee,
 }: EmployeeDetailDialogProps) {
+  const t = useTranslations("employees");
+  const tVac = useTranslations("vacation");
   const [isAddVacationOpen, setIsAddVacationOpen] = useState(false);
 
   const { data: requests = [], isLoading: isLoadingRequests } = useAdminVacationRequests(
@@ -80,7 +83,7 @@ export function EmployeeDetailDialog({
                   <DialogTitle className="text-base font-bold flex items-center gap-2">
                     {employee.fullName}
                     <Badge variant={employee.isActive ? "default" : "secondary"} className="text-[10px]">
-                      {employee.isActive ? "Active" : "Inactive"}
+                      {employee.isActive ? t("active") : t("inactive")}
                     </Badge>
                   </DialogTitle>
                   <DialogDescription className="text-xs">
@@ -95,19 +98,19 @@ export function EmployeeDetailDialog({
                 onClick={() => setIsAddVacationOpen(true)}
               >
                 <PlusCircle className="h-3.5 w-3.5" />
-                Add Vacation on Behalf
+                {t("dialog.addVacation")}
               </Button>
             </div>
           </DialogHeader>
 
           <Tabs defaultValue="profile" className="flex-1 flex flex-col min-h-0 pt-2">
             <TabsList className="grid grid-cols-3 w-full">
-              <TabsTrigger value="profile" className="text-xs">Profile Details</TabsTrigger>
+              <TabsTrigger value="profile" className="text-xs">{t("dialog.profileDetails")}</TabsTrigger>
               <TabsTrigger value="pending" className="text-xs">
-                Pending Requests ({pendingRequests.length})
+                {t("dialog.pendingRequests")} ({pendingRequests.length})
               </TabsTrigger>
               <TabsTrigger value="history" className="text-xs">
-                History ({requests.length})
+                {t("dialog.vacationHistory")} ({requests.length})
               </TabsTrigger>
             </TabsList>
 
@@ -115,34 +118,34 @@ export function EmployeeDetailDialog({
               <div className="grid grid-cols-2 gap-3 bg-muted/40 p-3.5 rounded-lg border text-xs">
                 <div className="flex items-center gap-2">
                   <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-muted-foreground">Email:</span>
+                  <span className="text-muted-foreground">{t("dialog.email")}:</span>
                   <span className="font-medium">{employee.email}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-muted-foreground">Phone:</span>
-                  <span className="font-medium">{employee.phone || "Not set"}</span>
+                  <span className="text-muted-foreground">{t("dialog.phone")}:</span>
+                  <span className="font-medium">{employee.phone || "—"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Building className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-muted-foreground">Department:</span>
+                  <span className="text-muted-foreground">{t("dialog.department")}:</span>
                   <span className="font-medium">{employee.department || "General"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-muted-foreground">Job Title:</span>
+                  <span className="text-muted-foreground">{t("dialog.jobTitle")}:</span>
                   <span className="font-medium">{employee.jobTitle || "Employee"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-muted-foreground">Start Date:</span>
+                  <span className="text-muted-foreground">{t("dialog.startDate")}:</span>
                   <span className="font-medium">
                     {formatDate(employee.employmentStartDate)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-muted-foreground">Registered:</span>
+                  <span className="text-muted-foreground">{t("dialog.registered")}:</span>
                   <span className="font-medium">
                     {formatDate(employee.createdAt)}
                   </span>
@@ -151,11 +154,11 @@ export function EmployeeDetailDialog({
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="border rounded-lg p-3 bg-card shadow-sm text-center">
-                  <span className="text-xs text-muted-foreground">Approved Leaves</span>
+                  <span className="text-xs text-muted-foreground">{t("dialog.approvedLeaves")}</span>
                   <p className="text-xl font-bold text-primary mt-1">{approvedRequests.length}</p>
                 </div>
                 <div className="border rounded-lg p-3 bg-card shadow-sm text-center">
-                  <span className="text-xs text-muted-foreground">Pending Approval</span>
+                  <span className="text-xs text-muted-foreground">{t("tabs.pending")}</span>
                   <p className="text-xl font-bold text-amber-500 mt-1">{pendingRequests.length}</p>
                 </div>
               </div>
@@ -165,7 +168,7 @@ export function EmployeeDetailDialog({
               <ScrollArea className="h-[260px] pr-2">
                 {pendingRequests.length === 0 ? (
                   <div className="text-center py-10 text-xs text-muted-foreground">
-                    No pending vacation requests for this employee.
+                    {t("dialog.noPendingRequests")}
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -180,11 +183,11 @@ export function EmployeeDetailDialog({
                             <div className="flex items-center gap-2 font-semibold">
                               <span>{typeName}</span>
                               <Badge variant="outline" className="text-[10px] text-amber-500 border-amber-500/30 bg-amber-500/10">
-                                Pending
+                                {tVac("tabs.pending")}
                               </Badge>
                             </div>
                             <p className="text-muted-foreground mt-0.5">
-                              {formatDate(req.fromDate)} &rarr; {formatDate(req.toDate)} ({req.requestedDays} days)
+                              {formatDate(req.fromDate)} &rarr; {formatDate(req.toDate)} ({req.requestedDays} {tVac("review.days")})
                             </p>
                             {req.note && <p className="text-muted-foreground italic mt-0.5">&ldquo;{req.note}&rdquo;</p>}
                           </div>
@@ -199,9 +202,9 @@ export function EmployeeDetailDialog({
             <TabsContent value="history" className="flex-1 min-h-0 pt-2">
               <ScrollArea className="h-[260px] pr-2">
                 {isLoadingRequests ? (
-                  <div className="text-center py-10 text-xs text-muted-foreground">Loading history...</div>
+                  <div className="text-center py-10 text-xs text-muted-foreground">Loading...</div>
                 ) : requests.length === 0 ? (
-                  <div className="text-center py-10 text-xs text-muted-foreground">No vacation history found.</div>
+                  <div className="text-center py-10 text-xs text-muted-foreground">{t("dialog.noHistoryFound")}</div>
                 ) : (
                   <div className="space-y-2">
                     {requests.map((req: VacationRequestEntity) => {
@@ -228,7 +231,7 @@ export function EmployeeDetailDialog({
                               </Badge>
                             </div>
                             <p className="text-muted-foreground mt-0.5">
-                              {formatDate(req.fromDate)} &rarr; {formatDate(req.toDate)} ({req.requestedDays} days)
+                              {formatDate(req.fromDate)} &rarr; {formatDate(req.toDate)} ({req.requestedDays} {tVac("review.days")})
                             </p>
                           </div>
                           <span className="text-[11px] text-muted-foreground">

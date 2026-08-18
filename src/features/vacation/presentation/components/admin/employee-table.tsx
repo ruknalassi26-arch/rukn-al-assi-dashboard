@@ -22,6 +22,7 @@ import {
 } from "@shared/ui";
 import { Search, Mail, Phone, Building2, Briefcase, Calendar, Eye } from "lucide-react";
 import { DataTablePagination } from "@shared/components";
+import { useTranslations } from "next-intl";
 import type { EmployeeProfileEntity } from "../../../domain/entities/employee.entity";
 import { EmployeeDetailDialog } from "./employee-detail-dialog";
 
@@ -44,6 +45,7 @@ function formatDisplayDate(dateStr: string | null | undefined): string {
 }
 
 export function EmployeeTable({ employees, isLoading }: EmployeeTableProps) {
+  const t = useTranslations("employees");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeProfileEntity | null>(null);
@@ -73,14 +75,14 @@ export function EmployeeTable({ employees, isLoading }: EmployeeTableProps) {
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search by name, email, department, job..."
+            placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-8 text-xs h-8"
           />
         </div>
         <div className="text-xs text-muted-foreground">
-          Total Employees: <span className="font-semibold text-foreground">{employees.length}</span>
+          {t("totalEmployees")}: <span className="font-semibold text-foreground">{employees.length}</span>
         </div>
       </div>
 
@@ -89,12 +91,12 @@ export function EmployeeTable({ employees, isLoading }: EmployeeTableProps) {
         <Table>
           <TableHeader className="bg-muted/40">
             <TableRow>
-              <TableHead className="text-xs font-semibold">Employee</TableHead>
-              <TableHead className="text-xs font-semibold">Department & Job</TableHead>
-              <TableHead className="text-xs font-semibold">Contact Info</TableHead>
-              <TableHead className="text-xs font-semibold">Start Date</TableHead>
-              <TableHead className="text-xs font-semibold">Status</TableHead>
-              <TableHead className="text-xs font-semibold text-end">Actions</TableHead>
+              <TableHead className="text-xs font-semibold">{t("table.employee")}</TableHead>
+              <TableHead className="text-xs font-semibold">{t("table.departmentJob")}</TableHead>
+              <TableHead className="text-xs font-semibold">{t("table.contactInfo")}</TableHead>
+              <TableHead className="text-xs font-semibold">{t("table.startDate")}</TableHead>
+              <TableHead className="text-xs font-semibold">{t("table.status")}</TableHead>
+              <TableHead className="text-xs font-semibold text-end">{t("table.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -109,7 +111,7 @@ export function EmployeeTable({ employees, isLoading }: EmployeeTableProps) {
             ) : paginatedEmployees.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground text-xs">
-                  No employee profiles found.
+                  {t("noEmployeesFound")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -184,11 +186,11 @@ export function EmployeeTable({ employees, isLoading }: EmployeeTableProps) {
                   <TableCell>
                     {emp.isActive ? (
                       <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px]">
-                        Active
+                        {t("active")}
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="text-muted-foreground text-[10px]">
-                        Inactive
+                        {t("inactive")}
                       </Badge>
                     )}
                   </TableCell>
@@ -202,7 +204,7 @@ export function EmployeeTable({ employees, isLoading }: EmployeeTableProps) {
                       onClick={() => setSelectedEmployee(emp)}
                     >
                       <Eye className="h-3.5 w-3.5" />
-                      Details
+                      {t("details")}
                     </Button>
                   </TableCell>
                 </TableRow>

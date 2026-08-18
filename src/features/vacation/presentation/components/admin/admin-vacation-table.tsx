@@ -1,7 +1,7 @@
 "use client";
 // ==============================================================================
 // features/vacation/presentation/components/admin/admin-vacation-table.tsx
-// Table of Vacation Requests for Admin review and management with pagination
+// Table of Vacation Requests for Admin review and management with pagination & i18n
 // ==============================================================================
 
 import { useState } from "react";
@@ -29,6 +29,7 @@ import {
   Eye,
 } from "lucide-react";
 import { DataTablePagination } from "@shared/components";
+import { useTranslations } from "next-intl";
 import type { VacationRequestEntity } from "../../../domain/entities/vacation.entity";
 import { ReviewVacationDialog } from "./review-vacation-dialog";
 import { Can } from "@features/roles-permissions/presentation/components";
@@ -59,6 +60,7 @@ export function AdminVacationTable({
   activeStatus,
   onStatusChange,
 }: AdminVacationTableProps) {
+  const t = useTranslations("vacation");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState<VacationRequestEntity | null>(null);
@@ -91,37 +93,37 @@ export function AdminVacationTable({
       case "approved":
         return (
           <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 gap-1 text-[11px]">
-            <CheckCircle className="h-3 w-3" /> Approved
+            <CheckCircle className="h-3 w-3" /> {t("tabs.approved")}
           </Badge>
         );
       case "rejected":
         return (
           <Badge variant="destructive" className="gap-1 text-[11px]">
-            <XCircle className="h-3 w-3" /> Rejected
+            <XCircle className="h-3 w-3" /> {t("tabs.rejected")}
           </Badge>
         );
       case "cancelled":
         return (
           <Badge variant="secondary" className="gap-1 text-[11px] text-muted-foreground">
-            <Ban className="h-3 w-3" /> Cancelled
+            <Ban className="h-3 w-3" /> {t("tabs.cancelled")}
           </Badge>
         );
       case "pending":
       default:
         return (
           <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 gap-1 text-[11px]">
-            <Clock className="h-3 w-3" /> Pending
+            <Clock className="h-3 w-3" /> {t("tabs.pending")}
           </Badge>
         );
     }
   };
 
   const statusTabs = [
-    { label: "All", value: "all" },
-    { label: "Pending", value: "pending" },
-    { label: "Approved", value: "approved" },
-    { label: "Rejected", value: "rejected" },
-    { label: "Cancelled", value: "cancelled" },
+    { label: t("tabs.all"), value: "all" },
+    { label: t("tabs.pending"), value: "pending" },
+    { label: t("tabs.approved"), value: "approved" },
+    { label: t("tabs.rejected"), value: "rejected" },
+    { label: t("tabs.cancelled"), value: "cancelled" },
   ];
 
   return (
@@ -147,7 +149,7 @@ export function AdminVacationTable({
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search employee or type..."
+            placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-8 text-xs h-8"
@@ -160,13 +162,13 @@ export function AdminVacationTable({
         <Table>
           <TableHeader className="bg-muted/40">
             <TableRow>
-              <TableHead className="text-xs font-semibold">Employee</TableHead>
-              <TableHead className="text-xs font-semibold">Leave Type</TableHead>
-              <TableHead className="text-xs font-semibold">Dates</TableHead>
-              <TableHead className="text-xs font-semibold text-center">Days</TableHead>
-              <TableHead className="text-xs font-semibold">Return Date</TableHead>
-              <TableHead className="text-xs font-semibold">Status</TableHead>
-              <TableHead className="text-xs font-semibold text-right">Actions</TableHead>
+              <TableHead className="text-xs font-semibold">{t("table.employee")}</TableHead>
+              <TableHead className="text-xs font-semibold">{t("table.leaveType")}</TableHead>
+              <TableHead className="text-xs font-semibold">{t("table.dates")}</TableHead>
+              <TableHead className="text-xs font-semibold text-center">{t("table.days")}</TableHead>
+              <TableHead className="text-xs font-semibold">{t("table.returnDate")}</TableHead>
+              <TableHead className="text-xs font-semibold">{t("table.status")}</TableHead>
+              <TableHead className="text-xs font-semibold text-end">{t("table.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -181,7 +183,7 @@ export function AdminVacationTable({
             ) : paginatedRequests.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-muted-foreground text-xs">
-                  No vacation requests found matching your filter.
+                  {t("table.noRequestsFound")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -245,7 +247,7 @@ export function AdminVacationTable({
                     <TableCell>{getStatusBadge(req.status)}</TableCell>
 
                     {/* Actions */}
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <Can access="vacation:manage">
                         {req.status === "pending" ? (
                           <Button
@@ -257,7 +259,7 @@ export function AdminVacationTable({
                               setIsReviewOpen(true);
                             }}
                           >
-                            Review
+                            {t("table.review")}
                           </Button>
                         ) : (
                           <Button
@@ -269,7 +271,7 @@ export function AdminVacationTable({
                               setIsReviewOpen(true);
                             }}
                           >
-                            <Eye className="h-3.5 w-3.5 mr-1" /> View
+                            <Eye className="h-3.5 w-3.5 mr-1" /> {t("table.view")}
                           </Button>
                         )}
                       </Can>

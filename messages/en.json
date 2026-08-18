@@ -1575,5 +1575,111 @@
     "clientNameAr": "Client Name (Arabic)",
     "clientNameKu": "Client Name (Kurdish)",
     "websiteUrl": "Website / Partner URL"
+  },
+  "employees": {
+    "title": "Employee Directory",
+    "subtitle": "Manage company employees, job titles, departments, and profile records.",
+    "inviteEmployee": "Invite Employee",
+    "inviteDescription": "Register a new employee profile with authentication credentials and job info.",
+    "refresh": "Refresh",
+    "searchPlaceholder": "Search by name, email, department, job...",
+    "totalEmployees": "Total Employees",
+    "noEmployeesFound": "No employee profiles found.",
+    "active": "Active",
+    "inactive": "Inactive",
+    "details": "Details",
+    "table": {
+      "employee": "Employee",
+      "departmentJob": "Department & Job",
+      "contactInfo": "Contact Info",
+      "startDate": "Start Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "form": {
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "department": "Department",
+      "jobTitle": "Job Title",
+      "employmentStartDate": "Employment Start Date",
+      "initialPassword": "Initial Password",
+      "registerButton": "Register Employee",
+      "registering": "Registering Employee...",
+      "successMessage": "Employee profile created successfully",
+      "errorMessage": "Failed to create employee profile"
+    },
+    "dialog": {
+      "profileDetails": "Employee Profile Details",
+      "pendingRequests": "Pending Requests",
+      "vacationHistory": "Vacation History",
+      "approvedLeaves": "Approved Leaves",
+      "addVacation": "Add Vacation on Behalf",
+      "close": "Close",
+      "department": "Department",
+      "jobTitle": "Job Title",
+      "email": "Email",
+      "phone": "Phone",
+      "startDate": "Start Date",
+      "registered": "Registered",
+      "noPendingRequests": "No pending vacation requests.",
+      "noHistoryFound": "No vacation history found for this employee."
+    }
+  },
+  "vacation": {
+    "title": "Vacation & Leave Management",
+    "subtitle": "Review employee vacation requests, track balances, and approve leaves.",
+    "addVacation": "Add Vacation for Employee",
+    "searchPlaceholder": "Search employee or type...",
+    "tabs": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "table": {
+      "employee": "Employee",
+      "leaveType": "Leave Type",
+      "dates": "Dates",
+      "days": "Days",
+      "returnDate": "Return Date",
+      "status": "Status",
+      "actions": "Actions",
+      "review": "Review",
+      "view": "View",
+      "noRequestsFound": "No vacation requests found matching your filter."
+    },
+    "review": {
+      "title": "Review Vacation Request",
+      "employee": "Employee",
+      "leaveType": "Leave Type",
+      "period": "Period",
+      "duration": "Duration",
+      "days": "Days",
+      "returnToWork": "Return to Work",
+      "employeeNote": "Employee Note",
+      "currentStatus": "Current Status",
+      "reviewerNote": "Reviewer Note / Feedback (Optional)",
+      "reviewerNotePlaceholder": "e.g. Approved as discussed...",
+      "close": "Close",
+      "reject": "Reject",
+      "approve": "Approve",
+      "approvedSuccess": "Vacation request approved successfully",
+      "rejectedSuccess": "Vacation request rejected successfully"
+    },
+    "employeePortal": {
+      "title": "My Vacation & Leave",
+      "subtitle": "Request vacation days, view policy balances, and check status.",
+      "applyLeave": "Apply for Leave",
+      "allocated": "Allocated",
+      "used": "Used",
+      "pending": "Pending",
+      "remaining": "Remaining",
+      "historyTitle": "Vacation History",
+      "viewAllHistory": "View Full History",
+      "cancelRequest": "Cancel Request",
+      "confirmCancel": "Are you sure you want to cancel this vacation request?"
+    }
   }
 }

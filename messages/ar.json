@@ -1595,5 +1595,111 @@
     "clientNameAr": "اسم العميل (بالعربية)",
     "clientNameKu": "اسم العميل (بالكردية)",
     "websiteUrl": "رابط الموقع الالكتروني / الشريك"
+  },
+  "employees": {
+    "title": "دليل الموظفين",
+    "subtitle": "إدارة سجلات الموظفين، المسميات الوظيفية، الأقسام، وبيانات الملفات الشخصية.",
+    "inviteEmployee": "إضافة موظف",
+    "inviteDescription": "تسجيل ملف موظف جديد مع بيانات تسجيل الدخول وتفاصيل العمل.",
+    "refresh": "تحديث",
+    "searchPlaceholder": "البحث بالاسم، البريد، القسم، المسمى الوظيفي...",
+    "totalEmployees": "إجمالي الموظفين",
+    "noEmployeesFound": "لم يتم العثور على ملفات موظفين.",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "details": "التفاصيل",
+    "table": {
+      "employee": "الموظف",
+      "departmentJob": "القسم والوظيفة",
+      "contactInfo": "معلومات الاتصال",
+      "startDate": "تاريخ البدء",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "form": {
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "department": "القسم",
+      "jobTitle": "المسمى الوظيفي",
+      "employmentStartDate": "تاريخ بدء العمل",
+      "initialPassword": "كلمة المرور الأولية",
+      "registerButton": "تسجيل الموظف",
+      "registering": "جارٍ تسجيل الموظف...",
+      "successMessage": "تم إنشاء ملف الموظف بنجاح",
+      "errorMessage": "فشل إنشاء ملف الموظف"
+    },
+    "dialog": {
+      "profileDetails": "تفاصيل ملف الموظف",
+      "pendingRequests": "الطلبات المعلقة",
+      "vacationHistory": "سجل الإجازات",
+      "approvedLeaves": "الإجازات المعتمدة",
+      "addVacation": "تقديم إجازة نيابة عن الموظف",
+      "close": "إغلاق",
+      "department": "القسم",
+      "jobTitle": "المسمى الوظيفي",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "startDate": "تاريخ البدء",
+      "registered": "تاريخ التسجيل",
+      "noPendingRequests": "لا توجد طلبات إجازة معلقة.",
+      "noHistoryFound": "لا يوجد سجل إجازات لهذا الموظف."
+    }
+  },
+  "vacation": {
+    "title": "إدارة الإجازات والمغادرات",
+    "subtitle": "مراجعة طلبات إجازات الموظفين، متابعة الأرصدة، واعتماد الإجازات.",
+    "addVacation": "إضافة إجازة لموظف",
+    "searchPlaceholder": "البحث عن موظف أو نوع الإجازة...",
+    "tabs": {
+      "all": "الكل",
+      "pending": "معلق",
+      "approved": "معتمد",
+      "rejected": "مرفوض",
+      "cancelled": "ملغى"
+    },
+    "table": {
+      "employee": "الموظف",
+      "leaveType": "نوع الإجازة",
+      "dates": "التواريخ",
+      "days": "الأيام",
+      "returnDate": "تاريخ العودة للعمل",
+      "status": "الحالة",
+      "actions": "الإجراءات",
+      "review": "مراجعة",
+      "view": "عرض",
+      "noRequestsFound": "لا توجد طلبات إجازة مطابقة للبحث."
+    },
+    "review": {
+      "title": "مراجعة طلب الإجازة",
+      "employee": "الموظف",
+      "leaveType": "نوع الإجازة",
+      "period": "الفترة",
+      "duration": "المدة",
+      "days": "أيام",
+      "returnToWork": "العودة للعمل",
+      "employeeNote": "ملاحظة الموظف",
+      "currentStatus": "الحالة الحالية",
+      "reviewerNote": "ملاحظة / رد المسؤول (اختياري)",
+      "reviewerNotePlaceholder": "مثال: تمت الموافقة بعد التنسيق مع مدير الفريق...",
+      "close": "إغلاق",
+      "reject": "رفض",
+      "approve": "اعتماد",
+      "approvedSuccess": "تم اعتماد طلب الإجازة بنجاح",
+      "rejectedSuccess": "تم رفض طلب الإجازة بنجاح"
+    },
+    "employeePortal": {
+      "title": "إجازاتي ومغادراتي",
+      "subtitle": "طلب إجازات جديدة، متابعة رصيد السياسات، والتحقق من حالة الطلبات.",
+      "applyLeave": "تقديم طلب إجازة",
+      "allocated": "المخصص",
+      "used": "المستخدم",
+      "pending": "قيد المراجعة",
+      "remaining": "المتبقي",
+      "historyTitle": "سجل الإجازات",
+      "viewAllHistory": "عرض كامل السجل",
+      "cancelRequest": "إلغاء الطلب",
+      "confirmCancel": "هل أنت متأكد من رغبتك في إلغاء هذا الطلب؟"
+    }
   }
 }

@@ -1,6 +1,7 @@
+"use client";
 // ==============================================================================
 // features/vacation/presentation/components/admin/review-vacation-dialog.tsx
-// Modal for approving or rejecting an employee vacation request
+// Modal for approving or rejecting an employee vacation request with i18n
 // ==============================================================================
 
 import { useState } from "react";
@@ -15,7 +16,8 @@ import {
   Label,
   Badge,
 } from "@shared/ui";
-import { CheckCircle2, XCircle, Calendar, User, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, Calendar, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { VacationRequestEntity } from "../../../domain/entities/vacation.entity";
 import { useAdminReviewVacationRequest } from "../../hooks/use-vacation";
 
@@ -30,6 +32,7 @@ export function ReviewVacationDialog({
   onClose,
   request,
 }: ReviewVacationDialogProps) {
+  const t = useTranslations("vacation.review");
   const [reviewerNote, setReviewerNote] = useState("");
   const reviewMutation = useAdminReviewVacationRequest();
 
@@ -55,7 +58,7 @@ export function ReviewVacationDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
-            Review Vacation Request
+            {t("title")}
           </DialogTitle>
         </DialogHeader>
 
@@ -66,38 +69,38 @@ export function ReviewVacationDialog({
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span className="font-semibold text-foreground">
-                  {request.employee?.fullName || "Employee"}
+                  {request.employee?.fullName || t("employee")}
                 </span>
               </div>
               <Badge variant="outline" className="font-normal text-xs">
-                {request.vacationType?.name || "Vacation"}
+                {request.vacationType?.name || t("leaveType")}
               </Badge>
             </div>
 
             {request.employee?.department && (
               <p className="text-xs text-muted-foreground">
-                Dept: {request.employee.department}{" "}
+                {request.employee.department}{" "}
                 {request.employee.jobTitle && `• ${request.employee.jobTitle}`}
               </p>
             )}
 
             <div className="grid grid-cols-2 gap-2 pt-2 border-t text-xs">
               <div>
-                <span className="text-muted-foreground block">Period:</span>
+                <span className="text-muted-foreground block">{t("period")}:</span>
                 <span className="font-medium text-foreground">
                   {request.fromDate} → {request.toDate}
                 </span>
               </div>
               <div>
-                <span className="text-muted-foreground block">Duration:</span>
+                <span className="text-muted-foreground block">{t("duration")}:</span>
                 <span className="font-medium text-foreground">
-                  {request.requestedDays} Days
+                  {request.requestedDays} {t("days")}
                 </span>
               </div>
             </div>
 
             <div className="pt-1 text-xs">
-              <span className="text-muted-foreground block">Return to work:</span>
+              <span className="text-muted-foreground block">{t("returnToWork")}:</span>
               <span className="font-medium text-foreground">
                 {request.returnToWorkDate}
               </span>
@@ -106,21 +109,37 @@ export function ReviewVacationDialog({
             {request.note && (
               <div className="pt-2 border-t text-xs">
                 <span className="text-muted-foreground block font-medium">
-                  Employee Note:
+                  {t("employeeNote")}:
                 </span>
                 <p className="italic text-foreground mt-0.5">&quot;{request.note}&quot;</p>
               </div>
             )}
+
+            <div className="pt-2 border-t flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">{t("currentStatus")}:</span>
+              <Badge
+                variant={
+                  request.status === "approved"
+                    ? "default"
+                    : request.status === "rejected"
+                    ? "destructive"
+                    : "secondary"
+                }
+                className="capitalize text-[10px]"
+              >
+                {request.status}
+              </Badge>
+            </div>
           </div>
 
           {/* Optional Reviewer Note */}
           <div className="space-y-1.5">
             <Label htmlFor="reviewer-note" className="text-xs font-medium">
-              Reviewer Note / Feedback (Optional)
+              {t("reviewerNote")}
             </Label>
             <Textarea
               id="reviewer-note"
-              placeholder="e.g. Approved as discussed with team lead..."
+              placeholder={t("reviewerNotePlaceholder")}
               value={reviewerNote}
               onChange={(e) => setReviewerNote(e.target.value)}
               className="resize-none text-xs"
@@ -131,27 +150,31 @@ export function ReviewVacationDialog({
 
         <DialogFooter className="flex items-center justify-between sm:justify-between gap-2 pt-2">
           <Button variant="outline" size="sm" onClick={onClose} disabled={reviewMutation.isPending}>
-            Cancel
+            {t("close")}
           </Button>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="destructive"
-              size="sm"
-              className="gap-1 text-xs"
-              disabled={reviewMutation.isPending}
-              onClick={() => handleReview("rejected")}
-            >
-              <XCircle className="h-4 w-4" /> Reject
-            </Button>
-            <Button
-              size="sm"
-              className="gap-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-              disabled={reviewMutation.isPending}
-              onClick={() => handleReview("approved")}
-            >
-              <CheckCircle2 className="h-4 w-4" /> Approve
-            </Button>
+            {request.status !== "rejected" && (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="gap-1 text-xs"
+                disabled={reviewMutation.isPending}
+                onClick={() => handleReview("rejected")}
+              >
+                <XCircle className="h-4 w-4" /> {t("reject")}
+              </Button>
+            )}
+            {request.status !== "approved" && (
+              <Button
+                size="sm"
+                className="gap-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                disabled={reviewMutation.isPending}
+                onClick={() => handleReview("approved")}
+              >
+                <CheckCircle2 className="h-4 w-4" /> {t("approve")}
+              </Button>
+            )}
           </div>
         </DialogFooter>
       </DialogContent>

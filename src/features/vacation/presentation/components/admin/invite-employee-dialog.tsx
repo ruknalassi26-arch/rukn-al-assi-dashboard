@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +46,8 @@ export function InviteEmployeeDialog({
   onClose,
   onSuccess,
 }: InviteEmployeeDialogProps) {
+  const t = useTranslations("employees");
+  const tForm = useTranslations("employees.form");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -76,15 +79,15 @@ export function InviteEmployeeDialog({
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create employee profile.");
+        throw new Error(data.error || tForm("errorMessage"));
       }
 
-      toast.success("Employee account & profile created successfully!");
+      toast.success(tForm("successMessage"));
       reset();
       onSuccess();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to register employee.";
+      const msg = err instanceof Error ? err.message : tForm("errorMessage");
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -100,9 +103,9 @@ export function InviteEmployeeDialog({
               <UserPlus className="h-5 w-5" />
             </div>
             <div>
-              <DialogTitle className="text-base font-bold">Invite / Register Employee</DialogTitle>
+              <DialogTitle className="text-base font-bold">{t("inviteEmployee")}</DialogTitle>
               <DialogDescription className="text-xs">
-                Create an employee profile and login account.
+                {t("inviteDescription")}
               </DialogDescription>
             </div>
           </div>
@@ -110,7 +113,7 @@ export function InviteEmployeeDialog({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5 pt-1">
           <div className="space-y-1">
-            <Label htmlFor="fullName" className="text-xs font-medium">Full Name *</Label>
+            <Label htmlFor="fullName" className="text-xs font-medium">{tForm("fullName")} *</Label>
             <Input
               id="fullName"
               placeholder="e.g. Ahmed Ali"
@@ -122,7 +125,7 @@ export function InviteEmployeeDialog({
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="email" className="text-xs font-medium">Email Address *</Label>
+            <Label htmlFor="email" className="text-xs font-medium">{tForm("email")} *</Label>
             <Input
               id="email"
               type="email"
@@ -136,7 +139,7 @@ export function InviteEmployeeDialog({
 
           <div className="grid grid-cols-2 gap-2.5">
             <div className="space-y-1">
-              <Label htmlFor="department" className="text-xs font-medium">Department</Label>
+              <Label htmlFor="department" className="text-xs font-medium">{tForm("department")}</Label>
               <Input
                 id="department"
                 placeholder="e.g. Engineering"
@@ -144,7 +147,7 @@ export function InviteEmployeeDialog({
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="jobTitle" className="text-xs font-medium">Job Title</Label>
+              <Label htmlFor="jobTitle" className="text-xs font-medium">{tForm("jobTitle")}</Label>
               <Input
                 id="jobTitle"
                 placeholder="e.g. Project Manager"
@@ -155,7 +158,7 @@ export function InviteEmployeeDialog({
 
           <div className="grid grid-cols-2 gap-2.5">
             <div className="space-y-1">
-              <Label htmlFor="phone" className="text-xs font-medium">Phone</Label>
+              <Label htmlFor="phone" className="text-xs font-medium">{tForm("phone")}</Label>
               <Input
                 id="phone"
                 placeholder="+964 750 ..."
@@ -163,7 +166,7 @@ export function InviteEmployeeDialog({
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="employmentStartDate" className="text-xs font-medium">Start Date</Label>
+              <Label htmlFor="employmentStartDate" className="text-xs font-medium">{tForm("employmentStartDate")}</Label>
               <Input
                 id="employmentStartDate"
                 type="date"
@@ -173,7 +176,7 @@ export function InviteEmployeeDialog({
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="password" className="text-xs font-medium">Initial Password (Optional)</Label>
+            <Label htmlFor="password" className="text-xs font-medium">{tForm("initialPassword")}</Label>
             <Input
               id="password"
               type="password"
@@ -187,18 +190,18 @@ export function InviteEmployeeDialog({
 
           <DialogFooter className="pt-2">
             <Button type="button" variant="outline" size="sm" onClick={onClose}>
-              Cancel
+              {t("dialog.close")}
             </Button>
             <Button type="submit" size="sm" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                  Creating...
+                  {tForm("registering")}
                 </>
               ) : (
                 <>
                   <UserPlus className="h-3.5 w-3.5 mr-1.5" />
-                  Register Employee
+                  {tForm("registerButton")}
                 </>
               )}
             </Button>

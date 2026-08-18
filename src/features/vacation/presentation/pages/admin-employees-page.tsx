@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { Button } from "@shared/ui";
 import { Users, RefreshCw, UserPlus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAdminEmployees } from "../hooks/use-vacation";
 import { EmployeeTable } from "../components/admin/employee-table";
 import { InviteEmployeeDialog } from "../components/admin/invite-employee-dialog";
 
 export function AdminEmployeesPage() {
+  const t = useTranslations("employees");
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const { data: employees = [], isLoading, refetch, isRefetching } = useAdminEmployees();
 
@@ -18,10 +20,10 @@ export function AdminEmployeesPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Users className="h-6 w-6 text-primary" />
-            Employee Directory
+            {t("title")}
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            View staff members, department assignments, and contact details across the company.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -34,7 +36,7 @@ export function AdminEmployeesPage() {
             className="text-xs h-9 gap-1.5"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? "animate-spin" : ""}`} />
-            Refresh
+            {t("refresh")}
           </Button>
 
           <Button
@@ -43,7 +45,7 @@ export function AdminEmployeesPage() {
             className="text-xs h-9 gap-1.5"
           >
             <UserPlus className="h-3.5 w-3.5" />
-            Invite Employee
+            {t("inviteEmployee")}
           </Button>
         </div>
       </div>

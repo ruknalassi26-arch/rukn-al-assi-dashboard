@@ -1,19 +1,17 @@
-// ==============================================================================
-// features/vacation/presentation/pages/admin-vacation-page.tsx
-// Admin Page for managing all employee vacation requests
-// ==============================================================================
-
 "use client";
 
 import { useState } from "react";
 import { Button } from "@shared/ui";
 import { PlusCircle, CalendarCheck, RefreshCw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAdminVacationRequests } from "../hooks/use-vacation";
 import { AdminVacationTable } from "../components/admin/admin-vacation-table";
 import { AdminCreateVacationDialog } from "../components/admin/admin-create-vacation-dialog";
 import { Can } from "@features/roles-permissions/presentation/components";
 
 export function AdminVacationPage() {
+  const t = useTranslations("vacation");
+  const tEmp = useTranslations("employees");
   const [activeStatus, setActiveStatus] = useState("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -31,10 +29,10 @@ export function AdminVacationPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <CalendarCheck className="h-6 w-6 text-primary" />
-            Vacation & Leave Management
+            {t("title")}
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Review pending employee requests, approve or reject leaves, and log company vacations.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -47,7 +45,7 @@ export function AdminVacationPage() {
             className="text-xs h-9 gap-1.5"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? "animate-spin" : ""}`} />
-            Refresh
+            {tEmp("refresh")}
           </Button>
 
           <Can access="vacation:manage">
@@ -57,7 +55,7 @@ export function AdminVacationPage() {
               className="text-xs h-9 gap-1.5"
             >
               <PlusCircle className="h-4 w-4" />
-              Record Vacation
+              {t("addVacation")}
             </Button>
           </Can>
         </div>
