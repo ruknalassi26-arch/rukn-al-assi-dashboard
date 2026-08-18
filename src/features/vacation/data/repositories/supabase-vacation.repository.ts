@@ -141,13 +141,19 @@ export class SupabaseVacationRepository implements IVacationRepository {
 
   async adminGetVacationRequests(
     status?: string,
-    employeeId?: string
+    employeeId?: string,
+    search?: string,
+    page?: number,
+    pageSize?: number
   ): Promise<VacationRequestEntity[]> {
     const { data, error } = await (this.supabase.rpc as CallableFunction)(
       "admin_get_vacation_requests",
       {
         p_status: status && status !== "all" ? status : null,
         p_employee_id: employeeId || null,
+        p_search: search && search.trim() !== "" ? search.trim() : null,
+        p_page: page || 1,
+        p_page_size: pageSize || 100,
       }
     );
 
@@ -155,8 +161,14 @@ export class SupabaseVacationRepository implements IVacationRepository {
       throw new Error(error.message || "Failed to load vacation requests");
     }
 
-    const list = (typeof data === "string" ? JSON.parse(data) : data) as VacationRequestDto[];
-    return (Array.isArray(list) ? list : []).map(toVacationRequestEntity);
+    const parsed = typeof data === "string" ? JSON.parse(data) : data;
+    const rawList = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed?.items)
+      ? parsed.items
+      : [];
+
+    return (rawList as VacationRequestDto[]).map(toVacationRequestEntity);
   }
 
   async adminReviewVacationRequest(
