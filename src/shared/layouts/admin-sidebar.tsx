@@ -6,7 +6,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale, useMessages } from "next-intl";
 import {
   LayoutDashboard,
   Package,
@@ -31,6 +31,7 @@ import {
   Layers,
   UserCheck,
   Calendar,
+  CalendarCheck,
 } from "lucide-react";
 import { cn } from "@core/utils/cn";
 import { useRTL } from "@core/hooks/use-rtl";
@@ -87,6 +88,18 @@ const NAV_ITEMS: NavItem[] = [
     resource: "about",
   },
   { href: "/admin/team", labelKey: "team", icon: Users, resource: "about" },
+  {
+    href: "/admin/employees",
+    labelKey: "employees",
+    icon: Users,
+    resource: "employees",
+  },
+  {
+    href: "/admin/vacation",
+    labelKey: "vacationManagement",
+    icon: CalendarCheck,
+    resource: "vacation",
+  },
   {
     href: "/admin/projects",
     labelKey: "projects",
@@ -153,6 +166,34 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
+const DEFAULT_LABELS: Record<string, string> = {
+  dashboard: "Dashboard",
+  about: "About Us",
+  products: "Products",
+  categories: "Categories",
+  services: "Services",
+  certificates: "Certificates",
+  team: "Team",
+  employees: "Employee Directory",
+  vacationManagement: "Vacation & Leave",
+  myVacation: "My Vacation",
+  myProfile: "My Profile",
+  projects: "Projects",
+  jobPostings: "Job Postings",
+  careerApplications: "Career Applications",
+  rfq: "RFQ Quotes",
+  branches: "Branches",
+  contactMessages: "Contact Messages",
+  homepage: "Homepage",
+  seo: "SEO & Meta",
+  users: "User Management",
+  roles: "Roles & Permissions",
+  profile: "Admin Profile",
+  activityLog: "Activity Log",
+  notifications: "Notifications",
+  settings: "Settings",
+};
+
 interface AdminSidebarProps {
   className?: string;
 }
@@ -161,9 +202,14 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const locale = useLocale();
-  const t = useTranslations("sidebar");
+  const rawMessages = useMessages() as Record<string, unknown>;
+  const sidebarMessages = (rawMessages?.sidebar as Record<string, string> | undefined) || {};
   const isRtl = useRTL();
   const { hasPermission } = usePermission();
+
+  const getLabel = (key: string): string => {
+    return sidebarMessages[key] || DEFAULT_LABELS[key] || key;
+  };
 
   const filteredNavItems = NAV_ITEMS.filter(
     (item) => !item.resource || hasPermission(item.resource, "view"),
@@ -248,7 +294,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             {filteredNavItems.map((item) => {
               const active = isActive(item.href);
               const Icon = item.icon;
-              const label = t(item.labelKey);
+              const label = getLabel(item.labelKey);
 
               const linkContent = (
                 <Link
