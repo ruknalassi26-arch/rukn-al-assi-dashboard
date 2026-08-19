@@ -1,8 +1,9 @@
 "use client";
 // ==============================================================================
 // shared/upload/video-uploader.tsx
-// Local Video Uploader component with drag & drop, file picker, upload to Supabase,
-// live preview, and URL editing option.
+// Local Video Uploader component using Supabase 'branding/hero-videos/' bucket
+// Features: Drag & Drop, Type Validation, Size Limits, Upload Progress Bar,
+// Resumable/TUS support via UploadService, Live Preview, Replace, and Remove.
 // ==============================================================================
 import { useState, useRef } from "react";
 import {
@@ -15,10 +16,16 @@ import {
   Pause,
   ExternalLink,
   Edit3,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import { Button, Input, Label } from "@shared/ui";
 import { createClient } from "@core/lib/supabase/client";
-import { UploadService, type UploadBucket } from "@core/services/upload.service";
+import {
+  UploadService,
+  STORAGE_CONFIG,
+  type UploadBucket,
+} from "@core/services/upload.service";
 import { toast } from "@core/utils/toast";
 
 interface VideoUploaderProps {
@@ -36,15 +43,16 @@ interface VideoUploaderProps {
 export function VideoUploader({
   value,
   onChange,
-  bucket = "branding",
-  folder = "hero-videos",
+  bucket = STORAGE_CONFIG.BRANDING_BUCKET,
+  folder = STORAGE_CONFIG.BRANDING_PATHS.HERO_VIDEOS,
   label,
-  description = "Supports full quality MP4, WebM, QuickTime MOV (HD & 4K allowed)",
-  maxSizeMB = 1024,
+  description = `Supports MP4, WebM, QuickTime MOV (Max ${STORAGE_CONFIG.DEFAULT_MAX_FILE_SIZE_MB}MB)`,
+  maxSizeMB = STORAGE_CONFIG.DEFAULT_MAX_FILE_SIZE_MB,
   disabled = false,
   className = "",
 }: VideoUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -54,39 +62,50 @@ export function VideoUploader({
   const handleFileUpload = async (file: File) => {
     if (!file) return;
 
-    // Validate video mime type or extension
-    const isVideoMime = file.type.startsWith("video/");
-    const isVideoExt = /\.(mp4|webm|mov|mkv|ogg)$/i.test(file.name);
+    // 1. Validate MIME type / extension
+    const isVideoMime =
+      STORAGE_CONFIG.ALLOWED_VIDEO_MIME_TYPES.includes(file.type as any) ||
+      file.type.startsWith("video/");
+    const isVideoExt = /\.(mp4|webm|mov)$/i.test(file.name);
 
     if (!isVideoMime && !isVideoExt) {
-      toast.error("Please select a valid video file (MP4, WebM, MOV)");
+      toast.error("Invalid file type. Allowed formats: MP4, WebM, QuickTime (MOV).");
       return;
     }
 
+    // 2. Validate max size
     if (file.size > maxSizeMB * 1024 * 1024) {
-      toast.error(`Video file size must not exceed ${maxSizeMB}MB`);
+      toast.error(`The selected file exceeds the current ${maxSizeMB} MB upload limit.`);
       return;
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
+
     try {
       const supabase = createClient();
       const uploadService = new UploadService(supabase);
       const result = await uploadService.uploadFile(file, {
         bucket,
         folder,
+        maxSizeMB,
+        onProgress: (progress) => {
+          setUploadProgress(progress);
+        },
       });
 
       if (result.success && result.file?.publicUrl) {
         onChange(result.file.publicUrl);
-        toast.success("Video uploaded successfully from local device!");
+        toast.success("Video uploaded successfully to branding storage!");
       } else {
         toast.error(result.error ?? "Failed to upload video");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to upload video");
+      const message = err instanceof Error ? err.message : "Failed to upload video";
+      toast.error(message);
     } finally {
       setIsUploading(false);
+      setUploadProgress(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -99,215 +118,257 @@ export function VideoUploader({
     if (file) handleFileUpload(file);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    if (!disabled && !isUploading) setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
   const togglePlay = () => {
     if (!videoPreviewRef.current) return;
-    if (videoPreviewRef.current.paused) {
-      videoPreviewRef.current.play();
-      setIsPlaying(true);
-    } else {
+    if (isPlaying) {
       videoPreviewRef.current.pause();
       setIsPlaying(false);
+    } else {
+      videoPreviewRef.current.play();
+      setIsPlaying(true);
     }
   };
 
-  const fileName = value ? value.split("/").pop() || "Uploaded Video" : "";
+  const handleRemove = () => {
+    onChange(null);
+    setIsPlaying(false);
+    setShowUrlInput(false);
+  };
 
   return (
-    <div className={`space-y-2 ${className}`}>
+    <div className={`space-y-2.5 ${className}`}>
+      {label && (
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+            <Video className="h-3.5 w-3.5 text-primary" />
+            {label}
+          </Label>
+          {value && (
+            <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3" />
+              Attached
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Hidden File Input */}
       <input
         ref={fileInputRef}
         type="file"
-        accept="video/mp4,video/webm,video/quicktime,video/ogg,video/*"
+        accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+        className="hidden"
+        disabled={disabled || isUploading}
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleFileUpload(file);
         }}
-        disabled={disabled || isUploading}
-        className="hidden"
       />
 
+      {/* When Video is Uploaded / Selected */}
       {value ? (
-        /* Video Uploaded Preview State */
-        <div className="rounded-xl border border-border/80 bg-card overflow-hidden shadow-xs">
-          {/* Mini video display */}
-          <div className="relative aspect-video max-h-[220px] bg-slate-950 flex items-center justify-center group overflow-hidden">
+        <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm transition-all group">
+          <div className="relative aspect-video w-full max-h-[220px] bg-black/95 flex items-center justify-center">
             <video
               ref={videoPreviewRef}
               src={value}
+              className="h-full w-full object-contain"
               playsInline
-              loop
-              muted
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              className="w-full h-full object-cover"
+              onEnded={() => setIsPlaying(false)}
             />
 
-            {/* Play/Pause Overlay Button */}
+            {/* Video Play/Pause Overlay Button */}
             <button
               type="button"
               onClick={togglePlay}
-              className="absolute inset-0 m-auto h-12 w-12 rounded-full bg-black/60 text-white flex items-center justify-center backdrop-blur-xs hover:bg-black/80 hover:scale-105 transition-all opacity-80 group-hover:opacity-100 shadow-md"
+              className="absolute inset-0 m-auto h-12 w-12 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-transform hover:scale-110 shadow-lg"
+              title={isPlaying ? "Pause video" : "Play video"}
             >
               {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
             </button>
 
-            {/* Top info badge */}
-            <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/70 text-white text-[11px] font-medium backdrop-blur-sm">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-              <span>Video Loaded</span>
-            </div>
-          </div>
-
-          {/* Details & Actions Footer */}
-          <div className="p-3 bg-muted/30 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2 overflow-hidden min-w-0">
-              <div className="h-8 w-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
-                <Video className="h-4 w-4" />
-              </div>
-              <div className="overflow-hidden min-w-0">
-                <p className="text-xs font-semibold truncate text-foreground">{fileName}</p>
-                <a
-                  href={value}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] text-blue-600 hover:underline flex items-center gap-1 truncate"
-                >
-                  <span className="truncate">{value}</span>
-                  <ExternalLink className="h-3 w-3 shrink-0" />
-                </a>
-              </div>
+            {/* Badges */}
+            <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 pointer-events-none">
+              <span className="bg-black/70 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1">
+                <Video className="h-3 w-3 text-primary" />
+                Video Active
+              </span>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs gap-1.5"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={disabled || isUploading}
+            {/* Quick Actions at Top Right */}
+            <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+              <a
+                href={value}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-7 w-7 rounded-lg bg-black/70 hover:bg-black text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/10"
+                title="Open video in new tab"
               >
-                {isUploading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <UploadCloud className="h-3.5 w-3.5" />
-                )}
-                Replace Local Video
-              </Button>
-
-              <Button
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+              <button
                 type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 text-xs text-muted-foreground hover:text-foreground"
-                onClick={() => setShowUrlInput(!showUrlInput)}
-                title="Edit URL directly"
-              >
-                <Edit3 className="h-3.5 w-3.5" />
-              </Button>
-
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="h-8 w-8 shrink-0"
-                onClick={() => onChange(null)}
+                onClick={handleRemove}
                 disabled={disabled || isUploading}
+                className="h-7 w-7 rounded-lg bg-rose-500/80 hover:bg-rose-600 text-white flex items-center justify-center backdrop-blur-md transition-colors border border-rose-400/20"
                 title="Remove video"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Controls bar */}
+          <div className="p-3 bg-muted/30 border-t border-border/60 flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-foreground truncate" title={value}>
+                {value.split("/").pop() || "Uploaded Video"}
+              </p>
+              <p className="text-[10px] text-muted-foreground truncate">
+                Storage: <span className="font-mono text-primary">{bucket}/{folder}</span>
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs px-2.5 gap-1"
+                disabled={disabled || isUploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <RefreshCw className="h-3 w-3" />
+                Replace
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-7 text-xs px-2 gap-1 text-muted-foreground hover:text-foreground"
+                onClick={() => setShowUrlInput(!showUrlInput)}
+              >
+                <Edit3 className="h-3 w-3" />
+                URL
               </Button>
             </div>
           </div>
 
-          {/* Optional Direct URL Edit */}
+          {/* Collapsible Manual URL editor */}
           {showUrlInput && (
-            <div className="p-3 border-t bg-muted/50 space-y-1.5">
-              <Label className="text-[11px] font-semibold text-muted-foreground">Direct Video URL</Label>
+            <div className="p-3 bg-background border-t border-border/80 flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
               <Input
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                disabled={disabled}
-                className="font-mono text-xs h-8"
                 placeholder="https://..."
+                className="h-8 text-xs font-mono"
               />
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="h-8 text-xs"
+                onClick={() => setShowUrlInput(false)}
+              >
+                Done
+              </Button>
             </div>
           )}
         </div>
       ) : (
-        /* Empty Dropzone for Local Video Upload */
-        <div className="space-y-2">
-          <div
-            onClick={() => !isUploading && !disabled && fileInputRef.current?.click()}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            className={`flex flex-col items-center justify-center gap-3 p-6 rounded-xl border-2 border-dashed transition-all cursor-pointer ${
-              isDragging
-                ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 scale-[0.99]"
-                : "border-muted-foreground/25 hover:border-blue-500/50 bg-muted/20 hover:bg-muted/40"
-            } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
-          >
-            <div className="h-12 w-12 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center shadow-xs">
-              {isUploading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-              ) : (
-                <UploadCloud className="h-6 w-6 text-blue-600" />
-              )}
+        /* Upload Drag & Drop Zone */
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            if (!disabled && !isUploading) setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          onClick={() => {
+            if (!disabled && !isUploading) fileInputRef.current?.click();
+          }}
+          className={`relative rounded-xl border-2 border-dashed transition-all cursor-pointer p-6 flex flex-col items-center justify-center text-center group ${
+            isDragging
+              ? "border-primary bg-primary/5 scale-[0.99]"
+              : "border-border hover:border-primary/60 hover:bg-muted/30"
+          } ${disabled ? "opacity-60 pointer-events-none" : ""}`}
+        >
+          {isUploading ? (
+            <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+              <div className="relative flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="absolute text-[10px] font-bold text-primary">
+                  {uploadProgress !== null ? `${uploadProgress}%` : ""}
+                </span>
+              </div>
+              <div className="w-full space-y-1 text-center">
+                <p className="text-xs font-semibold text-foreground">Uploading Video...</p>
+                <p className="text-[10px] text-muted-foreground">Streaming to {bucket}/{folder}</p>
+                {uploadProgress !== null && (
+                  <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden mt-2">
+                    <div
+                      className="bg-primary h-full transition-all duration-300 rounded-full"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-
-            <div className="text-center space-y-1">
-              <p className="text-sm font-semibold text-foreground">
-                {isUploading ? "Uploading video from your device..." : "Click to browse or drag & drop video here"}
+          ) : (
+            <>
+              <div className="h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm">
+                <UploadCloud className="h-6 w-6" />
+              </div>
+              <p className="text-xs font-semibold text-foreground mb-1">
+                Click to upload or drag & drop video
               </p>
-              <p className="text-xs text-muted-foreground">{description}</p>
-            </div>
-
-            {!isUploading && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={disabled}
-                className="text-xs pointer-events-none gap-1.5"
-              >
-                <Video className="h-3.5 w-3.5" />
-                Select Local Video File
-              </Button>
-            )}
-          </div>
-
-          {/* Toggle to enter URL manually if needed */}
-          <div className="flex items-center justify-between px-1">
-            <span className="text-[11px] text-muted-foreground">Prefer pasting an external URL?</span>
-            <button
-              type="button"
-              onClick={() => setShowUrlInput(!showUrlInput)}
-              className="text-[11px] font-semibold text-blue-600 hover:underline"
-            >
-              {showUrlInput ? "Hide URL Input" : "Paste URL Instead"}
-            </button>
-          </div>
-
-          {showUrlInput && (
-            <div className="space-y-1.5 pt-1">
-              <Input
-                placeholder="https://example.com/videos/hero-background.mp4"
-                onChange={(e) => onChange(e.target.value)}
-                disabled={disabled}
-                className="font-mono text-xs h-9"
-              />
-            </div>
+              <p className="text-[11px] text-muted-foreground mb-3 max-w-xs">
+                {description}
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground font-mono">
+                  MP4, WebM, MOV
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground font-mono">
+                  Max {maxSizeMB}MB
+                </span>
+              </div>
+            </>
           )}
+        </div>
+      )}
+
+      {/* Manual URL Input Option for Empty State */}
+      {!value && !isUploading && (
+        <div className="pt-1 flex items-center justify-between text-[11px] text-muted-foreground">
+          <button
+            type="button"
+            onClick={() => setShowUrlInput(!showUrlInput)}
+            className="text-primary hover:underline flex items-center gap-1"
+          >
+            <Edit3 className="h-3 w-3" />
+            {showUrlInput ? "Hide Direct URL input" : "Or enter direct video URL"}
+          </button>
+        </div>
+      )}
+
+      {!value && showUrlInput && !isUploading && (
+        <div className="flex items-center gap-2 pt-1 animate-in fade-in">
+          <Input
+            value={value || ""}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="https://example.com/videos/hero-background.mp4"
+            className="h-8 text-xs font-mono"
+          />
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            className="h-8 text-xs"
+            onClick={() => setShowUrlInput(false)}
+          >
+            Apply
+          </Button>
         </div>
       )}
     </div>

@@ -120,9 +120,18 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
       secondary_button_url: data.secondaryButtonUrl !== undefined ? data.secondaryButtonUrl : (currentSettings.secondary_button_url ?? null),
     };
 
+    let validAdminId: string | null = null;
+    if (user?.id) {
+      const { data: profile } = await (this.supabase.from("admin_profiles" as any) as any)
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile) validAdminId = profile.id;
+    }
+
     const updatePayload: Record<string, any> = {
       settings: updatedSettings,
-      updated_by: user?.id ?? null,
+      updated_by: validAdminId,
       updated_at: new Date().toISOString(),
     };
 
@@ -131,24 +140,32 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
     }
 
     if (existingRow?.id) {
-      const { error } = await (this.supabase.from("homepage_sections" as any) as any)
+      const { data: updatedRows, error } = await (this.supabase.from("homepage_sections" as any) as any)
         .update(updatePayload)
-        .eq("section_key", "hero");
+        .eq("section_key", "hero")
+        .select();
 
       if (error) {
         throw new Error(error.message);
       }
+      if (!updatedRows || updatedRows.length === 0) {
+        throw new Error("Database RLS Permission Error: Could not update homepage_sections. Please run the provided SQL policy in Supabase SQL Editor.");
+      }
     } else {
-      const { error } = await (this.supabase.from("homepage_sections" as any) as any)
+      const { data: insertedRows, error } = await (this.supabase.from("homepage_sections" as any) as any)
         .insert({
           section_key: "hero",
           is_visible: data.isVisible ?? true,
           sort_order: 0,
           ...updatePayload,
-        });
+        })
+        .select();
 
       if (error) {
         throw new Error(error.message);
+      }
+      if (!insertedRows || insertedRows.length === 0) {
+        throw new Error("Database RLS Permission Error: Could not insert homepage_sections. Please run the provided SQL policy in Supabase SQL Editor.");
       }
     }
 
@@ -873,20 +890,35 @@ export class SupabaseHomepageRepository implements IHomepageRepository {
   }
 
   // ============================================================================
-  // ACTIVITY LOGGING (activity_logs)
+  // ACTIVITY LOGGING (activity_log)
   // ============================================================================
-  async logActivity(action: string, entityType: string, entityTitle?: string, metadata?: Record<string, unknown>): Promise<void> {
+  async logActivity(
+    action: string,
+    entityType: string,
+    entityTitle?: string,
+    metadata?: Record<string, unknown>
+  ): Promise<void> {
     try {
-      const user = (await this.supabase.auth.getUser()).data.user;
-      await (this.supabase.from("activity_logs" as any) as any).insert({
-        action: action as any,
-        entity_type: "homepage",
+      const { data: userData } = await this.supabase.auth.getUser();
+      let validAdminId: string | null = null;
+      if (userData?.user?.id) {
+        const { data: profile } = await (this.supabase.from("admin_profiles" as any) as any)
+          .select("id")
+          .eq("id", userData.user.id)
+          .maybeSingle();
+        if (profile) validAdminId = profile.id;
+      }
+
+      await (this.supabase.from("activity_log" as any) as any).insert({
+        action,
+        entity_type: entityType,
         entity_id: null,
-        entity_title: entityTitle || null,
-        user_id: user?.id ?? null,
-        user_email: user?.email ?? null,
-        metadata: metadata || null,
+        details: { entity_title: entityTitle, ...metadata },
+        admin_user_id: validAdminId,
       });
-    } catch {}
+    } catch {
+      // Non-blocking activity log
+    }
   }
 }
+

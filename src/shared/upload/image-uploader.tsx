@@ -1,10 +1,18 @@
 "use client";
-
+// ==============================================================================
+// shared/upload/image-uploader.tsx
+// Reusable image & document uploader component supporting 'branding' bucket,
+// progress tracking, size validation, and live preview.
+// ==============================================================================
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { X, Loader2, Image as ImageIcon, FileText } from "lucide-react";
+import { X, Loader2, Image as ImageIcon, FileText, UploadCloud, RefreshCw } from "lucide-react";
 import { createClient } from "@core/lib/supabase/client";
-import { UploadService, type UploadBucket } from "@core/services/upload.service";
+import {
+  UploadService,
+  STORAGE_CONFIG,
+  type UploadBucket,
+} from "@core/services/upload.service";
 import { Button } from "@shared/ui";
 import { toast } from "@core/utils/toast";
 import { useTranslations } from "next-intl";
@@ -19,26 +27,35 @@ interface ImageUploaderProps {
   fileType?: "image" | "pdf" | "any";
   accept?: string;
   hintText?: string;
+  maxSizeMB?: number;
 }
 
 export function ImageUploader({
   value,
   onChange,
-  bucket = "product-images",
-  folder = "uploads",
+  bucket = STORAGE_CONFIG.BRANDING_BUCKET,
+  folder = STORAGE_CONFIG.BRANDING_PATHS.HERO_IMAGES,
   label,
   className = "",
   fileType = "image",
   accept,
   hintText,
+  maxSizeMB = STORAGE_CONFIG.DEFAULT_MAX_FILE_SIZE_MB,
 }: ImageUploaderProps) {
   const t = useTranslations("common.dialogs");
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isPdf = fileType === "pdf";
-  const computedAccept = accept ?? (isPdf ? "application/pdf" : "image/*");
-  const defaultHint = isPdf ? "PDF (max 10MB)" : t("imageFormats");
+  const computedAccept =
+    accept ??
+    (isPdf
+      ? "application/pdf"
+      : "image/jpeg,image/png,image/webp,image/avif,image/svg+xml,.jpg,.jpeg,.png,.webp,.avif,.svg");
+  const defaultHint = isPdf
+    ? `PDF (max ${maxSizeMB}MB)`
+    : `JPEG, PNG, WebP, AVIF, SVG (max ${maxSizeMB}MB)`;
   const displayHint = hintText ?? defaultHint;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,26 +67,39 @@ export function ImageUploader({
         toast.error("Please select a valid PDF file");
         return;
       }
-      if (file.size > 100 * 1024 * 1024) {
-        toast.error("PDF file size should not exceed 100MB");
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        toast.error(`The selected file exceeds the current ${maxSizeMB} MB upload limit.`);
         return;
       }
     } else if (fileType === "image") {
-      if (!file.type.startsWith("image/")) {
-        toast.error("Please select a valid image file (JPEG, PNG, WebP, SVG)");
+      const isImageMime =
+        STORAGE_CONFIG.ALLOWED_IMAGE_MIME_TYPES.includes(file.type as any) ||
+        file.type.startsWith("image/");
+      const isImageExt = /\.(jpe?g|png|webp|avif|svg)$/i.test(file.name);
+
+      if (!isImageMime && !isImageExt) {
+        toast.error("Please select a valid image (JPEG, PNG, WebP, AVIF, SVG)");
         return;
       }
-      if (file.size > 100 * 1024 * 1024) {
-        toast.error("Image file size should not exceed 100MB");
+
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        toast.error(`The selected file exceeds the current ${maxSizeMB} MB upload limit.`);
         return;
       }
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
+
     try {
       const supabase = createClient();
       const uploadService = new UploadService(supabase);
-      const result = await uploadService.uploadFile(file, { bucket, folder });
+      const result = await uploadService.uploadFile(file, {
+        bucket,
+        folder,
+        maxSizeMB,
+        onProgress: (progress) => setUploadProgress(progress),
+      });
 
       if (result.success && result.file?.publicUrl) {
         onChange(result.file.publicUrl);
@@ -78,9 +108,11 @@ export function ImageUploader({
         toast.error(result.error ?? "Failed to upload file");
       }
     } catch (error) {
-      toast.error(error);
+      const message = error instanceof Error ? error.message : "Failed to upload file";
+      toast.error(message);
     } finally {
       setIsUploading(false);
+      setUploadProgress(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -98,102 +130,108 @@ export function ImageUploader({
         type="file"
         accept={computedAccept}
         onChange={handleFileChange}
+        disabled={isUploading}
         className="hidden"
       />
 
       {value ? (
-        isPdf ? (
-          <div className="relative group rounded-lg border p-4 bg-muted/30 flex items-center justify-between">
-            <div className="flex items-center gap-3 overflow-hidden">
+        <div className="relative group overflow-hidden rounded-xl border border-border bg-muted/20">
+          {isPdf ? (
+            <div className="flex items-center gap-3 p-4">
               <FileText className="h-8 w-8 text-primary shrink-0" />
-              <div className="overflow-hidden">
-                <p className="text-xs font-semibold truncate text-foreground">
-                  {value.split("/").pop() || "Document.pdf"}
-                </p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium truncate">{value.split("/").pop()}</p>
                 <a
                   href={value}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[11px] text-primary hover:underline"
+                  className="text-[10px] text-primary hover:underline"
                 >
                   View PDF
                 </a>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+          ) : (
+            <div className="relative aspect-video w-full max-h-[220px] bg-black/5 dark:bg-black/40 flex items-center justify-center">
+              <Image
+                src={value}
+                alt="Uploaded image"
+                fill
+                sizes="(max-width: 768px) 100vw, 400px"
+                className="object-contain"
+                unoptimized
+              />
+            </div>
+          )}
+
+          {/* Action overlay bar */}
+          <div className="p-2 bg-muted/60 border-t border-border flex items-center justify-between gap-2">
+            <span className="text-[10px] text-muted-foreground truncate font-mono">
+              {value.split("/").pop()}
+            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs"
+                className="h-7 text-xs px-2 gap-1"
+                disabled={isUploading}
                 onClick={() => fileInputRef.current?.click()}
               >
-                Replace
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="h-8 w-8"
-                onClick={handleRemove}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="relative group rounded-lg border overflow-hidden bg-muted aspect-video max-h-[180px] flex items-center justify-center">
-            <Image
-              src={value}
-              alt="Uploaded preview"
-              fill
-              unoptimized
-              className="object-contain p-2"
-            />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-              >
+                <RefreshCw className="h-3 w-3" />
                 Replace
               </Button>
               <Button
                 type="button"
                 variant="destructive"
                 size="sm"
+                className="h-7 w-7 p-0"
+                disabled={isUploading}
                 onClick={handleRemove}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
-        )
+        </div>
       ) : (
         <div
           onClick={() => !isUploading && fileInputRef.current?.click()}
-          className="flex flex-col items-center justify-center gap-2 p-6 rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 cursor-pointer bg-muted/20 hover:bg-muted/40 transition-colors"
+          className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border p-6 text-center cursor-pointer transition-all hover:border-primary/60 hover:bg-muted/30 ${
+            isUploading ? "opacity-75 pointer-events-none" : ""
+          }`}
         >
           {isUploading ? (
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          ) : isPdf ? (
-            <FileText className="h-8 w-8 text-muted-foreground" />
+            <div className="flex flex-col items-center gap-2">
+              <div className="relative flex items-center justify-center">
+                <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                <span className="absolute text-[9px] font-bold text-primary">
+                  {uploadProgress !== null ? `${uploadProgress}%` : ""}
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground">Uploading...</span>
+              {uploadProgress !== null && (
+                <div className="w-36 bg-muted rounded-full h-1 overflow-hidden mt-1">
+                  <div
+                    className="bg-primary h-full transition-all duration-300 rounded-full"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              )}
+            </div>
           ) : (
-            <ImageIcon className="h-8 w-8 text-muted-foreground" />
+            <>
+              <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+                {isPdf ? <FileText className="h-5 w-5" /> : <UploadCloud className="h-5 w-5" />}
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-foreground">
+                  {isPdf ? "Upload PDF Document" : "Click or drag image to upload"}
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{displayHint}</p>
+              </div>
+            </>
           )}
-          <div className="text-center">
-            <p className="text-sm font-medium text-foreground">
-              {isUploading
-                ? isPdf
-                  ? "Uploading PDF..."
-                  : "Uploading image..."
-                : isPdf
-                ? "Upload Technical PDF Datasheet"
-                : t("uploadImage")}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">{displayHint}</p>
-          </div>
         </div>
       )}
     </div>

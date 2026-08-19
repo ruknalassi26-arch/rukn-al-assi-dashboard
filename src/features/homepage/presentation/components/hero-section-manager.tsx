@@ -2,10 +2,10 @@
 // ==============================================================================
 // features/homepage/presentation/components/hero-section-manager.tsx
 // Comprehensive single-section Hero Editor matching database structure
-// Features: Video/Image media settings, Trilingual tabs (EN, AR, KU),
-// live responsive preview with autoplay video, overlay opacity, and CTA links.
+// Fully internationalized (EN, AR, CKB) with trilingual tabs and live preview.
 // ==============================================================================
 import { useEffect, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -45,6 +45,7 @@ import { VideoUploader } from "@shared/upload/video-uploader";
 import { ErrorState } from "@shared/components/error-state";
 import { useHeroSection, useUpdateHeroSection } from "../hooks/use-homepage-hero";
 import { usePermission } from "@features/roles-permissions/presentation/hooks/use-permission";
+import { toast } from "@core/utils/toast";
 
 const heroSchema = z.object({
   mediaType: z.enum(["video", "image"]),
@@ -75,6 +76,7 @@ const heroSchema = z.object({
 type HeroFormValues = z.infer<typeof heroSchema>;
 
 export function HeroSectionManager() {
+  const t = useTranslations("homepageAdmin.hero");
   const { hasPermission } = usePermission();
   const canManage = hasPermission("homepage", "manage") || hasPermission("homepage", "edit");
 
@@ -182,37 +184,42 @@ export function HeroSectionManager() {
   const watchedSecondaryTextAr = watch("secondaryButtonTextAr");
   const watchedSecondaryTextKu = watch("secondaryButtonTextKu");
 
-  // Reset video load error when URL changes
+  // Reset video load error when URL or preview device changes
   useEffect(() => {
     setVideoLoadError(false);
-  }, [watchedVideoUrl]);
+  }, [watchedVideoUrl, watchedMobileVideoUrl, previewDevice]);
 
   const onSubmit = async (values: HeroFormValues) => {
-    await updateMutation.mutateAsync({
-      mediaType: values.mediaType,
-      videoUrl: values.videoUrl?.trim() || null,
-      videoPosterUrl: values.videoPosterUrl?.trim() || null,
-      videoMobileUrl: values.videoMobileUrl?.trim() || null,
-      overlayOpacity: Number(values.overlayOpacity),
-      titleEn: values.titleEn,
-      titleAr: values.titleAr,
-      titleKu: values.titleKu?.trim() || null,
-      subtitleEn: values.subtitleEn?.trim() || null,
-      subtitleAr: values.subtitleAr?.trim() || null,
-      subtitleKu: values.subtitleKu?.trim() || null,
-      bodyEn: values.bodyEn?.trim() || null,
-      bodyAr: values.bodyAr?.trim() || null,
-      bodyKu: values.bodyKu?.trim() || null,
-      primaryButtonTextEn: values.primaryButtonTextEn?.trim() || null,
-      primaryButtonTextAr: values.primaryButtonTextAr?.trim() || null,
-      primaryButtonTextKu: values.primaryButtonTextKu?.trim() || null,
-      primaryButtonUrl: values.primaryButtonUrl?.trim() || null,
-      secondaryButtonTextEn: values.secondaryButtonTextEn?.trim() || null,
-      secondaryButtonTextAr: values.secondaryButtonTextAr?.trim() || null,
-      secondaryButtonTextKu: values.secondaryButtonTextKu?.trim() || null,
-      secondaryButtonUrl: values.secondaryButtonUrl?.trim() || null,
-      isVisible: values.isVisible,
-    });
+    try {
+      await updateMutation.mutateAsync({
+        mediaType: values.mediaType,
+        videoUrl: values.videoUrl?.trim() || null,
+        videoPosterUrl: values.videoPosterUrl?.trim() || null,
+        videoMobileUrl: values.videoMobileUrl?.trim() || null,
+        overlayOpacity: Number(values.overlayOpacity),
+        titleEn: values.titleEn,
+        titleAr: values.titleAr,
+        titleKu: values.titleKu?.trim() || null,
+        subtitleEn: values.subtitleEn?.trim() || null,
+        subtitleAr: values.subtitleAr?.trim() || null,
+        subtitleKu: values.subtitleKu?.trim() || null,
+        bodyEn: values.bodyEn?.trim() || null,
+        bodyAr: values.bodyAr?.trim() || null,
+        bodyKu: values.bodyKu?.trim() || null,
+        primaryButtonTextEn: values.primaryButtonTextEn?.trim() || null,
+        primaryButtonTextAr: values.primaryButtonTextAr?.trim() || null,
+        primaryButtonTextKu: values.primaryButtonTextKu?.trim() || null,
+        primaryButtonUrl: values.primaryButtonUrl?.trim() || null,
+        secondaryButtonTextEn: values.secondaryButtonTextEn?.trim() || null,
+        secondaryButtonTextAr: values.secondaryButtonTextAr?.trim() || null,
+        secondaryButtonTextKu: values.secondaryButtonTextKu?.trim() || null,
+        secondaryButtonUrl: values.secondaryButtonUrl?.trim() || null,
+        isVisible: values.isVisible,
+      });
+      toast.success(t("saveSuccess"));
+    } catch {
+      toast.error(t("saveError"));
+    }
   };
 
   if (isLoading) {
@@ -248,7 +255,7 @@ export function HeroSectionManager() {
   if (error) {
     return (
       <ErrorState
-        title="Failed to load hero section"
+        title={t("failedToLoad")}
         error={error}
         onRetry={() => refetch()}
       />
@@ -303,13 +310,13 @@ export function HeroSectionManager() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-foreground tracking-tight">Homepage Hero Banner</h2>
+              <h2 className="text-lg font-bold text-foreground tracking-tight">{t("title")}</h2>
               <Badge variant={watchedIsVisible ? "default" : "secondary"}>
-                {watchedIsVisible ? "Publicly Visible" : "Hidden"}
+                {watchedIsVisible ? t("badgeVisible") : t("badgeHidden")}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              Configure main Hero section media (Video/Image), trilingual headlines, and call-to-action buttons.
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -317,7 +324,7 @@ export function HeroSectionManager() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-muted/40 text-xs">
             <Label htmlFor="hero-visibility" className="text-xs font-medium cursor-pointer">
-              Visibility
+              {t("visibility")}
             </Label>
             <Switch
               id="hero-visibility"
@@ -337,7 +344,7 @@ export function HeroSectionManager() {
             ) : (
               <Save className="h-4 w-4" />
             )}
-            Save Changes
+            {updateMutation.isPending ? t("saving") : t("saveChanges")}
           </Button>
         </div>
       </div>
@@ -350,10 +357,10 @@ export function HeroSectionManager() {
             <CardHeader className="pb-4">
               <div className="flex items-center gap-2">
                 <Layers className="h-4 w-4 text-blue-600" />
-                <CardTitle className="text-base">Media & Background Configuration</CardTitle>
+                <CardTitle className="text-base">{t("mediaCardTitle")}</CardTitle>
               </div>
               <CardDescription>
-                Choose between a high-definition background video loop or a static banner image.
+                {t("mediaCardDesc")}
               </CardDescription>
             </CardHeader>
 
@@ -361,7 +368,7 @@ export function HeroSectionManager() {
               {/* Media Type Selector */}
               <div className="space-y-2">
                 <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Media Type
+                  {t("mediaType")}
                 </Label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -374,7 +381,7 @@ export function HeroSectionManager() {
                     }`}
                   >
                     <Video className="h-4 w-4" />
-                    <span>Background Video</span>
+                    <span>{t("backgroundVideo")}</span>
                   </button>
 
                   <button
@@ -387,7 +394,7 @@ export function HeroSectionManager() {
                     }`}
                   >
                     <ImageIcon className="h-4 w-4" />
-                    <span>Static Image</span>
+                    <span>{t("staticImage")}</span>
                   </button>
                 </div>
               </div>
@@ -398,16 +405,16 @@ export function HeroSectionManager() {
                   {/* Main Desktop / Hero Background Video */}
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold flex items-center justify-between">
-                      <span>Desktop / Main Background Video</span>
-                      <span className="text-[11px] font-normal text-muted-foreground">Upload from local device</span>
+                      <span>{t("desktopVideo")}</span>
+                      <span className="text-[11px] font-normal text-muted-foreground">{t("desktopVideoHint")}</span>
                     </Label>
                     <VideoUploader
                       value={watchedVideoUrl || null}
                       onChange={(url) => setValue("videoUrl", url, { shouldDirty: true })}
                       bucket="branding"
                       folder="hero-videos"
-                      description="Upload full-quality local video (MP4, WebM, MOV - 4K/HD allowed)"
-                      maxSizeMB={1024}
+                      description={t("desktopVideoDesc")}
+                      maxSizeMB={50}
                       disabled={!canManage}
                     />
                   </div>
@@ -415,31 +422,32 @@ export function HeroSectionManager() {
                   {/* Video Poster / Fallback Image */}
                   <div className="space-y-1.5">
                     <Label htmlFor="videoPosterUrl" className="text-xs font-semibold flex items-center justify-between">
-                      <span>Video Poster / Fallback Image</span>
-                      <span className="text-[11px] font-normal text-muted-foreground">Shown while video loads or on fallback</span>
+                      <span>{t("videoPoster")}</span>
+                      <span className="text-[11px] font-normal text-muted-foreground">{t("videoPosterHint")}</span>
                     </Label>
                     <ImageUploader
                       value={watchedPosterUrl || null}
                       onChange={(url) => setValue("videoPosterUrl", url, { shouldDirty: true })}
                       bucket="branding"
-                      folder="hero-posters"
-                      hintText="Upload full-quality poster image from local device (JPG, PNG, WebP)"
+                      folder="hero-images"
+                      hintText={t("videoPosterPlaceholder")}
+                      maxSizeMB={50}
                     />
                   </div>
 
                   {/* Mobile Video */}
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold flex items-center justify-between">
-                      <span>Mobile Video (Optional)</span>
-                      <span className="text-[11px] font-normal text-muted-foreground">Vertical video for mobile screens</span>
+                      <span>{t("mobileVideo")}</span>
+                      <span className="text-[11px] font-normal text-muted-foreground">{t("mobileVideoHint")}</span>
                     </Label>
                     <VideoUploader
                       value={watchedMobileVideoUrl || null}
                       onChange={(url) => setValue("videoMobileUrl", url, { shouldDirty: true })}
                       bucket="branding"
                       folder="hero-videos"
-                      description="Optional full-quality mobile video (MP4, WebM, MOV)"
-                      maxSizeMB={1024}
+                      description={t("mobileVideoDesc")}
+                      maxSizeMB={50}
                       disabled={!canManage}
                     />
                   </div>
@@ -448,15 +456,16 @@ export function HeroSectionManager() {
                 <div className="space-y-4 pt-2 border-t border-border/40">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold flex items-center justify-between">
-                      <span>Hero Banner Image</span>
-                      <span className="text-[11px] font-normal text-muted-foreground">Upload from local device</span>
+                      <span>{t("heroBannerImage")}</span>
+                      <span className="text-[11px] font-normal text-muted-foreground">{t("heroBannerImageHint")}</span>
                     </Label>
                     <ImageUploader
                       value={watchedPosterUrl || null}
                       onChange={(url) => setValue("videoPosterUrl", url, { shouldDirty: true })}
                       bucket="branding"
-                      folder="hero-banners"
-                      hintText="High-resolution image (1920x1080) for hero banner"
+                      folder="hero-images"
+                      hintText={t("heroBannerImageDesc")}
+                      maxSizeMB={50}
                     />
                   </div>
                 </div>
@@ -467,7 +476,7 @@ export function HeroSectionManager() {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="overlay-opacity-range" className="text-xs font-semibold flex items-center gap-1.5">
                     <Sliders className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span>Dark Overlay Opacity</span>
+                    <span>{t("overlayOpacity")}</span>
                   </Label>
                   <span className="text-xs font-bold px-2 py-0.5 rounded bg-muted font-mono">
                     {watchedOverlayOpacity}%
@@ -485,7 +494,7 @@ export function HeroSectionManager() {
                   className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  Adjusts the dark tint overlay over the media to guarantee high contrast for text readability.
+                  {t("overlayOpacityDesc")}
                 </p>
               </div>
             </CardContent>
@@ -496,10 +505,10 @@ export function HeroSectionManager() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <Globe2 className="h-4 w-4 text-emerald-600" />
-                <CardTitle className="text-base">Hero Localized Content</CardTitle>
+                <CardTitle className="text-base">{t("contentCardTitle")}</CardTitle>
               </div>
               <CardDescription>
-                Provide tailored headlines, subtitles, and descriptions in English, Arabic, and Kurdish Sorani.
+                {t("contentCardDesc")}
               </CardDescription>
             </CardHeader>
 
@@ -510,11 +519,11 @@ export function HeroSectionManager() {
                   <div className="space-y-4 pt-1">
                     <div className="space-y-1.5">
                       <Label htmlFor="titleEn" className="text-xs font-semibold">
-                        Main Title (English) <span className="text-red-500">*</span>
+                        {t("mainTitle")} (English) <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="titleEn"
-                        placeholder="e.g., Engineering & Industrial Hydraulic Solutions"
+                        placeholder={t("mainTitlePlaceholder")}
                         {...register("titleEn")}
                         disabled={!canManage}
                         className={errors.titleEn ? "border-red-500" : ""}
@@ -526,11 +535,11 @@ export function HeroSectionManager() {
 
                     <div className="space-y-1.5">
                       <Label htmlFor="subtitleEn" className="text-xs font-semibold">
-                        Subtitle / Tagline (English)
+                        {t("subtitle")} (English)
                       </Label>
                       <Input
                         id="subtitleEn"
-                        placeholder="e.g., Leading provider of high-pressure hydraulic equipment across Iraq"
+                        placeholder={t("subtitlePlaceholder")}
                         {...register("subtitleEn")}
                         disabled={!canManage}
                       />
@@ -538,12 +547,12 @@ export function HeroSectionManager() {
 
                     <div className="space-y-1.5">
                       <Label htmlFor="bodyEn" className="text-xs font-semibold">
-                        Body Text / Paragraph (English)
+                        {t("body")} (English)
                       </Label>
                       <Textarea
                         id="bodyEn"
                         rows={3}
-                        placeholder="e.g., Delivering world-class heavy industrial machinery, hydraulic cylinders, pumps, valves, and precision turnkey automation."
+                        placeholder={t("bodyPlaceholder")}
                         {...register("bodyEn")}
                         disabled={!canManage}
                       />
@@ -552,11 +561,11 @@ export function HeroSectionManager() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                       <div className="space-y-1.5">
                         <Label htmlFor="primaryButtonTextEn" className="text-xs font-semibold">
-                          Primary Button Label (EN)
+                          {t("primaryBtnLabel")} (EN)
                         </Label>
                         <Input
                           id="primaryButtonTextEn"
-                          placeholder="e.g., Explore Products"
+                          placeholder={t("primaryBtnLabelPlaceholder")}
                           {...register("primaryButtonTextEn")}
                           disabled={!canManage}
                         />
@@ -564,11 +573,11 @@ export function HeroSectionManager() {
 
                       <div className="space-y-1.5">
                         <Label htmlFor="secondaryButtonTextEn" className="text-xs font-semibold">
-                          Secondary Button Label (EN)
+                          {t("secondaryBtnLabel")} (EN)
                         </Label>
                         <Input
                           id="secondaryButtonTextEn"
-                          placeholder="e.g., Contact Us"
+                          placeholder={t("secondaryBtnLabelPlaceholder")}
                           {...register("secondaryButtonTextEn")}
                           disabled={!canManage}
                         />
@@ -580,7 +589,7 @@ export function HeroSectionManager() {
                   <div className="space-y-4 pt-1" dir="rtl">
                     <div className="space-y-1.5 text-right">
                       <Label htmlFor="titleAr" className="text-xs font-semibold">
-                        العنوان الرئيسي (العربية) <span className="text-red-500">*</span>
+                        {t("mainTitle")} (العربية) <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="titleAr"
@@ -597,7 +606,7 @@ export function HeroSectionManager() {
 
                     <div className="space-y-1.5 text-right">
                       <Label htmlFor="subtitleAr" className="text-xs font-semibold">
-                        العنوان الفرعي (العربية)
+                        {t("subtitle")} (العربية)
                       </Label>
                       <Input
                         id="subtitleAr"
@@ -611,7 +620,7 @@ export function HeroSectionManager() {
 
                     <div className="space-y-1.5 text-right">
                       <Label htmlFor="bodyAr" className="text-xs font-semibold">
-                        النص الوصفي (العربية)
+                        {t("body")} (العربية)
                       </Label>
                       <Textarea
                         id="bodyAr"
@@ -627,7 +636,7 @@ export function HeroSectionManager() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                       <div className="space-y-1.5 text-right">
                         <Label htmlFor="primaryButtonTextAr" className="text-xs font-semibold">
-                          نص الزر الرئيسي (العربية)
+                          {t("primaryBtnLabel")} (العربية)
                         </Label>
                         <Input
                           id="primaryButtonTextAr"
@@ -641,7 +650,7 @@ export function HeroSectionManager() {
 
                       <div className="space-y-1.5 text-right">
                         <Label htmlFor="secondaryButtonTextAr" className="text-xs font-semibold">
-                          نص الزر الثانوي (العربية)
+                          {t("secondaryBtnLabel")} (العربية)
                         </Label>
                         <Input
                           id="secondaryButtonTextAr"
@@ -659,7 +668,7 @@ export function HeroSectionManager() {
                   <div className="space-y-4 pt-1" dir="rtl">
                     <div className="space-y-1.5 text-right">
                       <Label htmlFor="titleKu" className="text-xs font-semibold">
-                        ناونیشانی سەرەکی (کوردی)
+                        {t("mainTitle")} (کوردی)
                       </Label>
                       <Input
                         id="titleKu"
@@ -673,7 +682,7 @@ export function HeroSectionManager() {
 
                     <div className="space-y-1.5 text-right">
                       <Label htmlFor="subtitleKu" className="text-xs font-semibold">
-                        ناونیشانی لاوەکی (کوردی)
+                        {t("subtitle")} (کوردی)
                       </Label>
                       <Input
                         id="subtitleKu"
@@ -687,7 +696,7 @@ export function HeroSectionManager() {
 
                     <div className="space-y-1.5 text-right">
                       <Label htmlFor="bodyKu" className="text-xs font-semibold">
-                        دەقی باسکردن (کوردی)
+                        {t("body")} (کوردی)
                       </Label>
                       <Textarea
                         id="bodyKu"
@@ -703,7 +712,7 @@ export function HeroSectionManager() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                       <div className="space-y-1.5 text-right">
                         <Label htmlFor="primaryButtonTextKu" className="text-xs font-semibold">
-                          دەقی دوگمەی سەرەکی (کوردی)
+                          {t("primaryBtnLabel")} (کوردی)
                         </Label>
                         <Input
                           id="primaryButtonTextKu"
@@ -717,7 +726,7 @@ export function HeroSectionManager() {
 
                       <div className="space-y-1.5 text-right">
                         <Label htmlFor="secondaryButtonTextKu" className="text-xs font-semibold">
-                          دەقی دوگمەی لاوەکی (کوردی)
+                          {t("secondaryBtnLabel")} (کوردی)
                         </Label>
                         <Input
                           id="secondaryButtonTextKu"
@@ -740,21 +749,21 @@ export function HeroSectionManager() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <LinkIcon className="h-4 w-4 text-cyan-600" />
-                <CardTitle className="text-base">Call-to-Action Link URLs</CardTitle>
+                <CardTitle className="text-base">{t("ctaCardTitle")}</CardTitle>
               </div>
               <CardDescription>
-                Configure the destination pages for the primary and secondary CTA buttons.
+                {t("ctaCardDesc")}
               </CardDescription>
             </CardHeader>
 
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="primaryButtonUrl" className="text-xs font-semibold">
-                  Primary Button Target URL
+                  {t("primaryBtnUrl")}
                 </Label>
                 <Input
                   id="primaryButtonUrl"
-                  placeholder="/products or https://..."
+                  placeholder={t("primaryBtnUrlPlaceholder")}
                   {...register("primaryButtonUrl")}
                   disabled={!canManage}
                   className="font-mono text-xs"
@@ -763,11 +772,11 @@ export function HeroSectionManager() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="secondaryButtonUrl" className="text-xs font-semibold">
-                  Secondary Button Target URL (Optional)
+                  {t("secondaryBtnUrl")}
                 </Label>
                 <Input
                   id="secondaryButtonUrl"
-                  placeholder="/contact or https://..."
+                  placeholder={t("secondaryBtnUrlPlaceholder")}
                   {...register("secondaryButtonUrl")}
                   disabled={!canManage}
                   className="font-mono text-xs"
@@ -784,7 +793,7 @@ export function HeroSectionManager() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4 text-blue-600" />
-                  <CardTitle className="text-sm font-semibold">Live Hero Preview</CardTitle>
+                  <CardTitle className="text-sm font-semibold">{t("previewCardTitle")}</CardTitle>
                 </div>
 
                 {/* Device & Language Switchers */}
@@ -826,7 +835,7 @@ export function HeroSectionManager() {
                       className={`p-1 rounded transition-all ${
                         previewDevice === "desktop" ? "bg-muted text-foreground" : "text-muted-foreground"
                       }`}
-                      title="Desktop view"
+                      title={t("previewDesktop")}
                     >
                       <Monitor className="h-3.5 w-3.5" />
                     </button>
@@ -836,7 +845,7 @@ export function HeroSectionManager() {
                       className={`p-1 rounded transition-all ${
                         previewDevice === "mobile" ? "bg-muted text-foreground" : "text-muted-foreground"
                       }`}
-                      title="Mobile view"
+                      title={t("previewMobile")}
                     >
                       <Smartphone className="h-3.5 w-3.5" />
                     </button>
@@ -860,6 +869,11 @@ export function HeroSectionManager() {
                     <video
                       ref={videoRef}
                       key={previewDevice === "mobile" && watchedMobileVideoUrl ? watchedMobileVideoUrl : watchedVideoUrl}
+                      src={
+                        (previewDevice === "mobile" && watchedMobileVideoUrl
+                          ? watchedMobileVideoUrl
+                          : watchedVideoUrl) || ""
+                      }
                       autoPlay
                       muted
                       loop
@@ -867,15 +881,7 @@ export function HeroSectionManager() {
                       poster={watchedPosterUrl || undefined}
                       onError={() => setVideoLoadError(true)}
                       className="absolute inset-0 w-full h-full object-cover"
-                    >
-                      <source
-                        src={
-                          (previewDevice === "mobile" && watchedMobileVideoUrl
-                            ? watchedMobileVideoUrl
-                            : watchedVideoUrl) || ""
-                        }
-                      />
-                    </video>
+                    />
                   ) : watchedPosterUrl ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
@@ -889,7 +895,7 @@ export function HeroSectionManager() {
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex flex-col items-center justify-center text-slate-500 p-4 text-center">
                       <Film className="h-8 w-8 mb-2 opacity-40 animate-pulse" />
-                      <span className="text-xs">No media source configured</span>
+                      <span className="text-xs">{t("previewNoMedia")}</span>
                     </div>
                   )}
 
@@ -958,7 +964,7 @@ export function HeroSectionManager() {
               {/* Status Note */}
               <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                <span>Live real-time preview matches public home banner layout</span>
+                <span>{t("previewStatus")}</span>
               </div>
             </CardContent>
           </Card>
