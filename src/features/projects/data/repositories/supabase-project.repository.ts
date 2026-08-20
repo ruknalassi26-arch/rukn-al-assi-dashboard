@@ -5,6 +5,7 @@
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
 import { logSystemActivity } from "@core/services/activity-logger.service";
+import { slugify } from "@core/utils/format";
 import type {
   IProjectRepository,
   ProjectFilters,
@@ -206,6 +207,35 @@ export class SupabaseProjectRepository implements IProjectRepository {
     }
   }
 
+  private async resolveUniqueSlug(
+    baseSlug: string,
+    languageCode: string,
+    excludeProjectId?: string
+  ): Promise<string> {
+    const cleanBase = slugify(baseSlug || "project") || "project";
+    let candidate = cleanBase;
+    let counter = 1;
+
+    while (true) {
+      let query = (this.supabase.from("project_translations" as any) as any)
+        .select("project_id")
+        .eq("language_code", languageCode)
+        .eq("slug", candidate);
+
+      if (excludeProjectId) {
+        query = query.neq("project_id", excludeProjectId);
+      }
+
+      const { data, error } = await query.maybeSingle();
+      if (error || !data) {
+        return candidate;
+      }
+
+      candidate = `${cleanBase}-${counter}`;
+      counter++;
+    }
+  }
+
   async createProject(input: CreateProjectInput): Promise<ProjectEntity> {
     const validCategoryId = await this.resolveValidCategoryId(input.categoryId);
 
@@ -225,14 +255,20 @@ export class SupabaseProjectRepository implements IProjectRepository {
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create project");
 
-    const defaultSlug = input.slugEn || input.titleEn.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const rawEn = input.slugEn || input.titleEn;
+    const rawAr = input.slugAr || input.slugEn || input.titleAr || input.titleEn;
+    const rawKu = input.slugKu || input.slugEn || input.titleKu || input.titleEn;
+
+    const enSlug = await this.resolveUniqueSlug(rawEn, "en");
+    const arSlug = await this.resolveUniqueSlug(rawAr, "ar");
+    const kuSlug = await this.resolveUniqueSlug(rawKu, "ku");
 
     const transPayloads = [];
     if (input.titleEn?.trim()) {
       transPayloads.push({
         project_id: data.id,
         language_code: "en",
-        slug: input.slugEn || defaultSlug,
+        slug: enSlug,
         title: input.titleEn.trim(),
         description: input.descriptionEn || null,
         challenge: input.challengeEn || null,
@@ -244,7 +280,7 @@ export class SupabaseProjectRepository implements IProjectRepository {
       transPayloads.push({
         project_id: data.id,
         language_code: "ar",
-        slug: input.slugAr || input.slugEn || defaultSlug,
+        slug: arSlug,
         title: input.titleAr.trim(),
         description: input.descriptionAr || null,
         challenge: input.challengeAr || null,
@@ -256,7 +292,7 @@ export class SupabaseProjectRepository implements IProjectRepository {
       transPayloads.push({
         project_id: data.id,
         language_code: "ku",
-        slug: input.slugKu || input.slugEn || defaultSlug,
+        slug: kuSlug,
         title: input.titleKu.trim(),
         description: input.descriptionKu || null,
         challenge: input.challengeKu || null,
@@ -304,16 +340,15 @@ export class SupabaseProjectRepository implements IProjectRepository {
       if (error) throw new Error(error.message);
     }
 
-    const defaultSlug = input.slugEn || input.titleEn?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || input.id;
-
     // English Translation
     if (input.titleEn !== undefined) {
       if (input.titleEn?.trim()) {
+        const enSlug = await this.resolveUniqueSlug(input.slugEn || input.titleEn, "en", input.id);
         await (this.supabase.from("project_translations" as any) as any).upsert(
           {
             project_id: input.id,
             language_code: "en",
-            slug: input.slugEn || defaultSlug,
+            slug: enSlug,
             title: input.titleEn.trim(),
             description: input.descriptionEn || null,
             challenge: input.challengeEn || null,
@@ -327,11 +362,12 @@ export class SupabaseProjectRepository implements IProjectRepository {
     // Arabic Translation
     if (input.titleAr !== undefined || input.descriptionAr !== undefined || input.challengeAr !== undefined || input.solutionAr !== undefined) {
       if (input.titleAr?.trim()) {
+        const arSlug = await this.resolveUniqueSlug(input.slugAr || input.slugEn || input.titleAr || "project", "ar", input.id);
         await (this.supabase.from("project_translations" as any) as any).upsert(
           {
             project_id: input.id,
             language_code: "ar",
-            slug: input.slugAr || input.slugEn || defaultSlug,
+            slug: arSlug,
             title: input.titleAr.trim(),
             description: input.descriptionAr || null,
             challenge: input.challengeAr || null,
@@ -350,11 +386,12 @@ export class SupabaseProjectRepository implements IProjectRepository {
     // Kurdish Translation
     if (input.titleKu !== undefined || input.descriptionKu !== undefined || input.challengeKu !== undefined || input.solutionKu !== undefined) {
       if (input.titleKu?.trim()) {
+        const kuSlug = await this.resolveUniqueSlug(input.slugKu || input.slugEn || input.titleKu || "project", "ku", input.id);
         await (this.supabase.from("project_translations" as any) as any).upsert(
           {
             project_id: input.id,
             language_code: "ku",
-            slug: input.slugKu || input.slugEn || defaultSlug,
+            slug: kuSlug,
             title: input.titleKu.trim(),
             description: input.descriptionKu || null,
             challenge: input.challengeKu || null,
