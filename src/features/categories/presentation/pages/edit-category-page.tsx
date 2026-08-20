@@ -2,17 +2,20 @@
 // ==============================================================================
 // features/categories/presentation/pages/edit-category-page.tsx
 // ==============================================================================
+import { useParams } from "next/navigation";
 import { CategoryForm } from "../components/category-form";
 import { useCategory } from "@shared/hooks/categories/use-category-hooks";
 import { Skeleton, Card, CardHeader, CardContent } from "@shared/ui";
 import { ErrorState } from "@shared/components/error-state";
 
 interface EditCategoryPageProps {
-  categoryId: string;
+  categoryId?: string;
 }
 
 export function EditCategoryPage({ categoryId }: EditCategoryPageProps) {
-  const { data: category, isLoading, error, refetch } = useCategory(categoryId);
+  const params = useParams();
+  const id = categoryId || (params?.id as string);
+  const { data: category, isLoading, error, refetch } = useCategory(id);
 
   if (isLoading) {
     return (

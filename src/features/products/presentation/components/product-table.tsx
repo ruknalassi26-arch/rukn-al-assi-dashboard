@@ -358,11 +358,7 @@ export function ProductTable() {
                         </TableCell>
                         <TableCell>
                           <div className="relative h-10 w-12 rounded overflow-hidden bg-muted border flex items-center justify-center">
-                            {product.displayImage ? (
-                              <Image src={product.displayImage} alt={product.nameEn} fill unoptimized className="object-cover" />
-                            ) : (
-                              <Package className="h-4 w-4 text-muted-foreground" />
-                            )}
+                            <ProductThumbnail src={product.displayImage} alt={product.nameEn} />
                           </div>
                         </TableCell>
                         <TableCell>
@@ -532,3 +528,23 @@ export function ProductTable() {
     </div>
   );
 }
+
+function ProductThumbnail({ src, alt }: { src: string | null; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!src || hasError) {
+    return <Package className="h-4 w-4 text-muted-foreground" />;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      unoptimized
+      className="object-cover"
+      onError={() => setHasError(true)}
+    />
+  );
+}
+

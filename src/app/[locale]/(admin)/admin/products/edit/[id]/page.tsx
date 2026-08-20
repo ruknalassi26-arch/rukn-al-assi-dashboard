@@ -3,6 +3,7 @@
 // Admin Edit Product Route
 // ==============================================================================
 import type { Metadata } from "next";
+import { setRequestLocale } from "next-intl/server";
 import { EditProductPage } from "@features/products/presentation/pages";
 
 export const metadata: Metadata = {
@@ -11,10 +12,11 @@ export const metadata: Metadata = {
 };
 
 interface EditProductRouteProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }
 
 export default async function AdminEditProductPage({ params }: EditProductRouteProps) {
-  const { id } = await params;
+  const { locale, id } = await params;
+  setRequestLocale(locale);
   return <EditProductPage productId={id} />;
 }

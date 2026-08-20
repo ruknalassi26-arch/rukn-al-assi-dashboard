@@ -2,17 +2,20 @@
 // ==============================================================================
 // features/certificates/presentation/pages/edit-certificate-page.tsx
 // ==============================================================================
+import { useParams } from "next/navigation";
 import { CertificateForm } from "../components/certificate-form";
 import { useCertificate } from "@shared/hooks/certificates/use-certificate-hooks";
 import { Skeleton, Card, CardHeader, CardContent } from "@shared/ui";
 import { ErrorState } from "@shared/components/error-state";
 
 interface EditCertificatePageProps {
-  certificateId: string;
+  certificateId?: string;
 }
 
 export function EditCertificatePage({ certificateId }: EditCertificatePageProps) {
-  const { data: certificate, isLoading, error, refetch } = useCertificate(certificateId);
+  const params = useParams();
+  const id = certificateId || (params?.id as string);
+  const { data: certificate, isLoading, error, refetch } = useCertificate(id);
 
   if (isLoading) {
     return (

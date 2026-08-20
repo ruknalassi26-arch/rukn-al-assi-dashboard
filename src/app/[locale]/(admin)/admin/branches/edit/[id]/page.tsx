@@ -3,6 +3,7 @@
 // Admin Edit Branch Route
 // ==============================================================================
 import type { Metadata } from "next";
+import { setRequestLocale } from "next-intl/server";
 import { EditBranchPage } from "@features/contact/presentation/pages";
 
 export const metadata: Metadata = {
@@ -11,10 +12,11 @@ export const metadata: Metadata = {
 };
 
 interface EditBranchRouteProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }
 
 export default async function AdminEditBranchPage({ params }: EditBranchRouteProps) {
-  const { id } = await params;
+  const { locale, id } = await params;
+  setRequestLocale(locale);
   return <EditBranchPage branchId={id} />;
 }

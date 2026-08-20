@@ -3,6 +3,7 @@
 // Admin Edit Team Member Route
 // ==============================================================================
 import type { Metadata } from "next";
+import { setRequestLocale } from "next-intl/server";
 import { EditTeamMemberPage } from "@features/team/presentation/pages";
 
 export const metadata: Metadata = {
@@ -11,10 +12,11 @@ export const metadata: Metadata = {
 };
 
 interface EditTeamMemberRouteProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }
 
 export default async function AdminEditTeamMemberPage({ params }: EditTeamMemberRouteProps) {
-  const { id } = await params;
+  const { locale, id } = await params;
+  setRequestLocale(locale);
   return <EditTeamMemberPage memberId={id} />;
 }

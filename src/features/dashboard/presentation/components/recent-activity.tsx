@@ -32,11 +32,19 @@ export function RecentActivity() {
     }
   };
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat(locale === "ar" ? "ar" : locale === "ckb" ? "ckb" : "en-US", {
-      dateStyle: "short",
-      timeStyle: "short",
-    }).format(new Date(date));
+  const formatDate = (date: Date | string | null | undefined) => {
+    if (!date) return "N/A";
+    const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return "N/A";
+    const loc = locale === "ar" ? "ar-SA" : locale === "ckb" ? "ar-IQ" : "en-US";
+    try {
+      return new Intl.DateTimeFormat(loc, {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(d);
+    } catch {
+      return d.toLocaleDateString();
+    }
   };
 
   if (isLoading) {

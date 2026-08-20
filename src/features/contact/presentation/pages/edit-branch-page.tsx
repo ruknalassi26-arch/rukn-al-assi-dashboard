@@ -2,17 +2,20 @@
 // ==============================================================================
 // features/contact/presentation/pages/edit-branch-page.tsx
 // ==============================================================================
+import { useParams } from "next/navigation";
 import { BranchForm } from "../components/branch-form";
 import { useBranch } from "@shared/hooks/contact/use-contact-hooks";
 import { Skeleton, Card, CardHeader, CardContent } from "@shared/ui";
 import { ErrorState } from "@shared/components/error-state";
 
 interface EditBranchPageProps {
-  branchId: string;
+  branchId?: string;
 }
 
 export function EditBranchPage({ branchId }: EditBranchPageProps) {
-  const { data: branch, isLoading, error, refetch } = useBranch(branchId);
+  const params = useParams();
+  const id = branchId || (params?.id as string);
+  const { data: branch, isLoading, error, refetch } = useBranch(id);
 
   if (isLoading) {
     return (

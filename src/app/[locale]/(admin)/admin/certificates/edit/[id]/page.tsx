@@ -3,6 +3,7 @@
 // Admin Edit Certificate Route
 // ==============================================================================
 import type { Metadata } from "next";
+import { setRequestLocale } from "next-intl/server";
 import { EditCertificatePage } from "@features/certificates/presentation/pages";
 
 export const metadata: Metadata = {
@@ -11,10 +12,11 @@ export const metadata: Metadata = {
 };
 
 interface EditCertificateRouteProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }
 
 export default async function AdminEditCertificatePage({ params }: EditCertificateRouteProps) {
-  const { id } = await params;
+  const { locale, id } = await params;
+  setRequestLocale(locale);
   return <EditCertificatePage certificateId={id} />;
 }

@@ -2,17 +2,20 @@
 // ==============================================================================
 // features/services/presentation/pages/edit-service-page.tsx
 // ==============================================================================
+import { useParams } from "next/navigation";
 import { ServiceForm } from "../components/service-form";
 import { useService } from "@shared/hooks/services/use-service-hooks";
 import { Skeleton, Card, CardHeader, CardContent } from "@shared/ui";
 import { ErrorState } from "@shared/components/error-state";
 
 interface EditServicePageProps {
-  serviceId: string;
+  serviceId?: string;
 }
 
 export function EditServicePage({ serviceId }: EditServicePageProps) {
-  const { data: service, isLoading, error, refetch } = useService(serviceId);
+  const params = useParams();
+  const id = serviceId || (params?.id as string);
+  const { data: service, isLoading, error, refetch } = useService(id);
 
   if (isLoading) {
     return (

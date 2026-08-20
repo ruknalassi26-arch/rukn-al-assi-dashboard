@@ -3,6 +3,7 @@
 // Admin Edit Category Route
 // ==============================================================================
 import type { Metadata } from "next";
+import { setRequestLocale } from "next-intl/server";
 import { EditCategoryPage } from "@features/categories/presentation/pages";
 
 export const metadata: Metadata = {
@@ -11,10 +12,11 @@ export const metadata: Metadata = {
 };
 
 interface EditCategoryRouteProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }
 
 export default async function AdminEditCategoryPage({ params }: EditCategoryRouteProps) {
-  const { id } = await params;
+  const { locale, id } = await params;
+  setRequestLocale(locale);
   return <EditCategoryPage categoryId={id} />;
 }

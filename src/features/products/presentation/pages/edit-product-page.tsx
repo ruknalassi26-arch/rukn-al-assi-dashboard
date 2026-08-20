@@ -2,17 +2,20 @@
 // ==============================================================================
 // features/products/presentation/pages/edit-product-page.tsx
 // ==============================================================================
+import { useParams } from "next/navigation";
 import { ProductForm } from "../components/product-form";
 import { useProduct } from "@shared/hooks/products/use-product-hooks";
 import { Skeleton, Card, CardHeader, CardContent } from "@shared/ui";
 import { ErrorState } from "@shared/components/error-state";
 
 interface EditProductPageProps {
-  productId: string;
+  productId?: string;
 }
 
 export function EditProductPage({ productId }: EditProductPageProps) {
-  const { data: product, isLoading, error, refetch } = useProduct(productId);
+  const params = useParams();
+  const id = productId || (params?.id as string);
+  const { data: product, isLoading, error, refetch } = useProduct(id);
 
   if (isLoading) {
     return (

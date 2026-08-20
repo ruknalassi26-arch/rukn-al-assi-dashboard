@@ -2,17 +2,20 @@
 // ==============================================================================
 // features/team/presentation/pages/edit-team-member-page.tsx
 // ==============================================================================
+import { useParams } from "next/navigation";
 import { TeamMemberForm } from "../components/team-member-form";
 import { useTeamMember } from "@shared/hooks/team/use-team-hooks";
 import { Skeleton, Card, CardHeader, CardContent } from "@shared/ui";
 import { ErrorState } from "@shared/components/error-state";
 
 interface EditTeamMemberPageProps {
-  memberId: string;
+  memberId?: string;
 }
 
 export function EditTeamMemberPage({ memberId }: EditTeamMemberPageProps) {
-  const { data: member, isLoading, error, refetch } = useTeamMember(memberId);
+  const params = useParams();
+  const id = memberId || (params?.id as string);
+  const { data: member, isLoading, error, refetch } = useTeamMember(id);
 
   if (isLoading) {
     return (

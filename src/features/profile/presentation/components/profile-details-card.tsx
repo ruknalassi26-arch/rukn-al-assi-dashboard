@@ -12,12 +12,19 @@ export function ProfileDetailsCard({ user }: ProfileDetailsCardProps) {
   const t = useTranslations("profile");
   const locale = useLocale();
 
-  const formatDate = (date: Date | null | undefined) => {
+  const formatDate = (date: Date | string | null | undefined) => {
     if (!date) return "N/A";
-    return new Intl.DateTimeFormat(locale === "ar" ? "ar" : locale === "ckb" ? "ckb" : "en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(date);
+    const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return "N/A";
+    try {
+      const loc = locale === "ar" ? "ar-SA" : locale === "ckb" ? "ar-IQ" : "en-US";
+      return new Intl.DateTimeFormat(loc, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(d);
+    } catch {
+      return d.toLocaleDateString();
+    }
   };
 
   return (

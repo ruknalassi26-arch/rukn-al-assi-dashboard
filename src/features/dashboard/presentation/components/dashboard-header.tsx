@@ -31,7 +31,8 @@ export function DashboardHeader() {
     }
   };
 
-  const formattedTime = new Intl.DateTimeFormat(locale === "ar" ? "ar" : locale === "ckb" ? "ckb" : "en-US", {
+  const loc = locale === "ar" ? "ar-SA" : locale === "ckb" ? "ar-IQ" : "en-US";
+  const formattedTime = new Intl.DateTimeFormat(loc, {
     timeStyle: "short",
   }).format(lastUpdated);
 
