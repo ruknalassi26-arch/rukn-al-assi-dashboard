@@ -238,7 +238,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
 
   async updateCertificate(input: UpdateCertificateInput): Promise<CertificateEntity> {
     const updatePayload: UpdateTables<"certifications"> = {};
-    if (input.image !== undefined) updatePayload.image_url = input.image;
+    if (input.image !== undefined) updatePayload.image_url = input.image ?? "";
     if (input.organization !== undefined) updatePayload.issued_by = input.organization;
     if (input.issueDate !== undefined) updatePayload.issued_date = cleanDateValue(input.issueDate);
     if (input.sortOrder !== undefined) updatePayload.sort_order = input.sortOrder;

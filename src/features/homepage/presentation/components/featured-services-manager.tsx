@@ -87,8 +87,11 @@ export function FeaturedServicesManager() {
               {featuredCount} {tCommon("featured")}
             </Badge>
           </div>
-          <CardDescription>
-            {t("featuredServicesSubtitle")}
+          <CardDescription className="flex items-center gap-2">
+            <span>{t("featuredServicesSubtitle")}</span>
+            <span className="font-semibold text-primary">
+              (Top 6 featured services displayed on the public Home page)
+            </span>
           </CardDescription>
         </div>
       </CardHeader>
@@ -137,6 +140,13 @@ export function FeaturedServicesManager() {
                       {service.isFeatured && (
                         <Badge className="bg-amber-500 text-white gap-1 text-[10px]">
                           <Check className="h-3 w-3" /> {tCommon("featured")}
+                        </Badge>
+                      )}
+                      {service.isFeatured && (
+                        <Badge variant="outline" className="text-[10px] text-amber-700 bg-amber-50 border-amber-300">
+                          {filteredServices.filter(s => s.isFeatured).findIndex(s => s.id === service.id) < 6
+                            ? `Home Display #${filteredServices.filter(s => s.isFeatured).findIndex(s => s.id === service.id) + 1}`
+                            : "Queue"}
                         </Badge>
                       )}
                     </div>

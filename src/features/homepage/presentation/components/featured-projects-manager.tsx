@@ -83,8 +83,11 @@ export function FeaturedProjectsManager() {
               {featuredCount} {tCommon("featured")}
             </Badge>
           </div>
-          <CardDescription>
-            {t("featuredProjectsSubtitle")}
+          <CardDescription className="flex items-center gap-2">
+            <span>{t("featuredProjectsSubtitle")}</span>
+            <span className="font-semibold text-primary">
+              (Top 3 featured projects displayed on the public Home page)
+            </span>
           </CardDescription>
         </div>
       </CardHeader>
@@ -138,6 +141,13 @@ export function FeaturedProjectsManager() {
                       {project.isFeatured && (
                         <Badge className="bg-violet-600 text-white gap-1 text-[10px]">
                           <Check className="h-3 w-3" /> {tCommon("featured")}
+                        </Badge>
+                      )}
+                      {project.isFeatured && (
+                        <Badge variant="outline" className="text-[10px] text-violet-700 bg-violet-50 border-violet-300">
+                          {filteredProjects.filter(p => p.isFeatured).findIndex(p => p.id === project.id) < 3
+                            ? `Home Display #${filteredProjects.filter(p => p.isFeatured).findIndex(p => p.id === project.id) + 1}`
+                            : "Queue"}
                         </Badge>
                       )}
                     </div>

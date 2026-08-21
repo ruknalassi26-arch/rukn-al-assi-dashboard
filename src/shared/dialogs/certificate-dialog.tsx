@@ -71,7 +71,7 @@ interface CertificateDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (values: CertificateFormValues) => Promise<void>;
-  initialData?: CertificateEntity | AboutCertificateEntity | any | null;
+  initialData?: CertificateEntity | AboutCertificateEntity | null;
   isLoading?: boolean;
 }
 
@@ -117,9 +117,10 @@ export function CertificateDialog({
   useEffect(() => {
     if (initialData) {
       if ("getTranslation" in initialData) {
-        const en = initialData.getTranslation("en");
-        const ar = initialData.getTranslation("ar");
-        const ku = initialData.getTranslation("ckb");
+        const aboutCert = initialData as AboutCertificateEntity;
+        const en = aboutCert.getTranslation("en");
+        const ar = aboutCert.getTranslation("ar");
+        const ku = aboutCert.getTranslation("ckb");
         reset({
           titleEn: en.title || "",
           titleAr: ar.title || "",
@@ -127,29 +128,30 @@ export function CertificateDialog({
           descriptionEn: en.description || "",
           descriptionAr: ar.description || "",
           descriptionKu: ku.description || "",
-          image: initialData.imageUrl,
-          issueDate: formatDateForInput(initialData.issuedDate),
-          organization: initialData.issuedBy ?? "",
-          sortOrder: initialData.sortOrder ?? 0,
-          isFeatured: initialData.isFeatured ?? false,
-          featuredOrder: initialData.featuredOrder ?? null,
-          status: initialData.status === "published" ? "active" : (initialData.status as any),
+          image: aboutCert.imageUrl,
+          issueDate: formatDateForInput(aboutCert.issuedDate),
+          organization: aboutCert.issuedBy ?? "",
+          sortOrder: aboutCert.sortOrder ?? 0,
+          isFeatured: aboutCert.isFeatured ?? false,
+          featuredOrder: aboutCert.featuredOrder ?? null,
+          status: aboutCert.status === "published" ? "active" : "draft",
         });
       } else {
+        const homeCert = initialData as CertificateEntity;
         reset({
-          titleEn: (initialData as any).titleEn ?? "",
-          titleAr: (initialData as any).titleAr ?? "",
-          titleKu: ((initialData as unknown as Record<string, unknown>).titleKu as string) ?? "",
-          descriptionEn: (initialData as any).descriptionEn ?? "",
-          descriptionAr: (initialData as any).descriptionAr ?? "",
-          descriptionKu: ((initialData as unknown as Record<string, unknown>).descriptionKu as string) ?? "",
-          image: initialData.image ?? initialData.imageUrl ?? null,
-          issueDate: formatDateForInput((initialData as any).issueDate ?? (initialData as any).issuedDate),
-          organization: (initialData as any).organization ?? (initialData as any).issuedBy ?? "",
-          sortOrder: initialData.sortOrder ?? 0,
-          isFeatured: (initialData as any).isFeatured ?? false,
-          featuredOrder: (initialData as any).featuredOrder ?? null,
-          status: initialData.status === "published" ? "active" : (initialData.status ?? "active"),
+          titleEn: homeCert.titleEn ?? "",
+          titleAr: homeCert.titleAr ?? "",
+          titleKu: "",
+          descriptionEn: "",
+          descriptionAr: "",
+          descriptionKu: "",
+          image: homeCert.image ?? null,
+          issueDate: formatDateForInput(homeCert.issueDate),
+          organization: "",
+          sortOrder: homeCert.sortOrder ?? 0,
+          isFeatured: homeCert.isFeatured ?? false,
+          featuredOrder: homeCert.featuredOrder ?? null,
+          status: homeCert.status === "active" ? "active" : "draft",
         });
       }
     } else {
