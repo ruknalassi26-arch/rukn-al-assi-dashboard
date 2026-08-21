@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   Wrench,
+  AlertTriangle,
   Search,
   Plus,
   RefreshCw,
@@ -89,6 +90,9 @@ export function ServiceTable() {
   } = useServiceStore();
 
   const isFeaturedParam = featured === "all" ? undefined : featured;
+
+  const { data: featuredServicesData } = useServices({ isFeatured: true, limit: 100 });
+  const featuredCount = featuredServicesData?.total ?? (featuredServicesData?.items?.length ?? 0);
 
   const { data, isLoading, error, refetch, isFetching } = useServices({
     search,
@@ -179,11 +183,20 @@ export function ServiceTable() {
     <Card className="border shadow-xs">
       {/* Header */}
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b bg-muted/20 pb-4">
-        <div>
-          <CardTitle className="text-xl font-bold flex items-center gap-2">
-            <Wrench className="h-5 w-5 text-primary" />
-            {t("title")}
-          </CardTitle>
+        <div className="space-y-1">
+          <div className="flex items-center gap-3 flex-wrap">
+            <CardTitle className="text-xl font-bold flex items-center gap-2">
+              <Wrench className="h-5 w-5 text-primary" />
+              {t("title")}
+            </CardTitle>
+            <Badge
+              variant={featuredCount > 6 ? "destructive" : "outline"}
+              className="font-mono text-xs gap-1.5 py-0.5 px-2 font-semibold"
+            >
+              <Star className="h-3 w-3 fill-amber-400 text-amber-500" />
+              Featured Services: {featuredCount} / 6
+            </Badge>
+          </div>
           <CardDescription>
             {t("subtitle")}
           </CardDescription>

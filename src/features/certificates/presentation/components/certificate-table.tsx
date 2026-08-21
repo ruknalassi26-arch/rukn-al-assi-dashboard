@@ -22,6 +22,7 @@ import {
   Loader2,
   Star,
   Sparkles,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Card,
@@ -98,6 +99,9 @@ export function CertificateTable() {
     sortOrder,
   });
 
+  const { data: featuredCertsData } = useCertificates({ isFeatured: true, limit: 100 });
+  const featuredCount = featuredCertsData?.total ?? (featuredCertsData?.items?.length ?? 0);
+
   const deleteCertificateMutation = useDeleteCertificate();
   const duplicateCertificateMutation = useDuplicateCertificate();
   const bulkDeleteMutation = useBulkDeleteCertificates();
@@ -151,11 +155,20 @@ export function CertificateTable() {
     <Card className="border shadow-xs">
       {/* Header */}
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b bg-muted/20 pb-4">
-        <div>
-          <CardTitle className="text-xl font-bold flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            {t("title")}
-          </CardTitle>
+        <div className="space-y-1">
+          <div className="flex items-center gap-3 flex-wrap">
+            <CardTitle className="text-xl font-bold flex items-center gap-2">
+              <Shield className="h-5 w-5 text-primary" />
+              {t("title")}
+            </CardTitle>
+            <Badge
+              variant={featuredCount > 4 ? "destructive" : "outline"}
+              className="font-mono text-xs gap-1.5 py-0.5 px-2 font-semibold"
+            >
+              <Star className="h-3 w-3 fill-amber-400 text-amber-500" />
+              Featured Certifications: {featuredCount} / 4
+            </Badge>
+          </div>
           <CardDescription>
             {t("subtitle")}
           </CardDescription>

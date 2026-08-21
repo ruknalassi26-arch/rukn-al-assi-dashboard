@@ -25,6 +25,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FolderOpen,
+  AlertTriangle,
   CheckCircle2,
   XCircle,
 } from "lucide-react";
@@ -70,6 +71,9 @@ export function ProjectTable() {
     sortBy,
     sortOrder,
   });
+
+  const { data: featuredProjectsData } = useProjectsQuery({ isFeatured: true, pageSize: 100 });
+  const featuredCount = featuredProjectsData?.total ?? (featuredProjectsData?.items?.length ?? 0);
 
   const toggleStatusMutation = useToggleProjectStatusMutation();
   const toggleFeaturedMutation = useToggleProjectFeaturedMutation();
@@ -176,6 +180,28 @@ export function ProjectTable() {
           </div>
         </div>
       )}
+
+      {/* Featured Quota Badge & Warning */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <Badge
+            variant={featuredCount > 3 ? "destructive" : "outline"}
+            className="font-mono text-xs gap-1.5 py-0.5 px-2.5 font-semibold self-start"
+          >
+            <Star className="h-3 w-3 fill-amber-400 text-amber-500" />
+            Featured Projects: {featuredCount} / 3
+          </Badge>
+        </div>
+
+        {featuredCount > 3 && (
+          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2.5 shadow-xs">
+            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span>
+              <strong>{featuredCount} projects</strong> are marked as featured. Only the first 3 will appear on Home.
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* Main Table */}
       <div className="border rounded-xl bg-card shadow-xs overflow-hidden">
