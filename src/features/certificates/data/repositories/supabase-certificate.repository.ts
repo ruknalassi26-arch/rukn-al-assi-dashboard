@@ -4,6 +4,9 @@
 // Strictly matching official SQL Schema for certifications and certification_translations
 // ==============================================================================
 import { createClient } from "@core/lib/supabase/client";
+import type { InsertTables, UpdateTables } from "@core/types/database.types";
+import { CertificateEntity } from "../../domain/entities/certificate.entity";
+import type { CertificateStatus } from "../../domain/entities/certificate.entity";
 import type {
   ICertificateRepository,
   CertificateFilterParams,
@@ -11,8 +14,30 @@ import type {
   CreateCertificateInput,
   UpdateCertificateInput,
 } from "../../domain/repositories/i-certificate.repository";
-import { CertificateEntity } from "../../domain/entities/certificate.entity";
-import type { CertificateStatus } from "../../domain/entities/certificate.entity";
+
+interface DbCertificationTranslation {
+  certification_id: string;
+  language_code: string;
+  title: string;
+  description: string | null;
+}
+
+interface DbCertificationRow {
+  id: string;
+  image_url: string | null;
+  issued_by: string | null;
+  issued_date: string | null;
+  sort_order: number;
+  status: "published" | "draft" | "active";
+  deleted_at: string | null;
+  created_by: string | null;
+  updated_by: string | null;
+  is_featured: boolean;
+  featured_order: number | null;
+  created_at: string;
+  updated_at: string;
+  certification_translations?: DbCertificationTranslation[];
+}
 
 export function formatDateForInput(dateStr?: string | null): string {
   if (!dateStr || dateStr.trim() === "") return "";
@@ -41,9 +66,9 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
   ) {
     try {
       const { data: userData } = await this.supabase.auth.getUser();
-      await (this.supabase.from("activity_log" as any) as any).insert({
+      await this.supabase.from("activity_log").insert({
         action,
-        entity_type: "certificates",
+        entity_type: "certificates" as const,
         entity_id: entityId,
         details: { entity_title: entityTitle, ...metadata },
         admin_user_id: userData.user?.id ?? null,
@@ -59,7 +84,8 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
     const offset = (page - 1) * limit;
 
     try {
-      let query = (this.supabase.from("certifications" as any) as any)
+      let query = this.supabase
+        .from("certifications")
         .select("*, certification_translations(*)", { count: "exact" })
         .is("deleted_at", null);
 
@@ -90,19 +116,20 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
         return { items: [], total: 0, page, limit, totalPages: 0 };
       }
 
-      const items = data.map((item: any) => {
-        const transList: any[] = item.certification_translations || [];
-        const en = transList.find((t: any) => t.language_code === "en") || {};
-        const ar = transList.find((t: any) => t.language_code === "ar") || {};
-        const ku = transList.find((t: any) => t.language_code === "ku") || {};
+      const rows = data as unknown as DbCertificationRow[];
+      const items = rows.map((item) => {
+        const transList = item.certification_translations || [];
+        const en = transList.find((t) => t.language_code === "en");
+        const ar = transList.find((t) => t.language_code === "ar");
+        const ku = transList.find((t) => t.language_code === "ku");
         return new CertificateEntity({
           id: item.id,
-          titleEn: en.title || "Certification",
-          titleAr: ar.title || "شهادة اعتمادات",
-          titleKu: ku.title || null,
-          descriptionEn: en.description || null,
-          descriptionAr: ar.description || null,
-          descriptionKu: ku.description || null,
+          titleEn: en?.title || "Certification",
+          titleAr: ar?.title || "شهادة اعتمادات",
+          titleKu: ku?.title || null,
+          descriptionEn: en?.description || null,
+          descriptionAr: ar?.description || null,
+          descriptionKu: ku?.description || null,
           image: item.image_url || null,
           issueDate: item.issued_date ? formatDateForInput(item.issued_date) : null,
           organization: item.issued_by || null,
@@ -128,37 +155,39 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
 
   async getCertificateById(id: string): Promise<CertificateEntity | null> {
     try {
-      const { data, error } = await (this.supabase.from("certifications" as any) as any)
+      const { data, error } = await this.supabase
+        .from("certifications")
         .select("*, certification_translations(*)")
         .eq("id", id)
         .single();
 
       if (error || !data) return null;
 
-      const transList: any[] = data.certification_translations || [];
-      const en = transList.find((t: any) => t.language_code === "en") || {};
-      const ar = transList.find((t: any) => t.language_code === "ar") || {};
-      const ku = transList.find((t: any) => t.language_code === "ku") || {};
+      const item = data as unknown as DbCertificationRow;
+      const transList = item.certification_translations || [];
+      const en = transList.find((t) => t.language_code === "en");
+      const ar = transList.find((t) => t.language_code === "ar");
+      const ku = transList.find((t) => t.language_code === "ku");
 
       return new CertificateEntity({
-        id: data.id,
-        titleEn: en.title || "Certification",
-        titleAr: ar.title || "شهادة اعتمادات",
-        titleKu: ku.title || null,
-        descriptionEn: en.description || null,
-        descriptionAr: ar.description || null,
-        descriptionKu: ku.description || null,
-        image: data.image_url || null,
-        issueDate: data.issued_date ? formatDateForInput(data.issued_date) : null,
-        organization: data.issued_by || null,
+        id: item.id,
+        titleEn: en?.title || "Certification",
+        titleAr: ar?.title || "شهادة اعتمادات",
+        titleKu: ku?.title || null,
+        descriptionEn: en?.description || null,
+        descriptionAr: ar?.description || null,
+        descriptionKu: ku?.description || null,
+        image: item.image_url || null,
+        issueDate: item.issued_date ? formatDateForInput(item.issued_date) : null,
+        organization: item.issued_by || null,
         organizationAr: null,
         organizationKu: null,
-        sortOrder: data.sort_order ?? 0,
-        isFeatured: data.is_featured ?? false,
-        featuredOrder: data.featured_order ?? null,
-        status: data.status === "published" ? "active" : "draft",
-        createdAt: data.created_at ? new Date(data.created_at) : new Date(),
-        updatedAt: data.updated_at ? new Date(data.updated_at) : new Date(),
+        sortOrder: item.sort_order ?? 0,
+        isFeatured: item.is_featured ?? false,
+        featuredOrder: item.featured_order ?? null,
+        status: item.status === "published" ? "active" : "draft",
+        createdAt: item.created_at ? new Date(item.created_at) : new Date(),
+        updatedAt: item.updated_at ? new Date(item.updated_at) : new Date(),
       });
     } catch {
       return null;
@@ -169,7 +198,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
     const isFeatured = input.isFeatured ?? false;
     const featuredOrder = isFeatured ? (input.featuredOrder ?? null) : null;
 
-    const insertPayload: Record<string, any> = {
+    const insertPayload: InsertTables<"certifications"> = {
       image_url: input.image ?? "",
       issued_by: input.organization ?? null,
       issued_date: cleanDateValue(input.issueDate),
@@ -179,14 +208,15 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
       status: input.status === "active" ? "published" : "draft",
     };
 
-    const { data, error } = await (this.supabase.from("certifications" as any) as any)
+    const { data, error } = await this.supabase
+      .from("certifications")
       .insert(insertPayload)
       .select("*")
       .single();
 
     if (error || !data) throw new Error(error?.message ?? "Failed to create certificate");
 
-    const transPayloads = [];
+    const transPayloads: InsertTables<"certification_translations">[] = [];
     if (input.titleEn?.trim()) {
       transPayloads.push({ certification_id: data.id, language_code: "en", title: input.titleEn.trim(), description: input.descriptionEn ?? null });
     }
@@ -198,7 +228,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
     }
 
     if (transPayloads.length > 0) {
-      await (this.supabase.from("certification_translations" as any) as any).insert(transPayloads);
+      await this.supabase.from("certification_translations").insert(transPayloads);
     }
 
     const created = (await this.getCertificateById(data.id))!;
@@ -207,7 +237,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
   }
 
   async updateCertificate(input: UpdateCertificateInput): Promise<CertificateEntity> {
-    const updatePayload: Record<string, any> = {};
+    const updatePayload: UpdateTables<"certifications"> = {};
     if (input.image !== undefined) updatePayload.image_url = input.image;
     if (input.organization !== undefined) updatePayload.issued_by = input.organization;
     if (input.issueDate !== undefined) updatePayload.issued_date = cleanDateValue(input.issueDate);
@@ -226,7 +256,8 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
     }
 
     if (Object.keys(updatePayload).length > 0) {
-      const { error } = await (this.supabase.from("certifications" as any) as any)
+      const { error } = await this.supabase
+        .from("certifications")
         .update(updatePayload)
         .eq("id", input.id);
       if (error) throw new Error(error.message);
@@ -234,7 +265,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
 
     if (input.titleEn !== undefined || input.descriptionEn !== undefined) {
       if (input.titleEn?.trim()) {
-        await (this.supabase.from("certification_translations" as any) as any).upsert({
+        await this.supabase.from("certification_translations").upsert({
           certification_id: input.id,
           language_code: "en",
           title: input.titleEn.trim(),
@@ -245,7 +276,7 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
 
     if (input.titleAr !== undefined || input.descriptionAr !== undefined) {
       if (input.titleAr?.trim()) {
-        await (this.supabase.from("certification_translations" as any) as any).upsert({
+        await this.supabase.from("certification_translations").upsert({
           certification_id: input.id,
           language_code: "ar",
           title: input.titleAr.trim(),
@@ -256,14 +287,15 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
 
     if (input.titleKu !== undefined || input.descriptionKu !== undefined) {
       if (input.titleKu?.trim()) {
-        await (this.supabase.from("certification_translations" as any) as any).upsert({
+        await this.supabase.from("certification_translations").upsert({
           certification_id: input.id,
           language_code: "ku",
           title: input.titleKu.trim(),
           description: input.descriptionKu ?? null,
         }, { onConflict: "certification_id,language_code" });
       } else {
-        await (this.supabase.from("certification_translations" as any) as any)
+        await this.supabase
+          .from("certification_translations")
           .delete()
           .eq("certification_id", input.id)
           .eq("language_code", "ku");
@@ -277,7 +309,8 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
 
   async deleteCertificate(id: string): Promise<void> {
     const existing = await this.getCertificateById(id);
-    await (this.supabase.from("certifications" as any) as any)
+    await this.supabase
+      .from("certifications")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", id);
     await this.logActivity("deleted", id, existing?.titleEn ?? "Certificate");
@@ -306,7 +339,8 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
 
   async bulkDeleteCertificates(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
-    await (this.supabase.from("certifications" as any) as any)
+    await this.supabase
+      .from("certifications")
       .update({ deleted_at: new Date().toISOString() })
       .in("id", ids);
     await this.logActivity("deleted", null, `${ids.length} certificates`, { count: ids.length });
@@ -314,7 +348,8 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
 
   async bulkUpdateCertificateStatus(ids: string[], status: CertificateStatus): Promise<void> {
     if (ids.length === 0) return;
-    await (this.supabase.from("certifications" as any) as any)
+    await this.supabase
+      .from("certifications")
       .update({ status: status === "active" ? "published" : "draft" })
       .in("id", ids);
     await this.logActivity("updated", null, `Bulk updated status to ${status}`, { ids, status });

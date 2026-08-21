@@ -230,7 +230,7 @@ export function CertificateTable() {
             </Select>
 
             {/* Status Filter */}
-            <Select value={status} onValueChange={(val) => setStatus(val as any)}>
+            <Select value={status} onValueChange={(val) => setStatus(val as CertificateStatus | "all")}>
               <SelectTrigger className="w-[140px] h-9">
                 <SelectValue placeholder={t("allStatuses")} />
               </SelectTrigger>
