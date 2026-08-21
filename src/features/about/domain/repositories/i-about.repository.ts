@@ -49,6 +49,8 @@ export interface SaveCertificateInput {
   issuedBy?: string | null;
   issuedDate?: string | null;
   sortOrder?: number;
+  isFeatured?: boolean;
+  featuredOrder?: number | null;
   status?: SectionStatus;
   translations: Record<string, { title: string; description: string }>;
 }

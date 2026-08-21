@@ -59,11 +59,32 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
     const offset = (page - 1) * limit;
 
     try {
-      const { data, count, error } = await (this.supabase.from("certifications" as any) as any)
+      let query = (this.supabase.from("certifications" as any) as any)
         .select("*, certification_translations(*)", { count: "exact" })
-        .is("deleted_at", null)
-        .order("sort_order", { ascending: true })
-        .range(offset, offset + limit - 1);
+        .is("deleted_at", null);
+
+      if (params?.status && params.status !== "all") {
+        query = query.eq("status", params.status === "active" ? "published" : "draft");
+      }
+
+      if (params?.isFeatured !== undefined && params.isFeatured !== "all") {
+        query = query.eq("is_featured", params.isFeatured);
+      }
+
+      const sortBy = params?.sortBy ?? "sort_order";
+      const isAsc = params?.sortOrder !== "desc";
+
+      if (sortBy === "featured_order") {
+        query = query.order("featured_order", { ascending: isAsc, nullsFirst: false });
+      } else if (sortBy === "issue_date") {
+        query = query.order("issued_date", { ascending: isAsc });
+      } else if (sortBy === "created_at") {
+        query = query.order("created_at", { ascending: isAsc });
+      } else {
+        query = query.order("sort_order", { ascending: isAsc });
+      }
+
+      const { data, count, error } = await query.range(offset, offset + limit - 1);
 
       if (error || !data) {
         return { items: [], total: 0, page, limit, totalPages: 0 };
@@ -88,6 +109,8 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
           organizationAr: null,
           organizationKu: null,
           sortOrder: item.sort_order ?? 0,
+          isFeatured: item.is_featured ?? false,
+          featuredOrder: item.featured_order ?? null,
           status: item.status === "published" ? "active" : "draft",
           createdAt: item.created_at ? new Date(item.created_at) : new Date(),
           updatedAt: item.updated_at ? new Date(item.updated_at) : new Date(),
@@ -131,6 +154,8 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
         organizationAr: null,
         organizationKu: null,
         sortOrder: data.sort_order ?? 0,
+        isFeatured: data.is_featured ?? false,
+        featuredOrder: data.featured_order ?? null,
         status: data.status === "published" ? "active" : "draft",
         createdAt: data.created_at ? new Date(data.created_at) : new Date(),
         updatedAt: data.updated_at ? new Date(data.updated_at) : new Date(),
@@ -141,11 +166,16 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
   }
 
   async createCertificate(input: CreateCertificateInput): Promise<CertificateEntity> {
+    const isFeatured = input.isFeatured ?? false;
+    const featuredOrder = isFeatured ? (input.featuredOrder ?? null) : null;
+
     const insertPayload: Record<string, any> = {
       image_url: input.image ?? "",
       issued_by: input.organization ?? null,
       issued_date: cleanDateValue(input.issueDate),
       sort_order: input.sortOrder ?? 0,
+      is_featured: isFeatured,
+      featured_order: featuredOrder,
       status: input.status === "active" ? "published" : "draft",
     };
 
@@ -183,6 +213,17 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
     if (input.issueDate !== undefined) updatePayload.issued_date = cleanDateValue(input.issueDate);
     if (input.sortOrder !== undefined) updatePayload.sort_order = input.sortOrder;
     if (input.status !== undefined) updatePayload.status = input.status === "active" ? "published" : "draft";
+
+    if (input.isFeatured !== undefined) {
+      updatePayload.is_featured = input.isFeatured;
+      if (!input.isFeatured) {
+        updatePayload.featured_order = null;
+      } else if (input.featuredOrder !== undefined) {
+        updatePayload.featured_order = input.featuredOrder;
+      }
+    } else if (input.featuredOrder !== undefined) {
+      updatePayload.featured_order = input.featuredOrder;
+    }
 
     if (Object.keys(updatePayload).length > 0) {
       const { error } = await (this.supabase.from("certifications" as any) as any)
@@ -257,6 +298,8 @@ export class SupabaseCertificateRepository implements ICertificateRepository {
       issueDate: existing.issueDate,
       organization: existing.organization,
       sortOrder: existing.sortOrder,
+      isFeatured: false,
+      featuredOrder: null,
       status: "draft",
     });
   }

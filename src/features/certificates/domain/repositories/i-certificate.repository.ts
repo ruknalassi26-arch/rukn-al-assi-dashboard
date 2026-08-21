@@ -7,9 +7,10 @@ import type { CertificateEntity, CertificateStatus } from "../entities/certifica
 export interface CertificateFilterParams {
   search?: string;
   status?: CertificateStatus | "all";
+  isFeatured?: boolean | "all";
   page?: number;
   limit?: number;
-  sortBy?: "title_en" | "sort_order" | "created_at" | "issue_date";
+  sortBy?: "title_en" | "sort_order" | "featured_order" | "created_at" | "issue_date";
   sortOrder?: "asc" | "desc";
 }
 
@@ -34,6 +35,8 @@ export interface CreateCertificateInput {
   organizationAr?: string | null;
   organizationKu?: string | null;
   sortOrder?: number;
+  isFeatured?: boolean;
+  featuredOrder?: number | null;
   status?: CertificateStatus;
 }
 

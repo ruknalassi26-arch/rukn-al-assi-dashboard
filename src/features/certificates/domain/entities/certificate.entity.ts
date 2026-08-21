@@ -19,6 +19,8 @@ export interface CertificateProps {
   organizationAr?: string | null;
   organizationKu?: string | null;
   sortOrder: number;
+  isFeatured?: boolean;
+  featuredOrder?: number | null;
   status: CertificateStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -38,6 +40,8 @@ export class CertificateEntity {
   public readonly organizationAr: string | null;
   public readonly organizationKu: string | null;
   public readonly sortOrder: number;
+  public readonly isFeatured: boolean;
+  public readonly featuredOrder: number | null;
   public readonly status: CertificateStatus;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
@@ -56,6 +60,8 @@ export class CertificateEntity {
     this.organizationAr = props.organizationAr ?? null;
     this.organizationKu = props.organizationKu ?? null;
     this.sortOrder = props.sortOrder ?? 0;
+    this.isFeatured = props.isFeatured ?? false;
+    this.featuredOrder = props.featuredOrder ?? null;
     this.status = props.status ?? "active";
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();

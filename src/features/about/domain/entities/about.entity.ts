@@ -157,6 +157,8 @@ export interface AboutCertificateProps {
   issuedBy: string | null;
   issuedDate: string | null;
   sortOrder: number;
+  isFeatured?: boolean;
+  featuredOrder?: number | null;
   status: SectionStatus;
   translations: Record<string, { title: string; description: string }>;
   createdAt?: Date;
@@ -169,6 +171,8 @@ export class AboutCertificateEntity {
   public readonly issuedBy: string | null;
   public readonly issuedDate: string | null;
   public readonly sortOrder: number;
+  public readonly isFeatured: boolean;
+  public readonly featuredOrder: number | null;
   public readonly status: SectionStatus;
   public readonly translations: Record<string, { title: string; description: string }>;
   public readonly createdAt: Date;
@@ -180,6 +184,8 @@ export class AboutCertificateEntity {
     this.issuedBy = props.issuedBy ?? null;
     this.issuedDate = props.issuedDate ?? null;
     this.sortOrder = props.sortOrder ?? 0;
+    this.isFeatured = props.isFeatured ?? false;
+    this.featuredOrder = props.featuredOrder ?? null;
     this.status = props.status ?? "published";
     this.translations = props.translations ?? {};
     this.createdAt = props.createdAt ?? new Date();

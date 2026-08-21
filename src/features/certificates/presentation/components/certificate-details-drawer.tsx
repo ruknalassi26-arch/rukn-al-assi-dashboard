@@ -100,14 +100,26 @@ export function CertificateDetailsDrawer() {
                 <span>{certificate.organization ?? "N/A"}</span>
               </div>
               <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="font-semibold">Issue Date:</span>
+                <span>{certificate.issueDate ?? "N/A"}</span>
+              </div>
+              <div className="flex items-center gap-2">
                 <Layers className="h-4 w-4 text-muted-foreground" />
                 <span className="font-semibold">Sort Order:</span>
                 <span>{certificate.sortOrder}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="font-semibold">Issue Date:</span>
-                <span>{certificate.issueDate ?? "N/A"}</span>
+                <span className="font-semibold">Homepage Featured:</span>
+                {certificate.isFeatured ? (
+                  <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                    Featured (Order: #{certificate.featuredOrder ?? "N/A"})
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs text-muted-foreground">
+                    Not Featured
+                  </Badge>
+                )}
               </div>
             </div>
 

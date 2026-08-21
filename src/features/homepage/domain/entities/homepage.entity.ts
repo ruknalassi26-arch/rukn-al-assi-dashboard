@@ -314,6 +314,8 @@ export interface CertificateProps {
   image: string | null;
   issueDate: string | null;
   sortOrder: number;
+  isFeatured?: boolean;
+  featuredOrder?: number | null;
   status: SlideStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -326,6 +328,8 @@ export class CertificateEntity {
   public readonly image: string | null;
   public readonly issueDate: string | null;
   public readonly sortOrder: number;
+  public readonly isFeatured: boolean;
+  public readonly featuredOrder: number | null;
   public readonly status: SlideStatus;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
@@ -337,6 +341,8 @@ export class CertificateEntity {
     this.image = props.image;
     this.issueDate = props.issueDate;
     this.sortOrder = props.sortOrder;
+    this.isFeatured = props.isFeatured ?? false;
+    this.featuredOrder = props.featuredOrder ?? null;
     this.status = props.status;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;

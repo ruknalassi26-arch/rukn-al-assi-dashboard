@@ -397,15 +397,31 @@ export interface Database {
       certifications: {
         Row: {
           id: string;
-          status: "active" | "draft";
+          image_url: string;
+          issued_by: string | null;
+          issued_date: string | null;
           sort_order: number;
+          status: "published" | "draft" | "active";
+          deleted_at: string | null;
+          created_by: string | null;
+          updated_by: string | null;
+          is_featured: boolean;
+          featured_order: number | null;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: string;
-          status?: "active" | "draft";
+          image_url?: string;
+          issued_by?: string | null;
+          issued_date?: string | null;
           sort_order?: number;
+          status?: "published" | "draft" | "active";
+          deleted_at?: string | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          is_featured?: boolean;
+          featured_order?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -413,6 +429,36 @@ export interface Database {
           Database["public"]["Tables"]["certifications"]["Insert"]
         >;
         Relationships: [];
+      };
+      certification_translations: {
+        Row: {
+          certification_id: string;
+          language_code: string;
+          title: string;
+          description: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Insert: {
+          certification_id: string;
+          language_code: string;
+          title: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["certification_translations"]["Insert"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "certification_translations_certification_id_fkey";
+            columns: ["certification_id"];
+            isOneToOne: false;
+            referencedRelation: "certifications";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       company_profile: {
         Row: {

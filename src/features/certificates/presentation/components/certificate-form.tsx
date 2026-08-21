@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
-import { Loader2, Save, ArrowLeft, Shield } from "lucide-react";
+import { Loader2, Save, ArrowLeft, Shield, Star, Sparkles } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -22,6 +22,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Switch,
 } from "@shared/ui";
 import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
@@ -29,21 +30,40 @@ import { useCreateCertificate, useUpdateCertificate } from "@shared/hooks/certif
 import { formatDateForInput } from "../../data/repositories/supabase-certificate.repository";
 import type { CertificateEntity } from "../../domain/entities/certificate.entity";
 
-const certificateSchema = z.object({
-  titleEn: z.string().min(2, "English title is required"),
-  titleAr: z.string().min(2, "Arabic title is required"),
-  titleKu: z.string().optional().nullable(),
-  descriptionEn: z.string().optional().nullable(),
-  descriptionAr: z.string().optional().nullable(),
-  descriptionKu: z.string().optional().nullable(),
-  organization: z.string().optional().nullable(),
-  organizationAr: z.string().optional().nullable(),
-  organizationKu: z.string().optional().nullable(),
-  image: z.string().optional().nullable(),
-  issueDate: z.string().optional().nullable(),
-  status: z.enum(["active", "draft"]),
-  sortOrder: z.number().min(0),
-});
+const certificateSchema = z
+  .object({
+    titleEn: z.string().min(2, "English title is required"),
+    titleAr: z.string().min(2, "Arabic title is required"),
+    titleKu: z.string().optional().nullable(),
+    descriptionEn: z.string().optional().nullable(),
+    descriptionAr: z.string().optional().nullable(),
+    descriptionKu: z.string().optional().nullable(),
+    organization: z.string().optional().nullable(),
+    organizationAr: z.string().optional().nullable(),
+    organizationKu: z.string().optional().nullable(),
+    image: z.string().optional().nullable(),
+    issueDate: z.string().optional().nullable(),
+    status: z.enum(["active", "draft"]),
+    sortOrder: z.number().min(0),
+    isFeatured: z.boolean(),
+    featuredOrder: z.number().nullable().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.isFeatured) {
+      if (
+        data.featuredOrder === null ||
+        data.featuredOrder === undefined ||
+        !Number.isInteger(data.featuredOrder) ||
+        data.featuredOrder <= 0
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Featured order must be a positive integer (e.g. 1, 2, 3...)",
+          path: ["featuredOrder"],
+        });
+      }
+    }
+  });
 
 export type CertificateFormValues = z.infer<typeof certificateSchema>;
 
@@ -77,10 +97,14 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
       issueDate: formatDateForInput(initialData?.issueDate),
       status: initialData?.status ?? "active",
       sortOrder: initialData?.sortOrder ?? 0,
+      isFeatured: initialData?.isFeatured ?? false,
+      featuredOrder: initialData?.featuredOrder ?? null,
     },
   });
 
   const { watch, setValue, register, handleSubmit, reset, formState: { errors } } = form;
+
+  const isFeaturedValue = watch("isFeatured");
 
   useEffect(() => {
     if (initialData) {
@@ -98,14 +122,24 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
         issueDate: formatDateForInput(initialData.issueDate),
         status: initialData.status ?? "active",
         sortOrder: initialData.sortOrder ?? 0,
+        isFeatured: initialData.isFeatured ?? false,
+        featuredOrder: initialData.featuredOrder ?? null,
       });
     }
   }, [initialData, reset]);
 
   const onSubmit = async (values: CertificateFormValues) => {
     try {
+      const isFeatured = values.isFeatured;
+      const featuredOrder =
+        isFeatured && values.featuredOrder !== null && values.featuredOrder !== undefined
+          ? Math.floor(Number(values.featuredOrder))
+          : null;
+
       const payload = {
         ...values,
+        isFeatured,
+        featuredOrder,
         issueDate: values.issueDate && values.issueDate.trim() !== "" ? values.issueDate.trim() : null,
       };
 
@@ -281,9 +315,72 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
 
         {/* Sidebar Controls */}
         <div className="space-y-6">
+          {/* Featured on Homepage Card */}
+          <Card className="border-amber-500/20 shadow-xs">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Star className="h-4 w-4 text-amber-500" />
+                Homepage Featured
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Control visibility and ranking on the homepage certifications section.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/20">
+                <div className="space-y-0.5">
+                  <Label htmlFor="isFeatured" className="text-sm font-semibold flex items-center gap-1.5 cursor-pointer">
+                    Featured on Homepage
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {isFeaturedValue ? "Yes — displayed on Home" : "No — hidden from Home"}
+                  </p>
+                </div>
+                <Switch
+                  id="isFeatured"
+                  checked={!!isFeaturedValue}
+                  onCheckedChange={(checked) => {
+                    setValue("isFeatured", checked, { shouldValidate: true });
+                    if (!checked) {
+                      setValue("featuredOrder", null, { shouldValidate: true });
+                    }
+                  }}
+                />
+              </div>
+
+              {isFeaturedValue && (
+                <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                  <Label htmlFor="featuredOrder" className="text-xs font-semibold flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                    Featured Order *
+                  </Label>
+                  <Input
+                    id="featuredOrder"
+                    type="number"
+                    min={1}
+                    step={1}
+                    placeholder="e.g. 1, 2, 3..."
+                    value={watch("featuredOrder") ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value === "" ? null : Number(e.target.value);
+                      setValue("featuredOrder", val, { shouldValidate: true });
+                    }}
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Lower number appears first on the homepage (e.g. 1, 2, 3, 4).
+                  </p>
+                  {errors.featuredOrder && (
+                    <p className="text-xs font-semibold text-destructive">{errors.featuredOrder.message as string}</p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Publishing & Dates */}
           <Card>
-            <CardHeader>
-              <CardTitle>{tForm("datesTitle")}</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">{tForm("datesTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -325,8 +422,8 @@ export function CertificateForm({ initialData }: CertificateFormProps) {
 
           {/* Certificate Image / Document Preview */}
           <Card>
-            <CardHeader>
-              <CardTitle>{tForm("imageTitle")}</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">{tForm("imageTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <ImageUploader

@@ -8,9 +8,10 @@ import type { CertificateStatus } from "../../domain/entities/certificate.entity
 interface CertificateState {
   search: string;
   status: CertificateStatus | "all";
+  isFeatured: boolean | "all";
   page: number;
   limit: number;
-  sortBy: "title_en" | "sort_order" | "created_at" | "issue_date";
+  sortBy: "title_en" | "sort_order" | "featured_order" | "created_at" | "issue_date";
   sortOrder: "asc" | "desc";
   selectedIds: string[];
   selectedCertificateId: string | null;
@@ -18,9 +19,10 @@ interface CertificateState {
 
   setSearch: (search: string) => void;
   setStatus: (status: CertificateStatus | "all") => void;
+  setIsFeatured: (isFeatured: boolean | "all") => void;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
-  setSorting: (sortBy: "title_en" | "sort_order" | "created_at" | "issue_date", sortOrder: "asc" | "desc") => void;
+  setSorting: (sortBy: "title_en" | "sort_order" | "featured_order" | "created_at" | "issue_date", sortOrder: "asc" | "desc") => void;
   setSelectedIds: (ids: string[]) => void;
   toggleSelectId: (id: string) => void;
   clearSelection: () => void;
@@ -32,6 +34,7 @@ interface CertificateState {
 export const useCertificateStore = create<CertificateState>((set) => ({
   search: "",
   status: "all",
+  isFeatured: "all",
   page: 1,
   limit: 10,
   sortBy: "sort_order",
@@ -42,6 +45,7 @@ export const useCertificateStore = create<CertificateState>((set) => ({
 
   setSearch: (search) => set({ search, page: 1 }),
   setStatus: (status) => set({ status, page: 1 }),
+  setIsFeatured: (isFeatured) => set({ isFeatured, page: 1 }),
   setPage: (page) => set({ page }),
   setLimit: (limit) => set({ limit, page: 1 }),
   setSorting: (sortBy, sortOrder) => set({ sortBy, sortOrder }),
@@ -59,6 +63,7 @@ export const useCertificateStore = create<CertificateState>((set) => ({
     set({
       search: "",
       status: "all",
+      isFeatured: "all",
       page: 1,
       sortBy: "sort_order",
       sortOrder: "asc",

@@ -637,6 +637,8 @@ export class SupabaseAboutRepository implements IAboutRepository {
             issuedBy: item.issued_by ?? null,
             issuedDate: item.issued_date ?? null,
             sortOrder: item.sort_order ?? 0,
+            isFeatured: item.is_featured ?? false,
+            featuredOrder: item.featured_order ?? null,
             status: item.status ?? "published",
             translations,
             createdAt: new Date(item.created_at || Date.now()),
@@ -652,12 +654,17 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async createCertificate(input: SaveCertificateInput): Promise<AboutCertificateEntity> {
+    const isFeatured = input.isFeatured ?? false;
+    const featuredOrder = isFeatured ? (input.featuredOrder ?? null) : null;
+
     const { data, error } = await (this.supabase.from("certifications" as any) as any)
       .insert({
         image_url: input.imageUrl ?? null,
         issued_by: input.issuedBy ?? null,
         issued_date: input.issuedDate ?? null,
         sort_order: input.sortOrder ?? 0,
+        is_featured: isFeatured,
+        featured_order: featuredOrder,
         status: input.status ?? "published",
       })
       .select()
@@ -683,14 +690,27 @@ export class SupabaseAboutRepository implements IAboutRepository {
   }
 
   async updateCertificate(id: string, input: SaveCertificateInput): Promise<AboutCertificateEntity> {
+    const updatePayload: Record<string, any> = {
+      image_url: input.imageUrl ?? null,
+      issued_by: input.issuedBy ?? null,
+      issued_date: input.issuedDate ?? null,
+      sort_order: input.sortOrder ?? 0,
+      status: input.status ?? "published",
+    };
+
+    if (input.isFeatured !== undefined) {
+      updatePayload.is_featured = input.isFeatured;
+      if (!input.isFeatured) {
+        updatePayload.featured_order = null;
+      } else if (input.featuredOrder !== undefined) {
+        updatePayload.featured_order = input.featuredOrder;
+      }
+    } else if (input.featuredOrder !== undefined) {
+      updatePayload.featured_order = input.featuredOrder;
+    }
+
     const { error: baseErr } = await (this.supabase.from("certifications" as any) as any)
-      .update({
-        image_url: input.imageUrl ?? null,
-        issued_by: input.issuedBy ?? null,
-        issued_date: input.issuedDate ?? null,
-        sort_order: input.sortOrder ?? 0,
-        status: input.status ?? "published",
-      })
+      .update(updatePayload)
       .eq("id", id);
 
     if (baseErr) throw new Error(baseErr.message || "Failed to update certificate");

@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
-import { Loader2 } from "lucide-react";
+import { Loader2, Star, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Switch,
 } from "@shared/ui";
 import { MultilingualTabs } from "@shared/components/multilingual-tabs";
 import { ImageUploader } from "@shared/upload/image-uploader";
@@ -31,19 +32,38 @@ import { formatDateForInput } from "@features/certificates/data/repositories/sup
 import type { CertificateEntity } from "@features/homepage/domain/entities/homepage.entity";
 import type { AboutCertificateEntity } from "@features/about/domain/entities/about.entity";
 
-const certificateSchema = z.object({
-  titleEn: z.string().min(2, "English title is required"),
-  titleAr: z.string().min(2, "Arabic title is required"),
-  titleKu: z.string().optional().nullable(),
-  descriptionEn: z.string().optional().nullable(),
-  descriptionAr: z.string().optional().nullable(),
-  descriptionKu: z.string().optional().nullable(),
-  image: z.string().optional().nullable(),
-  issueDate: z.string().optional().nullable(),
-  organization: z.string().optional().nullable(),
-  sortOrder: z.number().min(0),
-  status: z.enum(["active", "draft"]),
-});
+const certificateSchema = z
+  .object({
+    titleEn: z.string().min(2, "English title is required"),
+    titleAr: z.string().min(2, "Arabic title is required"),
+    titleKu: z.string().optional().nullable(),
+    descriptionEn: z.string().optional().nullable(),
+    descriptionAr: z.string().optional().nullable(),
+    descriptionKu: z.string().optional().nullable(),
+    image: z.string().optional().nullable(),
+    issueDate: z.string().optional().nullable(),
+    organization: z.string().optional().nullable(),
+    sortOrder: z.number().min(0),
+    isFeatured: z.boolean(),
+    featuredOrder: z.number().nullable().optional(),
+    status: z.enum(["active", "draft"]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.isFeatured) {
+      if (
+        data.featuredOrder === null ||
+        data.featuredOrder === undefined ||
+        !Number.isInteger(data.featuredOrder) ||
+        data.featuredOrder <= 0
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Featured order must be a positive integer",
+          path: ["featuredOrder"],
+        });
+      }
+    }
+  });
 
 type CertificateFormValues = z.infer<typeof certificateSchema>;
 
@@ -51,7 +71,7 @@ interface CertificateDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (values: CertificateFormValues) => Promise<void>;
-  initialData?: CertificateEntity | AboutCertificateEntity | null;
+  initialData?: CertificateEntity | AboutCertificateEntity | any | null;
   isLoading?: boolean;
 }
 
@@ -86,9 +106,13 @@ export function CertificateDialog({
       issueDate: "",
       organization: "",
       sortOrder: 1,
+      isFeatured: false,
+      featuredOrder: null,
       status: "active",
     },
   });
+
+  const isFeaturedValue = watch("isFeatured");
 
   useEffect(() => {
     if (initialData) {
@@ -106,7 +130,9 @@ export function CertificateDialog({
           image: initialData.imageUrl,
           issueDate: formatDateForInput(initialData.issuedDate),
           organization: initialData.issuedBy ?? "",
-          sortOrder: initialData.sortOrder,
+          sortOrder: initialData.sortOrder ?? 0,
+          isFeatured: initialData.isFeatured ?? false,
+          featuredOrder: initialData.featuredOrder ?? null,
           status: initialData.status === "published" ? "active" : (initialData.status as any),
         });
       } else {
@@ -117,11 +143,13 @@ export function CertificateDialog({
           descriptionEn: (initialData as any).descriptionEn ?? "",
           descriptionAr: (initialData as any).descriptionAr ?? "",
           descriptionKu: ((initialData as unknown as Record<string, unknown>).descriptionKu as string) ?? "",
-          image: initialData.image,
-          issueDate: formatDateForInput((initialData as any).issueDate),
-          organization: (initialData as any).organization ?? "",
-          sortOrder: initialData.sortOrder,
-          status: initialData.status,
+          image: initialData.image ?? initialData.imageUrl ?? null,
+          issueDate: formatDateForInput((initialData as any).issueDate ?? (initialData as any).issuedDate),
+          organization: (initialData as any).organization ?? (initialData as any).issuedBy ?? "",
+          sortOrder: initialData.sortOrder ?? 0,
+          isFeatured: (initialData as any).isFeatured ?? false,
+          featuredOrder: (initialData as any).featuredOrder ?? null,
+          status: initialData.status === "published" ? "active" : (initialData.status ?? "active"),
         });
       }
     } else {
@@ -136,6 +164,8 @@ export function CertificateDialog({
         issueDate: "",
         organization: "",
         sortOrder: 1,
+        isFeatured: false,
+        featuredOrder: null,
         status: "active",
       });
     }
@@ -145,7 +175,17 @@ export function CertificateDialog({
   const status = watch("status");
 
   const onFormSubmit = async (values: CertificateFormValues) => {
-    await onSubmit(values);
+    const isFeatured = values.isFeatured;
+    const featuredOrder =
+      isFeatured && values.featuredOrder !== null && values.featuredOrder !== undefined
+        ? Math.floor(Number(values.featuredOrder))
+        : null;
+
+    await onSubmit({
+      ...values,
+      isFeatured,
+      featuredOrder,
+    });
     onClose();
   };
 
@@ -216,6 +256,58 @@ export function CertificateDialog({
               <Label className="text-xs" htmlFor="issueDate">{tDialogs("issueDate")}</Label>
               <Input id="issueDate" type="date" {...register("issueDate")} />
             </div>
+          </div>
+
+          {/* Featured on Homepage */}
+          <div className="rounded-lg border p-3 bg-muted/20 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="dialogIsFeatured" className="text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+                  <Star className={`h-3.5 w-3.5 ${isFeaturedValue ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`} />
+                  Featured on Homepage
+                </Label>
+                <p className="text-[11px] text-muted-foreground">
+                  {isFeaturedValue ? "Yes — displayed on Homepage" : "No — hidden from Homepage"}
+                </p>
+              </div>
+              <Switch
+                id="dialogIsFeatured"
+                checked={!!isFeaturedValue}
+                onCheckedChange={(checked) => {
+                  setValue("isFeatured", checked, { shouldValidate: true });
+                  if (!checked) {
+                    setValue("featuredOrder", null, { shouldValidate: true });
+                  }
+                }}
+              />
+            </div>
+
+            {isFeaturedValue && (
+              <div className="pt-2 border-t space-y-1.5">
+                <Label htmlFor="dialogFeaturedOrder" className="text-xs font-semibold flex items-center gap-1">
+                  <Sparkles className="h-3 w-3 text-amber-500" />
+                  Featured Order *
+                </Label>
+                <Input
+                  id="dialogFeaturedOrder"
+                  type="number"
+                  min={1}
+                  step={1}
+                  placeholder="e.g. 1, 2, 3..."
+                  value={watch("featuredOrder") ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value === "" ? null : Number(e.target.value);
+                    setValue("featuredOrder", val, { shouldValidate: true });
+                  }}
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Lower number appears first on the homepage.
+                </p>
+                {errors.featuredOrder && (
+                  <p className="text-xs font-semibold text-destructive">{errors.featuredOrder.message as string}</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

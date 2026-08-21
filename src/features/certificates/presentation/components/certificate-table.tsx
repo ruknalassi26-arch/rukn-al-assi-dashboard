@@ -20,6 +20,8 @@ import {
   Building2,
   Copy,
   Loader2,
+  Star,
+  Sparkles,
 } from "lucide-react";
 import {
   Card,
@@ -61,7 +63,6 @@ import {
   useBulkUpdateCertificateStatus,
 } from "@shared/hooks/certificates/use-certificate-hooks";
 import { useTranslations } from "next-intl";
-import { CERTIFICATE_STATUS_LABELS, CERTIFICATE_STATUS_VARIANTS } from "../../domain/enums/certificate.enums";
 import type { CertificateEntity, CertificateStatus } from "../../domain/entities/certificate.entity";
 
 export function CertificateTable() {
@@ -70,6 +71,7 @@ export function CertificateTable() {
   const {
     search,
     status,
+    isFeatured,
     page,
     limit,
     sortBy,
@@ -77,6 +79,7 @@ export function CertificateTable() {
     selectedIds,
     setSearch,
     setStatus,
+    setIsFeatured,
     setPage,
     setSorting,
     toggleSelectId,
@@ -88,6 +91,7 @@ export function CertificateTable() {
   const { data, isLoading, error, refetch, isFetching } = useCertificates({
     search,
     status,
+    isFeatured,
     page,
     limit,
     sortBy,
@@ -135,7 +139,7 @@ export function CertificateTable() {
     clearSelection();
   };
 
-  const handleSortToggle = (column: "title_en" | "sort_order" | "created_at" | "issue_date") => {
+  const handleSortToggle = (column: "title_en" | "sort_order" | "featured_order" | "created_at" | "issue_date") => {
     if (sortBy === column) {
       setSorting(column, sortOrder === "asc" ? "desc" : "asc");
     } else {
@@ -206,6 +210,25 @@ export function CertificateTable() {
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
+            {/* Featured Filter */}
+            <Select
+              value={isFeatured === "all" ? "all" : isFeatured ? "featured" : "not_featured"}
+              onValueChange={(val) => {
+                if (val === "all") setIsFeatured("all");
+                else if (val === "featured") setIsFeatured(true);
+                else setIsFeatured(false);
+              }}
+            >
+              <SelectTrigger className="w-[150px] h-9">
+                <SelectValue placeholder="All Featured" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Featured</SelectItem>
+                <SelectItem value="featured">Featured Only</SelectItem>
+                <SelectItem value="not_featured">Not Featured</SelectItem>
+              </SelectContent>
+            </Select>
+
             {/* Status Filter */}
             <Select value={status} onValueChange={(val) => setStatus(val as any)}>
               <SelectTrigger className="w-[140px] h-9">
@@ -242,20 +265,21 @@ export function CertificateTable() {
                   <TableHead className="w-16">{t("table.preview")}</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("title_en")}>
                     <div className="flex items-center gap-1">
-                      <span>{t("table.title")}</span>
+                      <span>Certification</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead>{t("table.organization")}</TableHead>
+                  <TableHead>Issuer</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSortToggle("issue_date")}>
                     <div className="flex items-center gap-1">
-                      <span>{t("table.issueDate")}</span>
+                      <span>Issued Date</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSortToggle("sort_order")}>
+                  <TableHead>Featured</TableHead>
+                  <TableHead className="cursor-pointer" onClick={() => handleSortToggle("featured_order")}>
                     <div className="flex items-center gap-1">
-                      <span>{t("table.order")}</span>
+                      <span>Featured Order</span>
                       <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </TableHead>
@@ -272,6 +296,7 @@ export function CertificateTable() {
                       <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
                       <TableCell className="text-end"><Skeleton className="h-8 w-8 ms-auto rounded" /></TableCell>
@@ -279,7 +304,7 @@ export function CertificateTable() {
                   ))
                 ) : certificates.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="h-64 text-center">
+                    <TableCell colSpan={9} className="h-64 text-center">
                       <EmptyState
                         icon={Shield}
                         title={t("emptyTitle")}
@@ -317,7 +342,7 @@ export function CertificateTable() {
                           )}
                         </TableCell>
 
-                        {/* Title */}
+                        {/* Certification Title */}
                         <TableCell className="font-semibold text-foreground">
                           <div>
                             <div>{cert.titleEn}</div>
@@ -325,7 +350,7 @@ export function CertificateTable() {
                           </div>
                         </TableCell>
 
-                        {/* Organization */}
+                        {/* Issuer */}
                         <TableCell className="text-sm text-muted-foreground">
                           <div className="flex items-center gap-1.5">
                             <Building2 className="h-3.5 w-3.5" />
@@ -333,7 +358,7 @@ export function CertificateTable() {
                           </div>
                         </TableCell>
 
-                        {/* Issue Date */}
+                        {/* Issued Date */}
                         <TableCell className="text-xs text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3.5 w-3.5" />
@@ -341,8 +366,31 @@ export function CertificateTable() {
                           </div>
                         </TableCell>
 
-                        {/* Sort Order */}
-                        <TableCell className="text-sm font-mono">{cert.sortOrder}</TableCell>
+                        {/* Featured Badge */}
+                        <TableCell>
+                          {cert.isFeatured ? (
+                            <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 font-semibold gap-1">
+                              <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                              Featured
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground font-normal">
+                              Not Featured
+                            </Badge>
+                          )}
+                        </TableCell>
+
+                        {/* Featured Order */}
+                        <TableCell>
+                          {cert.isFeatured && cert.featuredOrder !== null ? (
+                            <span className="inline-flex items-center gap-1 font-mono font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 text-xs">
+                              <Sparkles className="h-3 w-3" />
+                              #{cert.featuredOrder}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">—</span>
+                          )}
+                        </TableCell>
 
                         {/* Status */}
                         <TableCell>
@@ -351,7 +399,7 @@ export function CertificateTable() {
                               {cert.status}
                             </Badge>
                           ) : (
-                            <Badge className="bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-semibold">
+                            <Badge className="bg-slate-500/15 text-slate-700 dark:text-slate-400 border border-slate-500/30 font-semibold">
                               {cert.status}
                             </Badge>
                           )}
